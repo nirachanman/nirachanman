@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>サークル予定カレンダー</title>
+  <style>
+/* 全体の背景とフォント設定 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f4ff; /* 淡い青系の背景 */
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  color: #333;
+}
+
+/* タイトルのスタイル（任意） */
+h1 {
+  text-align: center;
+  font-size: 1.6em;
+  color: #0055aa;
+  margin: 1em 0 0.5em;
+}
+
+/* iframe（Googleカレンダー）のスタイル */
+iframe {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* スマホでの余白調整（任意） */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.3em;
+    margin: 0.5em 0;
+  }
+  iframe {
+    height: 90vh;
+    border-radius: 8px;
+  }
+}  </style>
+</head>
+<body>
+  <h1>川口社会体育館 貸館スケジュール</h1>
+  <iframe src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"></iframe>
+</body>
+</html>

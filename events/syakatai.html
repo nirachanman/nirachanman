@@ -3,49 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>体育館予定カレンダー</title>
+  <title>川口社会体育館 貸館スケジュール</title>
   <style>
-/* 全体の背景とフォント設定 */
+/* 全体のリセットとフォント設定 */
+html {
+  box-sizing: border-box; /* パディングとボーダーを幅に含める */
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 body {
   margin: 0;
-  padding: 0;
+  padding: 10px; /* 画面の端に余白を追加 */
   background-color: #f0f4ff; /* 淡い青系の背景 */
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
   color: #333;
 }
 
-/* タイトルのスタイル（任意） */
+/* タイトルのスタイル */
 h1 {
   text-align: center;
   font-size: 1.6em;
   color: #0055aa;
-  margin: 1em 0 0.5em;
+  margin: 0.5em 0 0.5em; /* 上下の余白を調整 */
+  padding: 0 10px; /* 画面端での見切れ防止 */
+}
+
+/* iframe（Googleカレンダー）のコンテナ（任意） */
+.calendar-container {
+  width: 100%;
+  max-width: 1000px; /* PCでの表示サイズを制限したい場合 */
+  margin: 0 auto; /* 中央寄せ */
 }
 
 /* iframe（Googleカレンダー）のスタイル */
 iframe {
   display: block;
   width: 100%;
-  height: 100vh;
+  /* 最小の高さを設定し、ビューポートの高さに固定しないことで、
+     他のコンテンツとのバランスを取りやすくします */
+  min-height: 80vh; 
   border: none;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* スマホでの余白調整（任意） */
+/* スマートフォンでの調整 */
 @media (max-width: 600px) {
+  body {
+    padding: 5px; /* スマホでは余白を少し減らす */
+  }
   h1 {
-    font-size: 1.3em;
-    margin: 0.5em 0;
+    font-size: 1.3em; /* フォントを小さく */
+    margin: 0.3em 0;
   }
   iframe {
-    height: 90vh;
+    min-height: 75vh; /* スマホでは高さを調整 */
     border-radius: 8px;
   }
-}  </style>
+}
+  </style>
 </head>
 <body>
-  <h4>川口社会体育館 スケジュール</h4>
-  <iframe src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"></iframe>
+  <h1>川口社会体育館 貸館スケジュール</h1>
+  <div class="calendar-container">
+    <iframe src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"></iframe>
+  </div>
 </body>
 </html>

@@ -68,11 +68,11 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* カレンダー枠（高さ改善） */
+    /* カレンダー枠（スマホ余白ゼロ版） */
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 110%; /* ← スマホで高さアップ */
+      padding-top: 120%; /* ← スマホで高さをしっかり確保し余白ゼロ */
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -86,17 +86,19 @@
       width: 100%;
       height: 100%;
       border: 0;
-      transform: scale(0.90);
+      transform: scale(1.0); /* ← 縮小しないので右余白ゼロ */
       transform-origin: top left;
     }
 
+    /* タブレット */
     @media (min-width: 768px) {
-      .calendar-wrap { padding-top: 90%; } /* タブレット */
-      .calendar-wrap iframe { transform: scale(0.95); }
+      .calendar-wrap { padding-top: 90%; }
+      .calendar-wrap iframe { transform: scale(1.0); }
     }
 
+    /* PC */
     @media (min-width: 1024px) {
-      .calendar-wrap { padding-top: 75%; } /* PC */
+      .calendar-wrap { padding-top: 75%; }
       .calendar-wrap iframe { transform: scale(1.0); }
     }
   </style>

@@ -108,7 +108,7 @@
     <p class="note">施設ごとの予定を切り替えて表示できます。</p>
 
     <!-- 施設 ON/OFF ボタン -->
-    <div class="buttons">
+    <div class="buttons" id="facility-buttons">
       <button id="btn-all" class="active">すべて表示</button>
       <button id="btn-hall">公民館</button>
       <button id="btn-gym">社会体育館</button>
@@ -116,7 +116,7 @@
     </div>
 
     <!-- 月/週/予定リスト 切り替え -->
-    <div class="buttons">
+    <div class="buttons" id="view-buttons">
       <button id="view-month" class="active">月</button>
       <button id="view-week">週</button>
       <button id="view-agenda">予定リスト</button>
@@ -133,4 +133,68 @@
     const frame = document.getElementById("calendarFrame");
 
     const hall = "src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
-    const gym = "src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534
+    const gym = "src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
+    const annex = "src=kawaguchi.public.hall.annex%40gmail.com";
+
+    let currentView = "month";
+
+    function updateCalendar(srcList) {
+      frame.src = `https://calendar.google.com/calendar/embed?${srcList.join("&")}&ctz=Asia/Tokyo&mode=${currentView}`;
+    }
+
+    function activateButton(groupId, id) {
+      document.querySelectorAll(`#${groupId} button`).forEach(btn => btn.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function setBackground(className) {
+      document.body.classList.remove("hall-bg", "gym-bg", "annex-bg", "all-bg");
+      document.body.classList.add(className);
+    }
+
+    // 施設切り替え
+    document.getElementById("btn-all").onclick = () => {
+      updateCalendar([hall, gym, annex]);
+      activateButton("facility-buttons", "btn-all");
+      setBackground("all-bg");
+    };
+
+    document.getElementById("btn-hall").onclick = () => {
+      updateCalendar([hall]);
+      activateButton("facility-buttons", "btn-hall");
+      setBackground("hall-bg");
+    };
+
+    document.getElementById("btn-gym").onclick = () => {
+      updateCalendar([gym]);
+      activateButton("facility-buttons", "btn-gym");
+      setBackground("gym-bg");
+    };
+
+    document.getElementById("btn-annex").onclick = () => {
+      updateCalendar([annex]);
+      activateButton("facility-buttons", "btn-annex");
+      setBackground("annex-bg");
+    };
+
+    // 表示モード切り替え
+    document.getElementById("view-month").onclick = () => {
+      currentView = "month";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=month");
+      activateButton("view-buttons", "view-month");
+    };
+
+    document.getElementById("view-week").onclick = () => {
+      currentView = "week";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=week");
+      activateButton("view-buttons", "view-week");
+    };
+
+    document.getElementById("view-agenda").onclick = () => {
+      currentView = "agenda";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=agenda");
+      activateButton("view-buttons", "view-agenda");
+    };
+  </script>
+</body>
+</html>

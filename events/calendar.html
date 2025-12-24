@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>行事予定カレンダー</title>
+  <title>行事予定カレンダー（統合）</title>
 
   <style>
     body {
@@ -79,17 +79,19 @@
 
 <body>
   <div class="page">
-    <h1 class="title">行事予定カレンダー</h1>
-    <p class="note">日付をタップすると詳細が開きます。</p>
+    <h1 class="title">行事予定カレンダー（統合）</h1>
+    <p class="note">公民館・社会体育館・公民館別館の予定をまとめて表示しています。</p>
 
     <div class="calendar-wrap">
-      <!-- ▼ここをあなたのカレンダーIDに差し替えるだけでOK ▼ -->
       <iframe
-        src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"
+        src="https://calendar.google.com/calendar/embed?
+             src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com
+             &src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com
+             &src=kawaguchi.public.hall.annex%40gmail.com
+             &ctz=Asia/Tokyo"
         frameborder="0"
         scrolling="no">
       </iframe>
-      <!-- ▲ここまで ▲ -->
     </div>
   </div>
 </body>

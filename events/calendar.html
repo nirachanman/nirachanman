@@ -72,7 +72,7 @@
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 70%;
+      padding-top: 110%; /* ← スマホで高さアップ */
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -91,12 +91,12 @@
     }
 
     @media (min-width: 768px) {
-      .calendar-wrap { padding-top: 60%; }
+      .calendar-wrap { padding-top: 90%; } /* タブレット */
       .calendar-wrap iframe { transform: scale(0.95); }
     }
 
     @media (min-width: 1024px) {
-      .calendar-wrap { padding-top: 55%; }
+      .calendar-wrap { padding-top: 75%; } /* PC */
       .calendar-wrap iframe { transform: scale(1.0); }
     }
   </style>

@@ -1,74 +1,96 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>川口社会体育館 貸館スケジュール</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>行事予定カレンダー</title>
+
   <style>
-/* 全体のリセットとフォント設定 */
-html {
-  box-sizing: border-box; /* パディングとボーダーを幅に含める */
-}
-*, *::before, *::after {
-  box-sizing: inherit;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      font-size: 10px; /* 全体の文字を小さく */
+    }
 
-body {
-  margin: 0;
-  padding: 10px; /* 画面の端に余白を追加 */
-  background-color: #f0f4ff; /* 淡い青系の背景 */
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
-  color: #333;
-}
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 8px;
+    }
 
-/* タイトルのスタイル */
-h1 {
-  text-align: center;
-  font-size: 1.6em;
-  color: #0055aa;
-  margin: 0.5em 0 0.5em; /* 上下の余白を調整 */
-  padding: 0 10px; /* 画面端での見切れ防止 */
-}
+    .title {
+      font-size: 12px;
+      margin: 0 0 4px;
+    }
 
-/* iframe（Googleカレンダー）のコンテナ（任意） */
-.calendar-container {
-  width: 100%;
-  max-width: 1000px; /* PCでの表示サイズを制限したい場合 */
-  margin: 0 auto; /* 中央寄せ */
-}
+    .note {
+      font-size: 9px;
+      color: #666;
+      margin: 0 0 8px;
+    }
 
-/* iframe（Googleカレンダー）のスタイル */
-iframe {
-  display: block;
-  width: 100%;
-  /* 最小の高さを設定し、ビューポートの高さに固定しないことで、
-     他のコンテンツとのバランスを取りやすくします */
-  min-height: 80vh; 
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+    /* Googleカレンダーのレスポンシブ枠 */
+    .calendar-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 80%; /* スマホ向けの高さ比率 */
+      overflow: hidden;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
 
-/* スマートフォンでの調整 */
-@media (max-width: 600px) {
-  body {
-    padding: 5px; /* スマホでは余白を少し減らす */
-  }
-  h1 {
-    font-size: 1.3em; /* フォントを小さく */
-    margin: 0.3em 0;
-  }
-  iframe {
-    min-height: 75vh; /* スマホでは高さを調整 */
-    border-radius: 8px;
-  }
-}
+    .calendar-wrap iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+
+      /* カレンダー全体を縮小して文字も小さく見せる */
+      transform: scale(0.85);
+      transform-origin: top left;
+    }
+
+    /* タブレット以上では少し縮小率を戻す */
+    @media (min-width: 768px) {
+      .calendar-wrap {
+        padding-top: 70%;
+      }
+      .calendar-wrap iframe {
+        transform: scale(0.90);
+      }
+    }
+
+    /* PCではさらに見やすく */
+    @media (min-width: 1024px) {
+      .calendar-wrap {
+        padding-top: 60%;
+      }
+      .calendar-wrap iframe {
+        transform: scale(0.95);
+      }
+    }
   </style>
 </head>
+
 <body>
-  <h1>川口社会体育館 貸館スケジュール</h1>
-  <div class="calendar-container">
-    <iframe src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"></iframe>
+  <div class="page">
+    <h1 class="title">行事予定カレンダー</h1>
+    <p class="note">日付をタップすると詳細が開きます。</p>
+
+    <div class="calendar-wrap">
+      <!-- ▼ここをあなたのカレンダーIDに差し替えるだけでOK ▼ -->
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895%40group.calendar.google.com&ctz=Asia%2FTokyo"
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+      <!-- ▲ここまで ▲ -->
+    </div>
   </div>
 </body>
 </html>

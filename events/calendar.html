@@ -11,30 +11,68 @@
       padding: 0;
       font-family: system-ui, sans-serif;
       background: #f5f5f5;
-      font-size: 10px;
+      font-size: 11px;
+      transition: background 0.3s ease;
     }
+
+    /* 背景色（施設ごと） */
+    body.all-bg { background: #f5f5f5; }
+    body.hall-bg { background: #e8f1ff; }
+    body.gym-bg { background: #ffe8e8; }
+    body.annex-bg { background: #fff7d9; }
 
     .page {
       max-width: 900px;
       margin: 0 auto;
-      padding: 8px;
+      padding: 10px;
     }
 
     .title {
-      font-size: 12px;
-      margin: 0 0 4px;
+      font-size: 14px;
+      margin-bottom: 6px;
     }
 
     .note {
-      font-size: 9px;
+      font-size: 10px;
       color: #666;
-      margin: 0 0 8px;
+      margin-bottom: 10px;
     }
 
+    /* ボタンデザイン */
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 11px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background: #e9f2ff;
+    }
+
+    button.active {
+      background: #007bff;
+      color: #fff;
+      border-color: #007bff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* カレンダー枠（高さ改善） */
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 80%;
+      padding-top: 70%;
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -48,38 +86,51 @@
       width: 100%;
       height: 100%;
       border: 0;
-      transform: scale(0.85);
+      transform: scale(0.90);
       transform-origin: top left;
     }
 
     @media (min-width: 768px) {
-      .calendar-wrap {
-        padding-top: 70%;
-      }
-      .calendar-wrap iframe {
-        transform: scale(0.90);
-      }
+      .calendar-wrap { padding-top: 60%; }
+      .calendar-wrap iframe { transform: scale(0.95); }
     }
 
     @media (min-width: 1024px) {
-      .calendar-wrap {
-        padding-top: 60%;
-      }
-      .calendar-wrap iframe {
-        transform: scale(0.95);
-      }
+      .calendar-wrap { padding-top: 55%; }
+      .calendar-wrap iframe { transform: scale(1.0); }
     }
   </style>
 </head>
 
-<body>
+<body class="all-bg">
   <div class="page">
     <h1 class="title">行事予定カレンダー（統合）</h1>
-    <p class="note">公民館・社会体育館・公民館別館の予定をまとめて表示しています。</p>
+    <p class="note">施設ごとの予定を切り替えて表示できます。</p>
+
+    <!-- 施設 ON/OFF ボタン -->
+    <div class="buttons">
+      <button id="btn-all" class="active">すべて表示</button>
+      <button id="btn-hall">公民館</button>
+      <button id="btn-gym">社会体育館</button>
+      <button id="btn-annex">公民館（別館）</button>
+    </div>
+
+    <!-- 月/週/予定リスト 切り替え -->
+    <div class="buttons">
+      <button id="view-month" class="active">月</button>
+      <button id="view-week">週</button>
+      <button id="view-agenda">予定リスト</button>
+    </div>
 
     <div class="calendar-wrap">
-      <iframe src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=kawaguchi.public.hall.annex%40gmail.com&ctz=Asia/Tokyo" frameborder="0" scrolling="no"></iframe>
+      <iframe id="calendarFrame"
+        src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=kawaguchi.public.hall.annex%40gmail.com&ctz=Asia/Tokyo&mode=month"
+      ></iframe>
     </div>
   </div>
-</body>
-</html>
+
+  <script>
+    const frame = document.getElementById("calendarFrame");
+
+    const hall = "src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
+    const gym = "src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534

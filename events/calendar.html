@@ -11,7 +11,7 @@
       padding: 0;
       font-family: system-ui, sans-serif;
       background: #f5f5f5;
-      font-size: 10px; /* 全体の文字を小さく */
+      font-size: 10px;
     }
 
     .page {
@@ -31,11 +31,10 @@
       margin: 0 0 8px;
     }
 
-    /* Googleカレンダーのレスポンシブ枠 */
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 80%; /* スマホ向けの高さ比率 */
+      padding-top: 80%;
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -49,13 +48,10 @@
       width: 100%;
       height: 100%;
       border: 0;
-
-      /* カレンダー全体を縮小して文字も小さく見せる */
       transform: scale(0.85);
       transform-origin: top left;
     }
 
-    /* タブレット以上では少し縮小率を戻す */
     @media (min-width: 768px) {
       .calendar-wrap {
         padding-top: 70%;
@@ -65,7 +61,6 @@
       }
     }
 
-    /* PCではさらに見やすく */
     @media (min-width: 1024px) {
       .calendar-wrap {
         padding-top: 60%;
@@ -83,15 +78,7 @@
     <p class="note">公民館・社会体育館・公民館別館の予定をまとめて表示しています。</p>
 
     <div class="calendar-wrap">
-      <iframe
-        src="https://calendar.google.com/calendar/embed?
-             src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com
-             &src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com
-             &src=kawaguchi.public.hall.annex%40gmail.com
-             &ctz=Asia/Tokyo"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
+      <iframe src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=kawaguchi.public.hall.annex%40gmail.com&ctz=Asia/Tokyo" frameborder="0" scrolling="no"></iframe>
     </div>
   </div>
 </body>

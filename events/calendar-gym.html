@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       font-family: system-ui, sans-serif;
-      background: #ffe8e8; /* 体育館カラー */
+      background: #e8ffe8; /* ← 薄いグリーンに変更 */
       font-size: 11px;
     }
 
@@ -55,9 +55,9 @@
     }
 
     button.active {
-      background: #d9534f;
+      background: #28a745; /* グリーン系の強調色 */
       color: #fff;
-      border-color: #d9534f;
+      border-color: #28a745;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
@@ -118,7 +118,6 @@
     const frame = document.getElementById("calendarFrame");
     let currentView = "month";
 
-    /* 表示モード切り替え */
     function activateButton(id) {
       document.querySelectorAll("#view-buttons button").forEach(btn => btn.classList.remove("active"));
       document.getElementById(id).classList.add("active");

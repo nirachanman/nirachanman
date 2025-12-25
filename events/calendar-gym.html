@@ -14,6 +14,23 @@
       font-size: 11px;
     }
 
+    /* スマホだけフォントを小さくする */
+    @media (max-width: 767px) {
+      body {
+        font-size: 9px; /* ← スマホだけ小さく */
+      }
+      button {
+        font-size: 9px;
+        padding: 5px 10px;
+      }
+      .title {
+        font-size: 12px;
+      }
+      .note {
+        font-size: 9px;
+      }
+    }
+
     .page {
       max-width: 900px;
       margin: 0 auto;
@@ -65,7 +82,7 @@
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 140%; /* ← ここを150%に変更 */
+      padding-top: 150%; /* ← 高さ150% */
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -143,4 +160,3 @@
   </script>
 </body>
 </html>
-

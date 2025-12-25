@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       font-family: system-ui, sans-serif;
-      background: #e8ffe8; /* ← 薄いグリーンに変更 */
+      background: #e8ffe8; /* 薄いグリーン */
       font-size: 11px;
     }
 
@@ -55,17 +55,17 @@
     }
 
     button.active {
-      background: #28a745; /* グリーン系の強調色 */
+      background: #28a745;
       color: #fff;
       border-color: #28a745;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* カレンダー枠（スマホ余白ゼロ） */
+    /* カレンダー枠（高さ150%） */
     .calendar-wrap {
       position: relative;
       width: 100%;
-      padding-top: 120%;
+      padding-top: 150%; /* ← ここを150%に変更 */
       overflow: hidden;
       background: #fff;
       border-radius: 6px;
@@ -85,12 +85,12 @@
 
     /* タブレット */
     @media (min-width: 768px) {
-      .calendar-wrap { padding-top: 90%; }
+      .calendar-wrap { padding-top: 110%; }
     }
 
     /* PC */
     @media (min-width: 1024px) {
-      .calendar-wrap { padding-top: 75%; }
+      .calendar-wrap { padding-top: 85%; }
     }
   </style>
 </head>

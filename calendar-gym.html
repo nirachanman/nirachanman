@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>社会体育館 行事予定カレンダー</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, sans-serif;
+      background: #ffe8e8; /* 体育館カラー */
+      font-size: 11px;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .title {
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .note {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    /* ボタンデザイン */
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 11px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+      background: #e9f2ff;
+    }
+
+    button.active {
+      background: #d9534f;
+      color: #fff;
+      border-color: #d9534f;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* カレンダー枠（スマホ余白ゼロ） */
+    .calendar-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 120%;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .calendar-wrap iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      transform: scale(1.0);
+      transform-origin: top left;
+    }
+
+    /* タブレット */
+    @media (min-width: 768px) {
+      .calendar-wrap { padding-top: 90%; }
+    }
+
+    /* PC */
+    @media (min-width: 1024px) {
+      .calendar-wrap { padding-top: 75%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <h1 class="title">社会体育館 行事予定カレンダー</h1>
+    <p class="note">社会体育館の予定のみを表示しています。</p>
+
+    <!-- 月/週/予定リスト 切り替え -->
+    <div class="buttons" id="view-buttons">
+      <button id="view-month" class="active">月</button>
+      <button id="view-week">週</button>
+      <button id="view-agenda">予定リスト</button>
+    </div>
+
+    <div class="calendar-wrap">
+      <iframe id="calendarFrame"
+        src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&ctz=Asia/Tokyo&mode=month&height=400"
+      ></iframe>
+    </div>
+  </div>
+
+  <script>
+    const frame = document.getElementById("calendarFrame");
+    let currentView = "month";
+
+    /* 表示モード切り替え */
+    function activateButton(id) {
+      document.querySelectorAll("#view-buttons button").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    document.getElementById("view-month").onclick = () => {
+      currentView = "month";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=month");
+      activateButton("view-month");
+    };
+
+    document.getElementById("view-week").onclick = () => {
+      currentView = "week";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=week");
+      activateButton("view-week");
+    };
+
+    document.getElementById("view-agenda").onclick = () => {
+      currentView = "agenda";
+      frame.src = frame.src.replace(/mode=\w+/, "mode=agenda");
+      activateButton("view-agenda");
+    };
+  </script>
+</body>
+</html>

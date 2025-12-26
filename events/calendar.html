@@ -19,34 +19,35 @@
     body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
     body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-    /* タイトル（小さく） */
+    /* タイトル（さらに小さく & 詰める） */
     h2 {
-      margin-bottom: 10px;
-      font-size: 18px;
+      margin-bottom: 4px;   /* ← さらに詰める */
+      font-size: 14px;      /* ← さらに小さく */
+      font-weight: 600;
     }
 
-    /* ボタンエリア（上下スペースを狭く） */
+    /* ボタンエリア（上下スペースをさらに詰める） */
     .calendar-buttons {
       display: flex;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 4px;   /* ← 6px → 4px にさらに縮小 */
       flex-wrap: wrap;
     }
 
     /* ボタン（通常） */
     .calendar-buttons button {
-      padding: 12px 26px; /* ← 上下を少し小さく */
+      padding: 8px 22px;    /* ← 上下を10px → 8px にさらに縮小 */
       border-radius: 9999px;
       border: 2px solid rgba(255,255,255,0.7);
       background: white;
       cursor: pointer;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      min-width: 170px;
+      min-width: 160px;
       box-shadow: 0 3px 6px rgba(0,0,0,0.15);
       transition: all 0.35s cubic-bezier(.25,.8,.25,1);
       position: relative;
@@ -57,14 +58,14 @@
     .calendar-buttons button.active::before {
       content: "";
       position: absolute;
-      inset: -6px;
+      inset: -5px;
       border-radius: 9999px;
       background: radial-gradient(circle,
         rgba(255,255,255,0.9) 0%,
         rgba(255,255,255,0.4) 40%,
         rgba(255,255,255,0) 70%
       );
-      box-shadow: 0 0 18px rgba(255,255,255,0.9);
+      box-shadow: 0 0 16px rgba(255,255,255,0.9);
       opacity: 1;
       transition: opacity 0.4s ease;
       z-index: -1;
@@ -74,8 +75,8 @@
 
     /* アクティブ状態 */
     .calendar-buttons button.active {
-      transform: translateY(-4px) scale(1.08);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.28);
+      transform: translateY(-3px) scale(1.06);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
       border-color: rgba(255,255,255,1);
       background: rgba(255,255,255,0.98);
     }
@@ -91,7 +92,7 @@
       width: 100%;
       border: 0;
       display: none;
-      height: calc(100dvh - 120px);
+      height: calc(100dvh - 110px); /* ← タイトルとボタンが小さくなった分広く */
       max-height: none;
     }
     .calendar-frame.active { display: block; }
@@ -110,7 +111,7 @@
       .calendar-buttons button {
         display: inline-block;
         font-size: 12px;
-        padding: 8px 12px;
+        padding: 6px 12px;
         min-width: 110px;
         margin-right: 8px;
         border-width: 1.2px;
@@ -127,7 +128,7 @@
       }
 
       .calendar-frame {
-        height: calc(100dvh - 130px);
+        height: calc(100dvh - 120px);
       }
     }
 
@@ -145,7 +146,7 @@
       .calendar-buttons button {
         display: inline-block;
         font-size: 11px;
-        padding: 6px 10px;
+        padding: 5px 10px;
         min-width: 95px;
         margin-right: 6px;
         border-width: 1px;
@@ -161,7 +162,7 @@
       }
 
       .calendar-frame {
-        height: calc(100dvh - 110px);
+        height: calc(100dvh - 105px);
       }
     }
   </style>

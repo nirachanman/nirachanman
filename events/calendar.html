@@ -14,22 +14,12 @@
     }
 
     /* 背景グラデーション */
-    body.bg-taikukan {
-      background: linear-gradient(135deg, #eef7f1, #d7ead9);
-    }
-    body.bg-kouminkan {
-      background: linear-gradient(135deg, #eef3ff, #d6e3fb);
-    }
-    body.bg-bekkan {
-      background: linear-gradient(135deg, #fff8ec, #ffe8c7);
-    }
-    body.bg-all {
-      background: linear-gradient(135deg, #f2f2f2, #e0e0e0);
-    }
+    body.bg-taikukan { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
+    body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
+    body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
+    body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-    h2 {
-      margin-bottom: 16px;
-    }
+    h2 { margin-bottom: 16px; }
 
     /* ボタンエリア */
     .calendar-buttons {
@@ -65,8 +55,7 @@
       position: absolute;
       inset: -6px;
       border-radius: 9999px;
-      background: radial-gradient(
-        circle,
+      background: radial-gradient(circle,
         rgba(255,255,255,0.9) 0%,
         rgba(255,255,255,0.4) 40%,
         rgba(255,255,255,0) 70%
@@ -77,9 +66,7 @@
       z-index: -1;
     }
 
-    .calendar-buttons button::before {
-      opacity: 0;
-    }
+    .calendar-buttons button::before { opacity: 0; }
 
     /* アクティブ状態 */
     .calendar-buttons button.active {
@@ -90,22 +77,10 @@
     }
 
     /* 施設ごとのアクティブ色 */
-    #btn-taikukan.active {
-      background: #dff3e6;
-      color: #0f6a2c;
-    }
-    #btn-kouminkan.active {
-      background: #e3ecff;
-      color: #0f4fb8;
-    }
-    #btn-bekkan.active {
-      background: #fff1d6;
-      color: #a56a00;
-    }
-    #btn-all.active {
-      background: #f0f0f0;
-      color: #333;
-    }
+    #btn-taikukan.active { background: #dff3e6; color: #0f6a2c; }
+    #btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
+    #btn-bekkan.active { background: #fff1d6; color: #a56a00; }
+    #btn-all.active { background: #f0f0f0; color: #333; }
 
     /* カレンダー iframe（縦長化） */
     .calendar-frame {
@@ -115,45 +90,76 @@
       height: calc(100dvh - 120px);
       max-height: none;
     }
+    .calendar-frame.active { display: block; }
 
-    .calendar-frame.active {
-      display: block;
+    /* 📱 スマホ縦向き（小さめ＋横スクロール） */
+    @media (max-width: 600px) {
+
+      .calendar-buttons {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+      }
+
+      .calendar-buttons button {
+        display: inline-block;
+        font-size: 12px;
+        padding: 8px 12px;
+        min-width: 110px;
+        margin-right: 8px;
+        border-width: 1.2px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+        transform: none;
+      }
+
+      .calendar-buttons button.active {
+        transform: translateY(-1px) scale(1.03);
+      }
+
+      .calendar-buttons button.active::before {
+        inset: -3px;
+      }
+
+      .calendar-frame {
+        height: calc(100dvh - 130px);
+      }
     }
 
-    /* 📱 スマホ最適化（ボタン小さめ＋横スクロール＋nowrap） */
-@media (max-width: 600px) {
+    /* 📱 スマホ横向き（さらにコンパクト） */
+    @media (max-height: 500px) {
 
-  .calendar-buttons {
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
-  }
+      .calendar-buttons {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+      }
 
-  .calendar-buttons button {
-    display: inline-block;
-    font-size: 12px;        /* ← さらに小さく */
-    padding: 8px 12px;      /* ← さらに小さく */
-    min-width: 110px;       /* ← 横幅も縮小 */
-    margin-right: 8px;      /* ← 余白も調整 */
-    border-width: 1.2px;    /* ← 枠線も細く */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.12); /* ← 影も軽く */
-    transform: none;
-  }
+      .calendar-buttons button {
+        display: inline-block;
+        font-size: 11px;
+        padding: 6px 10px;
+        min-width: 95px;
+        margin-right: 6px;
+        border-width: 1px;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.10);
+      }
 
-  .calendar-buttons button.active {
-    transform: translateY(-1px) scale(1.03); /* ← 控えめアニメ */
-  }
+      .calendar-buttons button.active {
+        transform: translateY(-1px) scale(1.02);
+      }
 
-  .calendar-buttons button.active::before {
-    inset: -3px;            /* ← 光るリングも縮小 */
-  }
+      .calendar-buttons button.active::before {
+        inset: -2px;
+      }
 
-  .calendar-frame {
-    height: calc(100dvh - 130px); /* ← ボタンが小さくなった分だけ広く */
-  }
-}
+      .calendar-frame {
+        height: calc(100dvh - 110px);
+      }
+    }
   </style>
 </head>
 
@@ -169,30 +175,22 @@
   </div>
 
   <!-- 体育館 -->
-  <iframe
-    id="cal-taikukan"
-    class="calendar-frame active"
+  <iframe id="cal-taikukan" class="calendar-frame active"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
   <!-- 公民館 -->
-  <iframe
-    id="cal-kouminkan"
-    class="calendar-frame"
+  <iframe id="cal-kouminkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
   <!-- 公民館（別館） -->
-  <iframe
-    id="cal-bekkan"
-    class="calendar-frame"
+  <iframe id="cal-bekkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
 
   <!-- 全てのカレンダー統合 -->
-  <iframe
-    id="cal-all"
-    class="calendar-frame"
+  <iframe id="cal-all" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
 

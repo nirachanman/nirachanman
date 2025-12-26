@@ -19,19 +19,23 @@
     body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
     body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-    h2 { margin-bottom: 16px; }
+    /* タイトル（小さく） */
+    h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
 
-    /* ボタンエリア */
+    /* ボタンエリア（上下スペースを狭く） */
     .calendar-buttons {
       display: flex;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       flex-wrap: wrap;
     }
 
     /* ボタン（通常） */
     .calendar-buttons button {
-      padding: 16px 26px;
+      padding: 12px 26px; /* ← 上下を少し小さく */
       border-radius: 9999px;
       border: 2px solid rgba(255,255,255,0.7);
       background: white;

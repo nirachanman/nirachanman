@@ -121,38 +121,39 @@
     }
 
     /* 📱 スマホ最適化（ボタン小さめ＋横スクロール＋nowrap） */
-    @media (max-width: 600px) {
+@media (max-width: 600px) {
 
-      .calendar-buttons {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 6px;
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap; /* ← 横スクロールのために必須 */
-      }
+  .calendar-buttons {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
 
-      .calendar-buttons button {
-        display: inline-block;
-        font-size: 14px;
-        padding: 10px 16px;
-        min-width: 130px;
-        margin-right: 10px;
-        border-width: 1.5px;
-        transform: none;
-      }
+  .calendar-buttons button {
+    display: inline-block;
+    font-size: 12px;        /* ← さらに小さく */
+    padding: 8px 12px;      /* ← さらに小さく */
+    min-width: 110px;       /* ← 横幅も縮小 */
+    margin-right: 8px;      /* ← 余白も調整 */
+    border-width: 1.2px;    /* ← 枠線も細く */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12); /* ← 影も軽く */
+    transform: none;
+  }
 
-      .calendar-buttons button.active {
-        transform: translateY(-2px) scale(1.04);
-      }
+  .calendar-buttons button.active {
+    transform: translateY(-1px) scale(1.03); /* ← 控えめアニメ */
+  }
 
-      .calendar-buttons button.active::before {
-        inset: -4px;
-      }
+  .calendar-buttons button.active::before {
+    inset: -3px;            /* ← 光るリングも縮小 */
+  }
 
-      .calendar-frame {
-        height: calc(100dvh - 140px);
-      }
-    }
+  .calendar-frame {
+    height: calc(100dvh - 130px); /* ← ボタンが小さくなった分だけ広く */
+  }
+}
   </style>
 </head>
 

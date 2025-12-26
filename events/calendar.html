@@ -120,12 +120,22 @@
       display: block;
     }
 
-    /* 📱 スマホだけボタンを小さくする */
+    /* 📱 スマホ最適化（ボタン小さめ＋横スクロール） */
     @media (max-width: 600px) {
+
+      .calendar-buttons {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+      }
+
       .calendar-buttons button {
+        display: inline-block;
         font-size: 14px;
         padding: 10px 16px;
         min-width: 130px;
+        margin-right: 10px;
         border-width: 1.5px;
         transform: none;
       }

@@ -120,11 +120,24 @@
       display: block;
     }
 
+    /* 📱 スマホだけボタンを小さくする */
     @media (max-width: 600px) {
       .calendar-buttons button {
-        font-size: 16px;
-        padding: 16px 20px;
+        font-size: 14px;
+        padding: 10px 16px;
+        min-width: 130px;
+        border-width: 1.5px;
+        transform: none;
       }
+
+      .calendar-buttons button.active {
+        transform: translateY(-2px) scale(1.04);
+      }
+
+      .calendar-buttons button.active::before {
+        inset: -4px;
+      }
+
       .calendar-frame {
         height: calc(100dvh - 140px);
       }

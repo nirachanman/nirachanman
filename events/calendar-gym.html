@@ -27,30 +27,31 @@
         font-size: 12px;      /* ← スマホでも見やすい大きさ */
         padding: 8px 14px;    /* ← スマホ用に少し縮小 */
       }
-      .title {
-        font-size: 12px;
-      }
-      .note {
-        font-size: 9px;
-      }
-    }
+.title {
+  font-size: 14px;
+  margin-bottom: 6px;
+  text-align: center;   /* 中央寄せ */
+}
 
-    .page {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 10px;
-    }
+.note {
+  font-size: 12px;      /* フォント大きく */
+  color: #666;
+  margin-bottom: 10px;
+  text-align: center;   /* 中央寄せ */
+}
 
-    .title {
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
+/* スマホだけフォントをさらに見やすく */
+@media (max-width: 767px) {
+  .title {
+    font-size: 13px;
+    text-align: center;
+  }
+  .note {
+    font-size: 11px;
+    text-align: center;
+  }
+}
 
-    .note {
-      font-size: 10px;
-      color: #666;
-      margin-bottom: 10px;
-    }
 
     /* ★ 月／週／予定リストボタンを大きくする（PC・タブレット） */
     .buttons {
@@ -166,6 +167,7 @@
   </script>
 </body>
 </html>
+
 
 
 

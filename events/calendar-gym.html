@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>社会体育館 行事予定カレンダー</title>
 
+  <!-- PWA manifest -->
+  <link rel="manifest" href="./manifest-gym.json">
+  <meta name="theme-color" content="#28a745">
+
   <style>
     body {
       margin: 0;
@@ -17,7 +21,7 @@
     /* スマホだけフォントを小さくする */
     @media (max-width: 767px) {
       body {
-        font-size: 9px; /* ← スマホだけ小さく */
+        font-size: 9px;
       }
       button {
         font-size: 9px;
@@ -48,7 +52,6 @@
       margin-bottom: 10px;
     }
 
-    /* ボタンデザイン */
     .buttons {
       display: flex;
       flex-wrap: wrap;
@@ -78,7 +81,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* カレンダー枠（高さ150%） */
     .calendar-wrap {
       position: relative;
       width: 100%;
@@ -100,12 +102,10 @@
       transform-origin: top left;
     }
 
-    /* タブレット */
     @media (min-width: 768px) {
       .calendar-wrap { padding-top: 110%; }
     }
 
-    /* PC */
     @media (min-width: 1024px) {
       .calendar-wrap { padding-top: 85%; }
     }
@@ -117,7 +117,6 @@
     <h1 class="title">社会体育館 行事予定カレンダー</h1>
     <p class="note">社会体育館の予定のみを表示しています。</p>
 
-    <!-- 月/週/予定リスト 切り替え -->
     <div class="buttons" id="view-buttons">
       <button id="view-month" class="active">月</button>
       <button id="view-week">週</button>
@@ -133,30 +132,25 @@
 
   <script>
     const frame = document.getElementById("calendarFrame");
-    let currentView = "month";
-
-    function activateButton(id) {
-      document.querySelectorAll("#view-buttons button").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    }
 
     document.getElementById("view-month").onclick = () => {
-      currentView = "month";
       frame.src = frame.src.replace(/mode=\w+/, "mode=month");
-      activateButton("view-month");
     };
 
     document.getElementById("view-week").onclick = () => {
-      currentView = "week";
       frame.src = frame.src.replace(/mode=\w+/, "mode=week");
-      activateButton("view-week");
     };
 
     document.getElementById("view-agenda").onclick = () => {
-      currentView = "agenda";
       frame.src = frame.src.replace(/mode=\w+/, "mode=agenda");
-      activateButton("view-agenda");
     };
+  </script>
+
+  <!-- PWA service worker 登録 -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker-gym.js");
+    }
   </script>
 </body>
 </html>

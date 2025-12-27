@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>サークル予定カレンダー</title>
 
-  <!-- PWA 対応 -->
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#ffffff">
 
@@ -17,7 +17,7 @@
       transition: background 0.5s ease;
     }
 
-    body.bg-taikukan { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
+    body.bg-gym { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
     body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
     body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
     body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
@@ -79,7 +79,7 @@
       background: rgba(255,255,255,0.98);
     }
 
-    #btn-taikukan.active { background: #dff3e6; color: #0f6a2c; }
+    #btn-gym.active { background: #dff3e6; color: #0f6a2c; }
     #btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
     #btn-bekkan.active { background: #fff1d6; color: #a56a00; }
     #btn-all.active { background: #f0f0f0; color: #333; }
@@ -89,7 +89,6 @@
       border: 0;
       display: none;
       height: calc(100dvh - 110px);
-      max-height: none;
     }
     .calendar-frame.active { display: block; }
 
@@ -103,22 +102,12 @@
       }
 
       .calendar-buttons button {
-        display: inline-block;
         font-size: 12px;
         padding: 6px 12px;
         min-width: 110px;
         margin-right: 8px;
         border-width: 1.2px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.12);
-        transform: none;
-      }
-
-      .calendar-buttons button.active {
-        transform: translateY(-1px) scale(1.03);
-      }
-
-      .calendar-buttons button.active::before {
-        inset: -3px;
       }
 
       .calendar-frame {
@@ -127,30 +116,11 @@
     }
 
     @media (max-height: 500px) {
-      .calendar-buttons {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap;
-      }
-
       .calendar-buttons button {
-        display: inline-block;
         font-size: 11px;
         padding: 5px 10px;
         min-width: 95px;
         margin-right: 6px;
-        border-width: 1px;
-        box-shadow: 0 2px 3px rgba(0,0,0,0.10);
-      }
-
-      .calendar-buttons button.active {
-        transform: translateY(-1px) scale(1.02);
-      }
-
-      .calendar-buttons button.active::before {
-        inset: -2px;
       }
 
       .calendar-frame {
@@ -160,29 +130,33 @@
   </style>
 </head>
 
-<body class="bg-taikukan">
+<body class="bg-gym">
 
   <h2>施設カレンダー</h2>
 
   <div class="calendar-buttons">
-    <button onclick="showCalendar('taikukan')" id="btn-taikukan" class="active">🏟 川口社会体育館</button>
+    <button onclick="showCalendar('gym')" id="btn-gym" class="active">🏟 体育館</button>
     <button onclick="showCalendar('kouminkan')" id="btn-kouminkan">🏫 公民館</button>
-    <button onclick="showCalendar('bekkan')" id="btn-bekkan">🏢 公民館（別館）</button>
-    <button onclick="showCalendar('all')" id="btn-all">📅 全てを表示</button>
+    <button onclick="showCalendar('bekkan')" id="btn-bekkan">🏢 別館</button>
+    <button onclick="showCalendar('all')" id="btn-all">📅 全て</button>
   </div>
 
-  <iframe id="cal-taikukan" class="calendar-frame active"
+  <!-- 体育館 -->
+  <iframe id="cal-gym" class="calendar-frame active"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
+  <!-- 公民館 -->
   <iframe id="cal-kouminkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
+  <!-- 別館 -->
   <iframe id="cal-bekkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
 
+  <!-- 全て -->
   <iframe id="cal-all" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
@@ -199,7 +173,9 @@
       );
       document.getElementById('btn-' + target).classList.add('active');
 
-      document.body.classList.remove('bg-taikukan', 'bg-kouminkan', 'bg-bekkan', 'bg-all');
-      document.body.classList.add('bg-' + target);
+      document.body.className = 'bg-' + target;
     }
-  </
+  </script>
+
+</body>
+</html>

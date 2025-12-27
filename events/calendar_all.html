@@ -72,7 +72,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* 📱 スマホだけボタンを小さくする */
+    /* 📱 スマホだけボタンを小さくする（横向き対策は削除済み） */
     @media (max-width: 767px) {
       button {
         font-size: 9px;
@@ -83,21 +83,6 @@
       }
       .note {
         font-size: 9px;
-      }
-    }
-
-    /* 📱 スマホ横向き（landscape）対策：ボタンが隠れないようにする */
-    @media (max-width: 767px) and (orientation: landscape) {
-      .buttons {
-        gap: 4px;
-        margin-bottom: 6px;
-      }
-      button {
-        font-size: 8px;
-        padding: 3px 6px;
-      }
-      .calendar-wrap {
-        padding-top: 80%; /* ← 高さを少し低くして隠れ防止 */
       }
     }
 

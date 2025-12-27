@@ -18,54 +18,60 @@
       font-size: 11px;
     }
 
-    /* スマホだけフォントを小さくする */
+    /* スマホだけフォントを調整 */
     @media (max-width: 767px) {
       body {
         font-size: 9px;
       }
       button {
-        font-size: 12px;      /* ← スマホでも見やすい大きさ */
-        padding: 8px 14px;    /* ← スマホ用に少し縮小 */
+        font-size: 12px;
+        padding: 8px 14px;
       }
-.title {
-  font-size: 14px;
-  margin-bottom: 6px;
-  text-align: center;   /* 中央寄せ */
-}
+      .title {
+        font-size: 13px;
+        text-align: center;
+      }
+      .note {
+        font-size: 11px;
+        text-align: center;
+      }
+    }
 
-.note {
-  font-size: 12px;      /* フォント大きく */
-  color: #666;
-  margin-bottom: 10px;
-  text-align: center;   /* 中央寄せ */
-}
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px;
+    }
 
-/* スマホだけフォントをさらに見やすく */
-@media (max-width: 767px) {
-  .title {
-    font-size: 13px;
-    text-align: center;
-  }
-  .note {
-    font-size: 11px;
-    text-align: center;
-  }
-}
+    /* ★ タイトル中央寄せ */
+    .title {
+      font-size: 14px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
 
+    /* ★ 説明文フォント大きく＋中央寄せ */
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      text-align: center;
+    }
 
-    /* ★ 月／週／予定リストボタンを大きくする（PC・タブレット） */
+    /* ★ 月／週／予定リストボタンを大きく */
     .buttons {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 14px;
+      justify-content: center;
     }
 
     button {
-      padding: 10px 18px;   /* ← 大きく */
-      font-size: 14px;      /* ← 文字も大きく */
+      padding: 10px 18px;
+      font-size: 14px;
       border: 1px solid #ccc;
-      border-radius: 8px;   /* ← 少し丸く */
+      border-radius: 8px;
       background: #fff;
       cursor: pointer;
       transition: 0.2s;
@@ -119,13 +125,13 @@
     <h1 class="title">社会体育館 行事予定カレンダー</h1>
 
     <!-- ★ 説明文（変更済み） -->
-    <p class="note">スマートフォンは、横向きで見やすくなります。</p>
+    <p class="note">スマートフォンでは横向きで見やすくなります。</p>
 
     <!-- ★ 大きくしたボタン -->
     <div class="buttons" id="view-buttons">
       <button id="view-month" class="active">月</button>
       <button id="view-week">週</button>
-      <button id="view-agenda">スケジュール</button>
+      <button id="view-agenda">予定リスト</button>
     </div>
 
     <div class="calendar-wrap">
@@ -167,7 +173,3 @@
   </script>
 </body>
 </html>
-
-
-
-

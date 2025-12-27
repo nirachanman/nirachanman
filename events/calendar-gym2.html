@@ -50,7 +50,7 @@
     border-collapse: collapse;
     margin-top: 8px;
     background: white;
-    table-layout: fixed;   /* ← 列幅固定 */
+    table-layout: fixed;
   }
 
   /* 列幅指定 */
@@ -64,7 +64,7 @@
     padding: 4px 6px;
     font-size: 12px;
     vertical-align: middle;
-    height: 48px;             /* ← 行の高さ固定 */
+    height: 48px;
     line-height: 1.2;
     overflow: hidden;
     white-space: nowrap;
@@ -99,7 +99,7 @@
   }
 
   .date-bottom {
-    font-size: 8px;        /* ← 極小フォント */
+    font-size: 8px;
     color: #d32f2f;
     margin-top: 2px;
   }
@@ -107,7 +107,7 @@
   /* イベント2段レイアウト */
   .event-box {
     display: flex;
-    flex-wrap: wrap;        /* ← 2段にする */
+    flex-wrap: wrap;
     gap: 2px 4px;
     height: 100%;
     align-content: flex-start;
@@ -122,7 +122,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 48%;         /* ← 2段に収める幅 */
+    max-width: 48%;
   }
 
   /* 色分け */
@@ -131,6 +131,49 @@
   .color-volleyball { background: #ff9800; }
   .color-kids { background: #9c27b0; }
   .color-default { background: #607d8b; }
+
+  /* スマホ最適化 */
+  @media (max-width: 600px) {
+
+    h1 {
+      font-size: 16px;
+      padding: 12px;
+    }
+
+    .tab {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    th, td {
+      font-size: 10px;
+      padding: 3px 4px;
+      height: 44px;
+    }
+
+    /* スマホ用列幅 */
+    th:nth-child(1), td:nth-child(1) { width: 15%; }
+    th:nth-child(2), td:nth-child(2) { width: 28%; }
+    th:nth-child(3), td:nth-child(3) { width: 28%; }
+    th:nth-child(4), td:nth-child(4) { width: 28%; }
+
+    .date-top {
+      font-size: 11px;
+    }
+
+    .date-bottom {
+      font-size: 7px;
+    }
+
+    .event {
+      font-size: 10px;
+      max-width: 48%;
+    }
+
+    .event-box {
+      gap: 1px 3px;
+    }
+  }
 
 </style>
 </head>
@@ -146,22 +189,16 @@
 </div>
 
 <script>
-// ------------------------------
-// 設定
-// ------------------------------
 const CALENDAR_ID =
   "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
 
 const HOLIDAY_CALENDAR_ID =
   "japanese__ja@holiday.calendar.google.com";
 
-const API_KEY = "AIzaSyDZwpeUR_Vx_0D88WlRfSqJsRsf4WE_oyw";  // ←差し替え
+const API_KEY = "YOUR_API_KEY";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
-// ------------------------------
-// 月タブ生成
-// ------------------------------
 const today = new Date();
 const months = [];
 for (let i = -1; i <= 3; i++) {
@@ -186,9 +223,6 @@ months.forEach((m, idx) => {
   tabArea.appendChild(tab);
 });
 
-// ------------------------------
-// Google Calendar API
-// ------------------------------
 async function fetchEvents(calendarId, year, month) {
   const start = new Date(year, month, 1).toISOString();
   const end = new Date(year, month + 1, 1).toISOString();
@@ -202,9 +236,6 @@ async function fetchEvents(calendarId, year, month) {
   return data.items || [];
 }
 
-// ------------------------------
-// 時間帯分類
-// ------------------------------
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "その他";
   const hour = new Date(ev.start.dateTime).getHours();
@@ -213,9 +244,6 @@ function classifyTime(ev) {
   return "夜間";
 }
 
-// ------------------------------
-// 色分け
-// ------------------------------
 function detectColor(title) {
   if (title.includes("バド")) return "color-badminton";
   if (title.includes("卓球")) return "color-tabletennis";
@@ -224,9 +252,6 @@ function detectColor(title) {
   return "color-default";
 }
 
-// ------------------------------
-// 表描画
-// ------------------------------
 function renderTable(events, holidayMap, year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = "";
@@ -261,7 +286,6 @@ function renderTable(events, holidayMap, year, month) {
       slots[time].push(`<div class="event ${color}">${ev.summary}</div>`);
     });
 
-    // 日付セル（2段構成）
     const dateCell = `
       <div class="date-cell">
         <div class="date-top">${day}（${weekday}）</div>
@@ -269,7 +293,6 @@ function renderTable(events, holidayMap, year, month) {
       </div>
     `;
 
-    // 背景色判定
     let rowClass = "";
     if (holidayMap[dateStr]) {
       rowClass = "holiday";
@@ -293,9 +316,6 @@ function renderTable(events, holidayMap, year, month) {
   container.appendChild(table);
 }
 
-// ------------------------------
-// 月読み込み
-// ------------------------------
 async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
@@ -312,7 +332,6 @@ async function loadMonth(year, month) {
   renderTable(events, holidayMap, year, month);
 }
 
-// 初期表示
 loadMonth(today.getFullYear(), today.getMonth());
 </script>
 

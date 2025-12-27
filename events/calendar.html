@@ -17,17 +17,20 @@
       transition: background 0.5s ease;
     }
 
+    /* 背景色（施設ごと） */
     body.bg-gym { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
     body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
     body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
     body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
+    /* タイトル（小さく） */
     h2 {
       margin-bottom: 4px;
       font-size: 14px;
       font-weight: 600;
     }
 
+    /* ボタンエリア（余白を最小限） */
     .calendar-buttons {
       display: flex;
       gap: 10px;
@@ -35,6 +38,7 @@
       flex-wrap: wrap;
     }
 
+    /* ボタン（通常） */
     .calendar-buttons button {
       padding: 8px 22px;
       border-radius: 9999px;
@@ -54,6 +58,7 @@
       overflow: visible;
     }
 
+    /* 光るリング */
     .calendar-buttons button.active::before {
       content: "";
       position: absolute;
@@ -72,6 +77,7 @@
 
     .calendar-buttons button::before { opacity: 0; }
 
+    /* アクティブ状態 */
     .calendar-buttons button.active {
       transform: translateY(-3px) scale(1.06);
       box-shadow: 0 8px 18px rgba(0,0,0,0.25);
@@ -79,11 +85,13 @@
       background: rgba(255,255,255,0.98);
     }
 
+    /* 施設ごとの色 */
     #btn-gym.active { background: #dff3e6; color: #0f6a2c; }
     #btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
     #btn-bekkan.active { background: #fff1d6; color: #a56a00; }
     #btn-all.active { background: #f0f0f0; color: #333; }
 
+    /* カレンダー iframe */
     .calendar-frame {
       width: 100%;
       border: 0;
@@ -92,6 +100,7 @@
     }
     .calendar-frame.active { display: block; }
 
+    /* 📱 スマホ縦向き */
     @media (max-width: 600px) {
       .calendar-buttons {
         overflow-x: auto;
@@ -115,6 +124,7 @@
       }
     }
 
+    /* 📱 スマホ横向き（高さが低いとき） */
     @media (max-height: 500px) {
       .calendar-buttons button {
         font-size: 11px;
@@ -174,6 +184,13 @@
       document.getElementById('btn-' + target).classList.add('active');
 
       document.body.className = 'bg-' + target;
+    }
+  </script>
+
+  <!-- PWA Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js");
     }
   </script>
 

@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>行事予定カレンダー（統合）</title>
 
+  <!-- PWA manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#007bff">
+
   <style>
     body {
       margin: 0;
@@ -193,6 +197,13 @@
       activateButton("facility-buttons", "btn-annex");
       setBackground("annex-bg");
     };
+  </script>
+
+  <!-- PWA service worker 登録 -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
   </script>
 </body>
 </html>

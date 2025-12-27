@@ -24,8 +24,8 @@
         font-size: 9px;
       }
       button {
-        font-size: 9px;
-        padding: 5px 10px;
+        font-size: 12px;      /* ← スマホでも見やすい大きさ */
+        padding: 8px 14px;    /* ← スマホ用に少し縮小 */
       }
       .title {
         font-size: 12px;
@@ -52,22 +52,23 @@
       margin-bottom: 10px;
     }
 
+    /* ★ 月／週／予定リストボタンを大きくする（PC・タブレット） */
     .buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 14px;
     }
 
     button {
-      padding: 6px 12px;
-      font-size: 11px;
+      padding: 10px 18px;   /* ← 大きく */
+      font-size: 14px;      /* ← 文字も大きく */
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;   /* ← 少し丸く */
       background: #fff;
       cursor: pointer;
       transition: 0.2s;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     }
 
     button:hover {
@@ -116,9 +117,10 @@
   <div class="page">
     <h1 class="title">社会体育館 行事予定カレンダー</h1>
 
-    <!-- ★ ここを変更しました！ -->
+    <!-- ★ 説明文（変更済み） -->
     <p class="note">スマートフォンでは横向きで見やすくなります。</p>
 
+    <!-- ★ 大きくしたボタン -->
     <div class="buttons" id="view-buttons">
       <button id="view-month" class="active">月</button>
       <button id="view-week">週</button>
@@ -137,15 +139,23 @@
 
     document.getElementById("view-month").onclick = () => {
       frame.src = frame.src.replace(/mode=\w+/, "mode=month");
+      activate("view-month");
     };
 
     document.getElementById("view-week").onclick = () => {
       frame.src = frame.src.replace(/mode=\w+/, "mode=week");
+      activate("view-week");
     };
 
     document.getElementById("view-agenda").onclick = () => {
       frame.src = frame.src.replace(/mode=\w+/, "mode=agenda");
+      activate("view-agenda");
     };
+
+    function activate(id) {
+      document.querySelectorAll("#view-buttons button").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
   </script>
 
   <!-- PWA service worker 登録 -->

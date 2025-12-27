@@ -60,11 +60,10 @@
     table-layout: fixed;
   }
 
-  /* 列幅（PC） */
-  th:nth-child(1), td:nth-child(1) { width: 10%; }
-  th:nth-child(2), td:nth-child(2) { width: 30%; }
-  th:nth-child(3), td:nth-child(3) { width: 30%; }
-  th:nth-child(4), td:nth-child(4) { width: 30%; }
+  /* 列幅（PC：夜間削除 → 午後を広く） */
+  th:nth-child(1), td:nth-child(1) { width: 10%; }  /* 日付 */
+  th:nth-child(2), td:nth-child(2) { width: 30%; }  /* 午前 */
+  th:nth-child(3), td:nth-child(3) { width: 60%; }  /* 午後（夜間統合） */
 
   th, td {
     border: 1px solid #ddd;
@@ -154,7 +153,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 48%;
+    max-width: 100%;
     position: relative;
   }
 
@@ -201,11 +200,10 @@
       height: 44px;
     }
 
-    /* 列幅（スマホ） */
+    /* 列幅（スマホ：夜間削除 → 午後を広く） */
     th:nth-child(1), td:nth-child(1) { width: 15%; }
-    th:nth-child(2), td:nth-child(2) { width: 28%; }
-    th:nth-child(3), td:nth-child(3) { width: 28%; }
-    th:nth-child(4), td:nth-child(4) { width: 28%; }
+    th:nth-child(2), td:nth-child(2) { width: 30%; }
+    th:nth-child(3), td:nth-child(3) { width: 55%; }
 
     .date-top {
       font-size: 12px;
@@ -273,7 +271,6 @@
 <div id="calendarContainer">
   <div class="loading">読み込み中...</div>
 </div>
-
 <script>
 const CALENDAR_ID =
   "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
@@ -324,13 +321,12 @@ async function fetchEvents(calendarId, year, month) {
   const data = await res.json();
   return data.items || [];
 }
-
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "その他";
   const hour = new Date(ev.start.dateTime).getHours();
   if (hour < 12) return "午前";
   if (hour < 18) return "午後";
-  return "夜間";
+  return "夜間";  // ← 午後セルに統合するが分類は残す
 }
 
 function detectColor(title) {
@@ -351,7 +347,6 @@ function renderTable(events, holidayMap, year, month) {
       <th>日付</th>
       <th>午前</th>
       <th>午後</th>
-      <th>夜間</th>
     </tr>
   `;
 
@@ -368,16 +363,48 @@ function renderTable(events, holidayMap, year, month) {
       return d === dateStr;
     });
 
+    // 午前・午後・夜間の3分類（夜間は午後に統合する）
     const slots = { "午前": [], "午後": [], "夜間": [] };
 
     dayEvents.forEach(ev => {
       const time = classifyTime(ev);
       const color = detectColor(ev.summary || "");
       const title = ev.summary || "";
-      slots[time].push(
-        `<div class="event ${color}" data-fulltext="${title}">${title}</div>`
-      );
+
+      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+      const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+      const format = d =>
+        String(d.getHours()).padStart(2, "0") + ":" +
+        String(d.getMinutes()).padStart(2, "0");
+
+      let timeLabel = "";
+      if (start && end) {
+        timeLabel = `${format(start)}–${format(end)}`;
+      }
+
+      const displayText = timeLabel ? `${timeLabel} ${title}` : title;
+
+      slots[time].push({
+        start: start,
+        html: `<div class="event ${color}" data-fulltext="${displayText}">${displayText}</div>`
+      });
     });
+
+    // 時刻順に並べ替え
+    slots["午前"].sort((a, b) => a.start - b.start);
+    slots["午後"].sort((a, b) => a.start - b.start);
+    slots["夜間"].sort((a, b) => a.start - b.start);
+
+// 午後セル（午後＋夜間をまとめて1段）
+const afternoonHTML = `
+  <div class="event-box">
+    ${[...slots["午後"], ...slots["夜間"]]
+      .sort((a, b) => a.start - b.start)
+      .map(e => e.html)
+      .join("")}
+  </div>
+`;
 
     const weekdayClass = {
       "日": "w-sun",
@@ -414,9 +441,8 @@ function renderTable(events, holidayMap, year, month) {
     tr.className = rowClass + (isToday ? " today-row" : "");
     tr.innerHTML = `
       <td>${dateCell}</td>
-      <td><div class="event-box">${slots["午前"].join("")}</div></td>
-      <td><div class="event-box">${slots["午後"].join("")}</div></td>
-      <td><div class="event-box">${slots["夜間"].join("")}</div></td>
+      <td><div class="event-box">${slots["午前"].map(e => e.html).join("")}</div></td>
+      <td>${afternoonHTML}</td>
     `;
     table.appendChild(tr);
   }

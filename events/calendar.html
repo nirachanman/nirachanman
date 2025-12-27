@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>サークル予定カレンダー</title>
 
+  <!-- PWA 対応 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
   <style>
     body {
       font-family: sans-serif;
@@ -13,30 +17,26 @@
       transition: background 0.5s ease;
     }
 
-    /* 背景グラデーション */
     body.bg-taikukan { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
     body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
     body.bg-bekkan { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
     body.bg-all { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-    /* タイトル（さらに小さく & 詰める） */
     h2 {
-      margin-bottom: 4px;   /* ← さらに詰める */
-      font-size: 14px;      /* ← さらに小さく */
+      margin-bottom: 4px;
+      font-size: 14px;
       font-weight: 600;
     }
 
-    /* ボタンエリア（上下スペースをさらに詰める） */
     .calendar-buttons {
       display: flex;
       gap: 10px;
-      margin-bottom: 4px;   /* ← 6px → 4px にさらに縮小 */
+      margin-bottom: 4px;
       flex-wrap: wrap;
     }
 
-    /* ボタン（通常） */
     .calendar-buttons button {
-      padding: 8px 22px;    /* ← 上下を10px → 8px にさらに縮小 */
+      padding: 8px 22px;
       border-radius: 9999px;
       border: 2px solid rgba(255,255,255,0.7);
       background: white;
@@ -54,7 +54,6 @@
       overflow: visible;
     }
 
-    /* 光るリング（アクティブ時） */
     .calendar-buttons button.active::before {
       content: "";
       position: absolute;
@@ -73,7 +72,6 @@
 
     .calendar-buttons button::before { opacity: 0; }
 
-    /* アクティブ状態 */
     .calendar-buttons button.active {
       transform: translateY(-3px) scale(1.06);
       box-shadow: 0 8px 18px rgba(0,0,0,0.25);
@@ -81,25 +79,21 @@
       background: rgba(255,255,255,0.98);
     }
 
-    /* 施設ごとのアクティブ色 */
     #btn-taikukan.active { background: #dff3e6; color: #0f6a2c; }
     #btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
     #btn-bekkan.active { background: #fff1d6; color: #a56a00; }
     #btn-all.active { background: #f0f0f0; color: #333; }
 
-    /* カレンダー iframe（縦長化） */
     .calendar-frame {
       width: 100%;
       border: 0;
       display: none;
-      height: calc(100dvh - 110px); /* ← タイトルとボタンが小さくなった分広く */
+      height: calc(100dvh - 110px);
       max-height: none;
     }
     .calendar-frame.active { display: block; }
 
-    /* 📱 スマホ縦向き（小さめ＋横スクロール） */
     @media (max-width: 600px) {
-
       .calendar-buttons {
         overflow-x: auto;
         white-space: nowrap;
@@ -132,9 +126,7 @@
       }
     }
 
-    /* 📱 スマホ横向き（さらにコンパクト） */
     @media (max-height: 500px) {
-
       .calendar-buttons {
         overflow-x: auto;
         white-space: nowrap;
@@ -162,7 +154,7 @@
       }
 
       .calendar-frame {
-        height: calc(100dvh - 105px);
+        height: calc(100dvh - 80px);
       }
     }
   </style>
@@ -179,22 +171,18 @@
     <button onclick="showCalendar('all')" id="btn-all">📅 全てを表示</button>
   </div>
 
-  <!-- 体育館 -->
   <iframe id="cal-taikukan" class="calendar-frame active"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
-  <!-- 公民館 -->
   <iframe id="cal-kouminkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&ctz=Asia/Tokyo">
   </iframe>
 
-  <!-- 公民館（別館） -->
   <iframe id="cal-bekkan" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
 
-  <!-- 全てのカレンダー統合 -->
   <iframe id="cal-all" class="calendar-frame"
     src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
   </iframe>
@@ -214,7 +202,4 @@
       document.body.classList.remove('bg-taikukan', 'bg-kouminkan', 'bg-bekkan', 'bg-all');
       document.body.classList.add('bg-' + target);
     }
-  </script>
-
-</body>
-</html>
+  </

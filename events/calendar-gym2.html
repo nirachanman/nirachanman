@@ -80,6 +80,14 @@
     background: #f0f0f0;
   }
 
+  td {
+    overflow: visible;
+  }
+
+  .event-box {
+     overflow: visible;
+  }
+
   .saturday { background: #e3f2fd; }
   .sunday   { background: #ffebee; }
   .holiday  { background: #fff8e1; }
@@ -153,6 +161,7 @@
     max-width: 100%;
     position: relative;
     opacity: 0.85;
+    overflow: visible;
   }
 
   /* 時刻部分（PC＋スマホ共通） */
@@ -166,22 +175,6 @@
   .color-volleyball { background: #ff9800; }
   .color-kids { background: #9c27b0; }
   .color-default { background: #607d8b; }
-
-  @media (min-width: 601px) {
-    .event:hover::after {
-      content: attr(data-fulltext);
-      position: absolute;
-      left: 0;
-      top: 100%;
-      white-space: nowrap;
-      background: #333;
-      color: #fff;
-      padding: 3px 6px;
-      border-radius: 4px;
-      font-size: 11px;
-      z-index: 10;
-    }
-  }
 
   /* ★ スマホ最適化（最新版） */
   @media (max-width: 600px) {
@@ -367,14 +360,19 @@ function renderTable(events, holidayMap, year, month) {
         timeLabel = `${format(start)}–${format(end)}`;
       }
 
-      const displayText = timeLabel
-        ? `<time>${timeLabel}</time> ${title}`
-        : title;
+const displayText = timeLabel
+  ? `<time>${timeLabel}</time> ${title}`
+  : title;
 
-      slots[time].push({
-        start: start,
-        html: `<div class="event ${color}" data-fulltext="${displayText}">${displayText}</div>`
-      });
+// ★ ホバー用は time を含めない
+const hoverText = timeLabel
+  ? `${timeLabel} ${title}`
+  : title;
+
+slots[time].push({
+  start: start,
+  html: `<div class="event ${color}" data-fulltext="${hoverText}">${displayText}</div>`
+});
     });
 
     slots["午前"].sort((a, b) => a.start - b.start);
@@ -417,6 +415,23 @@ function renderTable(events, holidayMap, year, month) {
     table.appendChild(tr);
   }
 
+// ★ クリックで詳細を開く処理
+table.addEventListener("click", function(e) {
+  const eventDiv = e.target.closest(".event");
+  if (!eventDiv) return;
+
+  const text = eventDiv.getAttribute("data-fulltext") || eventDiv.textContent;
+
+  const modal = document.getElementById("eventModal");
+  modal.textContent = text;
+  modal.style.display = "block";
+
+  // 3秒後に自動で閉じる
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 3000);
+});
+
   container.appendChild(table);
 }
 
@@ -438,6 +453,23 @@ async function loadMonth(year, month) {
 
 loadMonth(today.getFullYear(), today.getMonth());
 </script>
+
+<!-- クリックで開く詳細ポップアップ -->
+<div id="eventModal" style="
+  display:none;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  background:#333;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:8px;
+  font-size:14px;
+  z-index:9999;
+  max-width:80%;
+  white-space:pre-wrap;
+"></div>
 
 </body>
 </html>

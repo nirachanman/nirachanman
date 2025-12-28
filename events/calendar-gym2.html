@@ -90,17 +90,17 @@
     background: #fff3e0 !important;
   }
 
-.date-cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;   /* ← 縦方向の中央揃え */
-  align-items: center;       /* ← 横方向の中央揃え（新規追加） */
-  text-align: center;        /* ← テキストも中央揃え */
-}
+  .date-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;   /* 横中央 */
+    text-align: center;    /* テキスト中央 */
+  }
 
   .date-top {
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 14px;   /* 日付を大きく */
+    font-weight: 600;
   }
 
   .date-bottom {
@@ -109,6 +109,7 @@
     margin-top: 2px;
   }
 
+  /* 曜日バッジ */
   .weekday-badge {
     padding: 1px 4px;
     margin-left: 3px;
@@ -117,13 +118,25 @@
     color: #fff;
   }
 
+  /* 日曜（赤） */
   .w-sun { background: #e57373; }
-  .w-mon { background: #64b5f6; }
-  .w-tue { background: #4db6ac; }
-  .w-wed { background: #9575cd; }
-  .w-thu { background: #ffb74d; }
-  .w-fri { background: #4fc3f7; }
+
+  /* 土曜（青） */
   .w-sat { background: #7986cb; }
+
+  /* 平日（月〜金）は紫 */
+  .w-mon,
+  .w-tue,
+  .w-wed,
+  .w-thu,
+  .w-fri {
+    background: #8e24aa;
+  }
+
+  /* 祝祭日はオレンジ */
+  .holiday .weekday-badge {
+    background: #ff9800 !important;
+  }
 
   .event-box {
     display: flex;
@@ -139,6 +152,13 @@
     line-height: 1.2;
     max-width: 100%;
     position: relative;
+    opacity: 0.85;
+  }
+
+  /* 時刻部分（PC＋スマホ共通） */
+  .event time {
+    color: #ffeb3b;   /* 明るい黄色 */
+    font-weight: 700;
   }
 
   .color-badminton { background: #4caf50; }
@@ -162,12 +182,6 @@
       z-index: 10;
     }
   }
-
-/* PC でも時刻部分を強調する */
-.event time {
-  color: #ffeb3b;   /* 明るい黄色（Material Yellow 300） */
-  font-weight: 700;
-}
 
   /* ★ スマホ最適化（最新版） */
   @media (max-width: 600px) {
@@ -195,7 +209,7 @@
 
     .event {
       font-size: 11.5px;
-      font-weight: 400;
+      font-weight: 400;   /* ← 太字にしない */
       max-width: 100%;
       line-height: 1.2;
       padding: 2px 6px;
@@ -204,17 +218,21 @@
     }
 
     .event time {
-      color: #ffeb3b; /* 明るい黄色 */
-      font-weight: 600;
+      color: #ffeb3b;
+      font-weight: 700;
     }
 
     .event-box {
       gap: 1px 3px;
     }
 
-    .date-cell { 
-      align-items: center; /* 横方向の中央揃え */ 
-      text-align: center; /* テキスト中央揃え */ 
+    .date-cell {
+      align-items: center;
+      text-align: center;
+    }
+
+    .date-top {
+      font-size: 15px;  /* スマホではさらに少し大きく */
     }
   }
 

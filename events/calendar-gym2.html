@@ -90,11 +90,13 @@
     background: #fff3e0 !important;
   }
 
-  .date-cell {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* ← 縦方向の中央揃え */
+  align-items: center;       /* ← 横方向の中央揃え（新規追加） */
+  text-align: center;        /* ← テキストも中央揃え */
+}
 
   .date-top {
     font-size: 12px;

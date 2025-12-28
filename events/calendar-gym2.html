@@ -182,46 +182,55 @@
   }
 
   /* スマホ最適化 */
-  @media (max-width: 600px) {
+@media (max-width: 600px) {
 
-    h1 {
-      font-size: 16px;
-      padding: 12px;
-    }
-
-    .tab {
-      font-size: 12px;
-      padding: 6px 10px;
-    }
-
-    th, td {
-      font-size: 10px;
-      padding: 3px 4px;
-      height: 44px;
-    }
-
-    /* 列幅（スマホ：夜間削除 → 午後を広く） */
-    th:nth-child(1), td:nth-child(1) { width: 15%; }
-    th:nth-child(2), td:nth-child(2) { width: 30%; }
-    th:nth-child(3), td:nth-child(3) { width: 55%; }
-
-    .date-top {
-      font-size: 12px;
-    }
-
-    .date-bottom {
-      font-size: 7px;
-    }
-
-    .event {
-      font-size: 10px;
-      max-width: 48%;
-    }
-
-    .event-box {
-      gap: 1px 3px;
-    }
+  h1 {
+    font-size: 17px;
+    padding: 12px;
   }
+
+  .tab {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  th, td {
+    font-size: 11px;        /* ← 少し大きく */
+    padding: 4px 5px;
+    height: 48px;
+    line-height: 1.3;       /* ← 行間を広げて読みやすく */
+  }
+
+  /* 列幅（スマホ：夜間削除 → 午後を広く） */
+  th:nth-child(1), td:nth-child(1) { width: 15%; }
+  th:nth-child(2), td:nth-child(2) { width: 30%; }
+  th:nth-child(3), td:nth-child(3) { width: 55%; }
+
+  .date-top {
+    font-size: 13px;
+  }
+
+  .date-bottom {
+    font-size: 8px;
+  }
+
+  /* イベント（スマホ） */
+  .event {
+    font-size: 11px;        /* ← 少し大きく */
+    max-width: 100%;        /* ← 幅いっぱい */
+    line-height: 1.25;      /* ← 行間を少し広げる */
+    padding: 2px 5px;       /* ← 少し余白を増やす */
+    border-radius: 5px;
+
+    /* 背景色を淡くして視認性アップ */
+    opacity: 0.85;          /* ← 色を淡くする */
+  }
+
+  .event-box {
+    gap: 2px 4px;
+  }
+}
+
 
   /* 印刷用（A4横） */
   @media print {

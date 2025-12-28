@@ -60,20 +60,19 @@
     table-layout: fixed;
   }
 
-  /* 列幅（PC：夜間削除 → 午後を広く） */
-  th:nth-child(1), td:nth-child(1) { width: 10%; }  /* 日付 */
-  th:nth-child(2), td:nth-child(2) { width: 30%; }  /* 午前 */
-  th:nth-child(3), td:nth-child(3) { width: 60%; }  /* 午後（夜間統合） */
+  /* PC 列幅 */
+  th:nth-child(1), td:nth-child(1) { width: 10%; }
+  th:nth-child(2), td:nth-child(2) { width: 30%; }
+  th:nth-child(3), td:nth-child(3) { width: 60%; }
 
   th, td {
     border: 1px solid #ddd;
     padding: 4px 6px;
     font-size: 12px;
-    vertical-align: middle;
     height: 48px;
     line-height: 1.2;
-    overflow: hidden;
     white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
   }
 
@@ -81,29 +80,20 @@
     background: #f0f0f0;
   }
 
-  /* 土日背景色 */
   .saturday { background: #e3f2fd; }
   .sunday   { background: #ffebee; }
-
-  /* 祝日背景色 */
   .holiday  { background: #fff8e1; }
 
-  /* 今日の行ハイライト */
   tr.today-row {
     outline: 2px solid #ff9800;
     outline-offset: -2px;
     background: #fff3e0 !important;
   }
 
-  /* 日付セル（2段構成） */
   .date-cell {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 100%;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
   }
 
   .date-top {
@@ -117,9 +107,7 @@
     margin-top: 2px;
   }
 
-  /* 曜日バッジ */
   .weekday-badge {
-    display: inline-block;
     padding: 1px 4px;
     margin-left: 3px;
     border-radius: 8px;
@@ -135,36 +123,28 @@
   .w-fri { background: #4fc3f7; }
   .w-sat { background: #7986cb; }
 
-  /* イベント2段レイアウト */
   .event-box {
     display: flex;
     flex-wrap: wrap;
     gap: 2px 4px;
-    height: 100%;
-    align-content: flex-start;
   }
 
   .event {
-    padding: 1px 4px;
-    border-radius: 4px;
+    padding: 2px 6px;
+    border-radius: 6px;
     color: #fff;
     font-size: 11px;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
     max-width: 100%;
     position: relative;
   }
 
-  /* 色分け */
   .color-badminton { background: #4caf50; }
   .color-tabletennis { background: #2196f3; }
   .color-volleyball { background: #ff9800; }
   .color-kids { background: #9c27b0; }
   .color-default { background: #607d8b; }
 
-  /* PC: イベント名ホバーで全文表示 */
   @media (min-width: 601px) {
     .event:hover::after {
       content: attr(data-fulltext);
@@ -181,90 +161,56 @@
     }
   }
 
-  /* スマホ最適化 */
-@media (max-width: 600px) {
+  /* ★ スマホ最適化（最新版） */
+  @media (max-width: 600px) {
 
-  h1 {
-    font-size: 17px;
-    padding: 10px;
-  }
-
-  .tab {
-    font-size: 13px;
-    padding: 6px 10px;
-  }
-
-  /* ★ セルの高さを詰める（ここが重要） */
-  th, td {
-    font-size: 11px;
-    padding: 2px 3px;     /* ← 余白を減らす */
-    height: 34px;         /* ← 高さを詰める（44px → 34px） */
-    line-height: 1.15;    /* ← 行間を少し詰める */
-  }
-
-  /* 列幅（スマホ） */
-  th:nth-child(1), td:nth-child(1) { width: 15%; }
-  th:nth-child(2), td:nth-child(2) { width: 30%; }
-  th:nth-child(3), td:nth-child(3) { width: 55%; }
-
-  .date-top {
-    font-size: 13px;
-  }
-
-  .date-bottom {
-    font-size: 8px;
-  }
-
-  /* イベント（スマホ） */
-  .event {
-    font-size: 11px;
-    max-width: 100%;
-    line-height: 1.15;    /* ← 行間を詰める */
-    padding: 1px 4px;     /* ← 余白を減らす */
-    border-radius: 4px;
-    opacity: 0.85;        /* ← 背景色を淡く */
-  }
-
-  .event-box {
-    gap: 1px 3px;         /* ← イベント同士の隙間も少し詰める */
-  }
-}
-
-  /* 印刷用（A4横） */
-  @media print {
-
-    @page {
-      size: A4 landscape;
-      margin: 10mm;
+    h1 {
+      font-size: 17px;
+      padding: 10px;
     }
 
-    body {
-      background: white;
-    }
-
-    h1, .tabs {
-      display: none;
-    }
-
-    table {
-      font-size: 11px;
-      border: 1px solid #000;
+    .tab {
+      font-size: 13px;
+      padding: 6px 10px;
     }
 
     th, td {
-      border: 1px solid #000;
-      height: 32px;
-      white-space: nowrap;
+      font-size: 11px;
+      padding: 2px 3px;
+      height: 34px;
+      line-height: 1.15;
     }
+
+    th:nth-child(1), td:nth-child(1) { width: 15%; }
+    th:nth-child(2), td:nth-child(2) { width: 30%; }
+    th:nth-child(3), td:nth-child(3) { width: 55%; }
 
     .event {
-      font-size: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      max-width: 100%;
+      line-height: 1.2;
+      padding: 2px 6px;
+      border-radius: 10px;
+      opacity: 0.70;
     }
 
-    tr.today-row {
-      outline: none;
-      background: #fff3c4 !important;
+    .event time {
+      color: #004d99;
+      font-weight: 700;
     }
+
+    .event-box {
+      gap: 1px 3px;
+    }
+  }
+
+  @media print {
+    @page { size: A4 landscape; margin: 10mm; }
+    h1, .tabs { display: none; }
+    table { font-size: 11px; border: 1px solid #000; }
+    th, td { border: 1px solid #000; height: 32px; }
+    tr.today-row { background: #fff3c4 !important; }
   }
 </style>
 </head>
@@ -278,6 +224,7 @@
 <div id="calendarContainer">
   <div class="loading">読み込み中...</div>
 </div>
+
 <script>
 const CALENDAR_ID =
   "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
@@ -285,7 +232,7 @@ const CALENDAR_ID =
 const HOLIDAY_CALENDAR_ID =
   "japanese__ja@holiday.calendar.google.com";
 
-const API_KEY = "AIzaSyDZwpeUR_Vx_0D88WlRfSqJsRsf4WE_oyw"; // ← 実際のAPIキーに差し替え
+const API_KEY = "AIzaSyDZwpeUR_Vx_0D88WlRfSqJsRsf4WE_oyw";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -328,12 +275,12 @@ async function fetchEvents(calendarId, year, month) {
   const data = await res.json();
   return data.items || [];
 }
+
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "その他";
   const hour = new Date(ev.start.dateTime).getHours();
   if (hour < 12) return "午前";
-  if (hour < 18) return "午後";
-  return "夜間";  // ← 午後セルに統合するが分類は残す
+  return "午後";  /* 夜間も午後に統合 */
 }
 
 function detectColor(title) {
@@ -370,8 +317,7 @@ function renderTable(events, holidayMap, year, month) {
       return d === dateStr;
     });
 
-    // 午前・午後・夜間の3分類（夜間は午後に統合する）
-    const slots = { "午前": [], "午後": [], "夜間": [] };
+    const slots = { "午前": [], "午後": [] };
 
     dayEvents.forEach(ev => {
       const time = classifyTime(ev);
@@ -390,7 +336,9 @@ function renderTable(events, holidayMap, year, month) {
         timeLabel = `${format(start)}–${format(end)}`;
       }
 
-      const displayText = timeLabel ? `${timeLabel} ${title}` : title;
+      const displayText = timeLabel
+        ? `<time>${timeLabel}</time> ${title}`
+        : title;
 
       slots[time].push({
         start: start,
@@ -398,20 +346,8 @@ function renderTable(events, holidayMap, year, month) {
       });
     });
 
-    // 時刻順に並べ替え
     slots["午前"].sort((a, b) => a.start - b.start);
     slots["午後"].sort((a, b) => a.start - b.start);
-    slots["夜間"].sort((a, b) => a.start - b.start);
-
-// 午後セル（午後＋夜間をまとめて1段）
-const afternoonHTML = `
-  <div class="event-box">
-    ${[...slots["午後"], ...slots["夜間"]]
-      .sort((a, b) => a.start - b.start)
-      .map(e => e.html)
-      .join("")}
-  </div>
-`;
 
     const weekdayClass = {
       "日": "w-sun",
@@ -434,13 +370,9 @@ const afternoonHTML = `
     `;
 
     let rowClass = "";
-    if (holidayMap[dateStr]) {
-      rowClass = "holiday";
-    } else if (weekday === "日") {
-      rowClass = "sunday";
-    } else if (weekday === "土") {
-      rowClass = "saturday";
-    }
+    if (holidayMap[dateStr]) rowClass = "holiday";
+    else if (weekday === "日") rowClass = "sunday";
+    else if (weekday === "土") rowClass = "saturday";
 
     const isToday = (dateStr === todayStr);
 
@@ -449,7 +381,7 @@ const afternoonHTML = `
     tr.innerHTML = `
       <td>${dateCell}</td>
       <td><div class="event-box">${slots["午前"].map(e => e.html).join("")}</div></td>
-      <td>${afternoonHTML}</td>
+      <td><div class="event-box">${slots["午後"].map(e => e.html).join("")}</div></td>
     `;
     table.appendChild(tr);
   }

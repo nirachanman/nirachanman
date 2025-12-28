@@ -6,302 +6,321 @@
 <title>社会体育館 行事予定カレンダー</title>
 
 <style>
-  body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f7f7f7;
-  }
+/* =========================================================
+   基本変数（テーマ全体）
+   ========================================================= */
+:root {
+  /* 色 */
+  --color-primary: #4a6fa5;
+  --color-bg: #f3f4f6;
+  --color-white: #ffffff;
+  --color-border: #dddddd;
+
+  /* 曜日背景 */
+  --color-sat: #f7fbff;
+  --color-sun: #fff7f7;
+  --color-holiday: #fffdf5;
+
+  /* イベント色 */
+  --color-badminton: #4caf50;
+  --color-tabletennis: #2196f3;
+  --color-volleyball: #ff9800;
+  --color-kids: #9c27b0;
+  --color-default: #607d8b;
+
+  /* 曜日バッジ */
+  --badge-sun: #e57373;
+  --badge-sat: #7986cb;
+  --badge-weekday: #8e24aa;
+  --badge-holiday: #ff9800;
+
+  /* UI */
+  --radius: 6px;
+  --radius-pill: 20px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.15);
+
+  /* フォント */
+  --font-base: 12px;
+  --font-small: 11px;
+  --font-xs: 8px;
+  --font-title: 20px;
+
+  /* 余白 */
+  --space-xs: 4px;
+  --space-s: 6px;
+  --space-m: 12px;
+  --space-l: 18px;
+
+  /* 印刷用 */
+  --print-row-height: 31px;
+}
+
+/* =========================================================
+   全体
+   ========================================================= */
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+h1 {
+  text-align: center;
+  padding: var(--space-l);
+  margin: 0;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-title);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   タブ
+   ========================================================= */
+.tabs {
+  display: flex;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  overflow-x: auto;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: #e6e6e6;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.tab:hover {
+  background: #d5d5d5;
+}
+
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* =========================================================
+   テーブル
+   ========================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-s);
+  background: var(--color-white);
+  table-layout: fixed;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: var(--space-s);
+}
+
+th, td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-xs) var(--space-s);
+  font-size: var(--font-base);
+  line-height: 1.2;
+  white-space: normal;
+  height: auto;
+  min-height: 48px;
+}
+
+/* PC 列幅 */
+th:nth-child(1), td:nth-child(1) { width: 10%; }
+th:nth-child(2), td:nth-child(2) { width: 30%; }
+th:nth-child(3), td:nth-child(3) { width: 60%; }
+
+/* =========================================================
+   行背景（曜日・祝日）
+   ========================================================= */
+.saturday { background: var(--color-sat); }
+.sunday   { background: var(--color-sun); }
+.holiday  { background: var(--color-holiday); }
+
+tr.today-row {
+  outline: 2px solid var(--color-volleyball);
+  outline-offset: -2px;
+  background: #fff3e0 !important;
+}
+
+/* =========================================================
+   日付セル
+   ========================================================= */
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.date-top {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.date-bottom {
+  font-size: var(--font-xs);
+  color: #d32f2f;
+  margin-top: 2px;
+}
+
+/* 曜日バッジ */
+.weekday-badge {
+  padding: 1px 4px;
+  margin-left: 3px;
+  border-radius: 8px;
+  font-size: 9px;
+  color: #fff;
+}
+
+.w-sun { background: var(--badge-sun); }
+.w-sat { background: var(--badge-sat); }
+.w-mon,
+.w-tue,
+.w-wed,
+.w-thu,
+.w-fri { background: var(--badge-weekday); }
+
+.holiday .weekday-badge {
+  background: var(--badge-holiday) !important;
+}
+
+/* =========================================================
+   イベント
+   ========================================================= */
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+}
+
+.event {
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  color: var(--color-white);
+  font-size: var(--font-small);
+  line-height: 1.2;
+  white-space: normal;
+  box-shadow: var(--shadow);
+}
+
+.event time {
+  color: #ffeb3b;
+  font-weight: 700;
+}
+
+/* 色分け */
+.color-badminton { background: var(--color-badminton); }
+.color-tabletennis { background: var(--color-tabletennis); }
+.color-volleyball { background: var(--color-volleyball); }
+.color-kids { background: var(--color-kids); }
+.color-default { background: var(--color-default); }
+
+/* =========================================================
+   スマホ最適化
+   ========================================================= */
+@media (max-width: 600px) {
 
   h1 {
-    text-align: center;
-    padding: 16px;
-    margin: 0;
-    background: #4a6fa5;
-    color: white;
-    font-size: 20px;
-  }
-
-  .tabs {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    overflow-x: auto;
-    background: white;
-    border-bottom: 1px solid #ddd;
+    font-size: 17px;
+    padding: 10px;
   }
 
   .tab {
-    padding: 8px 14px;
-    border-radius: 20px;
-    background: #e0e0e0;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    transition: 0.2s;
+    font-size: 13px;
+    padding: 6px 10px;
   }
-
-  .tab:hover {
-    background: #d5d5d5;
-  }
-
-  .tab.active {
-    background: #4a6fa5;
-    color: white;
-    border-color: #4a6fa5;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-    background: white;
-    table-layout: fixed;
-  }
-
-  /* PC 列幅 */
-  th:nth-child(1), td:nth-child(1) { width: 10%; }
-  th:nth-child(2), td:nth-child(2) { width: 30%; }
-  th:nth-child(3), td:nth-child(3) { width: 60%; }
 
   th, td {
-    border: 1px solid #ddd;
-    padding: 4px 6px;
-    font-size: 12px;
-    height: 48px;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 11px;
+    padding: 2px 3px;
+    height: 34px;
   }
 
-  th {
-    background: #f0f0f0;
-  }
+  th:nth-child(1), td:nth-child(1) { width: 15%; }
+  th:nth-child(2), td:nth-child(2) { width: 35%; }
+  th:nth-child(3), td:nth-child(3) { width: 50%; }
 
-  td {
-    overflow: visible;
+  .event {
+    font-size: 11.5px;
+    max-width: 100%;
+    border-radius: 10px;
+    opacity: 0.70;
   }
 
   .event-box {
-     overflow: visible;
-  }
-
-  .saturday { background: #e3f2fd; }
-  .sunday   { background: #ffebee; }
-  .holiday  { background: #fff8e1; }
-
-  tr.today-row {
-    outline: 2px solid #ff9800;
-    outline-offset: -2px;
-    background: #fff3e0 !important;
-  }
-
-  .date-cell {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;   /* 横中央 */
-    text-align: center;    /* テキスト中央 */
+    gap: 1px 3px;
   }
 
   .date-top {
-    font-size: 14px;   /* 日付を大きく */
-    font-weight: 600;
+    font-size: 15px;
   }
+}
 
-  .date-bottom {
-    font-size: 8px;
-    color: #d32f2f;
-    margin-top: 2px;
-  }
-
-  /* 曜日バッジ */
-  .weekday-badge {
-    padding: 1px 4px;
-    margin-left: 3px;
-    border-radius: 8px;
-    font-size: 9px;
-    color: #fff;
-  }
-
-  /* 日曜（赤） */
-  .w-sun { background: #e57373; }
-
-  /* 土曜（青） */
-  .w-sat { background: #7986cb; }
-
-  /* 平日（月〜金）は紫 */
-  .w-mon,
-  .w-tue,
-  .w-wed,
-  .w-thu,
-  .w-fri {
-    background: #8e24aa;
-  }
-
-  /* 祝祭日はオレンジ */
-  .holiday .weekday-badge {
-    background: #ff9800 !important;
-  }
-
-  .event-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 4px;
-  }
-
-  .event {
-    padding: 2px 6px;
-    border-radius: 6px;
-    color: #fff;
-    font-size: 11px;
-    line-height: 1.2;
-    max-width: 100%;
-    position: relative;
-    opacity: 0.85;
-    overflow: visible;
-  }
-
-  /* 時刻部分（PC＋スマホ共通） */
-  .event time {
-    color: #ffeb3b;   /* 明るい黄色 */
-    font-weight: 700;
-  }
-
-  .color-badminton { background: #4caf50; }
-  .color-tabletennis { background: #2196f3; }
-  .color-volleyball { background: #ff9800; }
-  .color-kids { background: #9c27b0; }
-  .color-default { background: #607d8b; }
-
-  /* ★ スマホ最適化（最新版） */
-  @media (max-width: 600px) {
-
-    h1 {
-      font-size: 17px;
-      padding: 10px;
-    }
-
-    .tab {
-      font-size: 13px;
-      padding: 6px 10px;
-    }
-
-    th, td {
-      font-size: 11px;
-      padding: 2px 3px;
-      height: 34px;
-      line-height: 1.15;
-    }
-
-    th:nth-child(1), td:nth-child(1) { width: 15%; }
-    th:nth-child(2), td:nth-child(2) { width: 35%; }
-    th:nth-child(3), td:nth-child(3) { width: 50%; }
-
-    .event {
-      font-size: 11.5px;
-      font-weight: 400;   /* ← 太字にしない */
-      max-width: 100%;
-      line-height: 1.2;
-      padding: 2px 6px;
-      border-radius: 10px;
-      opacity: 0.70;
-    }
-
-    .event time {
-      color: #ffeb3b;
-      font-weight: 700;
-    }
-
-    .event-box {
-      gap: 1px 3px;
-    }
-
-    .date-cell {
-      align-items: center;
-      text-align: center;
-    }
-
-    .date-top {
-      font-size: 15px;  /* スマホではさらに少し大きく */
-    }
-  }
-
+/* =========================================================
+   印刷用
+   ========================================================= */
 @media print {
 
-  /* A3 縦向き・余白少なめ */
   @page {
     size: A3 portrait;
     margin: 10mm;
   }
 
-  /* タブは印刷しない */
-  .tabs {
-    display: none !important;
-  }
+  .tabs { display: none !important; }
 
-  /* タイトルは印刷する */
   h1 {
     display: block !important;
     margin-bottom: 6px;
   }
 
-  /* 列幅を画面と同じ比率に統一 */
   th:nth-child(1), td:nth-child(1) { width: 15% !important; }
   th:nth-child(2), td:nth-child(2) { width: 35% !important; }
   th:nth-child(3), td:nth-child(3) { width: 50% !important; }
 
-  /* 印刷用テーブル最適化 */
   table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
-    table-layout: fixed;
   }
 
   th, td {
     border: 1px solid #000;
     padding: 3px 4px;
-    height: 31px;     /* ← ★ A3縦で32行が1ページに収まる最適値 */
-    line-height: 1.15;
+    height: var(--print-row-height);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* 日付セルの中央揃え */
-  .date-cell {
-    align-items: center;
-    text-align: center;
-  }
-
-  .date-top {
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .date-bottom {
-    font-size: 8px;
-  }
-
-  /* イベントの色を完全に消す（白背景・黒文字） */
   .event {
     background: #fff !important;
     color: #000 !important;
     border-radius: 0;
     padding: 2px 4px;
-    opacity: 1 !important;
   }
 
-  /* 時刻の黄色も黒に統一 */
   .event time {
     color: #000 !important;
-    font-weight: 700;
   }
 
-  /* 行の背景色も白に統一 */
   .saturday,
   .sunday,
   .holiday,
@@ -309,31 +328,26 @@
     background: #fff !important;
   }
 
-  /* 曜日バッジも白黒化 */
   .weekday-badge {
     background: #fff !important;
     color: #000 !important;
     border: 1px solid #000;
   }
 
-  /* 背景色を印刷する設定（ブラウザ依存） */
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* イベント名を折り返し可能にする */ 
-  td .event { 
-    white-space: normal !important; 
-    display: block; 
-  } 
+  td .event {
+    white-space: normal !important;
+    display: block;
+  }
 
-/* セル内で自然に高さが伸びるようにする */
-  td { 
-     height: auto !important; 
+  td {
+    height: auto !important;
   }
 }
-
 </style>
 </head>
 
@@ -399,7 +413,7 @@ async function fetchEvents(calendarId, year, month) {
 }
 
 function classifyTime(ev) {
-  if (!ev.start.dateTime) return "その他";
+  if (!ev.start.dateTime) return "午前";
   const hour = new Date(ev.start.dateTime).getHours();
   if (hour < 12) return "午前";
   return "午後";  /* 夜間も午後に統合 */

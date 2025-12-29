@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f57c00">
+
   <title>川口地区社会体育館 日程表</title>
 
   <style>
@@ -618,9 +621,17 @@
     max-width:80%;
     white-space:pre-wrap;
   "></div>
-
+  
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js");
+    });
+  }
+</script>
 </body>
 </html>
+
 
 
 

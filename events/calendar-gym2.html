@@ -267,8 +267,13 @@
         max-width: 100%;
         border-radius: 10px;
         opacity: 0.70;
+        display: block;
+        line-height: 1.3;
       }
-
+      .event time {
+        display: block; /* ← これで時間が1行目に固定される */
+        margin-bottom: 2px;
+      }
       .event-box {
         gap: 1px 3px;
       }
@@ -602,6 +607,7 @@
 
 </body>
 </html>
+
 
 
 

@@ -31,8 +31,8 @@
       /* 曜日バッジ */
       --badge-sun: #e57373;
       --badge-sat: #7986cb;
-      --badge-weekday: #8e24aa;
-      --badge-holiday: #ff9800;
+      --badge-weekday: #d1b3ff;
+      --badge-holiday: #ffd8a8;
 
       /* UI */
       --radius: 6px;
@@ -143,8 +143,8 @@
 
     /* PC 列幅 */
     th:nth-child(1), td:nth-child(1) { width: 10%; }
-    th:nth-child(2), td:nth-child(2) { width: 30%; }
-    th:nth-child(3), td:nth-child(3) { width: 60%; }
+    th:nth-child(2), td:nth-child(2) { width: 40%; }
+    th:nth-child(3), td:nth-child(3) { width: 50%; }
 
     /* =========================================================
        行背景（曜日・祝日）
@@ -166,12 +166,12 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
-      text-align: center;
+      align-items: flex-end;
+      text-align: right;
     }
 
     .date-top {
-      font-size: 14px;
+      font-size: 20px;
       font-weight: 600;
     }
 
@@ -179,6 +179,10 @@
       font-size: var(--font-xs);
       color: #d32f2f;
       margin-top: 2px;
+    }
+
+    .holiday .date-bottom {
+       display: none;
     }
 
     /* 曜日バッジ */
@@ -270,7 +274,7 @@
       }
 
       .date-top {
-        font-size: 15px;
+        font-size: 17px;
       }
     }
 
@@ -591,4 +595,3 @@
 
 </body>
 </html>
-

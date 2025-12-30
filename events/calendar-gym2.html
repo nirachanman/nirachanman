@@ -247,61 +247,68 @@
     /* =========================================================
        スマホ最適化
        ========================================================= */
-    @media (max-width: 600px) {
+@media (max-width: 600px) {
 
-      h1 {
-        font-size: 17px;
-        padding: 10px;
-      }
+  /* タイトル */
+  h1 {
+    font-size: 17px;
+    padding: 10px;
+  }
 
-      .tab {
-        font-size: 13px;
-        padding: 6px 10px;
-      }
+  /* タブ */
+  .tab {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
 
-      th, td {
-        font-size: 20px;
-        padding: 2px 3px;
-        height: 34px;
-      }
+  /* テーブル全体 */
+  table, th, td {
+    border: 1.5px solid #ccc;
+  }
 
-      table, th, td {
-        border: 1.5px solid #ccc;
-      } 
+  th, td {
+    font-size: 20px;
+    padding: 2px 3px;
+    height: 34px;
+  }
 
-      th:nth-child(1), td:nth-child(1) { width: 20%; }
-      th:nth-child(2), td:nth-child(2) { width: 35%; }
-      th:nth-child(3), td:nth-child(3) { width: 45%; }
+  /* 列幅（スマホ用） */
+  th:nth-child(1), td:nth-child(1) { width: 20%; }
+  th:nth-child(2), td:nth-child(2) { width: 35%; }
+  th:nth-child(3), td:nth-child(3) { width: 45%; }
 
-      .event {
-        font-weight: 400; /*← スマホだけ太文字は700に */
-        font-size: 13px;
-        max-width: 100%;
-        border-radius: 10px;
-        opacity: 1;
-        display: block;
-        line-height: 1.3;
-      }
-      .event time {
-        display: block; /* ← これで時間が1行目に固定される */
-        font-weight: 600;
-        margin-bottom: 2px;
-      }
-      .event-box {
-        gap: 1px 3px;
-      }
+  /* イベント表示 */
+  .event {
+    font-weight: 400; /* スマホでは細め */
+    font-size: 13px;
+    max-width: 100%;
+    border-radius: 10px;
+    opacity: 1;
+    display: block;
+    line-height: 1.3;
+  }
 
-     /* 日付の数字を大きく */
-     .date-top {
-       font-size: 22px;
-     }
+  .event time {
+    display: block; /* 時間を1行目に固定 */
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
 
-     /* 曜日バッジを大きく */
-     .weekday-badge {
-       font-size: 14px;
-       padding: 2px 6px;
-     }
-   }
+  .event-box {
+    gap: 1px 3px;
+  }
+
+  /* 日付の数字を大きく */
+  .date-top {
+    font-size: 22px;
+  }
+
+  /* 曜日バッジを大きく */
+  .weekday-badge {
+    font-size: 14px;
+    padding: 2px 6px;
+  }
+}
 
     /* =========================================================
        印刷用
@@ -635,6 +642,7 @@
 </script>
 </body>
 </html>
+
 
 
 

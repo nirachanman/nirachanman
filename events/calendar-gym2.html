@@ -287,6 +287,28 @@
        flex-wrap: wrap;
        gap: 4px;
      }
+
+/* スマホ表示：フォントを少し大きくする */
+  th, td {
+    font-size: 16px !important;   /* ← 全体の文字を少し大きく */
+  }
+
+  .event {
+    font-size: 15px !important;   /* ← イベント名を少し大きく */
+  }
+
+  .event-time {
+    font-size: 15px !important;   /* ← 時間も少し大きく */
+  }
+
+  .event-title {
+    font-size: 14px !important;   /* ← タイトルは控えめに */
+  }
+
+  .weekday-badge {
+    font-size: 12px !important;   /* ← 曜日バッジも少し大きく */
+  }
+      
     }
 
     /* 印刷用（あなたのコードそのまま） */
@@ -644,6 +666,7 @@ function mergeEventsForMobile() {
   </script>
 </body>
 </html>
+
 
 
 

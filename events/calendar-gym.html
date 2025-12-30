@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>社会体育館 行事予定カレンダー</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f57c00">
+
+  <title>川口地区社会体育館 日程表</title>
 
   <style>
     /* =========================================================
@@ -14,7 +17,7 @@
       --color-primary: #4a6fa5;
       --color-bg: #f3f4f6;
       --color-white: #ffffff;
-      --color-border: #dddddd;
+      --color-border: #999;
 
       /* 曜日背景 */
       --color-sat: #f7fbff;
@@ -24,13 +27,14 @@
       /* イベント色 */
       --color-badminton: #4caf50;
       --color-tabletennis: #2196f3;
-      --color-volleyball: #ff9800;
+      --color-volleyball: #cca152;
       --color-kids: #9c27b0;
+      --color-iwate: #ff69b4;
       --color-default: #607d8b;
 
       /* 曜日バッジ */
       --badge-sun: #e57373;
-      --badge-sat: #7986cb;
+      --badge-sat: #339FF6;
       --badge-weekday: #d1b3ff;
       --badge-holiday: var(--badge-sun);
 
@@ -52,7 +56,7 @@
       --space-l: 18px;
 
       /* 印刷用 */
-      --print-row-height: 31px;
+      --print-row-height: 35px;
     }
 
     /* =========================================================
@@ -118,7 +122,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: var(--space-s);
+      margin-top: 4px; /* ← ここを変更した */
       background: var(--color-white);
       table-layout: fixed;
       border-radius: var(--radius);
@@ -143,8 +147,9 @@
 
     /* PC 列幅 */
     th:nth-child(1), td:nth-child(1) { width: 10%; }
-    th:nth-child(2), td:nth-child(2) { width: 40%; }
-    th:nth-child(3), td:nth-child(3) { width: 50%; }
+    th:nth-child(2), td:nth-child(2) { width: 45%; }
+    th:nth-child(3), td:nth-child(3) { width: 45%; }
+
 
     /* =========================================================
        行背景（曜日・祝日）
@@ -154,9 +159,8 @@
     .holiday  { background: var(--color-holiday); }
 
     tr.today-row {
-      outline: 2px solid var(--color-volleyball);
-      outline-offset: -2px;
-      background: #fff3e0 !important;
+      outline: none !important;
+      background: none !important;
     }
 
     /* =========================================================
@@ -228,7 +232,7 @@
     }
 
     .event time {
-      color: #ffeb3b;
+      color: #ffff22;
       font-weight: 700;
     }
 
@@ -237,6 +241,7 @@
     .color-tabletennis { background: var(--color-tabletennis); }
     .color-volleyball { background: var(--color-volleyball); }
     .color-kids { background: var(--color-kids); }
+    .color-iwate { background: var(--color-iwate); }
     .color-default { background: var(--color-default); }
 
     /* =========================================================
@@ -260,11 +265,16 @@
         height: 34px;
       }
 
+      table, th, td {
+        border: 1.5px solid #ccc;
+      } 
+
       th:nth-child(1), td:nth-child(1) { width: 20%; }
       th:nth-child(2), td:nth-child(2) { width: 35%; }
       th:nth-child(3), td:nth-child(3) { width: 45%; }
 
       .event {
+        font-weight: 400; /*← スマホだけ太文字は700に */
         font-size: 13px;
         max-width: 100%;
         border-radius: 10px;
@@ -274,6 +284,7 @@
       }
       .event time {
         display: block; /* ← これで時間が1行目に固定される */
+        font-weight: 600;
         margin-bottom: 2px;
       }
       .event-box {
@@ -287,7 +298,7 @@
 
      /* 曜日バッジを大きく */
      .weekday-badge {
-       font-size: 12px;
+       font-size: 14px;
        padding: 2px 6px;
      }
    }
@@ -366,12 +377,18 @@
       td {
         height: auto !important;
       }
+
+      .holiday .weekday-badge {
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+      } 
     }
   </style>
 </head>
 <body>
 
-  <h1>社会体育館 行事予定カレンダー</h1>
+  <h1>川口地区社会体育館 日程表</h1>
 
   <div class="tabs" id="monthTabs"></div>
 
@@ -395,7 +412,7 @@
 
     // 月タブの設定（前月〜3か月後）
     const months = [];
-    for (let i = -1; i <= 3; i++) {
+    for (let i = -1; i <= 12; i++) {
       const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
       months.push({
         label: `${d.getFullYear()}年${d.getMonth() + 1}月`,
@@ -445,7 +462,8 @@
       if (title.includes("バド")) return "color-badminton";
       if (title.includes("卓球")) return "color-tabletennis";
       if (title.includes("バレー")) return "color-volleyball";
-      if (title.includes("キッズ")) return "color-kids";
+      if (title.includes("スマイル")) return "color-kids";
+      if (title.includes("いわて")) return "color-iwate";
       return "color-default";
     }
 
@@ -457,7 +475,7 @@
       const table = document.createElement("table");
       table.innerHTML = `
         <tr>
-          <th>日付</th>
+          <th>日</th>
           <th>午前</th>
           <th>午後</th>
         </tr>
@@ -607,7 +625,14 @@
     max-width:80%;
     white-space:pre-wrap;
   "></div>
-
+  
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js");
+    });
+  }
+</script>
 </body>
 </html>
 

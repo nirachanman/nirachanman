@@ -402,28 +402,47 @@
     /* =========================================================
        ▼ 新しい mergeEventsForMobile（完全版）
        ========================================================= */
-    function mergeEventsForMobile() {
-      if (window.innerWidth > 600) return;
+function mergeEventsForMobile() {
+  if (window.innerWidth > 600) return;
 
-      document.querySelectorAll("#calendarContainer table tr").forEach(row => {
-        const amCell = row.querySelector("td:nth-child(2)");
-        const pmCell = row.querySelector("td:nth-child(3)");
+  document.querySelectorAll("#calendarContainer table tr").forEach(row => {
+    const amCell = row.querySelector("td:nth-child(2)");
+    const pmCell = row.querySelector("td:nth-child(3)");
 
-        if (!amCell || !pmCell) return;
+    if (!amCell || !pmCell) return;
 
-        const merged = document.createElement("td");
-        merged.className = "merged-events";
+    const merged = document.createElement("td");
+    merged.className = "merged-events";
 
-        merged.innerHTML = `
-          <div class="event-box">
-            ${amCell.innerHTML}
-            ${pmCell.innerHTML}
-          </div>
+    // ▼ 午前・午後のイベントを2段構造に変換
+    const convert = html => {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      div.querySelectorAll(".event").forEach(ev => {
+        const html = ev.innerHTML.trim();
+        const timeMatch = html.match(/<time>(.*?)<\/time>/);
+        const title = html.replace(/<time>.*?<\/time>/, "").trim();
+        const time = timeMatch ? timeMatch[1] : "";
+
+        ev.innerHTML = `
+          <div class="event-time">${time}</div>
+          <div class="event-title">${title}</div>
         `;
-
-        row.appendChild(merged);
       });
-    }
+      return div.innerHTML;
+    };
+
+    merged.innerHTML = `
+      <div class="event-box">
+        ${convert(amCell.innerHTML)}
+        ${convert(pmCell.innerHTML)}
+      </div>
+    `;
+
+    row.appendChild(merged);
+  });
+}
+
 
     /* =========================================================
        ▼ 以下、あなたの既存コード（変更なし）
@@ -625,6 +644,7 @@
   </script>
 </body>
 </html>
+
 
 
 

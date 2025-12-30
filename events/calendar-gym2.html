@@ -264,6 +264,26 @@
       td.merged-events {
         width: 80% !important;
       }
+        /* スマホ表示：イベントを2段にする */
+  .event {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+
+  .event time {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .event-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
     }
 
     /* 印刷用（あなたのコードそのまま） */
@@ -602,6 +622,7 @@
   </script>
 </body>
 </html>
+
 
 
 

@@ -267,7 +267,86 @@
     }
 
     /* 印刷用（あなたのコードそのまま） */
+        /* 印刷用（あなたのコードそのまま） */
     @media print {
+
+      @page {
+        size: A3 portrait;
+        margin: 10mm;
+      }
+
+      .tabs {
+        display: none !important;
+      }
+
+      h1 {
+        display: block !important;
+        margin-bottom: 6px;
+      }
+
+      th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+      th:nth-child(2), td:nth-child(2) { width: 40% !important; }
+      th:nth-child(3), td:nth-child(3) { width: 50% !important; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      th, td {
+        border: 1px solid #000;
+        padding: 3px 4px;
+        height: var(--print-row-height);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .event {
+        background: #fff !important;
+        color: #000 !important;
+        border-radius: 0;
+        padding: 2px 4px;
+      }
+
+      .event time {
+        color: #000 !important;
+      }
+
+      .saturday,
+      .sunday,
+      .holiday,
+      tr.today-row {
+        background: #fff !important;
+      }
+
+      .weekday-badge {
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #000;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      td .event {
+        white-space: normal !important;
+        display: block;
+      }
+
+      td {
+        height: auto !important;
+      }
+
+      .holiday .weekday-badge {
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+      }
+
       /* 省略：あなたのコードをそのまま保持 */
     }
   </style>
@@ -519,3 +598,4 @@
 
 </body>
 </html>
+

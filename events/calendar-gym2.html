@@ -93,7 +93,6 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      margin-bottom: 2px;
     }
 
     .tab {
@@ -104,7 +103,6 @@
       white-space: nowrap;
       font-size: 14px;
       transition: 0.2s;
-      padding: 3px 8px;
     }
 
     .tab:hover {
@@ -302,6 +300,13 @@
      .weekday-badge {
        font-size: 14px;
        padding: 2px 6px;
+     }
+      .tabs {
+        margin: 2px 0 !important; /* 上下の余白をほぼゼロに */
+     }
+      .tab {
+        padding: 2px 6px !important; /* タブ自体の高さも低くする */
+        font-size: 13px; /* 文字も少し小さくして収まりを良くする */
      }
    }
 
@@ -637,6 +642,7 @@
 </script>
 </body>
 </html>
+
 
 
 

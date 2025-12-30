@@ -149,7 +149,9 @@
       text-align: right;
     }
 
-    .date-top {
+    .date-top,
+    .date-number {
+      font-family: "Nunito", "Hiragino Sans", sans-serif;
       font-size: 20px;
       font-weight: 600;
     }
@@ -209,7 +211,7 @@
     .color-default     { background: var(--color-default); }
 
     /* =========================================================
-       ▼ スマホ縦向き（午前・午後 → 1列に統合）
+       ▼ スマホ最適化（午前・午後 → 1列に統合）
        ========================================================= */
     @media (max-width: 600px) {
 
@@ -233,42 +235,85 @@
       }
     }
 
-    /* =========================================================
-       ▼ スマホ横向き（ランドスケープ）行間調整
-       ========================================================= */
-    @media screen and (max-height: 500px) {
+    /* 印刷用（あなたのコードそのまま） */
+    @media print {
+
+      @page {
+        size: A3 portrait;
+        margin: 10mm;
+      }
+
+      .tabs {
+        display: none !important;
+      }
+
+      h1 {
+        display: block !important;
+        margin-bottom: 6px;
+      }
+
+      th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+      th:nth-child(2), td:nth-child(2) { width: 40% !important; }
+      th:nth-child(3), td:nth-child(3) { width: 50% !important; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
 
       th, td {
-        font-size: 14px !important;
-        padding: 2px 4px !important;
-        min-height: 24px !important;
-        height: auto !important;
-        line-height: 1.1 !important;
+        border: 1px solid #000;
+        padding: 3px 4px;
+        height: var(--print-row-height);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .event {
-        font-size: 11px !important;
-        padding: 1px 4px !important;
-        line-height: 1.1 !important;
+        background: #fff !important;
+        color: #000 !important;
+        border-radius: 0;
+        padding: 2px 4px;
       }
 
-      .date-top {
-        font-size: 16px !important;
+      .event time {
+        color: #000 !important;
+      }
+
+      .saturday,
+      .sunday,
+      .holiday,
+      tr.today-row {
+        background: #fff !important;
       }
 
       .weekday-badge {
-        font-size: 10px !important;
-        padding: 1px 4px !important;
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #000;
       }
 
-      td.merged-events {
-        width: 80% !important;
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
-    }
 
-    /* 印刷用（あなたのコードそのまま） */
-    @media print {
-      /* 省略：あなたのコードをそのまま保持 */
+      td .event {
+        white-space: normal !important;
+        display: block;
+      }
+
+      td {
+        height: auto !important;
+      }
+
+      .holiday .weekday-badge {
+        background: none !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+      }
     }
   </style>
 </head>
@@ -515,4 +560,7 @@
     }
 
     loadMonth(today.getFullYear(), today.getMonth());
-  </
+  </script>
+
+</body>
+</html>

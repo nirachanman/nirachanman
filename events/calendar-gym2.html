@@ -594,10 +594,15 @@
     }
 
     loadMonth(today.getFullYear(), today.getMonth());
+    
+    // ▼ ここに追加（縦→横、横→縦で再描画する）
+    window.addEventListener("orientationchange", () => {
+      loadMonth(today.getFullYear(), today.getMonth());
+    });
   </script>
-
 </body>
 </html>
+
 
 
 

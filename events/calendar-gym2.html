@@ -122,7 +122,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 4px; /* ← ここを変更した */
+      margin-top: 4px;
       background: var(--color-white);
       table-layout: fixed;
       border-radius: var(--radius);
@@ -149,7 +149,6 @@
     th:nth-child(1), td:nth-child(1) { width: 10%; }
     th:nth-child(2), td:nth-child(2) { width: 35%; }
     th:nth-child(3), td:nth-child(3) { width: 55%; }
-
 
     /* =========================================================
        行背景（曜日・祝日）
@@ -188,7 +187,7 @@
     }
 
     .holiday .date-bottom {
-       display: none;
+      display: none;
     }
 
     /* 曜日バッジ */
@@ -237,78 +236,89 @@
     }
 
     /* 色分け */
-    .color-badminton { background: var(--color-badminton); }
+    .color-badminton   { background: var(--color-badminton); }
     .color-tabletennis { background: var(--color-tabletennis); }
-    .color-volleyball { background: var(--color-volleyball); }
-    .color-kids { background: var(--color-kids); }
-    .color-iwate { background: var(--color-iwate); }
-    .color-default { background: var(--color-default); }
+    .color-volleyball  { background: var(--color-volleyball); }
+    .color-kids        { background: var(--color-kids); }
+    .color-iwate       { background: var(--color-iwate); }
+    .color-default     { background: var(--color-default); }
 
     /* =========================================================
-       スマホ最適化
+       スマホ最適化（午前・午後を1列に統合）
        ========================================================= */
-@media (max-width: 600px) {
+    @media (max-width: 600px) {
 
-  /* タイトル */
-  h1 {
-    font-size: 17px;
-    padding: 10px;
-  }
+      /* タイトル */
+      h1 {
+        font-size: 17px;
+        padding: 10px;
+      }
 
-  /* タブ */
-  .tab {
-    font-size: 13px;
-    padding: 6px 10px;
-  }
+      /* タブ */
+      .tab {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
 
-  /* テーブル全体 */
-  table, th, td {
-    border: 1.5px solid #ccc;
-  }
+      /* テーブル全体（枠線少し太め） */
+      table, th, td {
+        border: 1.5px solid #ccc;
+      }
 
-  th, td {
-    font-size: 20px;
-    padding: 2px 3px;
-    height: 34px;
-  }
+      th, td {
+        font-size: 20px;
+        padding: 2px 3px;
+        height: 34px;
+      }
 
-  /* 列幅（スマホ用） */
-  th:nth-child(1), td:nth-child(1) { width: 20%; }
-  th:nth-child(2), td:nth-child(2) { width: 35%; }
-  th:nth-child(3), td:nth-child(3) { width: 45%; }
+      /* ▼ 午前・午後の列を非表示にする ▼ */
+      th:nth-child(2),
+      td:nth-child(2),
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none !important;
+      }
 
-  /* イベント表示 */
-  .event {
-    font-weight: 400; /* スマホでは細め */
-    font-size: 13px;
-    max-width: 100%;
-    border-radius: 10px;
-    opacity: 1;
-    display: block;
-    line-height: 1.3;
-  }
+      /* ▼ 日付列をフル幅にする（1列構成） ▼ */
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 100% !important;
+        display: block;
+      }
 
-  .event time {
-    display: block; /* 時間を1行目に固定 */
-    font-weight: 600;
-    margin-bottom: 2px;
-  }
+      /* ▼ イベントを縦に並べる（1列表示） ▼ */
+      td .event {
+        display: block;
+        margin-top: 4px;
+        font-weight: 400;
+        font-size: 13px;
+        max-width: 100%;
+        border-radius: 10px;
+        opacity: 1;
+        line-height: 1.3;
+      }
 
-  .event-box {
-    gap: 1px 3px;
-  }
+      .event time {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
 
-  /* 日付の数字を大きく */
-  .date-top {
-    font-size: 22px;
-  }
+      .event-box {
+        gap: 1px 3px;
+      }
 
-  /* 曜日バッジを大きく */
-  .weekday-badge {
-    font-size: 14px;
-    padding: 2px 6px;
-  }
-}
+      /* 日付の数字を大きく */
+      .date-top {
+        font-size: 22px;
+      }
+
+      /* 曜日バッジを大きく */
+      .weekday-badge {
+        font-size: 14px;
+        padding: 2px 6px;
+      }
+    }
 
     /* =========================================================
        印刷用
@@ -320,7 +330,9 @@
         margin: 10mm;
       }
 
-      .tabs { display: none !important; }
+      .tabs {
+        display: none !important;
+      }
 
       h1 {
         display: block !important;
@@ -366,7 +378,6 @@
 
       .weekday-badge {
         background: none !important;
-        color: none !important;
         color: #000 !important;
         border: 1px solid #000;
       }
@@ -389,10 +400,11 @@
         background: none !important;
         color: #000 !important;
         border: 1px solid #000 !important;
-      } 
+      }
     }
   </style>
 </head>
+
 <body>
 
   <h1>川口地区社会体育館 日程表</h1>
@@ -402,6 +414,23 @@
   <div id="calendarContainer">
     <div class="loading">読み込み中...</div>
   </div>
+
+  <!-- クリックで開く詳細ポップアップ -->
+  <div id="eventModal" style="
+    display:none;
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%, -50%);
+    background:#333;
+    color:#fff;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:14px;
+    z-index:9999;
+    max-width:80%;
+    white-space:pre-wrap;
+  "></div>
 
   <script>
     const CALENDAR_ID =
@@ -417,7 +446,30 @@
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
 
-    // 月タブの設定（前月〜3か月後）
+    // ▼ スマホ用：午前・午後のイベントを1列目にコピーして統合
+    function mergeEventsForMobile() {
+      if (window.innerWidth > 600) return; // PCでは何もしない
+
+      document.querySelectorAll("#calendarContainer table tr").forEach(row => {
+        const dateCell = row.querySelector("td:nth-child(1)");
+        const amCell   = row.querySelector("td:nth-child(2)");
+        const pmCell   = row.querySelector("td:nth-child(3)");
+
+        if (!dateCell || !amCell || !pmCell) return;
+
+        // 午前のイベントをコピー
+        amCell.querySelectorAll(".event").forEach(ev => {
+          dateCell.appendChild(ev.cloneNode(true));
+        });
+
+        // 午後のイベントをコピー
+        pmCell.querySelectorAll(".event").forEach(ev => {
+          dateCell.appendChild(ev.cloneNode(true));
+        });
+      });
+    }
+
+    // 月タブの設定（前月〜12か月後）
     const months = [];
     for (let i = -1; i <= 12; i++) {
       const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
@@ -461,7 +513,7 @@
       if (!ev.start.dateTime) return "午前";
       const hour = new Date(ev.start.dateTime).getHours();
       if (hour < 12) return "午前";
-      return "午後";  /* 夜間も午後に統合 */
+      return "午後";  // 夜間も午後に統合
     }
 
     // 種目ごとの色分け
@@ -558,6 +610,7 @@
             <div class="date-bottom">${holidayMap[dateStr] || ""}</div>
           </div>
         `;
+
         let rowClass = "";
         if (holidayMap[dateStr]) rowClass = "holiday";
         else if (weekday === "日") rowClass = "sunday";
@@ -593,6 +646,9 @@
       });
 
       container.appendChild(table);
+
+      // ▼ スマホ用：午前・午後のイベントを1列に統合
+      mergeEventsForMobile();
     }
 
     // 月読み込み
@@ -616,63 +672,12 @@
     loadMonth(today.getFullYear(), today.getMonth());
   </script>
 
-  <!-- クリックで開く詳細ポップアップ -->
-  <div id="eventModal" style="
-    display:none;
-    position:fixed;
-    left:50%;
-    top:50%;
-    transform:translate(-50%, -50%);
-    background:#333;
-    color:#fff;
-    padding:12px 16px;
-    border-radius:8px;
-    font-size:14px;
-    z-index:9999;
-    max-width:80%;
-    white-space:pre-wrap;
-  "></div>
-  
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js");
-    });
-  }
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

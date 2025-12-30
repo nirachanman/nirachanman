@@ -271,24 +271,28 @@
         height: 34px;
       }
 
-      /* ▼ 午前・午後の列を非表示にする ▼ */
+      /* 午前・午後の列を非表示（幅ゼロ）にする */
       th:nth-child(2),
       td:nth-child(2),
       th:nth-child(3),
       td:nth-child(3) {
+        width: 0 !important;
+        padding: 0 !important;
+        border: none !important;
         display: none !important;
       }
 
       /* ▼ 日付列をフル幅にする（1列構成） ▼ */
       th:nth-child(1),
       td:nth-child(1) {
-        width: 100% !important;
-        display: block;
+        width: 20% !important;
+        display: table-cell !important;
       }
 
-      /* ▼ イベントを縦に並べる（1列表示） ▼ */
-      td .event {
-        display: block;
+      /* イベント列（午前＋午後をまとめた1列）を80%に */
+      td.merged-events {
+        width: 80% !important;
+        display: table-cell !important;
         margin-top: 4px;
         font-weight: 400;
         font-size: 13px;
@@ -681,3 +685,4 @@
   </script>
 </body>
 </html>
+

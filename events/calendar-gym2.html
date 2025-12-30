@@ -412,7 +412,7 @@
 
     // 月タブの設定（前月〜3か月後）
     const months = [];
-    for (let i = -1; i <= 3; i++) {
+    for (let i = -1; i <= 12; i++) {
       const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
       months.push({
         label: `${d.getFullYear()}年${d.getMonth() + 1}月`,
@@ -635,6 +635,7 @@
 </script>
 </body>
 </html>
+
 
 
 

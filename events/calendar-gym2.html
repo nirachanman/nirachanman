@@ -328,6 +328,14 @@
     gap: 4px;
   }
 
+  /* ★ タブをスマホ縦でも固定する */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 20;   /* PCより強めにしておく */
+    background: var(--color-white);
+  }
+  
   /* ★ 時間を必ず黄色にする最強指定（誤記なし） */
   td .event time,
   td .merged-events .event time,
@@ -715,4 +723,5 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 

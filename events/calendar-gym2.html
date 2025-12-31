@@ -160,6 +160,13 @@
       margin-top: 2px;
     }
 
+    .holiday-label {
+      font-size: 10px;
+      color: #d32f2f;
+      opacity: 0.85;
+      margin-bottom: 4px;
+    }
+
     .weekday-badge {
       padding: 1px 4px;
       margin-left: 3px;
@@ -232,38 +239,38 @@
         vertical-align: top;
       }
              /* スマホ表示：フォントを少し大きくする */
-  th, td {
-    font-size: 16px !important;   /* ← 全体の文字を少し大きく */
-  }
+      th, td {
+        font-size: 16px !important;   /* ← 全体の文字を少し大きく */
+      }
 
-  .event {
-    font-size: 15px !important;   /* ← イベント名を少し大きく */
-  }
+      .event {
+        font-size: 15px !important;   /* ← イベント名を少し大きく */
+      }
 
-  .event-time {
-    font-size: 15px !important;   /* ← 時間も少し大きく */
-  }
+      .event-time {
+        font-size: 15px !important;   /* ← 時間も少し大きく */
+      }
 
-  .event-title {
-    font-size: 14px !important;   /* ← タイトルは控えめに */
-  }
+      .event-title {
+        font-size: 14px !important;   /* ← タイトルは控えめに */
+      }
 
-  .weekday-badge {
-    font-size: 12px !important;   /* ← 曜日バッジも少し大きく */
-  }
+      .weekday-badge {
+        font-size: 12px !important;   /* ← 曜日バッジも少し大きく */
+      }
       
        /* スマホ縦向き：merged-events にもフォントを適用 */
-.merged-events .event {
-  font-size: 15px !important;
-}
+     .merged-events .event {
+       font-size: 15px !important;
+     }
 
-.merged-events .event-time {
-  font-size: 15px !important;
-}
+     .merged-events .event-time {
+       font-size: 15px !important;
+     }
 
-.merged-events .event-title {
-  font-size: 13px !important;
-}    
+     .merged-events .event-title {
+       font-size: 13px !important;
+     }    
     }
 
     /* =========================================================
@@ -605,15 +612,19 @@ function mergeEventsForMobile() {
           "土": "w-sat"
         }[weekday];
 
-        const dateCell = `
-          <div class="date-cell">
-            <div class="date-top">
-              ${day}
-              <span class="weekday-badge ${weekdayClass}">${weekday}</span>
-            </div>
-            <div class="date-bottom">${holidayMap[dateStr] || ""}</div>
-          </div>
-        `;
+const dateCell = `
+  <div class="date-cell">
+    <div class="date-top">
+      ${day}
+      <span class="weekday-badge ${weekdayClass}">${weekday}</span>
+    </div>
+
+    <!-- ★ スマホだけ祝日名を表示（PCでは空） -->
+    <div class="date-bottom">
+      ${window.innerWidth <= 600 ? (holidayMap[dateStr] || "") : ""}
+    </div>
+  </div>
+`;
 
         let rowClass = "";
         if (holidayMap[dateStr]) rowClass = "holiday";
@@ -624,11 +635,32 @@ function mergeEventsForMobile() {
 
         const tr = document.createElement("tr");
         tr.className = rowClass + (isToday ? " today-row" : "");
-        tr.innerHTML = `
-          <td>${dateCell}</td>
-          <td><div class="event-box">${slots["午前"].map(e => e.html).join("")}</div></td>
-          <td><div class="event-box">${slots["午後"].map(e => e.html).join("")}</div></td>
-        `;
+// ★ PC判定
+const isPC = window.innerWidth > 600;
+
+// ★ 祝日名のHTML（祝日でない日は空）
+const holidayLabel = holidayMap[dateStr]
+  ? `<div class="holiday-label">${holidayMap[dateStr]}</div>`
+  : "";
+
+// ★ 1日の行（tr）を生成
+tr.innerHTML = `
+  <td>${dateCell}</td>
+
+  <td>
+    <div class="event-box">
+      ${isPC ? holidayLabel : ""}   <!-- ★ PCだけ祝日名を午前セルへ -->
+      ${slots["午前"].map(e => e.html).join("")}
+    </div>
+  </td>
+
+  <td>
+    <div class="event-box">
+      ${slots["午後"].map(e => e.html).join("")}
+    </div>
+  </td>
+`;
+
         table.appendChild(tr);
       }
 
@@ -677,6 +709,7 @@ function mergeEventsForMobile() {
   </script>
 </body>
 </html>
+
 
 
 

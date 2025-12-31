@@ -72,7 +72,7 @@
     .tabs {
       display: flex;
       gap: var(--space-xs);
-      padding: var(--space-s);
+      padding: var(--space-m);
       overflow-x: auto;
       background: var(--color-white);
       border-bottom: 1px solid var(--color-border);
@@ -319,6 +319,7 @@
        display: block;
        font-weight: 700;
        margin-bottom: 2px;
+       color: #ffff22; /* ★ スマホでも黄色を適用 */
      }
 
      .merged-events .event-box,
@@ -329,7 +330,6 @@
      }
     }
 
-    /* 印刷用（あなたのコードそのまま） */
         /* 印刷用（あなたのコードそのまま） */
     @media print {
 
@@ -709,6 +709,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

@@ -328,6 +328,16 @@
        flex-wrap: wrap;
        gap: 4px;
      }
+
+  /* 既存のスマホ用CSSはそのまま */
+
+  /* ★ 時間を必ず黄色にする最強指定 */
+  td .event time,
+  td .merged-events .event time,
+  .event-box time {
+    color: #ffff22 !important;
+  }
+
     }
 
         /* 印刷用（あなたのコードそのまま） */
@@ -709,6 +719,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

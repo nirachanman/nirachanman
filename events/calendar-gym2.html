@@ -276,66 +276,69 @@
     /* =========================================================
        ▼ スマホ横向き（ランドスケープ）行間調整
        ========================================================= */
-@media screen and (max-height: 600px) {
+    @media screen and (max-height: 600px) {
 
-  th, td {
-    font-size: 14px !important;
-    padding: 2px 4px !important;
-    min-height: 48px !important;
-    height: auto !important;
-    line-height: 1.1 !important;
-  }
+      th, td {
+        font-size: 14px !important;
+        padding: 2px 4px !important;
+        min-height: 48px !important;
+        height: auto !important;
+        line-height: 1.1 !important;
+      }
 
-  .event {
-    font-size: 11px !important;
-    padding: 1px 4px !important;
-    line-height: 1.1 !important;
-  }
+      .event {
+        font-size: 11px !important;
+        padding: 1px 4px !important;
+        line-height: 1.1 !important;
+      }
 
-  .date-top {
-    font-size: 16px !important;
-  }
+      .date-top {
+        font-size: 16px !important;
+      }
 
-  .weekday-badge {
-    font-size: 10px !important;
-    padding: 1px 4px !important;
-  }
+      .weekday-badge {
+        font-size: 10px !important;
+        padding: 1px 4px !important;
+      }
 
-  td.merged-events {
-    width: 80% !important;
-  }
+      td.merged-events {
+        width: 80% !important;
+      }
+        /* スマホ表示：イベントを2段にする */
+        /* スマホ縦向き：イベントを2段にする（merged-events にも適用） */
+     .merged-events .event,
+     .event {
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;
+       line-height: 1.2;
+     }
 
-  /* イベントを縦2段にする */
-  .merged-events .event,
-  .event {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    line-height: 1.2;
-  }
+     .merged-events .event time,
+     .event time {
+       display: block;
+       font-weight: 700;
+       margin-bottom: 2px;
+       color: #ffff22 !important; /* ★ スマホでも必ず黄色にする */
+     }
 
-  .merged-events .event time,
-  .event time {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 2px;
-  }
+     .merged-events .event-box,
+     .event-box {
+       display: flex;
+       flex-wrap: wrap;
+       gap: 4px;
+     }
 
-  .merged-events .event-box,
-  .event-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
+  /* 既存のスマホ用CSSはそのまま */
 
-  /* ★ 時間を必ず黄色にする最強指定（誤記なし） */
+  /* ★ 時間を必ず黄色にする最強指定 */
   td .event time,
   td .merged-events .event time,
   .event-box time {
     color: #ffff22 !important;
   }
-}
 
+    }
 
         /* 印刷用（あなたのコードそのまま） */
     @media print {
@@ -716,39 +719,3 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

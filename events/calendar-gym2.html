@@ -271,6 +271,14 @@
     flex-wrap: wrap !important;
     gap: 0 !important; /* ← 隙間の原因を完全に消す */
   }
+
+  @media (max-width: 600px) {
+  .event-box {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    column-gap: 4 !important;   /* 左右の隙間はゼロのまま */
+    row-gap: 4px !important;    /* ★ イベント同士の上下に余白を付ける */
+  }
 }
 
         /* 印刷用（あなたのコードそのまま） */
@@ -652,6 +660,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

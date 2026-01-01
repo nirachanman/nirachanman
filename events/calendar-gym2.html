@@ -215,139 +215,63 @@
     .color-iwate       { background: var(--color-iwate); }
     .color-default     { background: var(--color-default); }
 
-    /* =========================================================
-       ▼ スマホ縦向き（午前・午後 → 1列に統合）
-       ========================================================= */
-    @media (max-width: 600px) {
+/* =========================================================
+   ▼ スマホ縦向き（午前・午後 → 1列に統合）
+   ========================================================= */
+@media (max-width: 600px) {
 
-      th:nth-child(2),
-      td:nth-child(2),
-      th:nth-child(3),
-      td:nth-child(3) {
-        display: none !important;
-      }
-
-      th:nth-child(1),
-      td:nth-child(1) {
-        width: 20% !important;
-        display: table-cell !important;
-      }
-
-      td.merged-events {
-        width: 80% !important;
-        display: table-cell !important;
-        vertical-align: top;
-      }
-             /* スマホ表示：フォントを少し大きくする */
-      th, td {
-        font-size: 16px !important;   /* ← 全体の文字を少し大きく */
-      }
-
-        /* ★ スマホ縦でもイベントを縦並びにする（隙間の原因を解消） */
-      .event {
-        font-size: 15px !important;   /* ← イベント名を少し大きく */
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important; }
-        line-height: 1.2 !important;
-      }
-
-      .event-time {
-        font-size: 15px !important;   /* ← 時間も少し大きく */
-        color: #ffff22 !important;
-        margin-bottom: 2px;
-      }
-
-      .event-title {
-        font-size: 14px !important;   /* ← タイトルは控えめに */
-      }
-    
-      .event-box {
-        gap: 0 !important; /* ← 左の隙間の正体を消す */
-      }
-
-      .weekday-badge {
-        font-size: 12px !important;   /* ← 曜日バッジも少し大きく */
-      }
-      
-       /* スマホ縦向き：merged-events にもフォントを適用 */
-     .merged-events .event {
-       font-size: 15px !important;
-     }
-
-     .merged-events .event-time {
-       font-size: 15px !important;
-     }
-
-     .merged-events .event-title {
-       font-size: 13px !important;
-     }    
-    }
-
-    /* =========================================================
-       ▼ スマホ横向き（ランドスケープ）行間調整
-       ========================================================= */
-@media screen and (max-width: 600px) {
-
-  th, td {
-    font-size: 14px !important;
-    padding: 2px 4px !important;
-    min-height: 48px !important;
-    height: auto !important;
-    line-height: 1.1 !important;
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3) {
+    display: none !important;
   }
 
-  .event {
-    font-size: 11px !important;
-    padding: 1px 4px !important;
-    line-height: 1.1 !important;
-  }
-
-  .date-top {
-    font-size: 16px !important;
-  }
-
-  .weekday-badge {
-    font-size: 10px !important;
-    padding: 1px 4px !important;
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 20% !important;
+    display: table-cell !important;
   }
 
   td.merged-events {
     width: 80% !important;
+    display: table-cell !important;
+    vertical-align: top;
   }
 
-  /* イベントを縦2段にする */
-  .merged-events .event,
+  /* スマホ表示：フォントを少し大きくする */
+  th, td {
+    font-size: 16px !important;
+  }
+
   .event {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    line-height: 1.2;
+    font-size: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    line-height: 1.2 !important;
   }
 
-  .merged-events .event time,
   .event time {
-    display: block;
-    font-weight: 700;
+    font-size: 15px !important;
     margin-bottom: 2px;
+    color: #ffff22 !important;
   }
 
-  .merged-events .event-box,
+  .event-title {
+    font-size: 14px !important;
+  }
+
+  .weekday-badge {
+    font-size: 12px !important;
+  }
+
   .event-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0 !important; /* ← 隙間の原因を完全に消す */
   }
-
-  /* ★ タブをスマホ縦でも固定する */
-  .tabs {
-    position: sticky;
-    top: 0;
-    z-index: 20;   /* PCより強めにしておく */
-    background: var(--color-white);
-  }
-  
- }
+}
 
         /* 印刷用（あなたのコードそのまま） */
     @media print {
@@ -728,6 +652,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

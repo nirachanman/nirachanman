@@ -244,24 +244,12 @@
       }
 
         /* ★ スマホ縦でもイベントを縦並びにする（隙間の原因を解消） */
-  .event {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    line-height: 1.2 !important;
-  }
-
-  .event time {
-    margin-bottom: 2px;
-    color: #ffff22 !important; /* ← 黄色も確実に適用される */
-  }
-
-
       .event {
         font-size: 15px !important;   /* ← イベント名を少し大きく */
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important; }
+        line-height: 1.2 !important;
       }
 
       .event-time {
@@ -736,6 +724,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

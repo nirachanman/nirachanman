@@ -245,10 +245,15 @@
 
       .event {
         font-size: 15px !important;   /* ← イベント名を少し大きく */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important; }
       }
 
       .event-time {
         font-size: 15px !important;   /* ← 時間も少し大きく */
+        color: #ffff22 !important;
+        margin-bottom: 2px;
       }
 
       .event-title {
@@ -336,16 +341,7 @@
     background: var(--color-white);
   }
   
- /* ★ 時間を必ず黄色にする最終指定 */
-  td .event time,
-  td .merged-events .event time,
-  .event-box time,
-  td .event .event-time,
-  td .merged-events .event .event-time,
-  .event-box .event-time {
-    color: #ffff22 !important;
-  }
-}
+ }
 
         /* 印刷用（あなたのコードそのまま） */
     @media print {
@@ -726,6 +722,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

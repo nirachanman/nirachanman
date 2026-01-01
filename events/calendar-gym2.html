@@ -336,10 +336,13 @@
     background: var(--color-white);
   }
   
-  /* ★ 時間を必ず黄色にする最強指定（誤記なし） */
+ /* ★ 時間を必ず黄色にする最終指定 */
   td .event time,
   td .merged-events .event time,
-  .event-box time {
+  .event-box time,
+  td .event .event-time,
+  td .merged-events .event .event-time,
+  .event-box .event-time {
     color: #ffff22 !important;
   }
 }
@@ -723,6 +726,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

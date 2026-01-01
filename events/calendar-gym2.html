@@ -72,7 +72,7 @@
     .tabs {
       display: flex;
       gap: var(--space-s);
-      padding: var(--space-m);
+      padding: var(--space-s);
       overflow-x: auto;
       background: var(--color-white);
       border-bottom: 1px solid var(--color-border);
@@ -242,29 +242,28 @@
     vertical-align: top !important;
   }
 
-  /* 全体のフォント調整 */
+  /* セル全体の余白はゼロにして影響を消す */
   th,
   td {
     font-size: 16px !important;
-    padding: 2px 4px !important;
+    padding: 0 !important;
     line-height: 1.2 !important;
   }
 
-  /* イベント本体 */
+  /* イベント本体：ここに余白を一本化 */
   .event {
     font-size: 15px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    line-height: 1.2 !important;
-    padding-left: 6px !important; /* ← 左余白を統一 */
+    padding: 4px 0 4px 6px !important; /* 左6px・上下4px（ここだけで統一） */
   }
 
-  /* 時間（必ず黄色） */
+  /* 時間（必ず黄色・下だけ少し余白） */
   .event time {
     display: block !important;
     font-weight: 700 !important;
-    margin-bottom: 2px !important;
+    margin: 0 0 2px 0 !important;
     color: #ffff22 !important;
   }
 
@@ -279,12 +278,12 @@
     padding: 1px 4px !important;
   }
 
-  /* イベントボックス（複数イベントの余白調整） */
+  /* イベントボックス：gap はすべてゼロにして不統一要因を消す */
   .event-box {
     display: flex !important;
     flex-wrap: wrap !important;
-    column-gap: 4px !important; /* 横方向の余白 */
-    row-gap: 6px !important;    /* 縦方向の余白 */
+    column-gap: 0 !important;
+    row-gap: 0 !important;
   }
 
   /* タブ固定 */
@@ -675,6 +674,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

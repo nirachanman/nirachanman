@@ -231,13 +231,13 @@
   /* 日付列（左側） */
   th:nth-child(1),
   td:nth-child(1) {
-    width: 15% !important;
+    width: 20% !important;
     display: table-cell !important;
   }
 
   /* イベント列（右側） */
   td.merged-events {
-    width: 85% !important;
+    width: 80% !important;
     display: table-cell !important;
     vertical-align: top !important;
   }
@@ -282,8 +282,8 @@
   .event-box {
     display: flex !important;
     flex-wrap: wrap !important;
-    column-gap: 0px !important; /* ← 左右はゼロのまま（左余白は .event で統一） */
-    row-gap: 4px !important; /* ← 上下の間隔（お好みで調整可） */
+    column-gap: 1px !important; /* ← 左右はゼロのまま（左余白は .event で統一） */
+    row-gap: 2px !important; /* ← 上下の間隔（お好みで調整可） */
   }
 
   /* タブ固定 */
@@ -674,6 +674,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

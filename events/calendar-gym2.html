@@ -220,6 +220,7 @@
    ========================================================= */
 @media (max-width: 600px) {
 
+  /* 午前・午後の列を非表示にして1列化 */
   th:nth-child(2),
   td:nth-child(2),
   th:nth-child(3),
@@ -227,50 +228,71 @@
     display: none !important;
   }
 
+  /* 日付列（左側） */
   th:nth-child(1),
   td:nth-child(1) {
     width: 20% !important;
     display: table-cell !important;
   }
 
+  /* イベント列（右側） */
   td.merged-events {
     width: 80% !important;
     display: table-cell !important;
-    vertical-align: top;
+    vertical-align: top !important;
   }
 
-  /* スマホ表示：フォントを少し大きくする */
-  th, td {
+  /* 全体のフォント調整 */
+  th,
+  td {
     font-size: 16px !important;
+    padding: 2px 4px !important;
+    line-height: 1.2 !important;
   }
 
+  /* イベント本体 */
   .event {
     font-size: 15px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     line-height: 1.2 !important;
+    padding-left: 6px !important; /* ← 左余白を統一 */
   }
 
+  /* 時間（必ず黄色） */
   .event time {
-    font-size: 15px !important;
-    margin-bottom: 2px;
+    display: block !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
     color: #ffff22 !important;
   }
 
+  /* タイトル */
   .event-title {
     font-size: 14px !important;
   }
 
+  /* 曜日バッジ */
   .weekday-badge {
     font-size: 12px !important;
+    padding: 1px 4px !important;
   }
 
+  /* イベントボックス（複数イベントの余白調整） */
   .event-box {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 0 0 !important; /* 上下0、左右0 */
-    row-gap: 4px !important;    /* ★ イベント同士の上下に余白を付ける */
+    column-gap: 4px !important; /* 横方向の余白 */
+    row-gap: 6px !important;    /* 縦方向の余白 */
+  }
+
+  /* タブ固定 */
+  .tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    background: var(--color-white) !important;
   }
 }
 
@@ -653,6 +675,7 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
+
 
 
 

@@ -6,12 +6,16 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#f57c00">
 
-  <title>体育館 公民館 別館 日程表</title>
+  <title>川口地区社会体育館 日程表</title>
 
   <style>
     /* =========================================================
        基本変数（テーマ全体）
        ========================================================= */
+html {
+  overflow-y: scroll;
+}
+
     :root {
       --color-primary: #4a6fa5;
       --color-bg: #f3f4f6;
@@ -50,12 +54,7 @@
 
       --print-row-height: 35px;
     }
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      overflow-y: scroll;
-    }
+
     body {
       font-family: system-ui, sans-serif;
       margin: 0;
@@ -74,11 +73,19 @@
       letter-spacing: 0.5px;
     }
 
+.header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
     .tabs {
       display: flex;
       gap: var(--space-s);
       padding: var(--space-s);
-      overflow-x: scroll;
+      overflow-x: auto;
       background: var(--color-white);
       border-bottom: 1px solid var(--color-border);
       position: sticky;
@@ -94,9 +101,6 @@
       white-space: nowrap;
       font-size: 14px;
       transition: 0.2s;
-      flex: 1 0 0;
-      text-align: center;
-      min-width: 0;
     }
 
     .tab:hover {
@@ -137,8 +141,8 @@
     }
 
     th:nth-child(1), td:nth-child(1) { width: 10%; }
-    th:nth-child(2), td:nth-child(2) { width: 40%; }
-    th:nth-child(3), td:nth-child(3) { width: 50%; }
+    th:nth-child(2), td:nth-child(2) { width: 35%; }
+    th:nth-child(3), td:nth-child(3) { width: 55%; }
 
     .saturday { background: var(--color-sat); }
     .sunday   { background: var(--color-sun); }
@@ -169,7 +173,7 @@
     }
 
     .holiday-label {
-      font-size: 10px;
+      font-size: 2px !important;
       color: #d32f2f;
       opacity: 0.85;
       margin-bottom: 4px;
@@ -486,7 +490,7 @@
 
 /* ▼ 祝日名（小さく控えめ） */
 .holiday-label {
-  font-size: 10px;
+  font-size: 2px !important;
   color: #d32f2f;
   opacity: 0.85;
   margin-top: 2px;
@@ -505,27 +509,61 @@ tr.holiday {
   background: #fff8e1 !important; /* 薄い黄色 */
 }
 
+/* ▼ Webページでは非表示 */
+#printMonthTitle {
+  display: none;
+}
+
+/* ▼ 印刷時だけ表示 */
+@media print {
+  #printMonthTitle {
+    display: block !important;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+}
+
+/* ▼ 月選択タブを小さくする */
+#monthTabs .tab {
+  padding: 4px 10px !important;   /* 小さめの余白 */
+  font-size: 12px !important;     /* 文字サイズを小さく */
+  border-radius: 12px !important; /* 丸みも少し小さく */
+  flex: 0 0 auto !important;      /* 幅が広がらないように */
+}
+
+/* ▼ 体育館 / 公民館 / 別館 のタブを大きくする */
+.switch-btn {
+  padding: 10px 20px !important;   /* ← 高さと横幅を増やす */
+  font-size: 20px !important;      /* ← 文字を大きく */
+  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
+  font-weight: 700 !important;     /* ← 太字で見やすく */
+}
 
   </style>
 </head>
 
 <body>
 
-  <h1>体育館 公民館 別館 日程表</h1>
+  <div class="header-fixed">
 
-<!-- ▼ カレンダー切り替えボタン -->
-<div id="calendarSwitchTabs" class="calendar-switch">
-  <button class="switch-btn active" data-cal="gym">体育館</button>
-  <button class="switch-btn" data-cal="kouminkan">公民館</button>
-  <button class="switch-btn" data-cal="bekkan">別館</button>
-</div>
+    <h1>体育館 公民館 別館 日程表</h1>
 
-<!-- ▼ 月タブ（すでにある場合はそのまま） -->
-<div id="monthTabs" class="tabs month-tabs"></div>
+    <!-- ▼ カレンダー切り替えボタン -->
+    <div id="calendarSwitchTabs" class="calendar-switch">
+      <button class="switch-btn active" data-cal="gym">体育館</button>
+      <button class="switch-btn" data-cal="kouminkan">公民館</button>
+      <button class="switch-btn" data-cal="bekkan">別館</button>
+    </div>
 
-<!-- ▼ カレンダー本体 -->
-<div id="printMonthTitle" class="print-title"></div>
-<div id="calendarContainer"></div>
+    <!-- ▼ 月タブ -->
+    <div id="monthTabs" class="tabs month-tabs"></div>
+
+  </div> <!-- /header-fixed -->
+
+  <!-- ▼ カレンダー本体 -->
+  <div id="printMonthTitle" class="print-title"></div>
+  <div id="calendarContainer"></div>
 
 <script>
 /* =========================================================
@@ -543,7 +581,7 @@ const CALENDAR_SETS = {
   ]
 };
 
-let currentCalendarSet = "kouminkan";  // 初期表示
+let currentCalendarSet = "kouminkan";  // 初期表示は公民館
 
 const HOLIDAY_CALENDAR_ID = "japanese__ja@holiday.calendar.google.com";
 const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
@@ -821,15 +859,3 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-

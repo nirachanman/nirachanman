@@ -56,15 +56,6 @@
       width: 100%;
       overflow-y: scroll;
     }
-
-.header-fixed {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--color-white);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-}
-
     body {
       font-family: system-ui, sans-serif;
       margin: 0;
@@ -523,19 +514,14 @@ tr.holiday {
   <h1>体育館 公民館 別館 日程表</h1>
 
 <!-- ▼ カレンダー切り替えボタン -->
-<div class="header-fixed">
-  <div class="tabs">
-    <div class="tabs-title">体育館 公民館 別館 日程表</div>
-    <div class="tab" data-mode="gym">体育館</div>
-    <div class="tab" data-mode="kouminkan">公民館</div>
-    <div class="tab" data-mode="bekkan">別館</div>
-  </div>
-
-  <div class="calendar-switch">
-    … 月選択ボタン …
-  </div>
+<div id="calendarSwitchTabs" class="calendar-switch">
+  <button class="switch-btn active" data-cal="gym">体育館</button>
+  <button class="switch-btn" data-cal="kouminkan">公民館</button>
+  <button class="switch-btn" data-cal="bekkan">別館</button>
 </div>
 
+<!-- ▼ 月タブ（すでにある場合はそのまま） -->
+<div id="monthTabs" class="tabs month-tabs"></div>
 
 <!-- ▼ カレンダー本体 -->
 <div id="printMonthTitle" class="print-title"></div>
@@ -835,8 +821,6 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-
 
 
 

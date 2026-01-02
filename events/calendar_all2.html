@@ -51,6 +51,10 @@
       --print-row-height: 35px;
     }
 
+    html {
+  overflow-y: scroll;
+　　　　}
+
     body {
       font-family: system-ui, sans-serif;
       margin: 0;
@@ -67,12 +71,6 @@
       font-size: var(--font-title);
       font-weight: 600;
       letter-spacing: 0.5px;
-      min-height: 48px; /* ← ヘッダーの高さを固定して動きを止める */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 56px;
-      padding: 0;
     }
 
     .tabs {
@@ -819,6 +817,7 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
+
 
 
 

@@ -539,37 +539,6 @@ tr.holiday {
   border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
   font-weight: 700 !important;     /* ← 太字で見やすく */
 }
-    
-/* ▼ Googleカレンダーリンクをタブと同じデザインに */
-.link-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: inherit;
-}
-    
-/* ▼ PCでは通常表示 */
-.link-btn::after {
-  content: "Googleカレンダー";
-}
-
-/* ▼ スマホでは短く表示（600px以下） */
-@media (max-width: 600px) {
-  .link-btn::after {
-    content: "Gカレンダー";
-  }
-}
-    .link-btn {
-   color: inherit;
-   text-decoration: none;
-   position: relative;
- }
-
- /* 元のテキストを消す */
- .link-btn {
-   font-size: 0;
- }
 
   </style>
 </head>
@@ -581,18 +550,11 @@ tr.holiday {
     <h1>体育館 公民館 別館 日程表</h1>
 
     <!-- ▼ カレンダー切り替えボタン -->
-<div id="calendarSwitchTabs" class="calendar-switch">
-
-  <!-- ▼ 新規タブで開く Google カレンダーリンク -->
-  <a href="https://calendar.google.com/" target="_blank" class="switch-btn link-btn">
-    Googleカレンダー
-  </a>
-
-  <button class="switch-btn active" data-cal="gym">体育館</button>
-  <button class="switch-btn" data-cal="kouminkan">公民館</button>
-  <button class="switch-btn" data-cal="bekkan">別館</button>
-</div>
-
+    <div id="calendarSwitchTabs" class="calendar-switch">
+      <button class="switch-btn active" data-cal="gym">体育館</button>
+      <button class="switch-btn" data-cal="kouminkan">公民館</button>
+      <button class="switch-btn" data-cal="bekkan">別館</button>
+    </div>
 
     <!-- ▼ 月タブ -->
     <div id="monthTabs" class="tabs month-tabs"></div>
@@ -897,5 +859,3 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-

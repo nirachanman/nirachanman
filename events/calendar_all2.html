@@ -8,70 +8,69 @@
 
   <title>川口地区社会体育館 日程表</title>
 
-  <style>
-    /* =========================================================
-       基本変数（テーマ全体）
-       ========================================================= */
-html {
-  overflow-y: scroll;
+  /* =========================================================
+   基本変数
+   ========================================================= */
+html { overflow-y: scroll; }
+
+:root {
+  --color-primary: #4a6fa5;
+  --color-bg: #f3f4f6;
+  --color-white: #ffffff;
+  --color-border: #999;
+
+  --color-sat: #f7fbff;
+  --color-sun: #fff7f7;
+  --color-holiday: #fffdf5;
+
+  --color-badminton: #4caf50;
+  --color-tabletennis: #2196f3;
+  --color-volleyball: #cca152;
+  --color-kids: #9c27b0;
+  --color-sports: #ff69b4;
+  --color-default: #607d8b;
+
+  --badge-sun: #e57373;
+  --badge-sat: #339FF6;
+  --badge-weekday: #d1b3ff;
+
+  --radius: 6px;
+  --radius-pill: 20px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.15);
+
+  --font-base: 12px;
+  --font-small: 11px;
+  --font-xs: 6px;
+  --font-title: 20px;
+
+  --space-xs: 4px;
+  --space-s: 6px;
+  --space-m: 12px;
+  --space-l: 18px;
+
+  --print-row-height: 35px;
 }
 
-    :root {
-      --color-primary: #4a6fa5;
-      --color-bg: #f3f4f6;
-      --color-white: #ffffff;
-      --color-border: #999;
+/* =========================================================
+   全体
+   ========================================================= */
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
 
-      --color-sat: #f7fbff;
-      --color-sun: #fff7f7;
-      --color-holiday: #fffdf5;
-
-      --color-badminton: #4caf50;
-      --color-tabletennis: #2196f3;
-      --color-volleyball: #cca152;
-      --color-kids: #9c27b0;
-      --color-sports: #ff69b4;
-      --color-default: #607d8b;
-
-      --badge-sun: #e57373;
-      --badge-sat: #339FF6;
-      --badge-weekday: #d1b3ff;
-      --badge-holiday: var(--badge-sun);
-
-      --radius: 6px;
-      --radius-pill: 20px;
-      --shadow: 0 1px 2px rgba(0,0,0,0.15);
-
-      --font-base: 12px;
-      --font-small: 11px;
-      --font-xs: 6px;
-      --font-title: 20px;
-
-      --space-xs: 4px;
-      --space-s: 6px;
-      --space-m: 12px;
-      --space-l: 18px;
-
-      --print-row-height: 35px;
-    }
-
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: var(--color-bg);
-    }
-
-    h1 {
-      text-align: center;
-      padding: var(--space-s);
-      margin: 0;
-      background: var(--color-primary);
-      color: var(--color-white);
-      font-size: var(--font-title);
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
+h1 {
+  text-align: center;
+  padding: var(--space-s);
+  margin: 0;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-title);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 
 .header-fixed {
   position: sticky;
@@ -81,404 +80,108 @@ html {
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
-    .tabs {
-      display: flex;
-      gap: var(--space-s);
-      padding: var(--space-s);
-      overflow-x: auto;
-      background: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .tab {
-      padding: 8px 18px;
-      border-radius: var(--radius-pill);
-      background: #e6e6e6;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-
-    .tab:hover {
-      background: #d5d5d5;
-    }
-
-    .tab.active {
-      background: var(--color-primary);
-      color: var(--color-white);
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 4px;
-      background: var(--color-white);
-      table-layout: fixed;
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    th {
-      background: #f5f5f5;
-      font-weight: 600;
-      padding: var(--space-s);
-    }
-
-    th, td {
-      border: 1px solid var(--color-border);
-      padding: var(--space-xs) var(--space-s);
-      font-size: var(--font-base);
-      line-height: 1.2;
-      white-space: normal;
-      height: auto;
-      min-height: 48px;
-    }
-
-    th:nth-child(1), td:nth-child(1) { width: 10%; }
-    th:nth-child(2), td:nth-child(2) { width: 35%; }
-    th:nth-child(3), td:nth-child(3) { width: 55%; }
-
-    .saturday { background: var(--color-sat); }
-    .sunday   { background: var(--color-sun); }
-    .holiday  { background: var(--color-holiday); }
-
-    tr.today-row {
-      outline: none !important;
-      background: none !important;
-    }
-
-    .date-cell {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-end;
-      text-align: right;
-    }
-
-    .date-top {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .date-bottom {
-      font-size: var(--font-xs);
-      color: #d32f2f;
-      margin-top: 2px;
-    }
-
-    .holiday-label {
-      font-size: 2px !important;
-      color: #d32f2f;
-      opacity: 0.85;
-      margin-bottom: 4px;
-    }
-
-    .weekday-badge {
-      padding: 1px 4px;
-      margin-left: 3px;
-      border-radius: 8px;
-      font-size: 9px;
-      color: #fff;
-    }
-
-    .w-sun { background: var(--badge-sun); }
-    .w-sat { background: var(--badge-sat); }
-    .w-mon,
-    .w-tue,
-    .w-wed,
-    .w-thu,
-    .w-fri { background: var(--badge-weekday); }
-
-    .holiday .weekday-badge {
-      background: var(--badge-holiday) !important;
-    }
-
-    .event-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px 4px;
-    }
-
-    .event {
-      padding: 2px 6px;
-      border-radius: var(--radius);
-      color: var(--color-white);
-      font-size: var(--font-small);
-      line-height: 1.2;
-      white-space: normal;
-      box-shadow: var(--shadow);
-    }
-
-    .event time {
-      color:#ffff22;
-      font-weight: 700;
-    }
-
-    .color-badminton   { background: var(--color-badminton); }
-    .color-tabletennis { background: var(--color-tabletennis); }
-    .color-volleyball  { background: var(--color-volleyball); }
-    .color-kids        { background: var(--color-kids); }
-    .color-sports       { background: var(--color-sports); }
-    .color-default     { background: var(--color-default); }
-
 /* =========================================================
-   ▼ スマホ縦向き（午前・午後 → 1列に統合）
+   月タブ（上部）
    ========================================================= */
-@media (max-width: 600px) {
-
-  /* 午前・午後の列を非表示にして1列化 */
-  th:nth-child(2),
-  td:nth-child(2),
-  th:nth-child(3),
-  td:nth-child(3) {
-    display: none !important;
-  }
-
-  /* 日付列（左側） */
-  th:nth-child(1),
-  td:nth-child(1) {
-    width: 20% !important;
-    display: table-cell !important;
-  }
-
-  /* イベント列（右側） */
-  td.merged-events {
-    width: 80% !important;
-    display: table-cell !important;
-    vertical-align: top !important;
-  }
-
-  /* セル全体の余白はゼロにして影響を消す */
-  th,
-  td {
-    font-size: 16px !important;
-    padding: 4px 8px !important;
-    line-height: 1.2 !important;
-  }
-
-  /* イベント本体：ここに余白を一本化 */
-  .event {
-    font-size: 15px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    padding: 2px 4px 2px 4px !important; /* 上4px 右6px 下4px 左6px → 左右が同じ */
-  }
-
-  /* 時間（必ず黄色・下だけ少し余白） */
-  .event time {
-    display: block !important;
-    font-weight: 700 !important;
-    margin: 0 0 2px 0 !important;
-    color: #ffff22 !important;
-  }
-
-  /* タイトル */
-  .event-title {
-    font-size: 14px !important;
-  }
-
-  /* 曜日バッジ */
-  .weekday-badge {
-    font-size: 12px !important;
-    padding: 1px 4px !important;
-  }
-
-  /* イベントボックス：gap はすべてゼロにして不統一要因を消す */
-  .event-box {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    column-gap: 1px !important; /* ← 左右はゼロのまま（左余白は .event で統一） */
-    row-gap: 2px !important; /* ← 上下の間隔（お好みで調整可） */
-  }
-
-  /* タブ固定 */
-  .tabs {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 20 !important;
-    background: var(--color-white) !important;
-  }
-}
-
-        /* 印刷用（あなたのコードそのまま） */
-    @media print {
-
-      @page {
-        size: A3 portrait;
-        margin: 10mm;
-      }
-
-      .tabs {
-        display: none !important;
-      }
-
-      h1 {
-        display: block !important;
-        margin-bottom: 6px;
-      }
-
-      th:nth-child(1), td:nth-child(1) { width: 10% !important; }
-      th:nth-child(2), td:nth-child(2) { width: 40% !important; }
-      th:nth-child(3), td:nth-child(3) { width: 50% !important; }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-      }
-
-      th, td {
-        border: 1px solid #000;
-        padding: 3px 4px;
-        height: var(--print-row-height);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .event {
-        background: #fff !important;
-        color: #000 !important;
-        border-radius: 0;
-        padding: 2px 4px;
-      }
-
-      .event time {
-        color: #000 !important;
-      }
-
-      .saturday,
-      .sunday,
-      .holiday,
-      tr.today-row {
-        background: #fff !important;
-      }
-
-      .weekday-badge {
-        background: none !important;
-        color: #000 !important;
-        border: 1px solid #000;
-      }
-
-      * {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-
-      td .event {
-        white-space: normal !important;
-        display: block;
-      }
-
-      td {
-        height: auto !important;
-      }
-
-      .holiday .weekday-badge {
-        background: none !important;
-        color: #000 !important;
-        border: 1px solid #000 !important;
-      }
-
-/* カレンダー切り替えボタン全体 */
-.calendar-switch {
+.tabs {
   display: flex;
-  gap: 10px;
-  margin: 10px 0 15px;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  overflow-x: auto;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
-/* ボタンの基本デザイン */
-.switch-btn {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 2px solid #ccc;
-  background: #f5f5f5;
+.tab {
+  padding: 4px 16px;
+  border-radius: 14px;
+  background: #e6e6e6;
   cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
   transition: 0.2s;
 }
 
-/* ホバー時 */
-.switch-btn:hover {
-  background: #e8e8e8;
+.tab:hover {
+  background: #d5d5d5;
 }
 
-/* 選択中のボタン */
-.switch-btn.active {
-  background: #0078d4;
-  color: white;
-  border-color: #005a9e;
-}
-  }
- /* 公民館：青系テーマ */
-.kouminkan-mode .event {
-  background: #e6f0ff !important;   /* 優しい薄青 */
-  border-left: 6px solid #1e88e5 !important; /* 青のアクセント */
-  color: #0d47a1 !important;        /* 読みやすい濃青 */
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
-.kouminkan-mode .event time {
-  color: #003c8f !important;        /* 深い青の時間表示 */
+/* =========================================================
+   テーブル
+   ========================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+  background: var(--color-white);
+  table-layout: fixed;
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
-.kouminkan-mode .switch-btn.active {
-  background: #1565c0 !important;   /* 濃い青 */
-  border-color: #0d47a1 !important;
-  color: #fff !important;
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: var(--space-s);
 }
 
-/* 体育館：緑系テーマ */
-.gym-mode .event {
-  background: #dff5e1 !important;   /* 優しい薄緑 */
-  border-left: 6px solid #4caf50 !important; /* 緑のアクセント */
-  color: #1b5e20 !important;        /* 読みやすい濃緑 */
+th, td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-xs) var(--space-s);
+  font-size: var(--font-base);
+  line-height: 1.2;
+  white-space: normal;
+  min-height: 48px;
 }
 
-.gym-mode .event time {
-  color: #0d5302 !important;        /* 深い緑の時間表示 */
+th:nth-child(1), td:nth-child(1) { width: 10%; }
+th:nth-child(2), td:nth-child(2) { width: 35%; }
+th:nth-child(3), td:nth-child(3) { width: 55%; }
+
+.saturday { background: var(--color-sat); }
+.sunday   { background: var(--color-sun); }
+.holiday  { background: var(--color-holiday); }
+
+/* =========================================================
+   日付セル
+   ========================================================= */
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.gym-mode .switch-btn.active {
-  background: #2e7d32 !important;   /* 濃い緑 */
-  border-color: #1b5e20 !important;
-  color: #fff !important;
+.date-top {
+  font-size: 20px;
+  font-weight: 600;
 }
 
-/* 別館：オレンジ系テーマ */
-.bekkan-mode .event {
-  background: #fff2e0 !important;   /* 優しい薄オレンジ */
-  border-left: 6px solid #fb8c00 !important; /* オレンジのアクセント */
-  color: #e65100 !important;        /* 読みやすい濃オレンジ */
+.date-bottom {
+  font-size: var(--font-xs);
+  color: #d32f2f;
+  margin-top: 2px;
 }
 
-.bekkan-mode .event time {
-  color: #bf360c !important;        /* 深いオレンジの時間表示 */
+.holiday-label {
+  font-size: 2px;
+  color: #d32f2f;
+  opacity: 0.85;
+  margin-top: 2px;
 }
 
-.bekkan-mode .switch-btn.active {
-  background: #ef6c00 !important;   /* 濃いオレンジ */
-  border-color: #e65100 !important;
-  color: #fff !important;
-}
-
-.pc-only { display: table-cell; }
-.sp-only { display: none; }
-
-@media (max-width: 600px) {
-  .pc-only { display: none !important; }
-  .sp-only { display: table-cell !important; }
-}
-
-/* ▼ 曜日バッジ（PC・スマホ共通） */
+/* =========================================================
+   曜日バッジ（統一）
+   ========================================================= */
 .weekday-badge {
   padding: 1px 6px;
   margin-left: 6px;
@@ -488,59 +191,223 @@ html {
   color: #fff;
 }
 
-/* ▼ 祝日名（小さく控えめ） */
-.holiday-label {
-  font-size: 2px !important;
-  color: #d32f2f;
-  opacity: 0.85;
-  margin-top: 2px;
+.w-sun { background: var(--badge-sun); }
+.w-sat { background: var(--badge-sat); }
+.w-mon,
+.w-tue,
+.w-wed,
+.w-thu,
+.w-fri { background: var(--badge-weekday); }
+
+/* =========================================================
+   イベント
+   ========================================================= */
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
 }
 
-/* ▼ 行全体の色（PC・スマホ共通） */
-tr.saturday {
-  background: #f0f7ff !important; /* 薄い青 */
+.event {
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  color: var(--color-white);
+  font-size: var(--font-small);
+  line-height: 1.2;
+  box-shadow: var(--shadow);
 }
 
-tr.sunday {
-  background: #fff0f0 !important; /* 薄い赤 */
+.event time {
+  color:#ffff22;
+  font-weight: 700;
 }
 
-tr.holiday {
-  background: #fff8e1 !important; /* 薄い黄色 */
+/* =========================================================
+   施設モード（体育館 / 公民館 / 別館）
+   ========================================================= */
+.gym-mode .event {
+  background: #dff5e1 !important;
+  border-left: 6px solid #4caf50 !important;
+  color: #1b5e20 !important;
 }
 
-/* ▼ Webページでは非表示 */
-#printMonthTitle {
-  display: none;
+.gym-mode .event time { color: #0d5302 !important; }
+
+.gym-mode .switch-btn.active {
+  background: #2e7d32 !important;
+  border-color: #1b5e20 !important;
+  color: #fff !important;
 }
 
-/* ▼ 印刷時だけ表示 */
+.kouminkan-mode .event {
+  background: #e6f0ff !important;
+  border-left: 6px solid #1e88e5 !important;
+  color: #0d47a1 !important;
+}
+
+.kouminkan-mode .event time { color: #003c8f !important; }
+
+.kouminkan-mode .switch-btn.active {
+  background: #1565c0 !important;
+  border-color: #0d47a1 !important;
+  color: #fff !important;
+}
+
+.bekkan-mode .event {
+  background: #fff2e0 !important;
+  border-left: 6px solid #fb8c00 !important;
+  color: #e65100 !important;
+}
+
+.bekkan-mode .event time { color: #bf360c !important; }
+
+.bekkan-mode .switch-btn.active {
+  background: #ef6c00 !important;
+  border-color: #e65100 !important;
+  color: #fff !important;
+}
+
+/* =========================================================
+   施設タブ（Googleカレンダー含む）
+   ========================================================= */
+.calendar-switch {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0 15px;
+  align-items: center;
+}
+
+.switch-btn,
+.link-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  background: #f5f5f5;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.switch-btn:hover,
+.link-btn:hover {
+  background: #e8e8e8;
+}
+
+.switch-btn.active {
+  background: #0078d4;
+  color: white;
+  border-color: #005a9e;
+}
+
+/* Googleカレンダー（テキスト切替） */
+.link-btn { font-size: 0; }
+
+.link-btn::after {
+  content: "Googleカレンダー";
+  font-size: 16px;
+}
+
+@media (max-width: 600px) {
+  .link-btn::after {
+    content: "Gカレンダー";
+    font-size: 14px;
+  }
+}
+
+/* =========================================================
+   スマホ最適化
+   ========================================================= */
+@media (max-width: 600px) {
+
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3) {
+    display: none !important;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 20% !important;
+  }
+
+  td.merged-events {
+    width: 80% !important;
+    vertical-align: top !important;
+  }
+
+  th, td {
+    font-size: 16px !important;
+    padding: 4px 8px !important;
+  }
+
+  .event {
+    font-size: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .event time {
+    margin-bottom: 2px !important;
+  }
+}
+
+/* =========================================================
+   印刷
+   ========================================================= */
 @media print {
+
+  @page {
+    size: A3 portrait;
+    margin: 10mm;
+  }
+
+  .tabs { display: none !important; }
+
   #printMonthTitle {
     display: block !important;
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 8px;
   }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 3px 4px;
+    height: var(--print-row-height);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event {
+    background: #fff !important;
+    color: #000 !important;
+    border-radius: 0;
+  }
+
+  .event time { color: #000 !important; }
+
+  tr.saturday,
+  tr.sunday,
+  tr.holiday {
+    background: #fff !important;
+  }
+
+  .weekday-badge {
+    background: none !important;
+    color: #000 !important;
+    border: 1px solid #000;
+  }
 }
 
-/* ▼ 月選択タブを小さくする */
-#monthTabs .tab {
-  padding: 4px 16px !important;   /* 小さめの余白 */
-  font-size: 14px !important;     /* 文字サイズを小さく */
-  border-radius: 14px !important; /* 丸みも少し小さく */
-  flex: 0 0 auto !important;      /* 幅が広がらないように */
-}
-
-/* ▼ 体育館 / 公民館 / 別館 のタブを大きくする */
-.switch-btn {
-  padding: 4px 14px !important;   /* ← 高さと横幅を増やす */
-  font-size: 18px !important;      /* ← 文字を大きく */
-  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
-  font-weight: 700 !important;     /* ← 太字で見やすく */
-}
-
-  </style>
 </head>
 
 <body>

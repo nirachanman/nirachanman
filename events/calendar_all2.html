@@ -91,6 +91,7 @@ html {
       position: sticky;
       top: 0;
       z-index: 10;
+      position: sticky !important;/* タブ固定*/
     }
 
     .tab {
@@ -172,20 +173,22 @@ html {
       margin-top: 2px;
     }
 
-    .holiday-label {
-      font-size: 2px !important;
-      color: #d32f2f;
-      opacity: 0.85;
-      margin-bottom: 4px;
-    }
+  /* 曜日バッジ */
+  .weekday-badge {
+    font-size: 8px !important;
+    padding: 1px 6px !important;
+  }
 
-    .weekday-badge {
-      padding: 1px 4px;
-      margin-left: 3px;
-      border-radius: 8px;
-      font-size: 9px;
-      color: #fff;
-    }
+/* ▼ 曜日バッジ（PC・スマホ共通） */
+.weekday-badge {
+  padding: 1px 6px;
+  margin-left: 6px;
+  border-radius: 10px;
+  font-size: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+
 
     .w-sun { background: var(--badge-sun); }
     .w-sat { background: var(--badge-sat); }
@@ -284,11 +287,6 @@ html {
     font-size: 14px !important;
   }
 
-  /* 曜日バッジ */
-  .weekday-badge {
-    font-size: 12px !important;
-    padding: 1px 4px !important;
-  }
 
   /* イベントボックス：gap はすべてゼロにして不統一要因を消す */
   .event-box {
@@ -298,13 +296,6 @@ html {
     row-gap: 2px !important; /* ← 上下の間隔（お好みで調整可） */
   }
 
-  /* タブ固定 */
-  .tabs {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 20 !important;
-    background: var(--color-white) !important;
-  }
 }
 
         /* 印刷用（あなたのコードそのまま） */
@@ -407,6 +398,14 @@ html {
   transition: 0.2s;
 }
 
+/* 設定無効▼ 体育館 / 公民館 / 別館 のタブを大きくする
+.switch-btn {
+  padding: 10px 20px !important;   /* ← 高さと横幅を増やす */
+  font-size: 20px !important;      /* ← 文字を大きく */
+  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
+  font-weight: 700 !important;     /* ← 太字で見やすく */
+}
+
 /* ホバー時 */
 .switch-btn:hover {
   background: #e8e8e8;
@@ -478,22 +477,13 @@ html {
   .sp-only { display: table-cell !important; }
 }
 
-/* ▼ 曜日バッジ（PC・スマホ共通） */
-.weekday-badge {
-  padding: 1px 6px;
-  margin-left: 6px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #fff;
-}
 
 /* ▼ 祝日名（小さく控えめ） */
 .holiday-label {
   font-size: 2px !important;
   color: #d32f2f;
   opacity: 0.85;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* ▼ 行全体の色（PC・スマホ共通） */
@@ -526,18 +516,10 @@ tr.holiday {
 
 /* ▼ 月選択タブを小さくする */
 #monthTabs .tab {
-  padding: 4px 16px !important;   /* 小さめの余白 */
-  font-size: 14px !important;     /* 文字サイズを小さく */
-  border-radius: 14px !important; /* 丸みも少し小さく */
+  padding: 4px 10px !important;   /* 小さめの余白 */
+  font-size: 12px !important;     /* 文字サイズを小さく */
+  border-radius: 12px !important; /* 丸みも少し小さく */
   flex: 0 0 auto !important;      /* 幅が広がらないように */
-}
-
-/* ▼ 体育館 / 公民館 / 別館 のタブを大きくする */
-.switch-btn {
-  padding: 4px 14px !important;   /* ← 高さと横幅を増やす */
-  font-size: 18px !important;      /* ← 文字を大きく */
-  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
-  font-weight: 700 !important;     /* ← 太字で見やすく */
 }
 
   </style>
@@ -551,8 +533,8 @@ tr.holiday {
 
     <!-- ▼ カレンダー切り替えボタン -->
     <div id="calendarSwitchTabs" class="calendar-switch">
-      <button class="switch-btn active" data-cal="gym">体育館</button>
-      <button class="switch-btn" data-cal="kouminkan">公民館</button>
+      <button class="switch-btn active" data-cal="kouminkan">公民館</button>
+      <button class="switch-btn" data-cal="gym">体育館</button>
       <button class="switch-btn" data-cal="bekkan">別館</button>
     </div>
 
@@ -571,10 +553,11 @@ tr.holiday {
    ========================================================= */
 /* ▼ カレンダー切り替えセット */
 const CALENDAR_SETS = {
-  gym: [
-    "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com"
+  kouminkan: [
+    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
   ],
-  kouminkan: [    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
+  gym:[
+    "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com"
   ],
   bekkan: [ 
 "kawaguchi.public.hall.annex@gmail.com" 
@@ -859,7 +842,3 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-
-
-

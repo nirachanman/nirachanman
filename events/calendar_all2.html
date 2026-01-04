@@ -295,44 +295,6 @@ html {
     column-gap: 1px !important; /* ← 左右はゼロのまま（左余白は .event で統一） */
     row-gap: 2px !important; /* ← 上下の間隔（お好みで調整可） */
   }
-  .google-cal-btn { 
-    display: none !important; }
-
-  /* ▼ Googleボタン＋施設タブを縦並びにする */
-  .calendar-switch-wrapper {
-    display: flex;
-    flex-direction: column;   /* ← スマホでは縦並び */
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  /* ▼ 施設タブは横並びのまま（折り返しOK） */
-  .calendar-switch {
-    display: flex;
-    flex-wrap: wrap;          /* ← スマホでは折り返し許可 */
-    gap: 6px;
-  }
-
-  .switch-btn {
-    flex: 1 1 45%;            /* ← 2列に並ぶ幅 */
-    min-width: 0;
-    white-space: nowrap;
-  }
-
-  /* ▼ 月タブは2段目として独立表示 */
-  .month-tabs {
-    margin-top: 4px;
-    display: flex;
-    flex-wrap: wrap;          /* ← 月タブも折り返しOK */
-    gap: 6px;
-  }
-
-  .month-tabs .tab {
-    flex: 1 1 22%;            /* ← 4列×複数段のイメージ */
-    min-width: 0;
-    white-space: nowrap;
-    text-align: center;
-  }
 
 }
 
@@ -464,7 +426,7 @@ html {
 }
 
 .kouminkan-mode .event time {
-  color: #ffff22 !important;        /* 時間表示の色 */
+  color: #003c8f !important;        /* 深い青の時間表示 */
 }
 
 .kouminkan-mode .switch-btn.active {
@@ -554,33 +516,10 @@ tr.holiday {
 
 /* ▼ 月選択タブを小さくする */
 #monthTabs .tab {
-  padding: 4px 6px !important;   /* 小さめの余白 */
-  font-size: 10px !important;     /* 文字サイズを小さく */
+  padding: 4px 10px !important;   /* 小さめの余白 */
+  font-size: 12px !important;     /* 文字サイズを小さく */
   border-radius: 12px !important; /* 丸みも少し小さく */
   flex: 0 0 auto !important;      /* 幅が広がらないように */
-}
-
-.calendar-switch-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-}
-
-.google-cal-btn {
-  display: inline-block;
-  padding: 2px 4px;
-  background: #4285f4;
-  color: #fff;
-  font-size: 4px;
-  font-weight: 600;
-  border-radius: 6px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.google-cal-btn:hover {
-  background: #3367d6;
 }
 
   </style>
@@ -591,14 +530,6 @@ tr.holiday {
   <div class="header-fixed">
 
     <h1>体育館 公民館 別館 日程表</h1>
-
-    <!-- ▼ Googleカレンダー + 施設タブをまとめる --> 
-    <div class="calendar-switch-wrapper">
-
-    <!-- ▼ Googleカレンダーへのリンクボタン -->
-    <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
-      Gカレンダー
-   </a>
 
     <!-- ▼ カレンダー切り替えボタン -->
     <div id="calendarSwitchTabs" class="calendar-switch">
@@ -911,5 +842,3 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-

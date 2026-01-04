@@ -426,7 +426,7 @@ html {
 }
 
 .kouminkan-mode .event time {
-  color: #003c8f !important;        /* 深い青の時間表示 */
+  color: #ffff22 !important;        /* 時間表示の色 */
 }
 
 .kouminkan-mode .switch-btn.active {
@@ -516,10 +516,33 @@ tr.holiday {
 
 /* ▼ 月選択タブを小さくする */
 #monthTabs .tab {
-  padding: 4px 10px !important;   /* 小さめの余白 */
-  font-size: 12px !important;     /* 文字サイズを小さく */
+  padding: 4px 6px !important;   /* 小さめの余白 */
+  font-size: 10px !important;     /* 文字サイズを小さく */
   border-radius: 12px !important; /* 丸みも少し小さく */
   flex: 0 0 auto !important;      /* 幅が広がらないように */
+}
+
+.calendar-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+}
+
+.google-cal-btn {
+  display: inline-block;
+  padding: 2px 4px;
+  background: #4285f4;
+  color: #fff;
+  font-size: 4px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.google-cal-btn:hover {
+  background: #3367d6;
 }
 
   </style>
@@ -530,6 +553,14 @@ tr.holiday {
   <div class="header-fixed">
 
     <h1>体育館 公民館 別館 日程表</h1>
+
+    <!-- ▼ Googleカレンダー + 施設タブをまとめる --> 
+    <div class="calendar-switch-wrapper">
+
+    <!-- ▼ Googleカレンダーへのリンクボタン -->
+    <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
+      Gカレンダー
+   </a>
 
     <!-- ▼ カレンダー切り替えボタン -->
     <div id="calendarSwitchTabs" class="calendar-switch">

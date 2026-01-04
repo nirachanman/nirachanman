@@ -297,6 +297,43 @@ html {
   }
   .google-cal-btn { 
     display: none !important; }
+
+  /* ▼ Googleボタン＋施設タブを縦並びにする */
+  .calendar-switch-wrapper {
+    display: flex;
+    flex-direction: column;   /* ← スマホでは縦並び */
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* ▼ 施設タブは横並びのまま（折り返しOK） */
+  .calendar-switch {
+    display: flex;
+    flex-wrap: wrap;          /* ← スマホでは折り返し許可 */
+    gap: 6px;
+  }
+
+  .switch-btn {
+    flex: 1 1 45%;            /* ← 2列に並ぶ幅 */
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  /* ▼ 月タブは2段目として独立表示 */
+  .month-tabs {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;          /* ← 月タブも折り返しOK */
+    gap: 6px;
+  }
+
+  .month-tabs .tab {
+    flex: 1 1 22%;            /* ← 4列×複数段のイメージ */
+    min-width: 0;
+    white-space: nowrap;
+    text-align: center;
+  }
+
 }
 
         /* 印刷用（あなたのコードそのまま） */
@@ -874,4 +911,5 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
+
 

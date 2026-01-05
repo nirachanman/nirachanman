@@ -534,6 +534,12 @@ tr.holiday {
   border-radius: 12px !important; /* 丸みも少し小さく */
   flex: 0 0 auto !important;      /* 幅が広がらないように */
 }
+    
+.calendar-switch {
+  display: flex;
+  justify-content: center;   /* ← 中央寄せの決め手 */
+  gap: 8px;                  /* ボタン間の余白（任意） */
+}
 
   </style>
 </head>
@@ -855,6 +861,7 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
+
 
 
 

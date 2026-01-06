@@ -27,6 +27,7 @@
       --color-volleyball: #cca152;
       --color-kids: #9c27b0;
       --color-iwate: #ff69b4;
+      --color-cancel: #ed1a3d;
       --color-default: #607d8b;
 
       --badge-sun: #e57373;
@@ -208,6 +209,7 @@
       font-weight: 700;
     }
 
+    .color-cancel       { background: var(--color-cancel); }
     .color-badminton   { background: var(--color-badminton); }
     .color-tabletennis { background: var(--color-tabletennis); }
     .color-volleyball  { background: var(--color-volleyball); }
@@ -497,11 +499,14 @@ function mergeEventsForMobile() {
     }
 
     function detectColor(title) {
+      if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
       if (title.includes("バド")) return "color-badminton";
       if (title.includes("卓球")) return "color-tabletennis";
       if (title.includes("バレー")) return "color-volleyball";
       if (title.includes("スマイル")) return "color-kids";
       if (title.includes("いわて")) return "color-iwate";
+
+
       return "color-default";
     }
 
@@ -674,38 +679,3 @@ tr.innerHTML = `
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

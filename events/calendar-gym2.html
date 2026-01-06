@@ -261,13 +261,12 @@
     padding: 2px 4px 2px 4px !important; /* 上4px 右6px 下4px 左6px → 左右が同じ */
   }
 
-  /* 時間（必ず黄色・下だけ少し余白） */
-  .event time {
-    display: block !important;
-    font-weight: 700 !important;
-    margin: 0 0 2px 0 !important;
-    color: #ffff22 !important;
-  }
+    /* 時間を黄色に（<time> と .event-time の両方） */
+    .event time,
+    .event-time {
+      color:#ffff22 !important;
+      font-weight:700 !important;
+    }
 
   /* タイトル */
   .event-title {

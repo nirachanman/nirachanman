@@ -31,7 +31,7 @@ html {
       --color-volleyball: #cca152;
       --color-kids: #9c27b0;
       --color-sports: #ff69b4;
-      --color-default: #2884B0;
+      --color-default: #607d8b;
 
       --badge-sun: #e57373;
       --badge-sat: #339FF6;
@@ -91,11 +91,10 @@ html {
       position: sticky;
       top: 0;
       z-index: 10;
-      position: sticky !important;/* タブ固定*/
     }
 
     .tab {
-      padding: 8px 22px;
+      padding: 8px 18px;
       border-radius: var(--radius-pill);
       background: #e6e6e6;
       cursor: pointer;
@@ -173,22 +172,20 @@ html {
       margin-top: 2px;
     }
 
-  /* 曜日バッジ */
-  .weekday-badge {
-    font-size: 8px !important;
-    padding: 1px 6px !important;
-  }
+    .holiday-label {
+      font-size: 2px !important;
+      color: #d32f2f;
+      opacity: 0.85;
+      margin-bottom: 4px;
+    }
 
-/* ▼ 曜日バッジ（PC・スマホ共通） */
-.weekday-badge {
-  padding: 1px 6px;
-  margin-left: 6px;
-  border-radius: 10px;
-  font-size: 8px;
-  font-weight: 600;
-  color: #fff;
-}
-
+    .weekday-badge {
+      padding: 1px 4px;
+      margin-left: 3px;
+      border-radius: 8px;
+      font-size: 9px;
+      color: #fff;
+    }
 
     .w-sun { background: var(--badge-sun); }
     .w-sat { background: var(--badge-sat); }
@@ -287,6 +284,11 @@ html {
     font-size: 14px !important;
   }
 
+  /* 曜日バッジ */
+  .weekday-badge {
+    font-size: 12px !important;
+    padding: 1px 4px !important;
+  }
 
   /* イベントボックス：gap はすべてゼロにして不統一要因を消す */
   .event-box {
@@ -296,19 +298,13 @@ html {
     row-gap: 2px !important; /* ← 上下の間隔（お好みで調整可） */
   }
 
-  .switch-btn {
-    font-size: 18px !important;   /* 文字を大きく */
-    padding: 6px 10px !important; /* ボタン自体を大きく */
-    height: auto !important;       /* 固定高さを解除 */
+  /* タブ固定 */
+  .tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    background: var(--color-white) !important;
   }
-
-  .month-tabs .tab {
-    font-size: 18px !important;     /* 文字を大きく */
-    padding: 6px 10px !important;  /* ボタン自体を大きく */
-    height: auto !important;        /* 固定高さを解除 */
-  }
-}
-
 }
 
         /* 印刷用（あなたのコードそのまま） */
@@ -411,14 +407,6 @@ html {
   transition: 0.2s;
 }
 
-/* 設定無効▼ 体育館 / 公民館 / 別館 のタブを大きくする
-.switch-btn {
-  padding: 10px 20px !important;   /* ← 高さと横幅を増やす */
-  font-size: 20px !important;      /* ← 文字を大きく */
-  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
-  font-weight: 700 !important;     /* ← 太字で見やすく */
-}
-
 /* ホバー時 */
 .switch-btn:hover {
   background: #e8e8e8;
@@ -439,7 +427,7 @@ html {
 }
 
 .kouminkan-mode .event time {
-  color: #ffff22 !important;        /* 時間表示 */
+  color: #003c8f !important;        /* 深い青の時間表示 */
 }
 
 .kouminkan-mode .switch-btn.active {
@@ -490,13 +478,22 @@ html {
   .sp-only { display: table-cell !important; }
 }
 
+/* ▼ 曜日バッジ（PC・スマホ共通） */
+.weekday-badge {
+  padding: 1px 6px;
+  margin-left: 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
 
 /* ▼ 祝日名（小さく控えめ） */
 .holiday-label {
-  font-size: 8px !important;
+  font-size: 2px !important;
   color: #d32f2f;
   opacity: 0.85;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* ▼ 行全体の色（PC・スマホ共通） */
@@ -534,11 +531,13 @@ tr.holiday {
   border-radius: 12px !important; /* 丸みも少し小さく */
   flex: 0 0 auto !important;      /* 幅が広がらないように */
 }
-    
-.calendar-switch {
-  display: flex;
-  justify-content: center;   /* ← 中央寄せの決め手 */
-  gap: 8px;                  /* ボタン間の余白（任意） */
+
+/* ▼ 体育館 / 公民館 / 別館 のタブを大きくする */
+.switch-btn {
+  padding: 10px 20px !important;   /* ← 高さと横幅を増やす */
+  font-size: 20px !important;      /* ← 文字を大きく */
+  border-radius: 10px !important;  /* ← ボタンの丸みも調整 */
+  font-weight: 700 !important;     /* ← 太字で見やすく */
 }
 
   </style>
@@ -548,12 +547,12 @@ tr.holiday {
 
   <div class="header-fixed">
 
-    <h1>🏢公民館 🤾体育館 🏣別館 📆日程表</h1>
+    <h1>体育館 公民館 別館 日程表</h1>
 
     <!-- ▼ カレンダー切り替えボタン -->
     <div id="calendarSwitchTabs" class="calendar-switch">
-      <button class="switch-btn active" data-cal="kouminkan">公民館</button>
-      <button class="switch-btn" data-cal="gym">体育館</button>
+      <button class="switch-btn active" data-cal="gym">体育館</button>
+      <button class="switch-btn" data-cal="kouminkan">公民館</button>
       <button class="switch-btn" data-cal="bekkan">別館</button>
     </div>
 
@@ -572,11 +571,10 @@ tr.holiday {
    ========================================================= */
 /* ▼ カレンダー切り替えセット */
 const CALENDAR_SETS = {
-  kouminkan: [
-    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
-  ],
-  gym:[
+  gym: [
     "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com"
+  ],
+  kouminkan: [    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
   ],
   bekkan: [ 
 "kawaguchi.public.hall.annex@gmail.com" 
@@ -638,7 +636,7 @@ function setupCalendarSwitch() {
       currentCalendarSet = btn.dataset.cal;
 
       // ▼ すべてのテーマクラスを一度削除（重要）
-      document.body.classList.remove("kouminkan-mode", "gym-mode", "bekkan-mode");
+      document.body.classList.remove("gym-mode", "kouminkan-mode", "bekkan-mode");
 
       // ▼ 選択されたタブのテーマクラスを追加
       if (currentCalendarSet === "gym") {
@@ -861,14 +859,3 @@ loadMonth(currentYear, currentMonth);
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-

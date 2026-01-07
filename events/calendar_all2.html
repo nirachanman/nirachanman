@@ -180,12 +180,12 @@
       border-radius: 6px;
       color: #fff;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 400 !important;
     }
 
     .event time {
       color: #ffff22;
-      font-weight: 600;
+      font-weight: 400 !important;
     }
 
     .pc-only { display: table-cell; }
@@ -204,6 +204,26 @@
       .pc-only { display: none !important; }
       .sp-only { display: table-cell !important; }
     }
+
+/* 上部タブ（施設選択）を固定 */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* 月選択タブも固定（施設タブの下に固定） */
+.tabs {
+  position: sticky;
+  top: 48px; /* top-bar の高さに合わせて調整 */
+  z-index: 999;
+}
+
+/* タイトル行を非表示にする */
+#page-title {
+  display: none !important;
+}
+
   </style>
 </head>
 

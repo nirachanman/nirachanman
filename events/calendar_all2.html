@@ -12,10 +12,10 @@
       --color-white: #ffffff;
       --color-border: #999;
 
-      --cal1-color: #4a6fa5; /* 公民館（青） */
-      --cal2-color: #0d8a6a; /* 体育館（深緑・明るさ抑え） */
-      --cal3-color: #c47c08; /* 別館（琥珀色・明るさ抑え） */
-      --calAll-color: #6b7280; /* 全て表示（統合） */
+      --cal1-color: #4a6fa5;
+      --cal2-color: #0d8a6a;
+      --cal3-color: #c47c08;
+      --calAll-color: #6b7280;
 
       --radius-pill: 30px;
       --shadow: 0 2px 4px rgba(0,0,0,0.15);
@@ -26,20 +26,9 @@
       margin: 0;
       padding: 0;
       background: var(--color-bg);
-      transition: background 0.3s ease;
     }
 
-    h1 {
-      text-align: center;
-      padding: 10px;
-      margin: 0;
-      background: var(--color-primary);
-      color: var(--color-white);
-      font-size: 22px;
-      font-weight: 600;
-      transition: background 0.3s ease;
-    }
-
+    /* 上部タブ行（施設選択） */
     .top-bar {
       display: flex;
       align-items: center;
@@ -48,6 +37,9 @@
       background: var(--color-white);
       border-bottom: 1px solid var(--color-border);
       overflow-x: auto;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
     .cal-tab {
@@ -59,9 +51,6 @@
       font-size: 14px;
       box-shadow: var(--shadow);
       transition: 0.25s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .cal-tab.active {
@@ -77,18 +66,13 @@
       background: var(--color-primary);
       color: #fff;
       border-radius: var(--radius-pill);
-      text-align: center;
       cursor: pointer;
       font-size: 14px;
       box-shadow: var(--shadow);
-      transition: 0.25s;
       white-space: nowrap;
     }
 
-    .show-all-btn:hover {
-      opacity: 0.85;
-    }
-
+    /* 月タブ */
     .tabs {
       display: flex;
       gap: 4px;
@@ -96,6 +80,9 @@
       overflow-x: auto;
       background: var(--color-white);
       border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 48px;
+      z-index: 999;
     }
 
     .tab {
@@ -105,7 +92,6 @@
       cursor: pointer;
       white-space: nowrap;
       font-size: 13px;
-      transition: 0.25s;
     }
 
     .tab.active {
@@ -115,6 +101,7 @@
       transform: translateY(-2px);
     }
 
+    /* カレンダー領域 */
     .calendar-wrapper {
       padding: 10px;
     }
@@ -132,8 +119,6 @@
       border-collapse: collapse;
       background: var(--color-white);
       table-layout: fixed;
-      border-radius: 6px;
-      overflow: hidden;
     }
 
     th, td {
@@ -141,34 +126,48 @@
       padding: 4px 6px;
       font-size: 12px;
       line-height: 1.2;
-      white-space: normal;
-      min-height: 48px;
     }
 
-    /* PC時：日付10% */
+    /* 列幅（PC） */
     th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+    th:nth-child(2), td:nth-child(2) { width: 35% !important; }
+    th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
+    /* スマホ列幅 */
+    @media (max-width: 600px) {
+      th:nth-child(1), td:nth-child(1) { width: 15% !important; }
+    }
+
+    /* 日付セル */
     .date-cell {
       text-align: right;
       font-weight: 600;
+      font-size: 14px;
     }
 
-    .holiday-name {
-      font-size: 4px !important;
-      line-height: 1.1;
-      display: block;
-      margin-top: 2px;
-      color: #d97706;
-    }
+    /* 祝日名 */
+.holiday-name {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #fca5a5; /* 柔らかい赤 */ 
+  color: #7f1d1d; /* 深めの赤文字で読みやすく */
+  font-size: 4px;
+  font-weight: 400;
+  border-radius: 6px;
+  margin-top: 2px;
+}
 
-    .weekday-sun { color: #e11d48; }
-    .weekday-sat { color: #2563eb; }
-    .weekday-holiday { color: #d97706; }
+    /* 曜日文字色 */
+    .weekday-sun { color: #e11d48 !important; }
+    .weekday-sat { color: #2563eb !important; }
+    .weekday-holiday { color: #d97706 !important; }
 
-    .row-sun { background: #fff1f2; }
-    .row-sat { background: #eff6ff; }
-    .row-holiday { background: #fff7ed; }
+    /* 行背景色 */
+    .row-sun { background: #fff1f2 !important; }
+    .row-sat { background: #eff6ff !important; }
+    .row-holiday { background: #fff7ed !important; }
 
+    /* イベント */
     .event-box {
       display: flex;
       flex-wrap: wrap;
@@ -179,64 +178,33 @@
       padding: 2px 6px;
       border-radius: 6px;
       color: #fff;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 400 !important;
     }
 
     .event time {
       color: #ffff22;
-      font-weight: 500 !important;
+      font-weight: 600;
     }
 
+    /* PC/スマホ切替 */
     .pc-only { display: table-cell; }
     .sp-only { display: none; }
 
     @media (max-width: 600px) {
-      .holiday-name {
-        font-size: 7px !important;
-      }
-
-      th:nth-child(1),
-      td:nth-child(1) {
-        width: 15% !important;
-      }
-
       .pc-only { display: none !important; }
       .sp-only { display: table-cell !important; }
     }
-
-/* 上部タブ（施設選択）を固定 */
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-/* 月選択タブも固定（施設タブの下に固定） */
-.tabs {
-  position: sticky;
-  top: 48px; /* top-bar の高さに合わせて調整 */
-  z-index: 999;
-}
-
-/* タイトル行を非表示にする */
-#page-title {
-  display: none !important;
-}
-
   </style>
 </head>
 
 <body>
 
-<h1 id="page-title">日程表（公民館）</h1>
-
 <div class="top-bar">
-  <div class="cal-tab active" data-cal="1">🏛 川口公民館</div>
-  <div class="cal-tab" data-cal="2">🏟 社会体育館</div>
-  <div class="cal-tab" data-cal="3">🏢 公民館別館</div>
+  <div class="cal-tab active" data-cal="1">🏛 公民館</div>
+  <div class="cal-tab" data-cal="2">🏟 体育館</div>
+  <div class="cal-tab" data-cal="3">🏢 別館</div>
   <div class="show-all-btn" id="showAllBtn">📅 全て表示</div>
-  <button onclick="window.open('https://calendar.google.com/', '_blank')">G</button>
 </div>
 
 <div class="tabs" id="monthTabs"></div>
@@ -299,7 +267,7 @@ months.forEach((m, idx) => {
   tabArea.appendChild(tab);
 });
 
-/* カレンダー切り替え */
+/* 施設タブ切替 */
 document.querySelectorAll(".cal-tab").forEach(tab => {
   tab.addEventListener("click", () => {
     const cal = Number(tab.dataset.cal);
@@ -311,8 +279,6 @@ document.querySelectorAll(".cal-tab").forEach(tab => {
     const color = CALENDAR_COLORS[cal];
     document.documentElement.style.setProperty("--color-primary", color);
     document.body.style.background = color + "22";
-    document.getElementById("page-title").style.background = color;
-    document.getElementById("page-title").textContent = `日程表（${CALENDAR_NAMES[cal]}）`;
 
     const activeTab = document.querySelector("#monthTabs .active");
     const [year, month] = activeTab.textContent.match(/(\d+)年(\d+)月/).slice(1).map(Number);
@@ -401,31 +367,52 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
       (a,b)=> (a.start || 0) - (b.start || 0)
     );
 
+    const holidayName = holidayMap[dateStr]
+      ? `<div class="holiday-name">${holidayMap[dateStr]}</div>`
+      : "";
+
+    const isPC = window.innerWidth > 600;
+
+    /* 曜日クラス */
     let weekdayClass = "";
     if (holidayMap[dateStr]) weekdayClass = "weekday-holiday";
     else if (weekday === "日") weekdayClass = "weekday-sun";
     else if (weekday === "土") weekdayClass = "weekday-sat";
 
-    let rowClass = "";
-    if (holidayMap[dateStr]) rowClass = "row-holiday";
-    else if (weekday === "日") rowClass = "row-sun";
-    else if (weekday === "土") rowClass = "row-sat";
-
-    const holidayName = holidayMap[dateStr] ? `<div class="holiday-name">${holidayMap[dateStr]}</div>` : "";
-
     const tr = document.createElement("tr");
-    tr.className = rowClass;
+
+    /* 行背景色 */
+    if (holidayMap[dateStr]) tr.className = "row-holiday";
+    else if (weekday === "日") tr.className = "row-sun";
+    else if (weekday === "土") tr.className = "row-sat";
 
     tr.innerHTML = `
       <td>
         <div class="date-cell">
           ${day} <span class="${weekdayClass}">(${weekday})</span>
-          ${holidayName}
+          ${!isPC ? holidayName : ""}
         </div>
       </td>
-      <td class="pc-only"><div class="event-box">${slots["午前"].map(e=>e.html).join("")}</div></td>
-      <td class="pc-only"><div class="event-box">${slots["午後"].map(e=>e.html).join("")}</div></td>
-      <td class="sp-only"><div class="event-box">${merged.map(e=>e.html).join("")}</div></td>
+
+      <td class="pc-only">
+        <div class="event-box">
+          ${isPC ? holidayName : ""}
+          ${slots["午前"].map(e=>e.html).join("")}
+        </div>
+      </td>
+
+      <td class="pc-only">
+        <div class="event-box">
+          ${slots["午後"].map(e=>e.html).join("")}
+        </div>
+      </td>
+
+     <td class="sp-only">
+       <div class="event-box">
+         ${holidayName}   <!-- ← スマホでもイベント列の先頭に祝日名 -->
+         ${merged.map(e=>e.html).join("")}
+       </div>
+     </td>
     `;
 
     table.appendChild(tr);
@@ -462,7 +449,7 @@ async function loadMonth(year, month) {
   );
 }
 
-/* 全て表示（3つのカレンダーを統合） */
+/* 全て表示 */
 document.getElementById("showAllBtn").onclick = async () => {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
@@ -506,4 +493,3 @@ loadMonth(today.getFullYear(), today.getMonth());
 
 </body>
 </html>
-

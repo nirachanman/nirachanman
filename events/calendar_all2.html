@@ -142,28 +142,18 @@
     .date-cell {
       text-align: right;
       font-weight: 600;
-padding-right: 2px;
+      font-size: 14px;
     }
 
 .day-number {
   font-family: "Roboto Mono", "Courier New", monospace;
-  font-size: 12px;
+
 }
 
 /* 本日強調（画面表示のみ） */
 .today-highlight td {
   background: #fef9c3 !important; /* 柔らかい黄色 */
   border-color: #facc15 !important;
-}
-
-/* 今日の数字を丸で囲み太字にする（画面表示のみ） */
-.today-number {
-  font-weight: 700;
-  color: #000 !important; /* 明るい黄色 */
-  background: #c4b5fd; /* 濃いめの紫背景 */
-  padding: 2px 6px;
-  border-radius: 9999px;       /* 完全な丸（pill） */
-  display: inline-block;
 }
 
     /* 祝日名 */
@@ -276,13 +266,6 @@ padding-right: 2px;
   .today-highlight td {
     background: #fff !important;
     border-color: #999 !important;
-  }
-@media print {
-  .today-number {
-    font-weight: normal !important;
-    color: #000 !important;
-    background: transparent !important;
-    padding: 0 !important;
   }
 }
 
@@ -493,7 +476,7 @@ if (isToday) tr.classList.add("today-highlight");
     tr.innerHTML = `
       <td>
         <div class="date-cell">
-          <span class="day-number ${weekdayClass} ${isToday ? 'today-number' : ''}">${day}</span>
+          <span class="day-number ${weekdayClass}">${day}</span>
           <span class="${weekdayClass}">(${weekday})</span>
         </div>
       </td>
@@ -597,6 +580,3 @@ loadMonth(today.getFullYear(), today.getMonth());
 
 </body>
 </html>
-
-
-

@@ -148,12 +148,12 @@
     /* 祝日名 */
 .holiday-name {
   display: inline-block;
-  padding: 2px 6px;
-  background: #fca5a5; /* 柔らかい赤 */ 
-  color: #7f1d1d; /* 深めの赤文字で読みやすく */
-  font-size: 4px;
+  padding: 1px 4px;        /* ← 余白を小さく */
+  background: #fca5a5;     /* 柔らかい赤（そのまま） */
+  color: #7f1d1d;          /* 深い赤文字 */
+  font-size: 8px;          /* ← 小さめに変更 */
   font-weight: 400;
-  border-radius: 6px;
+  border-radius: 6px;      /* ← 角丸も少し小さく */
   margin-top: 2px;
 }
 
@@ -187,6 +187,24 @@
       font-weight: 600;
     }
 
+.google-cal-btn {
+  padding: 6px 16px;
+  background: #4285f4;        /* Googleブルー */
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  margin-left: 6px;
+  display: inline-block;
+  transition: 0.2s;
+}
+
+.google-cal-btn:hover {
+  background: #357ae8;
+}
+
     /* PC/スマホ切替 */
     .pc-only { display: table-cell; }
     .sp-only { display: none; }
@@ -204,7 +222,12 @@
   <div class="cal-tab active" data-cal="1">🏛 公民館</div>
   <div class="cal-tab" data-cal="2">🏟 体育館</div>
   <div class="cal-tab" data-cal="3">🏢 別館</div>
+
   <div class="show-all-btn" id="showAllBtn">📅 全て表示</div>
+
+  <a href="https://calendar.google.com" target="_blank" class="google-cal-btn">
+    🔗 Googleカレンダー
+  </a>
 </div>
 
 <div class="tabs" id="monthTabs"></div>
@@ -389,8 +412,8 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
     tr.innerHTML = `
       <td>
         <div class="date-cell">
-          ${day} <span class="${weekdayClass}">(${weekday})</span>
-          ${!isPC ? holidayName : ""}
+          <span class="day-number ${weekdayClass}">${day}</span>
+          <span class="${weekdayClass}">(${weekday})</span>
         </div>
       </td>
 

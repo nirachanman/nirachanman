@@ -145,6 +145,12 @@
       font-size: 14px;
     }
 
+/* 本日強調（画面表示のみ） */
+.today-highlight td {
+  background: #fef9c3 !important; /* 柔らかい黄色 */
+  border-color: #facc15 !important;
+}
+
     /* 祝日名 */
 .holiday-name {
   display: inline-block;
@@ -213,6 +219,51 @@
       .pc-only { display: none !important; }
       .sp-only { display: table-cell !important; }
     }
+
+@media print {
+
+  /* 文字はすべて黒に統一 */
+  * {
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 曜日色クラスも黒に上書き */
+  .weekday-sun,
+  .weekday-sat,
+  .weekday-holiday {
+    color: #000 !important;
+  }
+
+  /* 行背景色は残す（ここが重要） */
+  .row-sun    { background: #fff1f2 !important; } /* 日曜：淡い赤 */
+  .row-sat    { background: #eff6ff !important; } /* 土曜：淡い青 */
+  .row-holiday{ background: #fff7ed !important; } /* 祝日：淡い橙 */
+
+  /* それ以外の背景色は消す（イベント色・祝日ラベルなど） */
+  .event,
+  .holiday-name,
+  .calendar-box,
+  table,
+  th,
+  td {
+    background: #fff !important;
+  }
+
+  /* 行背景色の上書きを防ぐため、行背景指定を最後に再度適用 */
+  tr.row-sun    td { background: #fff1f2 !important; }
+  tr.row-sat    td { background: #eff6ff !important; }
+  tr.row-holiday td { background: #fff7ed !important; }
+}
+
+@media print {
+  .today-highlight td {
+    background: #fff !important;
+    border-color: #999 !important;
+  }
+}
+
   </style>
 </head>
 
@@ -402,7 +453,15 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
     else if (weekday === "日") weekdayClass = "weekday-sun";
     else if (weekday === "土") weekdayClass = "weekday-sat";
 
-    const tr = document.createElement("tr");
+const tr = document.createElement("tr");
+
+// 今日なら強調クラスを付ける
+const isToday =
+  dateObj.getFullYear() === today.getFullYear() &&
+  dateObj.getMonth() === today.getMonth() &&
+  dateObj.getDate() === today.getDate();
+
+if (isToday) tr.classList.add("today-highlight");
 
     /* 行背景色 */
     if (holidayMap[dateStr]) tr.className = "row-holiday";

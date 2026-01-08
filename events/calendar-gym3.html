@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4a6fa5">
+
+  <title>川口地区社会体育館 日程表</title>
+
+  <style>
+  /* =========================================================
+     1. テーマ変数
+     ========================================================= */
+  :root {
+    --color-primary: #4a6fa5;
+    --color-bg: #f3f4f6;
+    --color-white: #ffffff;
+    --color-border: #999;
+
+    --color-sat: #f7fbff;
+    --color-sun: #fff7f7;
+    --color-holiday: #fffdf5;
+
+    --color-badminton: #4caf50;
+    --color-tabletennis: #2196f3;
+    --color-volleyball: #cca152;
+    --color-kids: #9c27b0;
+    --color-iwate: #ff69b4;
+    --color-cancel: #ed1a3d;
+    --color-default: #607d8b;
+
+    --badge-sun: #e57373;
+    --badge-sat: #339FF6;
+    --badge-weekday: #d1b3ff;
+    --badge-holiday: var(--badge-sun);
+
+    --radius: 6px;
+    --radius-pill: 20px;
+    --shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+    --font-base: 12px;
+    --font-small: 11px;
+    --font-xs: 10px;
+    --font-title: 20px;
+
+    --space-xs: 4px;
+    --space-s: 6px;
+    --space-m: 12px;
+    --space-l: 18px;
+
+    --print-row-height: 35px;
+  }
+
+  /* =========================================================
+     2. ベース
+     ========================================================= */
+  body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--color-bg);
+  }
+
+  h1 {
+    text-align: center;
+    padding: var(--space-s);
+    margin: 0;
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-size: var(--font-title);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* 印刷時だけ当月を表示する領域 */
+  .print-month-header {
+    display: none;
+  }
+
+  /* =========================================================
+     3. レイアウト
+     ========================================================= */
+  .tabs {
+    display: flex;
+    gap: var(--space-s);
+    padding: var(--space-s);
+    overflow-x: auto;
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    scrollbar-gutter: stable;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .tab {
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
+    background: #e6e6e6;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+
+  .tab:hover {
+    background: #d5d5d5;
+  }
+
+  .tab.active {
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 600;
+    box-shadow: var(--shadow);
+  }
+
+  /* カレンダー外枠 */
+  .calendar-wrapper {
+    padding: 12px;
+  }
+
+  .calendar-box {
+    background: var(--color-primary);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    padding: 6px;
+    margin: 6px auto;
+    max-width: 900px;
+  }
+
+  /* =========================================================
+     4. カレンダー（テーブル）
+     ========================================================= */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    table-layout: fixed;
+  }
+
+  th {
+    background: #f5f5f5;
+    font-weight: 600;
+    padding: var(--space-s);
+  }
+
+  th, td {
+    border: 1px solid var(--color-border);
+    padding: var(--space-xs) var(--space-s);
+    font-size: var(--font-base);
+    line-height: 1.2;
+    white-space: normal;
+    min-height: 48px;
+  }
+
+  th:nth-child(1), td:nth-child(1) { width: 10%; }
+  th:nth-child(2), td:nth-child(2) { width: 35%; }
+  th:nth-child(3), td:nth-child(3) { width: 55%; }
+
+  .saturday { background: var(--color-sat); }
+  .sunday   { background: var(--color-sun); }
+  .holiday  { background: var(--color-holiday); }
+
+  .date-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+.holiday-label {
+  color: #d9534f !important; /* 落ち着いた朱色 */
+  font-weight: 400;
+}
+
+  .date-top {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .date-bottom {
+    font-size: var(--font-xs);
+    color: #d32f2f;
+    margin-top: 2px;
+  }
+
+  .weekday-badge {
+    padding: 1px 4px;
+    margin-left: 3px;
+    border-radius: 8px;
+    font-size: 9px;
+    color: #fff;
+  }
+
+  .w-sun { background: var(--badge-sun); }
+  .w-sat { background: var(--badge-sat); }
+  .w-mon,
+  .w-tue,
+  .w-wed,
+  .w-thu,
+  .w-fri { background: var(--badge-weekday); }
+
+  .holiday .weekday-badge {
+    background: var(--badge-holiday) !important;
+  }
+
+  .event-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+  }
+
+  .event {
+    padding: 2px 6px;
+    border-radius: var(--radius);
+    color: var(--color-white);
+    font-size: var(--font-small);
+    line-height: 1.2;
+    box-shadow: var(--shadow);
+  }
+
+  .event time {
+    color:#ffff22;
+    font-weight: 700;
+  }
+
+  .color-cancel       { background: var(--color-cancel); }
+  .color-badminton   { background: var(--color-badminton); }
+  .color-tabletennis { background: var(--color-tabletennis); }
+  .color-volleyball  { background: var(--color-volleyball); }
+  .color-kids        { background: var(--color-kids); }
+  .color-iwate       { background: var(--color-iwate); }
+  .color-default     { background: var(--color-default); }
+
+  /* =========================================================
+     5. スマホ最適化
+     ========================================================= */
+  @media (max-width: 600px) {
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+      display: none !important;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 20% !important;
+    }
+
+    td.merged-events {
+      width: 80% !important;
+      display: table-cell !important;
+      vertical-align: top !important;
+    }
+
+    th, td {
+      font-size: 16px !important;
+      padding: 4px 8px !important;
+    }
+
+    .event {
+      font-size: 15px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      padding: 2px 4px !important;
+    }
+
+    .event time,
+    .event-time {
+      color:#ffff22 !important;
+      font-weight:600 !important;
+    }
+
+    .event-title {
+      font-size: 14px !important;
+    }
+
+    .weekday-badge {
+      font-size: 12px !important;
+      padding: 1px 4px !important;
+    }
+
+    .event-box {
+      column-gap: 1px !important;
+      row-gap: 2px !important;
+    }
+
+    .tabs {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 20 !important;
+    }
+  }
+
+  /* =========================================================
+     6. 印刷最適化（当月表示＋土日祝バッジ色復活）
+     ========================================================= */
+  @media print {
+
+    @page {
+      size: A3 portrait;
+      margin: 10mm;
+    }
+
+    .tabs {
+      display: none !important;
+    }
+
+    h1 {
+      display: block !important;
+      margin-bottom: 6px;
+      font-size: 20px !important;
+    }
+
+    /* 印刷時に当月を真ん中に表示 */
+    .print-month-header {
+      display: block !important;
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 2px !important; /* ← 余白はあなたの調整値のまま */
+      text-align: center !important; /* ← 中央寄せに変更 */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 3px 4px;
+      height: var(--print-row-height);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    :root {
+      --print-row-height: 32px;
+    }
+
+    .event {
+      background: #fff !important;
+      color: #000 !important;
+      border-radius: 0 !important;
+      padding: 2px 4px !important;
+      font-size: 11px !important;
+      box-shadow: none !important;
+    }
+
+    .event time {
+      color: #000 !important;
+      font-weight: 600 !important;
+    }
+
+    /* まず全バッジを白黒に */
+    .weekday-badge,
+    .holiday .weekday-badge {
+      background: none !important;
+      color: #000 !important;
+      border: 1px solid #000 !important;
+      padding: 0 3px !important;
+      font-size: 10px !important;
+    }
+
+    /* 土曜だけ色復活 */
+    .w-sat {
+      background: var(--badge-sat) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    /* 日曜だけ色復活 */
+    .w-sun {
+      background: var(--badge-sun) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    /* 祝日だけ色復活 */
+    .holiday .weekday-badge {
+      background: var(--badge-holiday) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    /* 行背景は白に統一 */
+    .saturday,
+    .sunday,
+    .holiday,
+    tr.today-row {
+      background: #fff !important;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    td .event {
+      white-space: normal !important;
+      display: block !important;
+    }
+
+    td {
+      height: auto !important;
+    }
+
+/* 通常は非表示（印刷時だけ表示） */
+.print-header-center {
+  display: none;
+}
+
+@media print {
+  /* 印刷時だけ中央に表示 */
+  .print-header-center {
+    display: block !important;
+    text-align: center !important;
+    font-size: 20px !important;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* 通常の h1 は印刷時は非表示 */
+  body > h1 {
+    display: none !important;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+<div class="print-header-center">
+  川口地区社会体育館 日程表（<span id="printMonthHeader"></span>）
+</div>
+
+  <!-- 印刷時だけ当月を表示 -->
+  <div id="printMonthHeader" class="print-month-header"></div>
+
+  <div class="tabs" id="monthTabs"></div>
+
+  <div class="calendar-wrapper">
+    <div class="calendar-box">
+      <div id="calendarContainer">
+        <div class="loading">読み込み中...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /* =========================================================
+     Google Calendar API 設定
+     ========================================================= */
+  const CALENDAR_ID =
+    "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
+  const HOLIDAY_CALENDAR_ID = "japanese__ja@holiday.calendar.google.com";
+  const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+
+  const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  /* =========================================================
+     スマホ用：午前・午後を統合
+     ========================================================= */
+  function mergeEventsForMobile() {
+    if (window.innerWidth > 600) return;
+
+    document.querySelectorAll("#calendarContainer table tr").forEach(row => {
+      const amCell = row.querySelector("td:nth-child(2)");
+      const pmCell = row.querySelector("td:nth-child(3)");
+      if (!amCell || !pmCell) return;
+
+      const merged = document.createElement("td");
+      merged.className = "merged-events";
+
+      const convert = html => {
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        div.querySelectorAll(".event").forEach(ev => {
+          const html = ev.innerHTML.trim();
+          const timeMatch = html.match(/<time>(.*?)<\/time>/);
+          const title = html.replace(/<time>.*?<\/time>/, "").trim();
+          const time = timeMatch ? timeMatch[1] : "";
+
+          ev.innerHTML = `
+            <div class="event-time">${time}</div>
+            <div class="event-title">${title}</div>
+          `;
+        });
+        return div.innerHTML;
+      };
+
+      merged.innerHTML = `
+        <div class="event-box">
+          ${convert(amCell.innerHTML)}
+          ${convert(pmCell.innerHTML)}
+        </div>
+      `;
+
+      row.appendChild(merged);
+    });
+  }
+
+  /* =========================================================
+     月タブ生成
+     ========================================================= */
+  const months = [];
+  for (let i = -1; i <= 12; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    months.push({
+      label: `${d.getFullYear()}年${d.getMonth() + 1}月`,
+      year: d.getFullYear(),
+      month: d.getMonth()
+    });
+  }
+
+  const tabArea = document.getElementById("monthTabs");
+  months.forEach((m, idx) => {
+    const tab = document.createElement("div");
+    tab.className = "tab" + (idx === 1 ? " active" : "");
+    tab.textContent = m.label;
+    tab.onclick = () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      loadMonth(m.year, m.month);
+    };
+    tabArea.appendChild(tab);
+  });
+
+  /* =========================================================
+     Google Calendar API 取得
+     ========================================================= */
+  async function fetchEvents(calendarId, year, month) {
+    const start = new Date(year, month, 1).toISOString();
+    const end = new Date(year, month + 1, 1).toISOString();
+
+    const url =
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
+      `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
+      `&singleEvents=true&orderBy=startTime`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.items || [];
+  }
+
+  function classifyTime(ev) {
+    if (!ev.start.dateTime) return "午前";
+    const hour = new Date(ev.start.dateTime).getHours();
+    return hour < 12 ? "午前" : "午後";
+  }
+
+  function detectColor(title) {
+    if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
+    if (title.includes("バド")) return "color-badminton";
+    if (title.includes("卓球")) return "color-tabletennis";
+    if (title.includes("バレー")) return "color-volleyball";
+    if (title.includes("スマイル")) return "color-kids";
+    if (title.includes("いわて")) return "color-iwate";
+    return "color-default";
+  }
+
+  /* =========================================================
+     カレンダー描画
+     ========================================================= */
+  function renderTable(events, holidayMap, year, month) {
+    const container = document.getElementById("calendarContainer");
+    container.innerHTML = "";
+
+    const table = document.createElement("table");
+    table.innerHTML = `
+      <tr>
+        <th>日</th>
+        <th>午前</th>
+        <th>午後</th>
+      </tr>
+    `;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateObj = new Date(year, month, day);
+      const weekday = WEEKDAYS[dateObj.getDay()];
+      const dateStr =
+        `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+      const dayEvents = events.filter(ev => {
+        const d = ev.start.date || ev.start.dateTime.split("T")[0];
+        return d === dateStr;
+      });
+
+      const slots = { "午前": [], "午後": [] };
+
+      dayEvents.forEach(ev => {
+        const time = classifyTime(ev);
+        const color = detectColor(ev.summary || "");
+        const title = ev.summary || "";
+
+        const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+        const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+        const format = d =>
+          String(d.getHours()).padStart(2, "0") + ":" +
+          String(d.getMinutes()).padStart(2, "0");
+
+        let timeLabel = "";
+        if (start && end) {
+          timeLabel = `${format(start)}–${format(end)}`;
+        }
+
+        const displayText = timeLabel
+          ? `<time>${timeLabel}</time> ${title}`
+          : title;
+
+        const hoverText = timeLabel
+          ? `${timeLabel} ${title}`
+          : title;
+
+        slots[time].push({
+          start: start,
+          html: `<div class="event ${color}" aria-label="${hoverText}">${displayText}</div>`
+        });
+      });
+
+      slots["午前"].sort((a, b) => a.start - b.start);
+      slots["午後"].sort((a, b) => a.start - b.start);
+
+      const weekdayClass = {
+        "日": "w-sun",
+        "月": "w-mon",
+        "火": "w-tue",
+        "水": "w-wed",
+        "木": "w-thu",
+        "金": "w-fri",
+        "土": "w-sat"
+      }[weekday];
+
+      const dateCell = `
+        <div class="date-cell">
+          <div class="date-top">
+            ${day}
+            <span class="weekday-badge ${weekdayClass}">${weekday}</span>
+          </div>
+          <div class="date-bottom">
+            ${window.innerWidth <= 600 ? (holidayMap[dateStr] || "") : ""}
+          </div>
+        </div>
+      `;
+
+      let rowClass = "";
+      if (holidayMap[dateStr]) rowClass = "holiday";
+      else if (weekday === "日") rowClass = "sunday";
+      else if (weekday === "土") rowClass = "saturday";
+
+      const isToday = (dateStr === todayStr);
+
+      const tr = document.createElement("tr");
+      tr.className = rowClass + (isToday ? " today-row" : "");
+
+      const isPC = window.innerWidth > 600;
+
+      const holidayLabel = holidayMap[dateStr]
+        ? `<div class="holiday-label">${holidayMap[dateStr]}</div>`
+        : "";
+
+      tr.innerHTML = `
+        <td>${dateCell}</td>
+
+        <td>
+          <div class="event-box">
+            ${isPC ? holidayLabel : ""}
+            ${slots["午前"].map(e => e.html).join("")}
+          </div>
+        </td>
+
+        <td>
+          <div class="event-box">
+            ${slots["午後"].map(e => e.html).join("")}
+          </div>
+        </td>
+      `;
+
+      table.appendChild(tr);
+    }
+
+    container.appendChild(table);
+
+    mergeEventsForMobile();
+  }
+
+  /* =========================================================
+     月読み込み
+     ========================================================= */
+  async function loadMonth(year, month) {
+    const container = document.getElementById("calendarContainer");
+    container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+    const events = await fetchEvents(CALENDAR_ID, year, month);
+    const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+
+    const holidayMap = {};
+    holidayEvents.forEach(ev => {
+      const date = ev.start.date || ev.start.dateTime.split("T")[0];
+      holidayMap[date] = ev.summary;
+    });
+
+    /* 印刷用の当月表示を更新 */
+    document.getElementById("printMonthHeader").textContent =
+      `${year}年${month + 1}月`;
+
+    renderTable(events, holidayMap, year, month);
+  }
+
+  loadMonth(today.getFullYear(), today.getMonth());
+
+  /* =========================================================
+     画面回転時に再描画
+     ========================================================= */
+  window.addEventListener("orientationchange", () => {
+    loadMonth(today.getFullYear(), today.getMonth());
+  });
+  </script>
+
+</body>
+</html>
+

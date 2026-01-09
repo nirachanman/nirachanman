@@ -1,1 +1,673 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Googleカレンダーwide川口公民館</title>
+
+  <style>
+:root {
+  --color-primary: #4a6fa5;
+  --color-bg: #f3f4f6;
+  --color-white: #ffffff;
+  --color-border: #999;
+
+  --cal1-color: #4a6fa5;
+  --cal2-color: #0d8a6a;
+  --cal3-color: #c47c08;
+  --calAll-color: #6b7280;
+
+  --topbar-height: 47px; /* 実際の高さに合わせる（後で調整OK） */
+  --radius-pill: 30px;
+  --shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+/* 上部タブ行 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.google-cal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin-left: auto;
+  background: #4285f4;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: 0.2s;
+}
+
+.google-cal-btn:hover {
+  background: #357ae8;
+}
+
+.google-cal-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.cal-tab {
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: #e5e7eb;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  transition: 0.25s;
+}
+
+.cal-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  transform: translateY(-2px);
+}
+
+.show-all-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+/* 月タブ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+  overflow-x: auto;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: var(--topbar-height);
+  z-index: 999;
+}
+
+.tab {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: #e6e6e6;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  transform: translateY(-2px);
+}
+
+/* カレンダー領域 */
+.calendar-wrapper {
+  padding: 5px;
+}
+
+.calendar-box {
+  margin-bottom: 10px;
+  padding: 5px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-white);
+  table-layout: fixed;
+}
+
+th, td {
+  border: 1px solid var(--color-border);
+  padding: 4px 6px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+/* 列幅（PC） */
+th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+th:nth-child(2), td:nth-child(2) { width: 35% !important; }
+th:nth-child(3), td:nth-child(3) { width: 55% !important; }
+
+/* スマホ列幅 */
+@media (max-width: 600px) {
+  th:nth-child(1), td:nth-child(1) { width: 20% !important; }
+}
+
+/* 日付セル */
+.date-cell {
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.day-number {
+  font-family: "Roboto Mono", "Courier New", monospace;
+}
+
+/* 本日強調（画面表示のみ） */
+.today-highlight td {
+  background: #fef9c3 !important;
+  border-color: #facc15 !important;
+}
+
+/* 祝日名 */
+.holiday-name {
+  display: inline-block;
+  padding: 1px 4px;
+  background: #fca5a5;
+  color: #7f1d1d;
+  font-size: 8px;
+  font-weight: 400;
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+/* 曜日文字色 */
+.weekday-sun { color: #e11d48 !important; }
+.weekday-sat { color: #2563eb !important; }
+.weekday-holiday { color: #d97706 !important; }
+
+/* 行背景色 */
+.row-sun { background: #fff1f2 !important; }
+.row-sat { background: #eff6ff !important; }
+.row-holiday { background: #fff7ed !important; }
+
+/* イベント */
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+}
+
+.event {
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400 !important;
+}
+
+.event time {
+  color: #ffff22;
+  font-weight: 500;
+}
+
+.event-time {
+  color: #ffff22 !important;
+  font-weight: 500;
+}
+
+/* PC/スマホ切替 */
+.pc-only { display: table-cell; }
+.sp-only { display: none; }
+
+@media (max-width: 600px) {
+  .pc-only { display: none !important; }
+  .sp-only { display: table-cell !important; }
+}
+
+/* PC（横並び） */
+@media (min-width: 769px) {
+  .event {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .event-time {
+    margin-right: 4px;
+  }
+
+/* 印刷用 */
+@media print {
+
+  * {
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .weekday-sun,
+  .weekday-sat,
+  .weekday-holiday {
+    color: #000 !important;
+  }
+
+  .row-sun    { background: #fff1f2 !important; }
+  .row-sat    { background: #eff6ff !important; }
+  .row-holiday{ background: #fff7ed !important; }
+
+  .event,
+  .holiday-name,
+  .calendar-box,
+  table,
+  th,
+  td {
+    background: #fff !important;
+  }
+
+  tr.row-sun td    { background: #fff1f2 !important; }
+  tr.row-sat td    { background: #eff6ff !important; }
+  tr.row-holiday td{ background: #fff7ed !important; }
+
+  .today-highlight td {
+    background: #fff !important;
+    border-color: #999 !important;
+  }
+
+  .event-time {
+    color: #000 !important;
+  }
+}
+
+
+/* スマホ縦表示だけ 2 段にする */
+@media (max-width: 768px) {
+  .event {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .event-time {
+    font-size: 12px;
+    color: #ffeb3b !important;
+  }
+
+  .event-title {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="cal-tab active" data-cal="1">🏛 公民館</div>
+  <div class="cal-tab" data-cal="2">🏟 体育館</div>
+  <div class="cal-tab" data-cal="3">🏢 別館</div>
+
+  <div class="show-all-btn" id="showAllBtn">📅 全て表示</div>
+
+<a href="https://calendar.google.com/" target="_blank" class="google-cal-btn" aria-label="Googleカレンダーを開く">
+  <svg viewBox="0 0 24 24" class="google-cal-icon">
+    <path fill="#4285F4" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+    <path fill="#FFF" d="M7 11h10v2H7z"/>
+  </svg>
+</a>
+</div>
+
+<div class="tabs" id="monthTabs"></div>
+
+<div id="calendarContainer" class="calendar-wrapper">
+  <div class="loading">読み込み中...</div>
+</div>
+
+<script>
+/* ------------------------------
+   定数
+------------------------------ */
+let CURRENT_CALENDAR = 1;
+
+const CALENDAR_IDS = {
+  1: "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com",
+  2: "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com",
+  3: "kawaguchi.public.hall.annex@gmail.com"
+};
+
+const CALENDAR_NAMES = { 1: "公民館", 2: "体育館", 3: "別館" };
+
+const CALENDAR_COLORS = {
+  1: "var(--cal1-color)",
+  2: "var(--cal2-color)",
+  3: "var(--cal3-color)",
+  all: "var(--calAll-color)"
+};
+
+const FACILITY_COLOR = {
+  "公民館": "var(--cal1-color)",
+  "体育館": "var(--cal2-color)",
+  "別館": "var(--cal3-color)"
+};
+
+const HOLIDAY_CALENDAR_ID = "japanese__ja@holiday.calendar.google.com";
+const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+
+const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+const today = new Date();
+
+/* キーワードで色を変える設定 */
+const KEYWORD_COLORS = [
+  { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#8c6450" },
+  { keywords: ["2fs", "PC", "キルト", "英語"], color: "#3b7960" },
+  { keywords: ["2fl", "ヨガ", "体操", "洋品店"], color: "#745399" },
+  { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
+  // 必要に応じて追加
+];
+
+/* ------------------------------
+   Google Calendar API
+------------------------------ */
+async function fetchEvents(calendarId, year, month) {
+  const start = new Date(year, month, 1).toISOString();
+  const end = new Date(year, month + 1, 1).toISOString();
+
+  const url =
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
+    `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
+    `&singleEvents=true&orderBy=startTime`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.items || [];
+}
+
+/* ------------------------------
+   共通関数
+------------------------------ */
+function getKeywordColor(title) {
+  for (const rule of KEYWORD_COLORS) {
+    for (const kw of rule.keywords) {
+      if (title.includes(kw)) {
+        return rule.color;
+      }
+    }
+  }
+  return null;
+}
+
+function classifyTime(ev) {
+  if (!ev.start.dateTime) return "午前";
+  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
+}
+
+function formatTime(d) {
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+
+function createEventHTML(ev, baseColor) {
+  const title = ev.summary || "";
+
+  // キーワードで色を上書き
+  const keywordColor = getKeywordColor(title);
+  const color = keywordColor || baseColor;
+
+  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+  const timeLabel = (start && end)
+    ? `${formatTime(start)}–${formatTime(end)}`
+    : "";
+
+  return `
+    <div class="event" style="background:${color}">
+      <div class="event-time">${timeLabel}</div>
+      <div class="event-title">${title}</div>
+    </div>
+  `;
+}
+
+function createHolidayMap(holidayEvents) {
+  const map = {};
+  holidayEvents.forEach(ev => {
+    const date = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
+    map[date] = ev.summary;
+  });
+  return map;
+}
+
+function getWeekdayClass(dateObj, holidayMap, dateStr) {
+  if (holidayMap[dateStr]) return "weekday-holiday";
+  const w = dateObj.getDay();
+  if (w === 0) return "weekday-sun";
+  if (w === 6) return "weekday-sat";
+  return "";
+}
+
+function getRowClass(dateObj, holidayMap, dateStr) {
+  if (holidayMap[dateStr]) return "row-holiday";
+  const w = dateObj.getDay();
+  if (w === 0) return "row-sun";
+  if (w === 6) return "row-sat";
+  return "";
+}
+
+/* ------------------------------
+   テーブル描画
+------------------------------ */
+function renderTable(events, holidayMap, year, month, title, themeColor) {
+  const box = document.createElement("div");
+  box.className = "calendar-box";
+
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <tr>
+      <th>${title}</th>
+      <th class="pc-only">午前</th>
+      <th class="pc-only">午後</th>
+      <th class="sp-only">イベント</th>
+    </tr>
+  `;
+
+  const days = new Date(year, month + 1, 0).getDate();
+
+  for (let day = 1; day <= days; day++) {
+    const dateObj = new Date(year, month, day);
+    const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const weekday = WEEKDAYS[dateObj.getDay()];
+
+    const dayEvents = events.filter(ev => {
+      const d = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
+      return d === dateStr;
+    });
+
+    const slots = { "午前": [], "午後": [] };
+
+    dayEvents.forEach(ev => {
+      const time = classifyTime(ev);
+      const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
+
+      slots[time].push({
+        start: ev.start.dateTime ? new Date(ev.start.dateTime) : null,
+        html: createEventHTML(ev, color)
+      });
+    });
+
+    slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+    slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+
+    const merged = [...slots["午前"], ...slots["午後"]];
+
+    const holidayName = holidayMap[dateStr]
+      ? `<div class="holiday-name">${holidayMap[dateStr]}</div>`
+      : "";
+
+    const weekdayClass = getWeekdayClass(dateObj, holidayMap, dateStr);
+    const rowClass = getRowClass(dateObj, holidayMap, dateStr);
+
+    const tr = document.createElement("tr");
+    tr.className = rowClass;
+
+    if (
+      dateObj.getFullYear() === today.getFullYear() &&
+      dateObj.getMonth() === today.getMonth() &&
+      dateObj.getDate() === today.getDate()
+    ) {
+      tr.classList.add("today-highlight");
+    }
+
+    tr.innerHTML = `
+      <td>
+        <div class="date-cell">
+          <span class="day-number ${weekdayClass}">${day}</span>
+          <span class="${weekdayClass}">(${weekday})</span>
+        </div>
+      </td>
+
+      <td class="pc-only">
+        <div class="event-box">
+          ${holidayName}
+          ${slots["午前"].map(e=>e.html).join("")}
+        </div>
+      </td>
+
+      <td class="pc-only">
+        <div class="event-box">
+          ${slots["午後"].map(e=>e.html).join("")}
+        </div>
+      </td>
+
+      <td class="sp-only">
+        <div class="event-box">
+          ${holidayName}
+          ${merged.map(e=>e.html).join("")}
+        </div>
+      </td>
+    `;
+
+    table.appendChild(tr);
+  }
+
+  box.appendChild(table);
+  return box;
+}
+
+/* ------------------------------
+   月読み込み
+------------------------------ */
+async function loadMonth(year, month) {
+  const container = document.getElementById("calendarContainer");
+  container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+  const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
+  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+  const holidayMap = createHolidayMap(holidayEvents);
+
+  container.innerHTML = "";
+  container.appendChild(
+    renderTable(events, holidayMap, year, month, CALENDAR_NAMES[CURRENT_CALENDAR], CALENDAR_COLORS[CURRENT_CALENDAR])
+  );
+}
+
+/* ------------------------------
+   月タブ生成（完全修正版）
+------------------------------ */
+const months = [];
+for (let i = -1; i <= 12; i++) {
+  const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+  months.push({ label: `${d.getFullYear()}年${d.getMonth()+1}月`, year: d.getFullYear(), month: d.getMonth() });
+}
+
+const tabArea = document.getElementById("monthTabs");
+
+months.forEach((m, idx) => {
+  const tab = document.createElement("div");
+  tab.className = "tab" + (idx === 1 ? " active" : "");
+  tab.dataset.year = m.year;
+  tab.dataset.month = m.month;
+  tab.textContent = m.label;
+
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    loadMonth(m.year, m.month);
+  });
+
+  tabArea.appendChild(tab);
+});
+
+/* ------------------------------
+   施設タブ（完全修正版）
+------------------------------ */
+document.querySelectorAll(".cal-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    CURRENT_CALENDAR = Number(tab.dataset.cal);
+
+    document.querySelectorAll(".cal-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    const activeTab = document.querySelector("#monthTabs .active");
+    const year = Number(activeTab.dataset.year);
+    const month = Number(activeTab.dataset.month);
+
+    loadMonth(year, month);
+  });
+});
+
+/* ------------------------------
+   全施設統合
+------------------------------ */
+document.getElementById("showAllBtn").onclick = async () => {
+  const container = document.getElementById("calendarContainer");
+  container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+  const activeTab = document.querySelector("#monthTabs .active");
+  const year = Number(activeTab.dataset.year);
+  const month = Number(activeTab.dataset.month);
+
+  const allEvents = [];
+
+  for (let cal = 1; cal <= 3; cal++) {
+    const events = await fetchEvents(CALENDAR_IDS[cal], year, month);
+    events.forEach(ev => {
+      ev._facility = CALENDAR_NAMES[cal];
+      allEvents.push(ev);
+    });
+  }
+
+  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+  const holidayMap = createHolidayMap(holidayEvents);
+
+  container.innerHTML = "";
+  container.appendChild(
+    renderTable(allEvents, holidayMap, year, month, "全施設統合", CALENDAR_COLORS.all)
+  );
+};
+
+/* ------------------------------
+   初期表示
+------------------------------ */
+loadMonth(today.getFullYear(), today.getMonth());
+</script>
+
+</body>
+</html>

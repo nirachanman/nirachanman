@@ -6,247 +6,247 @@
   <title>日程表</title>
 
   <style>
-    :root {
-      --color-primary: #4a6fa5;
-      --color-bg: #f3f4f6;
-      --color-white: #ffffff;
-      --color-border: #999;
+:root {
+  --color-primary: #4a6fa5;
+  --color-bg: #f3f4f6;
+  --color-white: #ffffff;
+  --color-border: #999;
 
-      --cal1-color: #4a6fa5;
-      --cal2-color: #0d8a6a;
-      --cal3-color: #c47c08;
-      --calAll-color: #6b7280;
+  --cal1-color: #4a6fa5;
+  --cal2-color: #0d8a6a;
+  --cal3-color: #c47c08;
+  --calAll-color: #6b7280;
 
-      --radius-pill: 30px;
-      --shadow: 0 2px 4px rgba(0,0,0,0.15);
-    }
+  --radius-pill: 30px;
+  --shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
 
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: var(--color-bg);
-    }
+html {
+  scrollbar-gutter: stable;
+}
 
-    /* 上部タブ行（施設選択） */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 8px;
-      background: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-      overflow-x: auto;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
 
-    .cal-tab {
-      padding: 6px 16px;
-      border-radius: var(--radius-pill);
-      background: #e5e7eb;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 14px;
-      box-shadow: var(--shadow);
-      transition: 0.25s;
-    }
+/* 上部タブ行 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-    .cal-tab.active {
-      background: var(--color-primary);
-      color: #fff;
-      font-weight: 600;
-      transform: translateY(-2px);
-    }
+.cal-tab {
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: #e5e7eb;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  transition: 0.25s;
+}
 
-    .show-all-btn {
-      margin-left: auto;
-      padding: 6px 16px;
-      background: var(--color-primary);
-      color: #fff;
-      border-radius: var(--radius-pill);
-      cursor: pointer;
-      font-size: 14px;
-      box-shadow: var(--shadow);
-      white-space: nowrap;
-    }
+.cal-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  transform: translateY(-2px);
+}
 
-    /* 月タブ */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      padding: 4px 6px;
-      overflow-x: auto;
-      background: var(--color-white);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 48px;
-      z-index: 999;
-    }
+.show-all-btn {
+  margin-left: auto;
+  padding: 6px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
 
-    .tab {
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      background: #e6e6e6;
-      cursor: pointer;
-      white-space: nowrap;
-      font-size: 13px;
-    }
+/* 月タブ */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+  overflow-x: auto;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 48px;
+  z-index: 999;
+}
 
-    .tab.active {
-      background: var(--color-primary);
-      color: var(--color-white);
-      font-weight: 600;
-      transform: translateY(-2px);
-    }
+.tab {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: #e6e6e6;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+}
 
-    /* カレンダー領域 */
-    .calendar-wrapper {
-      padding: 5px;
-    }
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  transform: translateY(-2px);
+}
 
-    .calendar-box {
-      margin-bottom: 10px;
-      padding: 5px;
-      background: #fff;
-      border-radius: 5px;
-      box-shadow: var(--shadow);
-    }
+/* カレンダー領域 */
+.calendar-wrapper {
+  padding: 5px;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--color-white);
-      table-layout: fixed;
-    }
+.calendar-box {
+  margin-bottom: 10px;
+  padding: 5px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+}
 
-    th, td {
-      border: 1px solid var(--color-border);
-      padding: 4px 6px;
-      font-size: 12px;
-      line-height: 1.2;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-white);
+  table-layout: fixed;
+}
 
-    /* 列幅（PC） */
-    th:nth-child(1), td:nth-child(1) { width: 10% !important; }
-    th:nth-child(2), td:nth-child(2) { width: 35% !important; }
-    th:nth-child(3), td:nth-child(3) { width: 55% !important; }
+th, td {
+  border: 1px solid var(--color-border);
+  padding: 4px 6px;
+  font-size: 12px;
+  line-height: 1.2;
+}
 
-    /* スマホ列幅 */
-    @media (max-width: 600px) {
-      th:nth-child(1), td:nth-child(1) { width: 20% !important; }
-    }
+/* 列幅（PC） */
+th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+th:nth-child(2), td:nth-child(2) { width: 35% !important; }
+th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
-    /* 日付セル */
-    .date-cell {
-      text-align: right;
-      font-weight: 600;
-      font-size: 14px;
-    }
+/* スマホ列幅 */
+@media (max-width: 600px) {
+  th:nth-child(1), td:nth-child(1) { width: 20% !important; }
+}
+
+/* 日付セル */
+.date-cell {
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+}
 
 .day-number {
   font-family: "Roboto Mono", "Courier New", monospace;
-
 }
 
 /* 本日強調（画面表示のみ） */
 .today-highlight td {
-  background: #fef9c3 !important; /* 柔らかい黄色 */
+  background: #fef9c3 !important;
   border-color: #facc15 !important;
 }
 
-    /* 祝日名 */
+/* 祝日名 */
 .holiday-name {
   display: inline-block;
-  padding: 1px 4px;        /* ← 余白を小さく */
-  background: #fca5a5;     /* 柔らかい赤（そのまま） */
-  color: #7f1d1d;          /* 深い赤文字 */
-  font-size: 8px;          /* ← 小さめに変更 */
+  padding: 1px 4px;
+  background: #fca5a5;
+  color: #7f1d1d;
+  font-size: 8px;
   font-weight: 400;
-  border-radius: 6px;      /* ← 角丸も少し小さく */
+  border-radius: 6px;
   margin-top: 2px;
 }
 
-    /* 曜日文字色 */
-    .weekday-sun { color: #e11d48 !important; }
-    .weekday-sat { color: #2563eb !important; }
-    .weekday-holiday { color: #d97706 !important; }
+/* 曜日文字色 */
+.weekday-sun { color: #e11d48 !important; }
+.weekday-sat { color: #2563eb !important; }
+.weekday-holiday { color: #d97706 !important; }
 
-    /* 行背景色 */
-    .row-sun { background: #fff1f2 !important; }
-    .row-sat { background: #eff6ff !important; }
-    .row-holiday { background: #fff7ed !important; }
+/* 行背景色 */
+.row-sun { background: #fff1f2 !important; }
+.row-sat { background: #eff6ff !important; }
+.row-holiday { background: #fff7ed !important; }
 
-    /* イベント */
-    .event-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px 4px;
-    }
+/* イベント */
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+}
 
-    .event {
-      padding: 2px 6px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 400 !important;
-    }
-
-    .event time {
-      color: #ffff22;
-      font-weight: 600;
-    }
-
-.google-cal-btn {
-  padding: 6px 16px;
-  background: #4285f4;        /* Googleブルー */
+.event {
+  padding: 2px 6px;
+  border-radius: 6px;
   color: #fff;
-  border-radius: var(--radius-pill);
-  font-size: 14px;
-  text-decoration: none;
-  white-space: nowrap;
-  box-shadow: var(--shadow);
-  margin-left: 6px;
-  display: inline-block;
-  transition: 0.2s;
+  font-size: 11px;
+  font-weight: 400 !important;
 }
 
-.google-cal-btn:hover {
-  background: #357ae8;
+.event time {
+  color: #ffff22;
+  font-weight: 500;
 }
 
-    /* PC/スマホ切替 */
-    .pc-only { display: table-cell; }
-    .sp-only { display: none; }
+.event-time {
+  color: #ffff22 !important;
+  font-weight: 500;
+}
 
-    @media (max-width: 600px) {
-      .pc-only { display: none !important; }
-      .sp-only { display: table-cell !important; }
-    }
+/* PC/スマホ切替 */
+.pc-only { display: table-cell; }
+.sp-only { display: none; }
 
+@media (max-width: 600px) {
+  .pc-only { display: none !important; }
+  .sp-only { display: table-cell !important; }
+}
+
+/* PC（横並び） */
+@media (min-width: 769px) {
+  .event {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .event-time {
+    margin-right: 4px;
+  }
+
+/* 印刷用 */
 @media print {
 
-  /* 文字はすべて黒に統一 */
   * {
     color: #000 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* 曜日色クラスも黒に上書き */
   .weekday-sun,
   .weekday-sat,
   .weekday-holiday {
     color: #000 !important;
   }
 
-  /* 行背景色は残す（ここが重要） */
-  .row-sun    { background: #fff1f2 !important; } /* 日曜：淡い赤 */
-  .row-sat    { background: #eff6ff !important; } /* 土曜：淡い青 */
-  .row-holiday{ background: #fff7ed !important; } /* 祝日：淡い橙 */
+  .row-sun    { background: #fff1f2 !important; }
+  .row-sat    { background: #eff6ff !important; }
+  .row-holiday{ background: #fff7ed !important; }
 
-  /* それ以外の背景色は消す（イベント色・祝日ラベルなど） */
   .event,
   .holiday-name,
   .calendar-box,
@@ -256,16 +256,37 @@
     background: #fff !important;
   }
 
-  /* 行背景色の上書きを防ぐため、行背景指定を最後に再度適用 */
-  tr.row-sun    td { background: #fff1f2 !important; }
-  tr.row-sat    td { background: #eff6ff !important; }
-  tr.row-holiday td { background: #fff7ed !important; }
-}
+  tr.row-sun td    { background: #fff1f2 !important; }
+  tr.row-sat td    { background: #eff6ff !important; }
+  tr.row-holiday td{ background: #fff7ed !important; }
 
-@media print {
   .today-highlight td {
     background: #fff !important;
     border-color: #999 !important;
+  }
+
+  .event-time {
+    color: #000 !important;
+  }
+}
+
+
+/* スマホ縦表示だけ 2 段にする */
+@media (max-width: 768px) {
+  .event {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .event-time {
+    font-size: 12px;
+    color: #ffeb3b !important;
+  }
+
+  .event-title {
+    font-size: 12px;
+    font-weight: 400;
   }
 }
 
@@ -293,6 +314,9 @@
 </div>
 
 <script>
+/* ------------------------------
+   定数
+------------------------------ */
 let CURRENT_CALENDAR = 1;
 
 const CALENDAR_IDS = {
@@ -301,11 +325,7 @@ const CALENDAR_IDS = {
   3: "kawaguchi.public.hall.annex@gmail.com"
 };
 
-const CALENDAR_NAMES = {
-  1: "公民館",
-  2: "体育館",
-  3: "別館"
-};
+const CALENDAR_NAMES = { 1: "公民館", 2: "体育館", 3: "別館" };
 
 const CALENDAR_COLORS = {
   1: "var(--cal1-color)",
@@ -326,46 +346,9 @@ const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
 
-/* 月タブ生成 */
-const months = [];
-for (let i = -1; i <= 12; i++) {
-  const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-  months.push({ label: `${d.getFullYear()}年${d.getMonth()+1}月`, year: d.getFullYear(), month: d.getMonth() });
-}
-
-const tabArea = document.getElementById("monthTabs");
-months.forEach((m, idx) => {
-  const tab = document.createElement("div");
-  tab.className = "tab" + (idx === 1 ? " active" : "");
-  tab.textContent = m.label;
-  tab.onclick = () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    loadMonth(m.year, m.month);
-  };
-  tabArea.appendChild(tab);
-});
-
-/* 施設タブ切替 */
-document.querySelectorAll(".cal-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const cal = Number(tab.dataset.cal);
-    CURRENT_CALENDAR = cal;
-
-    document.querySelectorAll(".cal-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-
-    const color = CALENDAR_COLORS[cal];
-    document.documentElement.style.setProperty("--color-primary", color);
-    document.body.style.background = color + "22";
-
-    const activeTab = document.querySelector("#monthTabs .active");
-    const [year, month] = activeTab.textContent.match(/(\d+)年(\d+)月/).slice(1).map(Number);
-    loadMonth(year, month - 1);
-  });
-});
-
-/* Google Calendar API */
+/* ------------------------------
+   Google Calendar API
+------------------------------ */
 async function fetchEvents(calendarId, year, month) {
   const start = new Date(year, month, 1).toISOString();
   const end = new Date(year, month + 1, 1).toISOString();
@@ -380,14 +363,62 @@ async function fetchEvents(calendarId, year, month) {
   return data.items || [];
 }
 
-/* 午前/午後分類 */
+/* ------------------------------
+   共通関数
+------------------------------ */
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "午前";
-  const hour = new Date(ev.start.dateTime).getHours();
-  return hour < 12 ? "午前" : "午後";
+  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
 }
 
-/* テーブル描画 */
+function formatTime(d) {
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+
+function createEventHTML(ev, color) {
+  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+  const timeLabel = (start && end)
+    ? `${formatTime(start)}–${formatTime(end)}`
+    : "";
+
+  return `
+    <div class="event" style="background:${color}">
+      <div class="event-time">${timeLabel}</div>
+      <div class="event-title">${ev.summary || ""}</div>
+    </div>
+  `;
+}
+
+function createHolidayMap(holidayEvents) {
+  const map = {};
+  holidayEvents.forEach(ev => {
+    const date = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
+    map[date] = ev.summary;
+  });
+  return map;
+}
+
+function getWeekdayClass(dateObj, holidayMap, dateStr) {
+  if (holidayMap[dateStr]) return "weekday-holiday";
+  const w = dateObj.getDay();
+  if (w === 0) return "weekday-sun";
+  if (w === 6) return "weekday-sat";
+  return "";
+}
+
+function getRowClass(dateObj, holidayMap, dateStr) {
+  if (holidayMap[dateStr]) return "row-holiday";
+  const w = dateObj.getDay();
+  if (w === 0) return "row-sun";
+  if (w === 6) return "row-sat";
+  return "";
+}
+
+/* ------------------------------
+   テーブル描画
+------------------------------ */
 function renderTable(events, holidayMap, year, month, title, themeColor) {
   const box = document.createElement("div");
   box.className = "calendar-box";
@@ -406,8 +437,8 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
 
   for (let day = 1; day <= days; day++) {
     const dateObj = new Date(year, month, day);
-    const weekday = WEEKDAYS[dateObj.getDay()];
     const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const weekday = WEEKDAYS[dateObj.getDay()];
 
     const dayEvents = events.filter(ev => {
       const d = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
@@ -418,60 +449,36 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
 
     dayEvents.forEach(ev => {
       const time = classifyTime(ev);
-      const title = ev.summary || "";
-
-      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
-      const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
-
-      const format = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-      let timeLabel = "";
-      if (start && end) timeLabel = `${format(start)}–${format(end)}`;
-
-      const displayText = timeLabel ? `<time>${timeLabel}</time> ${title}` : title;
-
-      const eventColor = ev._facility
-        ? FACILITY_COLOR[ev._facility]
-        : themeColor;
+      const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
 
       slots[time].push({
-        start,
-        html: `<div class="event" style="background:${eventColor}">${displayText}</div>`
+        start: ev.start.dateTime ? new Date(ev.start.dateTime) : null,
+        html: createEventHTML(ev, color)
       });
     });
 
     slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
     slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
 
-    const merged = [...slots["午前"], ...slots["午後"]].sort(
-      (a,b)=> (a.start || 0) - (b.start || 0)
-    );
+    const merged = [...slots["午前"], ...slots["午後"]];
 
     const holidayName = holidayMap[dateStr]
       ? `<div class="holiday-name">${holidayMap[dateStr]}</div>`
       : "";
 
-    const isPC = window.innerWidth > 600;
+    const weekdayClass = getWeekdayClass(dateObj, holidayMap, dateStr);
+    const rowClass = getRowClass(dateObj, holidayMap, dateStr);
 
-    /* 曜日クラス */
-    let weekdayClass = "";
-    if (holidayMap[dateStr]) weekdayClass = "weekday-holiday";
-    else if (weekday === "日") weekdayClass = "weekday-sun";
-    else if (weekday === "土") weekdayClass = "weekday-sat";
+    const tr = document.createElement("tr");
+    tr.className = rowClass;
 
-const tr = document.createElement("tr");
-
-// 今日なら強調クラスを付ける
-const isToday =
-  dateObj.getFullYear() === today.getFullYear() &&
-  dateObj.getMonth() === today.getMonth() &&
-  dateObj.getDate() === today.getDate();
-
-if (isToday) tr.classList.add("today-highlight");
-
-    /* 行背景色 */
-    if (holidayMap[dateStr]) tr.className = "row-holiday";
-    else if (weekday === "日") tr.className = "row-sun";
-    else if (weekday === "土") tr.className = "row-sat";
+    if (
+      dateObj.getFullYear() === today.getFullYear() &&
+      dateObj.getMonth() === today.getMonth() &&
+      dateObj.getDate() === today.getDate()
+    ) {
+      tr.classList.add("today-highlight");
+    }
 
     tr.innerHTML = `
       <td>
@@ -483,7 +490,7 @@ if (isToday) tr.classList.add("today-highlight");
 
       <td class="pc-only">
         <div class="event-box">
-          ${isPC ? holidayName : ""}
+          ${holidayName}
           ${slots["午前"].map(e=>e.html).join("")}
         </div>
       </td>
@@ -494,12 +501,12 @@ if (isToday) tr.classList.add("today-highlight");
         </div>
       </td>
 
-     <td class="sp-only">
-       <div class="event-box">
-         ${holidayName}   <!-- ← スマホでもイベント列の先頭に祝日名 -->
-         ${merged.map(e=>e.html).join("")}
-       </div>
-     </td>
+      <td class="sp-only">
+        <div class="event-box">
+          ${holidayName}
+          ${merged.map(e=>e.html).join("")}
+        </div>
+      </td>
     `;
 
     table.appendChild(tr);
@@ -509,72 +516,101 @@ if (isToday) tr.classList.add("today-highlight");
   return box;
 }
 
-/* 月読み込み */
+/* ------------------------------
+   月読み込み
+------------------------------ */
 async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
 
   const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
   const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
-
-  const holidayMap = {};
-  holidayEvents.forEach(ev => {
-    const date = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
-    holidayMap[date] = ev.summary;
-  });
+  const holidayMap = createHolidayMap(holidayEvents);
 
   container.innerHTML = "";
   container.appendChild(
-    renderTable(
-      events,
-      holidayMap,
-      year,
-      month,
-      CALENDAR_NAMES[CURRENT_CALENDAR],
-      CALENDAR_COLORS[CURRENT_CALENDAR]
-    )
+    renderTable(events, holidayMap, year, month, CALENDAR_NAMES[CURRENT_CALENDAR], CALENDAR_COLORS[CURRENT_CALENDAR])
   );
 }
 
-/* 全て表示 */
+/* ------------------------------
+   月タブ生成（完全修正版）
+------------------------------ */
+const months = [];
+for (let i = -1; i <= 12; i++) {
+  const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+  months.push({ label: `${d.getFullYear()}年${d.getMonth()+1}月`, year: d.getFullYear(), month: d.getMonth() });
+}
+
+const tabArea = document.getElementById("monthTabs");
+
+months.forEach((m, idx) => {
+  const tab = document.createElement("div");
+  tab.className = "tab" + (idx === 1 ? " active" : "");
+  tab.dataset.year = m.year;
+  tab.dataset.month = m.month;
+  tab.textContent = m.label;
+
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    loadMonth(m.year, m.month);
+  });
+
+  tabArea.appendChild(tab);
+});
+
+/* ------------------------------
+   施設タブ（完全修正版）
+------------------------------ */
+document.querySelectorAll(".cal-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    CURRENT_CALENDAR = Number(tab.dataset.cal);
+
+    document.querySelectorAll(".cal-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    const activeTab = document.querySelector("#monthTabs .active");
+    const year = Number(activeTab.dataset.year);
+    const month = Number(activeTab.dataset.month);
+
+    loadMonth(year, month);
+  });
+});
+
+/* ------------------------------
+   全施設統合
+------------------------------ */
 document.getElementById("showAllBtn").onclick = async () => {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
 
   const activeTab = document.querySelector("#monthTabs .active");
-  const [year, month] = activeTab.textContent.match(/(\d+)年(\d+)月/).slice(1).map(Number);
+  const year = Number(activeTab.dataset.year);
+  const month = Number(activeTab.dataset.month);
 
   const allEvents = [];
 
   for (let cal = 1; cal <= 3; cal++) {
-    const events = await fetchEvents(CALENDAR_IDS[cal], year, month - 1);
+    const events = await fetchEvents(CALENDAR_IDS[cal], year, month);
     events.forEach(ev => {
       ev._facility = CALENDAR_NAMES[cal];
       allEvents.push(ev);
     });
   }
 
-  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month - 1);
-  const holidayMap = {};
-  holidayEvents.forEach(ev => {
-    const date = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
-    holidayMap[date] = ev.summary;
-  });
+  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+  const holidayMap = createHolidayMap(holidayEvents);
 
   container.innerHTML = "";
   container.appendChild(
-    renderTable(
-      allEvents,
-      holidayMap,
-      year,
-      month - 1,
-      "全施設統合",
-      CALENDAR_COLORS.all
-    )
+    renderTable(allEvents, holidayMap, year, month, "全施設統合", CALENDAR_COLORS.all)
   );
 };
 
-/* 初期表示 */
+/* ------------------------------
+   初期表示
+------------------------------ */
 loadMonth(today.getFullYear(), today.getMonth());
 </script>
 

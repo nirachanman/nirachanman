@@ -17,6 +17,7 @@
   --cal3-color: #c47c08;
   --calAll-color: #6b7280;
 
+  --topbar-height: 47px; /* 実際の高さに合わせる（後で調整OK） */
   --radius-pill: 30px;
   --shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
@@ -44,6 +45,30 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+.google-cal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin-left: auto;
+  background: #4285f4;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: 0.2s;
+}
+
+.google-cal-btn:hover {
+  background: #357ae8;
+}
+
+.google-cal-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .cal-tab {
@@ -85,7 +110,7 @@ body {
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
-  top: 48px;
+  top: var(--topbar-height);
   z-index: 999;
 }
 
@@ -302,9 +327,12 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
   <div class="show-all-btn" id="showAllBtn">📅 全て表示</div>
 
-  <a href="https://calendar.google.com" target="_blank" class="google-cal-btn">
-    🔗 Googleカレンダー
-  </a>
+<a href="https://calendar.google.com/" target="_blank" class="google-cal-btn" aria-label="Googleカレンダーを開く">
+  <svg viewBox="0 0 24 24" class="google-cal-icon">
+    <path fill="#4285F4" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+    <path fill="#FFF" d="M7 11h10v2H7z"/>
+  </svg>
+</a>
 </div>
 
 <div class="tabs" id="monthTabs"></div>
@@ -346,6 +374,15 @@ const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
 
+/* キーワードで色を変える設定 */
+const KEYWORD_COLORS = [
+  { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#8c6450" },
+  { keywords: ["2fs", "PC", "キルト", "英語"], color: "#3b7960" },
+  { keywords: ["2fl", "ヨガ", "体操", "洋品店"], color: "#745399" },
+  { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
+  // 必要に応じて追加
+];
+
 /* ------------------------------
    Google Calendar API
 ------------------------------ */
@@ -366,6 +403,17 @@ async function fetchEvents(calendarId, year, month) {
 /* ------------------------------
    共通関数
 ------------------------------ */
+function getKeywordColor(title) {
+  for (const rule of KEYWORD_COLORS) {
+    for (const kw of rule.keywords) {
+      if (title.includes(kw)) {
+        return rule.color;
+      }
+    }
+  }
+  return null;
+}
+
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "午前";
   return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
@@ -375,7 +423,13 @@ function formatTime(d) {
   return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
 
-function createEventHTML(ev, color) {
+function createEventHTML(ev, baseColor) {
+  const title = ev.summary || "";
+
+  // キーワードで色を上書き
+  const keywordColor = getKeywordColor(title);
+  const color = keywordColor || baseColor;
+
   const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
   const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
 
@@ -386,7 +440,7 @@ function createEventHTML(ev, color) {
   return `
     <div class="event" style="background:${color}">
       <div class="event-time">${timeLabel}</div>
-      <div class="event-title">${ev.summary || ""}</div>
+      <div class="event-title">${title}</div>
     </div>
   `;
 }

@@ -240,6 +240,11 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .sp-only { display: table-cell !important; }
 }
 
+@media (max-width: 600px) {
+  :root {
+    --topbar-height: 44px; /* スマホで高さが増える場合 */
+  }
+
 /* PC（横並び） */
 @media (min-width: 769px) {
   .event {

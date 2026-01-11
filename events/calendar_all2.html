@@ -17,7 +17,7 @@
   --cal3-color: #c47c08;
   --calAll-color: #6b7280;
 
-  --topbar-height: 43px; /* 実際の高さに合わせる（後で調整OK） */
+  --topbar-height: 44px; /* 実際の高さに合わせる（後で調整OK） */
   --radius-pill: 30px;
   --shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
@@ -186,7 +186,10 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 /* 祝日名 */
 .holiday-name {
-  display: inline-block;
+  display: flex;
+  align-items: center;     /* 上下中央寄せ */
+  justify-content: center; /* 左右中央寄せ（必要なら） */
+  min-height: 16px;        /* ← これが決め手 */
   padding: 1px 4px;
   background: #fca5a5;
   color: #7f1d1d;
@@ -194,6 +197,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-weight: 400;
   border-radius: 6px;
   margin-top: 2px;
+  line-height: 1;          /* ← 余計な縦伸びを防ぐ */
 }
 
 /* 曜日文字色 */
@@ -670,6 +674,3 @@ loadMonth(today.getFullYear(), today.getMonth());
 
 </body>
 </html>
-
-
-

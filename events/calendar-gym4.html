@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>社会体育館 年間予定表</title>
+
+<style>
+/* =========================================
+   画面表示用
+   ========================================= */
+
+:root {
+  --color-badminton:   #4caf50;
+  --color-tabletennis: #2196f3;
+  --color-volleyball:  #cca152;
+  --color-kids:        #9c27b0;
+  --color-iwate:       #ff69b4;
+  --color-cancel:      #ed1a3d;
+  --color-default:     #607d8b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, sans-serif;
+  background: #e8ffe8;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-y: scroll;
+}
+
+/* 固定タイトルバー */
+.title {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0; /* ← スクロールバー幅を自動調整 */
+  width: auto;
+  background: #28a745;
+  padding: 4px 0;
+  z-index: 9000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.title-text {
+  color: cca152;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  padding: 6px 0;
+}
+
+.month-tab.active {
+  background: #fff;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 12px 12px;
+}
+
+/* 月タイトル（画面用） */
+.month-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 2px 0 0px;
+  padding: 8px;
+  background: #28a745;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-title .sub-title {
+  font-size: 13px;
+  margin-left: 8px;
+  opacity: 0.9;
+}
+
+.toggle-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  color: #28a745;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* 折りたたみ */
+.month-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+  margin-bottom: 12px;
+}
+.month-content.open {
+  max-height: 5000px;
+}
+
+/* 日ボックス */
+.day-box {
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #999;
+  padding: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.day-box.sun { background: #ffecec; }
+.day-box.sat { background: #e8f4ff; }
+.day-box.holiday { background: #fff7d6; }
+
+.sun-text { color: #d9534f; }
+.sat-text { color: #0275d8; }
+.holiday-text { color: #d49b00; }
+
+.day-header {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.no-event {
+  background: #f2f2f2;
+  padding: 6px;
+  border-radius: 4px;
+  color: #777;
+  font-size: 12px;
+}
+
+/* イベント */
+.event-item {
+  padding: 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  border: 1px solid #ccc;
+}
+
+/* ホバー詳細 */
+.event-detail {
+  display: none;
+  position: fixed;
+  top: 40px;
+  left: 0;
+  width: 240px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 999999;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.event-item:hover .event-detail,
+.event-item.show-detail .event-detail {
+  display: block;
+}
+
+/* 時間ラベル */
+.time-block {
+  display: inline-block;
+  width: 210px;
+  font-size: 11px;
+  color: #555;
+}
+
+.time-am { color: #e67e22; }
+.time-pm { color: #2980b9; }
+.time-all { color: #555; }
+
+    /* =========================================
+       印刷レイアウト（最適化版）
+    ========================================= */
+    @media print {
+
+      /* 画面用タイトルバーは印刷しない */
+      .title {
+        display: none !important;
+      }
+
+      /* 全体の色・影をリセット */
+      body, body * {
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+
+      /* 印刷専用ヘッダー */
+      #print-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #000;
+      }
+      #print-header div {
+        flex: 1;
+        text-align: center;
+        font-size: 16px !important;
+        font-weight: bold;
+      }
+      .print-title-left  { text-align: left !important; }
+      .print-title-right { text-align: right !important; }
+
+      /* 月タイトル（緑帯）は印刷しない */
+      .month-title {
+        display: none !important;
+      }
+
+      /* すべての月を非表示 → 開いている月だけ印刷 */
+      .month-content {
+        display: none !important;
+      }
+      .month-content.open {
+        display: block !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+
+      /* 日ボックスはページ内で分割しない */
+      .day-box {
+        page-break-inside: avoid;
+        border: 1px solid #000 !important;
+        padding: 6px;
+        margin-bottom: 6px;
+      }
+
+      /* 1日のイベントを横並び1行にする */
+  .event-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;   /* ← ここが重要：折り返し許可 */
+    gap: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+      .event-item {
+        display: inline-block !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 4px 6px !important;
+        border: 1px solid #ccc !important;
+        background: #f2f2f2 !important;
+        page-break-inside: avoid;
+        white-space: nowrap !important;
+        flex: 1 1 auto !important;
+        max-width: 100% !important;
+        flex-shrink: 1 !important; 
+        min-width: 120px !important; /* ← 折り返しの最小幅（調整可） */
+        overflow: hidden !important; 
+        text-overflow: ellipsis !important;
+      }
+
+      .time-am,
+      .time-pm,
+      .time-all {
+        color: #000 !important;
+      }
+
+      .event-detail {
+        display: none !important;
+      }
+
+      /* ページ設定＋余白最小化 */
+      @page {
+        size: A4 portrait;
+        margin: 5mm; /* ← 一般より狭い余白（推奨値） */
+      }
+
+      /* ページ全体を強制的に幅100%にする（縮小率を変えても左右余白ゼロ） */
+      html, body {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 11px;
+      }
+
+      /* 表・ボックス類も幅100%に固定 */
+      .page,
+      .month-content,
+      .day-box,
+      .event-list {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 印刷専用ヘッダー -->
+<div id="print-header" style="display:none">
+  <div class="print-title-left">川口地区社会体育館</div>
+  <div class="print-title-center" id="print-month"></div>
+  <div class="print-title-right" id="print-date"></div>
+</div>
+
+<!-- 固定タイトルバー -->
+<div class="title">
+  <div class="title-text">月タイトル（緑帯）をクリックすると開閉</div>
+</div>
+
+<!-- カレンダー本体 -->
+<div class="page">
+  <div id="calendar-container"></div>
+</div>
+
+<script>
+/* ===== Google カレンダー API ===== */
+const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+const CALENDAR_ID = "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
+const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
+
+/* ===== 日付整形 ===== */
+function formatYMD(date) {
+  const y = date.getFullYear();
+  const m = ("0" + (date.getMonth() + 1)).slice(-2);
+  const d = ("0" + date.getDate()).slice(-2);
+  return `${y}-${m}-${d}`;
+}
+
+function weekdayName(n) {
+  return ["日","月","火","水","木","金","土"][n];
+}
+
+/* ===== 午前/午後表記 ===== */
+function formatAmPmTime(date) {
+  let h = date.getHours();
+  const m = date.getMinutes();
+  const period = h < 12 ? "午前" : "午後";
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  const mm = m === 0 ? "" : ":" + ("0" + m).slice(-2);
+  return `${period}${h}${mm}時`;
+}
+
+/* ===== Google カレンダー取得 ===== */
+async function loadEvents(startDate, endDate) {
+  const url = new URL("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(CALENDAR_ID) + "/events");
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("singleEvents", "true");
+  url.searchParams.set("orderBy", "startTime");
+  url.searchParams.set("timeMin", startDate.toISOString());
+  url.searchParams.set("timeMax", endDate.toISOString());
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.items || [];
+}
+
+async function loadHolidays(startDate, endDate) {
+  const url = new URL("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(HOLIDAY_CAL_ID) + "/events");
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("singleEvents", "true");
+  url.searchParams.set("orderBy", "startTime");
+  url.searchParams.set("timeMin", startDate.toISOString());
+  url.searchParams.set("timeMax", endDate.toISOString());
+  const res = await fetch(url);
+  const data = await res.json();
+  const map = {};
+  (data.items || []).forEach(ev => {
+    if (ev.start.date) map[ev.start.date] = ev.summary;
+  });
+  return map;
+}
+
+/* ===== イベントを日付ごとにまとめる ===== */
+function groupEventsByDate(events) {
+  const map = {};
+  const seen = new Set();
+
+  events.forEach(ev => {
+    if (seen.has(ev.id)) return;
+    seen.add(ev.id);
+
+    // 終日イベント（複数日対応）
+    if (ev.start.date && ev.end.date) {
+      const startDate = new Date(ev.start.date);
+      const endDate = new Date(ev.end.date);
+      endDate.setDate(endDate.getDate() - 1);
+
+      let cur = new Date(startDate);
+      while (cur <= endDate) {
+        const key = formatYMD(cur);
+        if (!map[key]) map[key] = [];
+        map[key].push(ev);
+        cur.setDate(cur.getDate() + 1);
+      }
+      return;
+    }
+
+    // 時間指定イベント
+    if (ev.start.dateTime) {
+      const d = new Date(ev.start.dateTime);
+      const key = formatYMD(d);
+      if (!map[key]) map[key] = [];
+      map[key].push(ev);
+    }
+  });
+
+  return map;
+}
+
+/* ===== 月 HTML（イベント横並び対応版） ===== */
+function renderMonthList(year, month, eventsByDate, holidayMap) {
+  const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+
+  const days = [];
+  const last = new Date(year, month + 1, 0).getDate();
+  for (let d = 1; d <= last; d++) {
+    const date = new Date(year, month, d);
+    days.push({
+      date,
+      ymd: formatYMD(date),
+      day: d,
+      weekday: date.getDay()
+    });
+  }
+
+  let html = `
+    <div class="month-title" data-month="${year}-${month}">
+      ${year}年 ${monthNames[month]}
+      <div class="toggle-icon" id="icon-${year}-${month}">＋</div>
+    </div>
+    <div class="month-content" id="content-${year}-${month}">
+  `;
+
+  days.forEach(d => {
+    const events = eventsByDate[d.ymd] || [];
+    const holidayName = holidayMap[d.ymd] || "";
+
+    let textClass = "";
+    if (holidayName) textClass = "holiday-text";
+    else if (d.weekday === 0) textClass = "sun-text";
+    else if (d.weekday === 6) textClass = "sat-text";
+
+    let boxClass = "";
+    if (holidayName) boxClass = "holiday";
+    else if (d.weekday === 0) boxClass = "sun";
+    else if (d.weekday === 6) boxClass = "sat";
+
+    html += `
+      <div class="day-box ${boxClass}">
+        <div class="day-header">
+          <span class="${textClass}">
+            ${d.day}日（${weekdayName(d.weekday)}）
+          </span>
+          ${holidayName ? `<span class="holiday-text">${holidayName}</span>` : ""}
+        </div>
+    `;
+
+    if (events.length === 0) {
+      html += `<div class="no-event">イベントなし</div>`;
+    } else {
+
+      // ★ 1日のイベントを横並びにするためのラッパー
+      html += `<div class="event-list">`;
+
+      events.forEach(ev => {
+        const title = ev.summary || "（無題）";
+        const desc = ev.description || "";
+        const loc = ev.location || "";
+        const start = ev.start.dateTime || ev.start.date;
+        const end = ev.end.dateTime || ev.end.date;
+
+        let timeLabel = "";
+        if (start.length === 10) {
+          timeLabel = `<strong class="time-block time-all">終日</strong>`;
+        } else {
+          const s = new Date(start);
+          const e = new Date(end);
+          const sLabel = formatAmPmTime(s);
+          const eLabel = formatAmPmTime(e);
+          const timeClass = s.getHours() < 12 ? "time-am" : "time-pm";
+          timeLabel = `<strong class="time-block ${timeClass}">${sLabel}〜${eLabel}</strong>`;
+        }
+
+        html += `
+          <div class="event-item">
+            <div class="event-time-title">
+              ${timeLabel}
+              <strong>${title}</strong>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`; // event-list end
+    }
+
+    html += `</div>`; // day-box end
+  });
+
+  html += `</div>`; // month-content end
+  return html;
+}
+
+/* ===== 月タイトルクリックで開閉 ===== */
+function enableMonthToggle(year) {
+  document.querySelectorAll(".month-title").forEach(title => {
+    title.addEventListener("click", () => {
+      const id = "content-" + title.dataset.month;
+      const content = document.getElementById(id);
+      const icon = document.getElementById("icon-" + title.dataset.month);
+
+      const isOpen = content.classList.contains("open");
+      if (isOpen) {
+        content.classList.remove("open");
+        icon.textContent = "＋";
+      } else {
+        content.classList.add("open");
+        icon.textContent = "−";
+      }
+
+      updatePrintHeader();
+    });
+  });
+}
+
+/* ===== 印刷ヘッダー更新 ===== */
+function updatePrintHeader() {
+  const open = document.querySelector(".month-content.open");
+  if (!open) return;
+
+  const monthIndex = Number(open.id.split("-")[2]);
+  const year = new Date().getFullYear();
+  const names = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+
+  document.getElementById("print-month").textContent =
+    `${year}年 ${names[monthIndex]}`;
+}
+
+/* ===== カレンダー描画（当月から15か月先まで） ===== */
+async function renderCalendar() {
+  const now = new Date();
+  const startYear = now.getFullYear();
+  const startMonth = now.getMonth();
+
+  const start = new Date(startYear, startMonth, 1);
+  const end = new Date(startYear, startMonth + 16, 1);
+
+  const events = await loadEvents(start, end);
+  const eventsByDate = groupEventsByDate(events);
+  const holidayMap = await loadHolidays(start, end);
+
+  let html = "";
+
+  for (let i = 0; i < 16; i++) {
+    const y = startYear + Math.floor((startMonth + i) / 12);
+    const m = (startMonth + i) % 12;
+
+    html += renderMonthList(y, m, eventsByDate, holidayMap);
+  }
+
+  document.getElementById("calendar-container").innerHTML = html;
+
+  enableMonthToggle(startYear);
+
+  // 初期表示：当月だけ開く
+  document.getElementById(`content-${startYear}-${startMonth}`).classList.add("open");
+  document.getElementById(`icon-${startYear}-${startMonth}`).textContent = "−";
+
+  document.getElementById("print-date").textContent =
+    new Date().toLocaleDateString("ja-JP");
+
+  updatePrintHeader();
+}
+
+renderCalendar();
+</script>
+
+</body>
+</html>

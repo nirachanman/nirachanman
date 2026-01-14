@@ -37,8 +37,9 @@ body {
   left: 0;
   right: 0; /* ← スクロールバー幅を自動調整 */
   width: auto;
-  background: #28a745;
-  padding: 4px 0;
+  background: #6F4E37; /* コーヒーブラウン */
+  color: white; /* 文字は白のままが見やすい */
+  padding: 2px 0;
   z-index: 9000;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
@@ -60,12 +61,12 @@ body {
 .page {
   max-width: 900px;
   margin: 0 auto;
-  padding: 60px 12px 12px;
+  padding: 40px 12px 12px;
 }
 
 /* 月タイトル（画面用） */
 .month-title {
-  font-size: 15px;
+  font-size: 22px;
   font-weight: bold;
   margin: 2px 0 0px;
   padding: 8px;
@@ -75,8 +76,14 @@ body {
   cursor: pointer;
   user-select: none;
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* ← タイトルを中央に */
   align-items: center;
+  position: relative; /* ← アイコンの絶対配置に必要 */
+}
+
+.month-title .toggle-icon {
+  position: absolute;
+  right: 10px;               /* ← 右端に固定 */
 }
 
 .month-title .sub-title {
@@ -114,9 +121,9 @@ body {
 .day-box {
   background: #fff;
   border-radius: 6px;
-  border: 1px solid #999;
-  padding: 8px;
-  margin-bottom: 8px;
+  border: 2px solid #999;
+  padding: 2px 8px; /* 上下2px、左右8px */
+  margin-bottom: 4px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
@@ -129,7 +136,7 @@ body {
 .holiday-text { color: #d49b00; }
 
 .day-header {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 4px;
   display: flex;
@@ -147,9 +154,9 @@ body {
 
 /* イベント */
 .event-item {
-  padding: 6px;
-  border-radius: 4px;
-  margin-bottom: 4px;
+  padding: 3px 6px; /* 上下3px、左右6px */
+  border-radius: 8px;
+  margin-bottom: 2px;
   font-size: 12px;
   cursor: pointer;
   position: relative;
@@ -189,6 +196,55 @@ body {
 .time-am { color: #e67e22; }
 .time-pm { color: #2980b9; }
 .time-all { color: #555; }
+
+@media (max-width: 767px) {
+  body {
+    font-size: 12px;
+  }
+
+  .month-tab,
+  .month-title,
+  .day-header,
+  .event-item,
+  .event-detail,
+  .no-event {
+    font-size: 14px;
+  }
+
+  .time-block {
+    font-size: 13px;
+  }
+
+  #print-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .time-block {
+    font-size: 12px;   /* ← 時間だけ小さく */
+    width: 130px;   /* ← 今より短くする */
+    margin-right: 4px; /* ← 時間とタイトルの間隔をさらに詰める */
+  }
+}
+
+@media (max-width: 480px) {
+  .day-header span {
+    font-size: 18px;   /* ← 好きな大きさに調整 */
+  }
+}
+
+@media (max-width: 480px) {
+  .month-title {
+    font-size: 20px;   /* ← 好きな大きさに */
+  }
+
+}
+@media (max-width: 480px) {
+  .month-title {
+    padding: 2px 8px;   /* 上下4px、左右8px → 隙間が半分に */
+  }
+}
 
     /* =========================================
        印刷レイアウト（最適化版）
@@ -326,7 +382,7 @@ body {
 
 <!-- 固定タイトルバー -->
 <div class="title">
-  <div class="title-text">月タイトル（緑帯）をクリックすると開閉</div>
+  <div class="title-text">月タイトル（緑の帯）をクリックすると開閉します。</div>
 </div>
 
 <!-- カレンダー本体 -->

@@ -74,7 +74,8 @@ body {
 .cal-tab {
   padding: 6px 16px;
   border-radius: var(--radius-pill);
-  background: #e5e7eb;
+  background: #e0edff; /* テーマ色の薄い版（例） */
+  color: var(--color-primary);
   cursor: pointer;
   white-space: nowrap;
   font-size: 14px;
@@ -135,13 +136,14 @@ body {
   padding: 5px;
 }
 
-.calendar-box {
-  margin-bottom: 10px;
-  padding: 5px;
-  background: #fff;
-  border-radius: 5px;
-  box-shadow: var(--shadow);
-}
+  .calendar-box {
+    background: var(--color-primary);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    padding: 2px;
+    margin: 6px auto;
+    max-width: 1000px;
+  }
 
 table {
   width: 100%;
@@ -256,6 +258,17 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .event-time {
     margin-right: 4px;
   }
+  .event-time {
+    color: #000 !important;
+    font-size: 12px;
+    color: #ffeb3b !important;
+  }
+
+  .event-title {
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
 
 /* 印刷用 */
 @media print {
@@ -297,25 +310,14 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .event-time {
     color: #000 !important;
   }
-}
 
-
-/* スマホ縦表示だけ 2 段にする */
-@media (max-width: 768px) {
-  .event {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .event-time {
-    font-size: 12px;
-    color: #ffeb3b !important;
-  }
-
-  .event-title {
-    font-size: 12px;
-    font-weight: 400;
+/* タブの文字色も黒に統一 */ 
+  .cal-tab, 
+  .tab, 
+  .show-all-btn { 
+    color: #000 !important; 
+    background: #fff !important; 
+    box-shadow: none !important; }
   }
 }
 
@@ -325,11 +327,10 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 <body>
 
 <div class="top-bar">
-  <div class="cal-tab active" data-cal="1">🏛 公民館</div>
-  <div class="cal-tab" data-cal="2">🏟 体育館</div>
-  <div class="cal-tab" data-cal="3">🏢 別館</div>
-
-  <div class="show-all-btn" id="showAllBtn">📅 全て表示</div>
+  <div class="cal-tab active" data-cal="1">公民館</div>
+  <div class="cal-tab" data-cal="2">体育館</div>
+  <div class="cal-tab" data-cal="3">別館</div>
+  <div class="show-all-btn" id="showAllBtn">📅 全</div>
 
 <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn" aria-label="Googleカレンダーを開く">
   <svg viewBox="0 0 24 24" class="google-cal-icon">
@@ -357,7 +358,11 @@ const CALENDAR_IDS = {
   3: "kawaguchi.public.hall.annex@gmail.com"
 };
 
-const CALENDAR_NAMES = { 1: "公民館", 2: "体育館", 3: "別館" };
+const CALENDAR_NAMES = {
+  1: "公民館",
+  2: "体育館",
+  3: "別館"
+};
 
 const CALENDAR_COLORS = {
   1: "var(--cal1-color)",
@@ -623,16 +628,19 @@ months.forEach((m, idx) => {
 ------------------------------ */
 document.querySelectorAll(".cal-tab").forEach(tab => {
   tab.addEventListener("click", () => {
-    CURRENT_CALENDAR = Number(tab.dataset.cal);
+    const cal = Number(tab.dataset.cal);
+    CURRENT_CALENDAR = cal;
 
     document.querySelectorAll(".cal-tab").forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
 
-    const activeTab = document.querySelector("#monthTabs .active");
-    const year = Number(activeTab.dataset.year);
-    const month = Number(activeTab.dataset.month);
+    const color = CALENDAR_COLORS[cal];
+    document.documentElement.style.setProperty("--color-primary", color);
+    document.body.style.background = color + "22";
 
-    loadMonth(year, month);
+    const activeTab = document.querySelector("#monthTabs .active");
+    const [year, month] = activeTab.textContent.match(/(\d+)年(\d+)月/).slice(1).map(Number);
+    loadMonth(year, month - 1);
   });
 });
 

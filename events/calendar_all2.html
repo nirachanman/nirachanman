@@ -391,22 +391,22 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   display: none;
 }
 
-/* 印刷用（元の仕様に戻した版） */
+/* 印刷用 */
 @media print {
 
-#print-header {
-  display: none;
-}
+  /* Webでは非表示のヘッダーは印刷でも非表示 */
+  #print-header {
+    display: none;
+  }
 
-@media print {
+  /* 固定ヘッダー類は印刷時に非表示 */
   .top-bar,
   .tabs,
   .header-fixed {
     display: none !important;
   }
-}
 
-@media print {
+  /* 印刷タイトル */
   #print-header {
     display: block;
     font-size: 20px;
@@ -416,8 +416,8 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     text-align: center;
     border-bottom: 2px solid #000;
   }
-}
 
+  /* 以下はあなたの元の設定をそのまま維持 */
   * {
     color: #000 !important;
     -webkit-print-color-adjust: exact;

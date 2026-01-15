@@ -382,7 +382,7 @@ body {
 
 <!-- 固定タイトルバー -->
 <div class="title">
-  <div class="title-text">月タイトル（緑の帯）をクリックすると開閉します。</div>
+  <div class="title-text">月タイトル（緑の帯）をクリックで開閉。</div>
 </div>
 
 <!-- カレンダー本体 -->
@@ -526,9 +526,9 @@ function renderMonthList(year, month, eventsByDate, holidayMap) {
     html += `
       <div class="day-box ${boxClass}">
         <div class="day-header">
-          <span class="${textClass}">
-            ${d.day}日（${weekdayName(d.weekday)}）
-          </span>
+<span class="${textClass}">
+  ${month + 1}月${d.day}日（${weekdayName(d.weekday)}）
+</span>
           ${holidayName ? `<span class="holiday-text">${holidayName}</span>` : ""}
         </div>
     `;

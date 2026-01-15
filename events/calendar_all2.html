@@ -17,21 +17,25 @@
   --cal3-color: #c47c08;
   --calAll-color: #6b7280;
 
-  --topbar-height: 47px; /* 実際の高さに合わせる（後で調整OK） */
   --radius-pill: 30px;
   --shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-html {
-  scrollbar-gutter: stable;
-}
+html { scrollbar-gutter: stable; }
 
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
   padding: 0;
   background: var(--color-bg);
+  transition: background 0.5s ease;
 }
+
+/* 背景色（施設ごと） */
+body.bg-gym        { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
+body.bg-kouminkan  { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
+body.bg-bekkan     { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
+body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
 /* 上部タブ行 */
 .top-bar {
@@ -42,11 +46,12 @@ body {
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
-  position: sticky;
+  position: static;
   top: 0;
   z-index: 1000;
 }
 
+/* Googleカレンダーボタン */
 .google-cal-btn {
   display: inline-flex;
   align-items: center;
@@ -54,12 +59,13 @@ body {
   width: 26px;
   height: 22px;
   padding: 0;
-  margin-left: auto;
+  margin-right: 10px !important; /* ← 施設タブとの距離を確保 */
   background: #4285f4;
   border-radius: 50%;
   text-decoration: none;
   box-shadow: var(--shadow);
   transition: 0.2s;
+  flex-shrink: 0;
 }
 
 .google-cal-btn:hover {
@@ -71,35 +77,90 @@ body {
   height: 22px;
 }
 
-.cal-tab {
-  padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  background: #e0edff; /* テーマ色の薄い版（例） */
-  color: var(--color-primary);
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: 14px;
-  box-shadow: var(--shadow);
-  transition: 0.25s;
+/* 光るボタン式 施設選択 UI */
+.calendar-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: 10px;
 }
 
-.cal-tab.active {
-  background: var(--color-primary);
-  color: #fff;
-  font-weight: 600;
-  transform: translateY(-2px);
+.calendar-buttons button {
+  padding: 4px 14px; /* ← 高さを小さく */
+  border-radius: 9999px;
+  border: 2px solid rgba(255,255,255,0.7);
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 140px; /* ← 横幅を縮める */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: all 0.35s cubic-bezier(.25,.8,.25,1);
+  position: relative;
+  overflow: visible;
 }
 
-.show-all-btn {
-  margin-left: auto;
-  padding: 6px 16px;
-  background: var(--color-primary);
-  color: #fff;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  font-size: 14px;
-  box-shadow: var(--shadow);
-  white-space: nowrap;
+/* 光るリング */
+.calendar-buttons button.active::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.9) 0%,
+    rgba(255,255,255,0.4) 40%,
+    rgba(255,255,255,0) 70%
+  );
+  box-shadow: 0 0 16px rgba(255,255,255,0.9);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.calendar-buttons button::before { opacity: 0; }
+
+/* アクティブ状態 */
+.calendar-buttons button.active {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  border-color: rgba(255,255,255,1);
+  background: rgba(255,255,255,0.98);
+}
+
+/* 施設ごとの色 */
+#btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
+#btn-gym.active        { background: #dff3e6; color: #0f6a2c; }
+#btn-bekkan.active     { background: #fff1d6; color: #a56a00; }
+#btn-all.active        { background: #f0f0f0; color: #333; }
+
+/* スマホ調整 */
+@media (max-width: 600px) {
+  .calendar-buttons {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .calendar-buttons button {
+    font-size: 12px;
+    padding: 4px 10px;
+    min-width: 75px;
+    margin-right: 3px;
+  }
+}
+
+/* 一体型固定ヘッダー */
+.header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* 月タブ */
@@ -110,23 +171,57 @@ body {
   overflow-x: auto;
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
-  position: sticky;
+  position: static;
   top: var(--topbar-height);
   z-index: 999;
 }
 
+/* 月タブ（光るボタン版） */
 .tab {
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  background: #e6e6e6;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: white;
+  border: 2px solid rgba(255,255,255,0.7);
   cursor: pointer;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: all 0.35s cubic-bezier(.25,.8,.25,1);
+  position: relative;
+  overflow: visible;
+}
+
+/* 光るリング */
+.tab.active::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.9) 0%,
+    rgba(255,255,255,0.4) 40%,
+    rgba(255,255,255,0) 70%
+  );
+  box-shadow: 0 0 16px rgba(255,255,255,0.9);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.tab::before { opacity: 0; }
+
+/* アクティブ状態 */
+.tab.active {
+  transform: none !important; /* 浮き上がりを消す 元はtranslateY(-3px) scale(1.06)*/
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  border-color: rgba(255,255,255,1);
+  background: rgba(255,255,255,0.98);
 }
 
 .tab.active {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #7fff00;
   font-weight: 600;
   transform: translateY(-2px);
 }
@@ -136,14 +231,14 @@ body {
   padding: 5px;
 }
 
-  .calendar-box {
-    background: var(--color-primary);
-    border-radius: 5px;
-    box-shadow: var(--shadow);
-    padding: 2px;
-    margin: 6px auto;
-    max-width: 1000px;
-  }
+.calendar-box {
+  background: var(--color-primary);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+  padding: 2px;
+  margin: 6px auto;
+  max-width: 1000px;
+}
 
 table {
   width: 100%;
@@ -189,9 +284,9 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 /* 祝日名 */
 .holiday-name {
   display: flex;
-  align-items: center;     /* 上下中央寄せ */
-  justify-content: center; /* 左右中央寄せ（必要なら） */
-  min-height: 16px;        /* ← これが決め手 */
+  align-items: center;
+  justify-content: center;
+  min-height: 16px;
   padding: 1px 4px;
   background: #fca5a5;
   color: #7f1d1d;
@@ -199,7 +294,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-weight: 400;
   border-radius: 6px;
   margin-top: 2px;
-  line-height: 1;          /* ← 余計な縦伸びを防ぐ */
+  line-height: 1;
 }
 
 /* 曜日文字色 */
@@ -257,9 +352,6 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
   .event-time {
     margin-right: 4px;
-  }
-  .event-time {
-    color: #000 !important;
     font-size: 12px;
     color: #ffeb3b !important;
   }
@@ -270,8 +362,61 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
-/* 印刷用 */
+/* スマホ時の月タブ */
+@media (max-width: 600px) {
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .tab {
+    font-size: 11px;
+    padding: 3px 10px;
+    min-width: 60px;
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .google-cal-btn,
+  .google-cal-wrapper,
+  .google-cal-label {
+    display: none !important;
+  }
+}
+
+/* Webでは非表示 */
+#print-header {
+  display: none;
+}
+
+/* 印刷用（元の仕様に戻した版） */
 @media print {
+
+#print-header {
+  display: none;
+}
+
+@media print {
+  .top-bar,
+  .tabs,
+  .header-fixed {
+    display: none !important;
+  }
+}
+
+@media print {
+  #print-header {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding: 6px 0;
+    text-align: center;
+    border-bottom: 2px solid #000;
+  }
+}
 
   * {
     color: #000 !important;
@@ -311,13 +456,17 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     color: #000 !important;
   }
 
-/* タブの文字色も黒に統一 */ 
-  .cal-tab, 
-  .tab, 
-  .show-all-btn { 
-    color: #000 !important; 
-    background: #fff !important; 
-    box-shadow: none !important; }
+  .tab,
+  .calendar-buttons button {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    transform: none !important;
+  }
+
+  .calendar-buttons button::before {
+    display: none !important;
   }
 }
 
@@ -325,31 +474,43 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 </head>
 
 <body>
+<div id="print-header"></div>
 
-<div class="top-bar">
-  <div class="cal-tab active" data-cal="1">公民館</div>
-  <div class="cal-tab" data-cal="2">体育館</div>
-  <div class="cal-tab" data-cal="3">別館</div>
-  <div class="show-all-btn" id="showAllBtn">📅 全</div>
+<!-- ============================
+     一体型固定ヘッダー
+============================ -->
+<div class="header-fixed">
 
-<a href="https://calendar.google.com/" target="_blank" class="google-cal-btn" aria-label="Googleカレンダーを開く">
-  <svg viewBox="0 0 24 24" class="google-cal-icon">
-    <path fill="#4285F4" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-    <path fill="#FFF" d="M7 11h10v2H7z"/>
-  </svg>
-</a>
+  <div class="top-bar">
+    <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
+      <svg viewBox="0 0 24 24" class="google-cal-icon">
+        <path fill="#4285F4" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+        <path fill="#FFF" d="M7 11h10v2H7z"/>
+      </svg>
+    </a>
+
+    <div class="calendar-buttons">
+      <button id="btn-kouminkan" data-cal="1" class="active">公民館</button>
+      <button id="btn-gym" data-cal="2">体育館</button>
+      <button id="btn-bekkan" data-cal="3">別館</button>
+      <button id="btn-all" data-cal="all">📅 全</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="monthTabs"></div>
+
 </div>
-
-<div class="tabs" id="monthTabs"></div>
 
 <div id="calendarContainer" class="calendar-wrapper">
   <div class="loading">読み込み中...</div>
 </div>
 
 <script>
-/* ------------------------------
-   定数
------------------------------- */
+console.log("JS動いてるよ");
+
+/* ============================
+   設定
+============================ */
 let CURRENT_CALENDAR = 1;
 
 const CALENDAR_IDS = {
@@ -383,59 +544,45 @@ const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
 
-/* キーワードで色を変える設定 */
-const KEYWORD_COLORS = [
-  { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
-  { keywords: ["2fs", "PC", "キルト", "英語"], color: "#7058a3" },
-  { keywords: ["2fl", "ヨガ", "体操", "洋品店"], color: "#9d5b8b" },
-  { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
-  // 必要に応じて追加
-];
+/* ============================
+   印刷タイトル更新
+============================ */
+function updatePrintHeader() {
+  const facility =
+    CURRENT_CALENDAR === "all"
+      ? "全施設"
+      : CALENDAR_NAMES[CURRENT_CALENDAR];
 
-/* ------------------------------
-   Google Calendar API
------------------------------- */
-async function fetchEvents(calendarId, year, month) {
-  const start = new Date(year, month, 1).toISOString();
-  const end = new Date(year, month + 1, 1).toISOString();
+  const activeTab = document.querySelector("#monthTabs .active");
+  const monthLabel = activeTab ? activeTab.textContent : "";
 
-  const url =
-    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
-    `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
-    `&singleEvents=true&orderBy=startTime`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.items || [];
+  document.getElementById("print-header").textContent =
+    `${facility}　${monthLabel}`;
 }
 
-/* ------------------------------
-   共通関数
------------------------------- */
+/* ============================
+   キーワード色
+============================ */
 function getKeywordColor(title) {
+  const KEYWORD_COLORS = [
+    { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
+    { keywords: ["2fs", "PC", "キルト", "英語"], color: "#7058a3" },
+    { keywords: ["2fl", "ヨガ", "体操", "洋品店"], color: "#9d5b8b" },
+    { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
+  ];
   for (const rule of KEYWORD_COLORS) {
     for (const kw of rule.keywords) {
-      if (title.includes(kw)) {
-        return rule.color;
-      }
+      if (title.includes(kw)) return rule.color;
     }
   }
   return null;
 }
 
-function classifyTime(ev) {
-  if (!ev.start.dateTime) return "午前";
-  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
-}
-
-function formatTime(d) {
-  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-}
-
+/* ============================
+   イベント HTML
+============================ */
 function createEventHTML(ev, baseColor) {
   const title = ev.summary || "";
-
-  // キーワードで色を上書き
   const keywordColor = getKeywordColor(title);
   const color = keywordColor || baseColor;
 
@@ -443,7 +590,7 @@ function createEventHTML(ev, baseColor) {
   const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
 
   const timeLabel = (start && end)
-    ? `${formatTime(start)}–${formatTime(end)}`
+    ? `${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}–${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}`
     : "";
 
   return `
@@ -454,6 +601,30 @@ function createEventHTML(ev, baseColor) {
   `;
 }
 
+/* ============================
+   Google Calendar API
+============================ */
+async function fetchEvents(calendarId, year, month) {
+  const start = new Date(year, month, 1).toISOString();
+  const end = new Date(year, month + 1, 1).toISOString();
+  const url =
+    `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
+    `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
+    `&singleEvents=true&orderBy=startTime`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.items || [];
+}
+
+function classifyTime(ev) {
+  if (!ev.start.dateTime) return "午前";
+  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
+}
+
+/* ============================
+   祝日
+============================ */
 function createHolidayMap(holidayEvents) {
   const map = {};
   holidayEvents.forEach(ev => {
@@ -479,9 +650,9 @@ function getRowClass(dateObj, holidayMap, dateStr) {
   return "";
 }
 
-/* ------------------------------
+/* ============================
    テーブル描画
------------------------------- */
+============================ */
 function renderTable(events, holidayMap, year, month, title, themeColor) {
   const box = document.createElement("div");
   box.className = "calendar-box";
@@ -513,7 +684,6 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
     dayEvents.forEach(ev => {
       const time = classifyTime(ev);
       const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
-
       slots[time].push({
         start: ev.start.dateTime ? new Date(ev.start.dateTime) : null,
         html: createEventHTML(ev, color)
@@ -579,12 +749,34 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
   return box;
 }
 
-/* ------------------------------
+/* ============================
    月読み込み
------------------------------- */
+============================ */
 async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+  if (CURRENT_CALENDAR === "all") {
+    const allEvents = [];
+    for (let c = 1; c <= 3; c++) {
+      const evs = await fetchEvents(CALENDAR_IDS[c], year, month);
+      evs.forEach(ev => {
+        ev._facility = CALENDAR_NAMES[c];
+        allEvents.push(ev);
+      });
+    }
+
+    const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+    const holidayMap = createHolidayMap(holidayEvents);
+
+    container.innerHTML = "";
+    container.appendChild(
+      renderTable(allEvents, holidayMap, year, month, "全施設統合", CALENDAR_COLORS.all)
+    );
+
+    updatePrintHeader();
+    return;
+  }
 
   const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
   const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
@@ -594,11 +786,13 @@ async function loadMonth(year, month) {
   container.appendChild(
     renderTable(events, holidayMap, year, month, CALENDAR_NAMES[CURRENT_CALENDAR], CALENDAR_COLORS[CURRENT_CALENDAR])
   );
+
+  updatePrintHeader();
 }
 
-/* ------------------------------
-   月タブ生成（完全修正版）
------------------------------- */
+/* ============================
+   月タブ生成
+============================ */
 const months = [];
 for (let i = -1; i <= 12; i++) {
   const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
@@ -617,69 +811,51 @@ months.forEach((m, idx) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
+
     loadMonth(m.year, m.month);
+    updatePrintHeader();
   });
 
   tabArea.appendChild(tab);
 });
 
-/* ------------------------------
-   施設タブ（完全修正版）
------------------------------- */
-document.querySelectorAll(".cal-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const cal = Number(tab.dataset.cal);
-    CURRENT_CALENDAR = cal;
+/* ============================
+   施設ボタン
+============================ */
+document.querySelectorAll(".calendar-buttons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const cal = btn.dataset.cal;
+    CURRENT_CALENDAR = cal === "all" ? "all" : Number(cal);
 
-    document.querySelectorAll(".cal-tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
+    document.querySelectorAll(".calendar-buttons button")
+      .forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-    const color = CALENDAR_COLORS[cal];
-    document.documentElement.style.setProperty("--color-primary", color);
-    document.body.style.background = color + "22";
+    document.documentElement.style.setProperty(
+      "--color-primary",
+      CALENDAR_COLORS[CURRENT_CALENDAR]
+ );
+
+    document.body.classList.remove("bg-gym", "bg-kouminkan", "bg-bekkan", "bg-all");
+    if (cal === "1") document.body.classList.add("bg-kouminkan");
+    if (cal === "2") document.body.classList.add("bg-gym");
+    if (cal === "3") document.body.classList.add("bg-bekkan");
+    if (cal === "all") document.body.classList.add("bg-all");
 
     const activeTab = document.querySelector("#monthTabs .active");
-    const [year, month] = activeTab.textContent.match(/(\d+)年(\d+)月/).slice(1).map(Number);
-    loadMonth(year, month - 1);
+    loadMonth(Number(activeTab.dataset.year), Number(activeTab.dataset.month));
+    updatePrintHeader();
   });
 });
 
-/* ------------------------------
-   全施設統合
------------------------------- */
-document.getElementById("showAllBtn").onclick = async () => {
-  const container = document.getElementById("calendarContainer");
-  container.innerHTML = `<div class="loading">読み込み中...</div>`;
-
-  const activeTab = document.querySelector("#monthTabs .active");
-  const year = Number(activeTab.dataset.year);
-  const month = Number(activeTab.dataset.month);
-
-  const allEvents = [];
-
-  for (let cal = 1; cal <= 3; cal++) {
-    const events = await fetchEvents(CALENDAR_IDS[cal], year, month);
-    events.forEach(ev => {
-      ev._facility = CALENDAR_NAMES[cal];
-      allEvents.push(ev);
-    });
-  }
-
-  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
-  const holidayMap = createHolidayMap(holidayEvents);
-
-  container.innerHTML = "";
-  container.appendChild(
-    renderTable(allEvents, holidayMap, year, month, "全施設統合", CALENDAR_COLORS.all)
-  );
-};
-
-/* ------------------------------
+/* ============================
    初期表示
------------------------------- */
-loadMonth(today.getFullYear(), today.getMonth());
+============================ */
+(function init() {
+  document.body.classList.add("bg-kouminkan");
+  loadMonth(today.getFullYear(), today.getMonth());
+  updatePrintHeader();
+})();
 </script>
-
 </body>
 </html>
-

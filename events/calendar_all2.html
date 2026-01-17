@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Googleカレンダーwide川口公民館</title>
+  <title>Googleカレンダーby川口公民館</title>
 
   <style>
 :root {
@@ -19,6 +19,10 @@
 
   --radius-pill: 30px;
   --shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 html { scrollbar-gutter: stable; }
@@ -55,38 +59,47 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 .google-cal-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 22px;
-  padding: 0;
-  margin-right: 10px !important; /* ← 施設タブとの距離を確保 */
+  gap: 4px;
+  padding: 4px 10px;
   background: #4285f4;
-  border-radius: 50%;
+  color: #fff;
   text-decoration: none;
-  box-shadow: var(--shadow);
-  transition: 0.2s;
-  flex-shrink: 0;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .google-cal-btn:hover {
-  background: #357ae8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(66,133,244,0.5);
 }
 
 .google-cal-icon {
-  width: 22px;
-  height: 22px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.google-cal-label {
+  white-space: nowrap;
 }
 
 /* 光るボタン式 施設選択 UI */
+/* PC（デフォルト） */
+/* ============================
+   施設タブ（PCデフォルト）
+============================ */
 .calendar-buttons {
   display: flex;
-  gap: 10px;
+  gap: 20px;
   flex-wrap: wrap;
   margin-left: 10px;
 }
 
 .calendar-buttons button {
-  padding: 4px 14px; /* ← 高さを小さく */
+  padding: 4px 14px;
   border-radius: 9999px;
   border: 2px solid rgba(255,255,255,0.7);
   background: white;
@@ -97,14 +110,14 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 140px; /* ← 横幅を縮める */
+  min-width: 140px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-  transition: all 0.35s cubic-bezier(.25,.8,.25,1);
+  transition: all 0.25s ease;
   position: relative;
   overflow: visible;
 }
 
-/* 光るリング */
+/* 光るリング（active時のみ） */
 .calendar-buttons button.active::before {
   content: "";
   position: absolute;
@@ -121,9 +134,11 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   z-index: -1;
 }
 
-.calendar-buttons button::before { opacity: 0; }
+.calendar-buttons button::before {
+  opacity: 0;
+}
 
-/* アクティブ状態 */
+/* active（選択中） */
 .calendar-buttons button.active {
   transform: translateY(-3px) scale(1.06);
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
@@ -131,26 +146,53 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   background: rgba(255,255,255,0.98);
 }
 
-/* 施設ごとの色 */
-#btn-kouminkan.active { background: #e3ecff; color: #0f4fb8; }
-#btn-gym.active        { background: #dff3e6; color: #0f6a2c; }
-#btn-bekkan.active     { background: #fff1d6; color: #a56a00; }
-#btn-all.active        { background: #f0f0f0; color: #333; }
+/* hover（active以外） */
+.calendar-buttons button:hover:not(.active) {
+  background: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(66,133,244,0.7);
+  border-color: rgba(255,255,255,1);
+}
 
-/* スマホ調整 */
+/* 施設ごとの色（active時） */
+#btn-kouminkan.active {
+  background: #c4d7ff;
+  color: #0a3a8c;
+}
+#btn-gym.active {
+  background: #bfe8cf;
+  color: #0a5222;
+}
+#btn-bekkan.active {
+  background: #ffe0a8;
+  color: #7a4f00;
+}
+#btn-all.active {
+  background: #d0d0d0;
+  color: #222;
+}
+
+/* ============================
+   スマホ調整
+============================ */
+@media (max-width: 600px) {
+  .calendar-buttons button.active {
+    transform: none !important;
+  }
+}
+
 @media (max-width: 600px) {
   .calendar-buttons {
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 4px;
-    flex-wrap: nowrap;
+    gap: 6px;
   }
 
   .calendar-buttons button {
     font-size: 12px;
-    padding: 4px 10px;
-    min-width: 75px;
-    margin-right: 3px;
+    padding: 3px 6px;
+    min-width: 80px;
+    gap: 4px;
+    border-width: 1px;
+    border-radius: 20px;
   }
 }
 
@@ -391,22 +433,22 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   display: none;
 }
 
-/* 印刷用 */
+/* 印刷用（元の仕様に戻した版） */
 @media print {
 
-  /* Webでは非表示のヘッダーは印刷でも非表示 */
-  #print-header {
-    display: none;
-  }
+#print-header {
+  display: none;
+}
 
-  /* 固定ヘッダー類は印刷時に非表示 */
+@media print {
   .top-bar,
   .tabs,
   .header-fixed {
     display: none !important;
   }
+}
 
-  /* 印刷タイトル */
+@media print {
   #print-header {
     display: block;
     font-size: 20px;
@@ -416,8 +458,8 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     text-align: center;
     border-bottom: 2px solid #000;
   }
+}
 
-  /* 以下はあなたの元の設定をそのまま維持 */
   * {
     color: #000 !important;
     -webkit-print-color-adjust: exact;
@@ -482,19 +524,17 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 <div class="header-fixed">
 
   <div class="top-bar">
-    <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
-      <svg viewBox="0 0 24 24" class="google-cal-icon">
-        <path fill="#4285F4" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-        <path fill="#FFF" d="M7 11h10v2H7z"/>
-      </svg>
-    </a>
-
     <div class="calendar-buttons">
-      <button id="btn-kouminkan" data-cal="1" class="active">公民館</button>
-      <button id="btn-gym" data-cal="2">体育館</button>
-      <button id="btn-bekkan" data-cal="3">別館</button>
-      <button id="btn-all" data-cal="all">📅 全</button>
+      <button id="btn-kouminkan" data-cal="1" class="active">🏬 公民館</button>
+      <button id="btn-gym" data-cal="2">🏃 体育館</button> 
+      <button id="btn-bekkan" data-cal="3">📚 別館</button>
+      <button id="btn-all" data-cal="all">🔘 全施設</button>
     </div>
+<a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
+  <span class="google-cal-icon">📅</span>
+  <span class="google-cal-label">Google カレンダーで編集</span>
+</a>
+
   </div>
 
   <div class="tabs" id="monthTabs"></div>
@@ -593,10 +633,16 @@ function createEventHTML(ev, baseColor) {
     ? `${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}–${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}`
     : "";
 
+  // ★ 公民館アイコン
+  const iconK = ev._facility === "公民館" ? "" : "";
+
+  // ★ 別館アイコン
+  const iconB = ev._facility === "別館" ? "" : "";
+
   return `
     <div class="event" style="background:${color}">
       <div class="event-time">${timeLabel}</div>
-      <div class="event-title">${title}</div>
+      <div class="event-title">${iconK}${iconB}${title}</div>
     </div>
   `;
 }
@@ -778,16 +824,30 @@ async function loadMonth(year, month) {
     return;
   }
 
-  const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
-  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
-  const holidayMap = createHolidayMap(holidayEvents);
+// ★ 単独施設モード
+const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
 
-  container.innerHTML = "";
-  container.appendChild(
-    renderTable(events, holidayMap, year, month, CALENDAR_NAMES[CURRENT_CALENDAR], CALENDAR_COLORS[CURRENT_CALENDAR])
-  );
+// ★ ここを追加：単独施設モードでも _facility を付ける
+events.forEach(ev => {
+  ev._facility = CALENDAR_NAMES[CURRENT_CALENDAR];
+});
 
-  updatePrintHeader();
+const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+const holidayMap = createHolidayMap(holidayEvents);
+
+container.innerHTML = "";
+container.appendChild(
+  renderTable(
+    events,
+    holidayMap,
+    year,
+    month,
+    CALENDAR_NAMES[CURRENT_CALENDAR],
+    CALENDAR_COLORS[CURRENT_CALENDAR]
+  )
+);
+
+updatePrintHeader();
 }
 
 /* ============================
@@ -859,5 +919,3 @@ document.querySelectorAll(".calendar-buttons button").forEach(btn => {
 </script>
 </body>
 </html>
-
-

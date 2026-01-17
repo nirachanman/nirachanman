@@ -14,7 +14,7 @@
 
   --cal1-color: #4a6fa5;
   --cal2-color: #0d8a6a;
-  --cal3-color: #c47c08;
+  --cal3-color: #b06f07;
   --calAll-color: #6b7280;
 
   --radius-pill: 30px;
@@ -44,6 +44,7 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 /* 上部タブ行 */
 .top-bar {
   display: flex;
+  flex-wrap: nowrap; /* ★ 折り返さない */
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
@@ -58,6 +59,7 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 /* Googleカレンダーボタン */
 .google-cal-btn {
   display: inline-flex;
+  flex-shrink: 0; /* ★ Googleカレンダーも潰れないように */
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
@@ -94,12 +96,13 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 .calendar-buttons {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* ★ 折り返さない */
   margin-left: 10px;
 }
 
 .calendar-buttons button {
   padding: 4px 14px;
+  flex-shrink: 0; /* ★ 幅が潰れないように */
   border-radius: 9999px;
   border: 2px solid rgba(255,255,255,0.7);
   background: white;
@@ -695,12 +698,16 @@ function updatePrintHeader() {
 
 /* ============================
    キーワード色
+    { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
+    { keywords: ["2fs", "PC", "キルト", "英語"], color: "#7058a3" },
+    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#9d5b8b" },
+    { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
 ============================ */
 function getKeywordColor(title) {
   const KEYWORD_COLORS = [
     { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
-    { keywords: ["2fs", "PC", "キルト", "英語"], color: "#7058a3" },
-    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#9d5b8b" },
+    { keywords: ["2fs", "PC", "キルト", "英語"], color: "#4a6fa5" },
+    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#4a6fa5" },
     { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
   ];
   for (const rule of KEYWORD_COLORS) {

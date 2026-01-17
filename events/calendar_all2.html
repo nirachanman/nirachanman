@@ -364,6 +364,70 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-weight: 400 !important;
 }
 
+/* イベント詳細ツールチップ */
+.event-title {
+  position: relative;
+}
+
+/* ツールチップ本体（最初は非表示） */
+.tooltip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  background: rgba(255,255,255,0.95);
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.3;
+  width: 260px;
+  text-align: left;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  border: 1px solid rgba(0,0,0,0.1);
+  pointer-events: none;
+  display: none;
+}
+
+/* ★ 各行を箇条書き風にする */
+.tooltip-line {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  line-height: 1.3;
+}
+
+.tooltip-line::before {
+  content: "•";   /* ★ 箇条書きマーカー */
+  color: #555;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+/* hover したときだけ表示 */
+.event-title:hover .tooltip {
+  display: block;
+}
+
+.event-title.facility-k .tooltip {
+  background: #fff;
+  color: #4a6fa5;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+.event-title.facility-t .tooltip {
+  background: #fff;
+  color: #0d8a6a;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+.event-title.facility-b .tooltip {
+  background: #fff;
+  color: #c47c08;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
 .event time {
   color: #ffff22;
   font-weight: 500;
@@ -510,6 +574,29 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .calendar-buttons button::before {
     display: none !important;
   }
+
+.tooltip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  width: 360px;
+  text-align: left;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  pointer-events: none;
+  display: none;
+}
+.event-title:hover .tooltip {
+  display: block;
+}
+
 }
 
   </style>
@@ -633,20 +720,31 @@ function createEventHTML(ev, baseColor) {
     ? `${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}–${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}`
     : "";
 
-  // ★ 公民館アイコン
-  const iconK = ev._facility === "公民館" ? "" : "";
+  // 施設クラスを決定
+  const facilityClass =
+    ev._facility === "公民館" ? "facility-k" :
+    ev._facility === "体育館"   ? "facility-t" :
+    ev._facility === "別館"   ? "facility-b" :
+    "facility-default";
 
-  // ★ 別館アイコン
-  const iconB = ev._facility === "別館" ? "" : "";
+  // ★ 説明文を行ごとに分割して箇条書きHTMLに変換
+  const detailLines = (ev.description || "")
+    .split("\n")
+    .map(line => `<div class="tooltip-line">${line}</div>`)
+    .join("");
 
   return `
     <div class="event" style="background:${color}">
       <div class="event-time">${timeLabel}</div>
-      <div class="event-title">${iconK}${iconB}${title}</div>
+
+      <div class="event-title ${facilityClass}">
+        ${title}
+        <div class="tooltip">${detailLines}</div>
+      </div>
+
     </div>
   `;
 }
-
 /* ============================
    Google Calendar API
 ============================ */

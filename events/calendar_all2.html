@@ -492,6 +492,12 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
+@media (hover: none) {
+  .event-title:hover .tooltip {
+    display: none;
+  }
+}
+
 /* Webでは非表示 */
 #print-header {
   display: none;
@@ -1004,6 +1010,25 @@ document.querySelectorAll(".calendar-buttons button").forEach(btn => {
     loadMonth(Number(activeTab.dataset.year), Number(activeTab.dataset.month));
     updatePrintHeader();
   });
+});
+
+document.addEventListener("click", function(e) {
+  const title = e.target.closest(".event-title");
+  if (!title) return;
+
+  const tooltip = title.querySelector(".tooltip");
+  if (!tooltip) return;
+
+  // すでに表示中なら閉じる
+  if (tooltip.style.display === "block") {
+    tooltip.style.display = "none";
+  } else {
+    // 他のツールチップを全部閉じる
+    document.querySelectorAll(".tooltip").forEach(t => t.style.display = "none");
+
+    // このツールチップを開く
+    tooltip.style.display = "block";
+  }
 });
 
 /* ============================

@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Googleカレンダーby川口公民館</title>
 
-  <style>
+<style>
+/* ============================
+   Root Variables
+============================ */
 :root {
   --color-primary: #4a6fa5;
   --color-bg: #f3f4f6;
@@ -25,7 +28,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html { scrollbar-gutter: stable; }
+html {
+  scrollbar-gutter: stable;
+}
 
 body {
   font-family: system-ui, sans-serif;
@@ -35,16 +40,20 @@ body {
   transition: background 0.5s ease;
 }
 
-/* 背景色（施設ごと） */
-body.bg-gym        { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
-body.bg-kouminkan  { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
-body.bg-bekkan     { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
-body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
+/* ============================
+   Background Colors
+============================ */
+body.bg-gym       { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
+body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
+body.bg-bekkan    { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
+body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-/* 上部タブ行 */
+/* ============================
+   Top Bar
+============================ */
 .top-bar {
   display: flex;
-  flex-wrap: nowrap; /* ★ 折り返さない */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
@@ -54,12 +63,21 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   position: static;
   top: 0;
   z-index: 1000;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Googleカレンダーボタン */
+.top-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================
+   Google Calendar Button
+============================ */
 .google-cal-btn {
   display: inline-flex;
-  flex-shrink: 0; /* ★ Googleカレンダーも潰れないように */
+  flex-shrink: 0;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
@@ -79,30 +97,22 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   box-shadow: 0 4px 10px rgba(66,133,244,0.5);
 }
 
-.google-cal-icon {
-  font-size: 16px;
-  line-height: 1;
-}
+.google-cal-icon  { font-size: 16px; line-height: 1; }
+.google-cal-label { white-space: nowrap; }
 
-.google-cal-label {
-  white-space: nowrap;
-}
-
-/* 光るボタン式 施設選択 UI */
-/* PC（デフォルト） */
 /* ============================
-   施設タブ（PCデフォルト）
+   Facility Buttons (PC)
 ============================ */
 .calendar-buttons {
   display: flex;
   gap: 20px;
-  flex-wrap: nowrap; /* ★ 折り返さない */
+  flex-wrap: nowrap;
   margin-left: 10px;
 }
 
 .calendar-buttons button {
   padding: 4px 14px;
-  flex-shrink: 0; /* ★ 幅が潰れないように */
+  flex-shrink: 0;
   border-radius: 9999px;
   border: 2px solid rgba(255,255,255,0.7);
   background: white;
@@ -120,7 +130,7 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   overflow: visible;
 }
 
-/* 光るリング（active時のみ） */
+/* Active Glow */
 .calendar-buttons button.active::before {
   content: "";
   position: absolute;
@@ -141,7 +151,7 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   opacity: 0;
 }
 
-/* active（選択中） */
+/* Active */
 .calendar-buttons button.active {
   transform: translateY(-3px) scale(1.06);
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
@@ -149,7 +159,7 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   background: rgba(255,255,255,0.98);
 }
 
-/* hover（active以外） */
+/* Hover */
 .calendar-buttons button:hover:not(.active) {
   background: #fff;
   transform: scale(1.15);
@@ -157,26 +167,14 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   border-color: rgba(255,255,255,1);
 }
 
-/* 施設ごとの色（active時） */
-#btn-kouminkan.active {
-  background: #c4d7ff;
-  color: #0a3a8c;
-}
-#btn-gym.active {
-  background: #bfe8cf;
-  color: #0a5222;
-}
-#btn-bekkan.active {
-  background: #ffe0a8;
-  color: #7a4f00;
-}
-#btn-all.active {
-  background: #d0d0d0;
-  color: #222;
-}
+/* Facility Colors */
+#btn-kouminkan.active { background: #c4d7ff; color: #0a3a8c; }
+#btn-gym.active       { background: #bfe8cf; color: #0a5222; }
+#btn-bekkan.active    { background: #ffe0a8; color: #7a4f00; }
+#btn-all.active       { background: #d0d0d0; color: #222; }
 
 /* ============================
-   スマホ調整
+   Smartphone Adjustments
 ============================ */
 @media (max-width: 600px) {
   .calendar-buttons button.active {
@@ -190,8 +188,8 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   }
 
   .calendar-buttons button {
-    font-size: 12px;
-    padding: 3px 6px;
+    font-size: 14px;
+    padding: 6px 6px;
     min-width: 80px;
     gap: 4px;
     border-width: 1px;
@@ -199,7 +197,9 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   }
 }
 
-/* 一体型固定ヘッダー */
+/* ============================
+   Fixed Header
+============================ */
 .header-fixed {
   position: sticky;
   top: 0;
@@ -208,7 +208,9 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   border-bottom: 1px solid var(--color-border);
 }
 
-/* 月タブ */
+/* ============================
+   Month Tabs
+============================ */
 .tabs {
   display: flex;
   gap: 4px;
@@ -221,7 +223,6 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   z-index: 999;
 }
 
-/* 月タブ（光るボタン版） */
 .tab {
   padding: 4px 12px;
   border-radius: 9999px;
@@ -237,7 +238,6 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   overflow: visible;
 }
 
-/* 光るリング */
 .tab.active::before {
   content: "";
   position: absolute;
@@ -254,24 +254,23 @@ body.bg-all        { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   z-index: -1;
 }
 
-.tab::before { opacity: 0; }
-
-/* アクティブ状態 */
-.tab.active {
-  transform: none !important; /* 浮き上がりを消す 元はtranslateY(-3px) scale(1.06)*/
-  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-  border-color: rgba(255,255,255,1);
-  background: rgba(255,255,255,0.98);
+.tab::before {
+  opacity: 0;
 }
 
 .tab.active {
+  transform: none !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+  border-color: rgba(255,255,255,1);
   background: var(--color-primary);
   color: #7fff00;
   font-weight: 600;
   transform: translateY(-2px);
 }
 
-/* カレンダー領域 */
+/* ============================
+   Calendar Area
+============================ */
 .calendar-wrapper {
   padding: 5px;
 }
@@ -299,17 +298,17 @@ th, td {
   line-height: 1.2;
 }
 
-/* 列幅（PC） */
+/* ============================
+   Date Cells
+============================ */
 th:nth-child(1), td:nth-child(1) { width: 10% !important; }
 th:nth-child(2), td:nth-child(2) { width: 35% !important; }
 th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
-/* スマホ列幅 */
 @media (max-width: 600px) {
   th:nth-child(1), td:nth-child(1) { width: 20% !important; }
 }
 
-/* 日付セル */
 .date-cell {
   text-align: right;
   font-weight: 600;
@@ -320,13 +319,13 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-family: "Roboto Mono", "Courier New", monospace;
 }
 
-/* 本日強調（画面表示のみ） */
+/* Today Highlight */
 .today-highlight td {
   background: #fef9c3 !important;
   border-color: #facc15 !important;
 }
 
-/* 祝日名 */
+/* Holiday Label */
 .holiday-name {
   display: flex;
   align-items: center;
@@ -342,17 +341,19 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   line-height: 1;
 }
 
-/* 曜日文字色 */
-.weekday-sun { color: #e11d48 !important; }
-.weekday-sat { color: #2563eb !important; }
+/* Weekday Colors */
+.weekday-sun     { color: #e11d48 !important; }
+.weekday-sat     { color: #2563eb !important; }
 .weekday-holiday { color: #d97706 !important; }
 
-/* 行背景色 */
-.row-sun { background: #fff1f2 !important; }
-.row-sat { background: #eff6ff !important; }
+/* Row Backgrounds */
+.row-sun     { background: #fff1f2 !important; }
+.row-sat     { background: #eff6ff !important; }
 .row-holiday { background: #fff7ed !important; }
 
-/* イベント */
+/* ============================
+   Events
+============================ */
 .event-box {
   display: flex;
   flex-wrap: wrap;
@@ -367,12 +368,11 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-weight: 400 !important;
 }
 
-/* イベント詳細ツールチップ */
 .event-title {
   position: relative;
 }
 
-/* ツールチップ本体（最初は非表示） */
+/* Tooltip */
 .tooltip {
   position: absolute;
   top: -8px;
@@ -393,7 +393,6 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   display: none;
 }
 
-/* ★ 各行を箇条書き風にする */
 .tooltip-line {
   display: flex;
   gap: 6px;
@@ -402,17 +401,17 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 }
 
 .tooltip-line::before {
-  content: "•";   /* ★ 箇条書きマーカー */
+  content: "•";
   color: #555;
   font-size: 14px;
   line-height: 1.3;
 }
 
-/* hover したときだけ表示 */
 .event-title:hover .tooltip {
   display: block;
 }
 
+/* Tooltip Colors */
 .event-title.facility-k .tooltip {
   background: #fff;
   color: #4a6fa5;
@@ -441,7 +440,9 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-weight: 500;
 }
 
-/* PC/スマホ切替 */
+/* ============================
+   PC / SP Switch
+============================ */
 .pc-only { display: table-cell; }
 .sp-only { display: none; }
 
@@ -450,7 +451,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .sp-only { display: table-cell !important; }
 }
 
-/* PC（横並び） */
+/* PC Event Layout */
 @media (min-width: 769px) {
   .event {
     display: inline-flex !important;
@@ -471,7 +472,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
-/* スマホ時の月タブ */
+/* Smartphone Month Tabs */
 @media (max-width: 600px) {
   .tabs {
     overflow-x: auto;
@@ -487,6 +488,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
+/* Hide Google Calendar on SP */
 @media (max-width: 600px) {
   .google-cal-btn,
   .google-cal-wrapper,
@@ -495,43 +497,45 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
+/* Disable hover on touch devices */
 @media (hover: none) {
   .event-title:hover .tooltip {
     display: none;
   }
 }
 
-/* Webでは非表示 */
-#print-header {
-  display: none;
-}
-
-/* 印刷用（元の仕様に戻した版） */
-@media print {
-
+/* ============================
+   Print Styles
+============================ */
 #print-header {
   display: none;
 }
 
 @media print {
-  .top-bar,
-  .tabs,
-  .header-fixed {
-    display: none !important;
-  }
-}
 
-@media print {
   #print-header {
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    padding: 6px 0;
-    text-align: center;
-    border-bottom: 2px solid #000;
+    display: none;
   }
-}
+
+  @media print {
+    .top-bar,
+    .tabs,
+    .header-fixed {
+      display: none !important;
+    }
+  }
+
+  @media print {
+    #print-header {
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding: 6px 0;
+      text-align: center;
+      border-bottom: 2px solid #000;
+    }
+  }
 
   * {
     color: #000 !important;
@@ -545,9 +549,9 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     color: #000 !important;
   }
 
-  .row-sun    { background: #fff1f2 !important; }
-  .row-sat    { background: #eff6ff !important; }
-  .row-holiday{ background: #fff7ed !important; }
+  .row-sun     { background: #fff1f2 !important; }
+  .row-sat     { background: #eff6ff !important; }
+  .row-holiday { background: #fff7ed !important; }
 
   .event,
   .holiday-name,
@@ -558,9 +562,9 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     background: #fff !important;
   }
 
-  tr.row-sun td    { background: #fff1f2 !important; }
-  tr.row-sat td    { background: #eff6ff !important; }
-  tr.row-holiday td{ background: #fff7ed !important; }
+  tr.row-sun td     { background: #fff1f2 !important; }
+  tr.row-sat td     { background: #eff6ff !important; }
+  tr.row-holiday td { background: #fff7ed !important; }
 
   .today-highlight td {
     background: #fff !important;
@@ -584,31 +588,30 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     display: none !important;
   }
 
-.tooltip {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translate(-50%, -100%);
-  background: rgba(0,0,0,0.9);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.6;
-  width: 360px;
-  text-align: left;
-  z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-  pointer-events: none;
-  display: none;
-}
-.event-title:hover .tooltip {
-  display: block;
-}
+  .tooltip {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    background: rgba(0,0,0,0.9);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    width: 360px;
+    text-align: left;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    pointer-events: none;
+    display: none;
+  }
 
+  .event-title:hover .tooltip {
+    display: block;
+  }
 }
-
-  </style>
+</style>
 </head>
 
 <body>

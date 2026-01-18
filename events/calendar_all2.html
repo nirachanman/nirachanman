@@ -708,11 +708,11 @@ function updatePrintHeader() {
 ============================ */
 function getKeywordColor(title) {
   const KEYWORD_COLORS = [
+    { keywords: ["仮）"], color: "#a9a9a9" },
+    { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" },
     { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
     { keywords: ["2fs", "PC", "キルト", "英語"], color: "#4a6fa5" },
-    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#4a6fa5" },
-    { keywords: ["仮）"], color: "#a9a9a9" },
-    { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
+    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#4a6fa5" }
   ];
   for (const rule of KEYWORD_COLORS) {
     for (const kw of rule.keywords) {

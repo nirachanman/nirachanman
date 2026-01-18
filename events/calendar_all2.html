@@ -296,17 +296,17 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 }
 
 @media (max-width: 500px) {
-  .tabs {
-    gap: 2px;
-  }
-
   .tab {
     padding: 2px 6px;
     font-size: 10px;
-    white-space: nowrap;
     max-width: 80px;
+
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    direction: rtl;     /* 左側を省略 */
+    text-align: left;   /* 見た目は左揃え */
   }
 }
 
@@ -1098,3 +1098,4 @@ document.addEventListener("click", function(e) {
 </script>
 </body>
 </html>
+

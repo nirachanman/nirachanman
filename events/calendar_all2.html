@@ -205,7 +205,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
     width: 190px !important;      /* ← 大きすぎない固定幅 */
     max-width: 85vw !important;   /* ← 画面からはみ出さない */
-    padding: 8px 10px !important;
+    padding: 4px 4px !important;
 
     font-size: 15px !important;
     line-height: 1.5 !important;
@@ -293,6 +293,21 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   color: #7fff00;
   font-weight: 600;
   transform: translateY(-2px);
+}
+
+@media (max-width: 500px) {
+  .tabs {
+    gap: 2px;
+  }
+
+  .tab {
+    padding: 2px 6px;
+    font-size: 10px;
+    white-space: nowrap;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* ============================

@@ -195,16 +195,32 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
     border-width: 1px;
     border-radius: 20px;
   }
-
 }
+
 @media (max-width: 600px) {
   .tooltip {
-    font-size: 20px;   /* ← 好きな大きさに変更 */
-    line-height: 1.6;
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-130%) !important;
+
+    width: 190px !important;      /* ← 大きすぎない固定幅 */
+    max-width: 85vw !important;   /* ← 画面からはみ出さない */
+    padding: 8px 10px !important;
+
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+
+    background: rgba(255,255,255,0.95) !important;
+    color: #333 !important;
+    z-index: 9999 !important;
+  }
+
+  .tooltip-line {
+    font-size: 16px !important;
   }
 
   .tooltip-line::before {
-    font-size: 18px;   /* 箇条書きの点も少し大きく */
+    font-size: 16px !important;
   }
 }
 
@@ -423,22 +439,25 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 }
 
 /* Tooltip Colors */
+/* 公民館（青・淡い色） */
 .event-title.facility-k .tooltip {
-  background: #fff;
-  color: #4a6fa5;
-  border: 1px solid rgba(0,0,0,0.2);
+  background: #e8f0ff !important;   /* 淡い青 */
+  color: #000 !important;           /* 黒文字 */
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
+/* 体育館（緑・淡い色） */
 .event-title.facility-t .tooltip {
-  background: #fff;
-  color: #0d8a6a;
-  border: 1px solid rgba(0,0,0,0.2);
+  background: #e6f7ef !important;   /* 淡い緑 */
+  color: #000 !important;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
+/* 別館（オレンジ・淡い色） */
 .event-title.facility-b .tooltip {
-  background: #fff;
-  color: #c47c08;
-  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff4e0 !important;   /* 淡いオレンジ */
+  color: #000 !important;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
 .event time {

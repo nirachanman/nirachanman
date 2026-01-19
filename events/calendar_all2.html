@@ -187,20 +187,12 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   position: relative;
   overflow: visible;
 }
-.tab.active::before {
-  content: "";
-  position: absolute;
-  inset: -5px;
-  border-radius: 9999px;
-  background: radial-gradient(circle,
-    rgba(255,255,255,0.9) 0%,
-    rgba(255,255,255,0.4) 40%,
-    rgba(255,255,255,0) 70%
-  );
-  box-shadow: 0 0 16px rgba(255,255,255,0.9);
-  opacity: 1;
-  transition: opacity 0.4s ease;
-  z-index: -1;
+.tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+  border-color: rgba(255,255,255,1);
 }
 .tab::before { opacity: 0; }
 .tab.active {
@@ -209,7 +201,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   background: var(--color-primary);
   color: #7fff00;
   font-weight: 600;
-  transform: translateY(-2px);
+/* transform: translateY(-2px); ← 削除 */
 }
 @media (max-width: 500px) {
   .tab {
@@ -299,7 +291,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   display: flex;
   flex-wrap: wrap;
   gap: 2px 4px;
-  cursor: pointer;
+  cursor: default; /* または削除 */
 }
 .event-box:hover {
   opacity: 0.9;
@@ -311,6 +303,10 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   color: #fff;
   font-size: 14px;
   font-weight: 400 !important;
+  cursor: pointer;
+}
+.event:hover {
+  opacity: 0.9;
 }
 .event-title { position: relative; }
 
@@ -542,6 +538,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 /* 公民館（青） */
 .modal-content.k {
+  background: #e8f0ff;   /* 淡い青 */
   border-top: 6px solid #4a7bd1;
 }
 .modal-content.k h3,
@@ -551,6 +548,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 /* 体育館（緑） */
 .modal-content.t {
+  background: #e6f7ef;   /* 淡い緑 */
   border-top: 6px solid #3aa86b;
 }
 .modal-content.t h3,
@@ -560,11 +558,27 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 /* 別館（橙） */
 .modal-content.b {
+  background: #fff4e0;   /* 淡いオレンジ */
   border-top: 6px solid #e08a2e;
 }
 .modal-content.b h3,
 .modal-content.b .modal-info-title {
   color: #7a4f00;
+}
+
+/* 公民館（青） */
+.modal-content.k .modal-info-box {
+  border-color: #4a7bd1;
+}
+
+/* 体育館（緑） */
+.modal-content.t .modal-info-box {
+  border-color: #3aa86b;
+}
+
+/* 別館（橙） */
+.modal-content.b .modal-info-box {
+  border-color: #e08a2e;
 }
 
 .modal-content h3 {
@@ -1085,15 +1099,16 @@ document.addEventListener("click", function(e) {
     if (lines.length > 0) description = lines.join("<br>");
   }
 
-  /* ★ 施設カラーをモーダルに反映 */
-  const facilityClass =
-    titleEl.classList.contains("facility-k") ? "k" :
-    titleEl.classList.contains("facility-t") ? "t" :
-    titleEl.classList.contains("facility-b") ? "b" : "";
+// 施設クラス（k / t / b）
+const facilityClass =
+  titleEl.classList.contains("facility-k") ? "k" :
+  titleEl.classList.contains("facility-t") ? "t" :
+  titleEl.classList.contains("facility-b") ? "b" : "";
 
-  const modalContent = document.querySelector(".modal-content");
-  modalContent.classList.remove("k", "t", "b");
-  if (facilityClass) modalContent.classList.add(facilityClass);
+// モーダルに施設カラーを反映
+const modalContent = document.querySelector(".modal-content");
+modalContent.classList.remove("k", "t", "b");
+if (facilityClass) modalContent.classList.add(facilityClass);
 
   /* モーダル内容 */
   const html = `

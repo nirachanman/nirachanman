@@ -6,9 +6,6 @@
   <title>Googleカレンダーby川口公民館</title>
 
 <style>
-/* ============================
-   Root Variables
-============================ */
 :root {
   --color-primary: #4a6fa5;
   --color-bg: #f3f4f6;
@@ -24,13 +21,9 @@
   --shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
-* {
-  -webkit-tap-highlight-color: transparent;
-}
+* { -webkit-tap-highlight-color: transparent; }
 
-html {
-  scrollbar-gutter: stable;
-}
+html { scrollbar-gutter: stable; }
 
 body {
   font-family: system-ui, sans-serif;
@@ -40,17 +33,13 @@ body {
   transition: background 0.5s ease;
 }
 
-/* ============================
-   Background Colors
-============================ */
+/* 背景 */
 body.bg-gym       { background: linear-gradient(135deg, #eef7f1, #d7ead9); }
 body.bg-kouminkan { background: linear-gradient(135deg, #eef3ff, #d6e3fb); }
 body.bg-bekkan    { background: linear-gradient(135deg, #fff8ec, #ffe8c7); }
 body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 
-/* ============================
-   Top Bar
-============================ */
+/* Top Bar */
 .top-bar {
   display: flex;
   flex-wrap: nowrap;
@@ -63,18 +52,12 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   position: static;
   top: 0;
   z-index: 1000;
-
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+.top-bar::-webkit-scrollbar { display: none; }
 
-.top-bar::-webkit-scrollbar {
-  display: none;
-}
-
-/* ============================
-   Google Calendar Button
-============================ */
+/* Google Calendar Button */
 .google-cal-btn {
   display: inline-flex;
   flex-shrink: 0;
@@ -91,25 +74,20 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .google-cal-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(66,133,244,0.5);
 }
-
 .google-cal-icon  { font-size: 16px; line-height: 1; }
 .google-cal-label { white-space: nowrap; }
 
-/* ============================
-   Facility Buttons (PC)
-============================ */
+/* Facility Buttons */
 .calendar-buttons {
   display: flex;
   gap: 20px;
   flex-wrap: nowrap;
   margin-left: 10px;
 }
-
 .calendar-buttons button {
   padding: 4px 14px;
   flex-shrink: 0;
@@ -129,8 +107,6 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   position: relative;
   overflow: visible;
 }
-
-/* Active Glow */
 .calendar-buttons button.active::before {
   content: "";
   position: absolute;
@@ -146,47 +122,27 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   transition: opacity 0.4s ease;
   z-index: -1;
 }
-
-.calendar-buttons button::before {
-  opacity: 0;
-}
-
-/* Active */
+.calendar-buttons button::before { opacity: 0; }
 .calendar-buttons button.active {
   transform: translateY(-3px) scale(1.06);
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
   border-color: rgba(255,255,255,1);
   background: rgba(255,255,255,0.98);
 }
-
-/* Hover */
 .calendar-buttons button:hover:not(.active) {
   background: #fff;
   transform: scale(1.15);
   box-shadow: 0 0 12px rgba(66,133,244,0.7);
   border-color: rgba(255,255,255,1);
 }
-
-/* Facility Colors */
 #btn-kouminkan.active { background: #c4d7ff; color: #0a3a8c; }
 #btn-gym.active       { background: #bfe8cf; color: #0a5222; }
 #btn-bekkan.active    { background: #ffe0a8; color: #7a4f00; }
 #btn-all.active       { background: #d0d0d0; color: #222; }
 
-/* ============================
-   Smartphone Adjustments
-============================ */
 @media (max-width: 600px) {
-  .calendar-buttons button.active {
-    transform: none !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .calendar-buttons {
-    gap: 6px;
-  }
-
+  .calendar-buttons button.active { transform: none !important; }
+  .calendar-buttons { gap: 6px; }
   .calendar-buttons button {
     font-size: 14px;
     padding: 6px 6px;
@@ -197,34 +153,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   }
 }
 
-/* ここから下の tooltip は「内容の保持用」として残すが、表示はポップアップに任せる */
-@media (max-width: 600px) {
-  .tooltip {
-    position: absolute !important;
-    left: 50% !important;
-    transform: translateX(-50%) translateY(-130%) !important;
-    width: 190px !important;
-    max-width: 85vw !important;
-    padding: 4px 4px !important;
-    font-size: 15px !important;
-    line-height: 1.5 !important;
-    background: rgba(255,255,255,0.95) !important;
-    color: #333 !important;
-    z-index: 9999 !important;
-  }
-
-  .tooltip-line {
-    font-size: 16px !important;
-  }
-
-  .tooltip-line::before {
-    font-size: 16px !important;
-  }
-}
-
-/* ============================
-   Fixed Header
-============================ */
+/* Fixed Header */
 .header-fixed {
   position: sticky;
   top: 0;
@@ -233,9 +162,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   border-bottom: 1px solid var(--color-border);
 }
 
-/* ============================
-   Month Tabs
-============================ */
+/* Month Tabs */
 .tabs {
   display: flex;
   gap: 4px;
@@ -244,10 +171,8 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   background: var(--color-white);
   border-bottom: 1px solid var(--color-border);
   position: static;
-  top: var(--topbar-height);
   z-index: 999;
 }
-
 .tab {
   padding: 4px 8px;
   border-radius: 9999px;
@@ -262,7 +187,6 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   position: relative;
   overflow: visible;
 }
-
 .tab.active::before {
   content: "";
   position: absolute;
@@ -278,13 +202,8 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   transition: opacity 0.4s ease;
   z-index: -1;
 }
-
-.tab::before {
-  opacity: 0;
-}
-
+.tab::before { opacity: 0; }
 .tab.active {
-  transform: none !important;
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
   border-color: rgba(255,255,255,1);
   background: var(--color-primary);
@@ -292,7 +211,6 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   font-weight: 600;
   transform: translateY(-2px);
 }
-
 @media (max-width: 500px) {
   .tab {
     padding: 2px 6px;
@@ -301,18 +219,13 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    direction: rtl;     /* 左側を省略 */
-    text-align: left;   /* 見た目は左揃え */
+    direction: rtl;
+    text-align: left;
   }
 }
 
-/* ============================
-   Calendar Area
-============================ */
-.calendar-wrapper {
-  padding: 5px;
-}
-
+/* Calendar Area */
+.calendar-wrapper { padding: 5px; }
 .calendar-box {
   background: var(--color-primary);
   border-radius: 5px;
@@ -321,14 +234,12 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   margin: 6px auto;
   max-width: 1200px;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
   background: var(--color-white);
   table-layout: fixed;
 }
-
 th, td {
   width: auto;
   border: 1px solid var(--color-border);
@@ -337,28 +248,21 @@ th, td {
   line-height: 1.2;
 }
 
-/* ============================
-   Date Cells
-============================ */
+/* Date Cells */
 th:nth-child(1), td:nth-child(1) { width: 10% !important; }
 th:nth-child(2), td:nth-child(2) { width: 35% !important; }
 th:nth-child(3), td:nth-child(3) { width: 55% !important; }
-
 @media (max-width: 600px) {
   th:nth-child(1), td:nth-child(1) { width: 20% !important; }
 }
-
 .date-cell {
   text-align: right;
   font-weight: 600;
   font-size: 18px;
 }
-
 .day-number {
   font-family: "Roboto Mono", "Courier New", monospace;
 }
-
-/* Today Highlight */
 .today-highlight td {
   background: #fef9c3 !important;
   border-color: #facc15 !important;
@@ -390,21 +294,17 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 .row-sat     { background: #eff6ff !important; }
 .row-holiday { background: #fff7ed !important; }
 
-/* ============================
-   Events
-============================ */
+/* Events */
 .event-box {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 4px;
-  cursor: pointer; /* クリックできる要素として指マーク */
+  cursor: pointer;
 }
-
 .event-box:hover {
   opacity: 0.9;
   transition: opacity 0.2s ease;
 }
-
 .event {
   padding: 2px 6px;
   border-radius: 6px;
@@ -412,12 +312,9 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-size: 14px;
   font-weight: 400 !important;
 }
+.event-title { position: relative; }
 
-.event-title {
-  position: relative;
-}
-
-/* Tooltip（内容保持用） */
+/* Tooltip（保持用） */
 .tooltip {
   position: absolute;
   top: -8px;
@@ -435,58 +332,44 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   box-shadow: 0 4px 12px rgba(0,0,0,0.35);
   border: 1px solid rgba(0,0,0,0.1);
   pointer-events: none;
-  display: none; /* hover では表示しない */
+  display: none;
 }
-
 .tooltip-line {
   display: flex;
   gap: 6px;
   align-items: flex-start;
   line-height: 1.3;
 }
-
 .tooltip-line::before {
   content: "•";
   color: #555;
   font-size: 14px;
   line-height: 1.3;
 }
-
-/* Tooltip Colors（淡色 + 黒文字） */
 .event-title.facility-k .tooltip {
   background: #e8f0ff !important;
   color: #000 !important;
   border: 1px solid rgba(0,0,0,0.15);
 }
-
 .event-title.facility-t .tooltip {
   background: #e6f7ef !important;
   color: #000 !important;
   border: 1px solid rgba(0,0,0,0.15);
 }
-
 .event-title.facility-b .tooltip {
   background: #fff4e0 !important;
   color: #000 !important;
   border: 1px solid rgba(0,0,0,0.15);
 }
-
-.event time {
-  color: #ffff22;
-  font-weight: 500;
-}
-
+.event time,
 .event-time {
   color: #ffff22 !important;
   font-weight: 500;
 }
 
-/* ============================
-   PC / SP Switch
-============================ */
+/* PC / SP Switch */
 .pc-only { display: table-cell; }
 .sp-only { display: none; }
-
 @media (max-width: 600px) {
   .pc-only { display: none !important; }
   .sp-only { display: table-cell !important; }
@@ -500,13 +383,11 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     align-items: center;
     gap: 4px;
   }
-
   .event-time {
     margin-right: 4px;
     font-size: 12px;
     color: #ffeb3b !important;
   }
-
   .event-title {
     font-size: 12px;
     font-weight: 400;
@@ -520,7 +401,6 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     white-space: nowrap;
     padding-bottom: 4px;
   }
-
   .tab {
     font-size: 11px;
     padding: 3px 10px;
@@ -540,23 +420,14 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 /* Disable hover tooltip on touch devices */
 @media (hover: none) {
-  .event-title:hover .tooltip {
-    display: none;
-  }
+  .event-title:hover .tooltip { display: none; }
 }
 
-/* ============================
-   Print Styles
-============================ */
-#print-header {
-  display: none;
-}
+/* Print Styles */
+#print-header { display: none; }
 
 @media print {
-
-  #print-header {
-    display: none;
-  }
+  #print-header { display: none; }
 
   @media print {
     .top-bar,
@@ -612,9 +483,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     border-color: #999 !important;
   }
 
-  .event-time {
-    color: #000 !important;
-  }
+  .event-time { color: #000 !important; }
 
   .tab,
   .calendar-buttons button {
@@ -625,9 +494,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     transform: none !important;
   }
 
-  .calendar-buttons button::before {
-    display: none !important;
-  }
+  .calendar-buttons button::before { display: none !important; }
 
   .tooltip {
     position: absolute;
@@ -647,101 +514,73 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     pointer-events: none;
     display: none;
   }
-
-  .event-title:hover .tooltip {
-    display: block;
-  }
+  .event-title:hover .tooltip { display: block; }
 }
 
-/* ============================
-   ポップアップ（クリック詳細表示）
-============================ */
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
+/* モーダル（クリック詳細表示） */
+.modal {
   display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.35);
 }
-
-/* 公民館（青） */
-.popup-content.k {
-  background: #e8f0ff;   /* 淡い青 */
-  color: #0a3a8c;
+.modal-content {
+  background: #f6fff6;
+  margin: 60px auto;
+  padding: 8px 10px;
+  border-radius: 12px;
+  width: 85%;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 14px;
+  border-top: 6px solid #28a745;
 }
-
-/* 体育館（緑） */
-.popup-content.t {
-  background: #e6f7ef;   /* 淡い緑 */
-  color: #0a5222;
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #28a745;
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
 }
-
-/* 別館（オレンジ） */
-.popup-content.b {
-  background: #fff4e0;   /* 淡いオレンジ */
-  color: #7a4f00;
+.modal-info-box {
+  border: 1px solid #c8e6c9;
+  background: #ffffff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
 }
-
-.popup-content {
-  background: #fff;
-  padding: 6px 8px;
-  border-radius: 10px;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  font-size: 15px;
-  line-height: 1.6;
+.modal-info-title {
+  font-weight: bold;
+  color: #28a745;
+  margin-bottom: 4px;
+  font-size: 14px;
 }
-
-.popup-close {
-  text-align: right;
+.modal-close {
+  float: right;
   font-size: 30px;
   cursor: pointer;
-  margin-bottom: 8px;
+  color: #444;
+  margin-top: -4px;
 }
-
-/* ポップアップの基本 */
-.popup-content {
-  padding: 8px 10px;
-  border-radius: 10px;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  font-size: 15px;
-  line-height: 1.6;
-  border: 2px solid #ccc; /* デフォルト */
+.modal-close:hover { color: #d9534f; }
+#modal-body p {
+  margin: 6px 0;
+  line-height: 1.4;
 }
-
-/* 施設カラー枠線 */
-.popup-content.k { border-color: #4a7bd1; }
-.popup-content.t { border-color: #3aa86b; }
-.popup-content.b { border-color: #e08a2e; }
-
-/* 時間・場所などの枠囲み（中立色） */
-.popup-field {
-  border: 1px solid #ccc;
-  padding: 4px 6px;
-  border-radius: 4px;
-  margin: 4px 0;
-  background: #fff;
-}
-
 </style>
 </head>
 
 <body>
 <div id="print-header"></div>
 
-<!-- ============================
-     一体型固定ヘッダー
-============================ -->
 <div class="header-fixed">
-
   <div class="top-bar">
     <div class="calendar-buttons">
       <button id="btn-kouminkan" data-cal="1" class="active">🏬 公民館</button>
@@ -756,29 +595,23 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   </div>
 
   <div class="tabs" id="monthTabs"></div>
-
 </div>
 
 <div id="calendarContainer" class="calendar-wrapper">
   <div class="loading">読み込み中...</div>
 </div>
 
-<!-- ============================
-     クリック詳細用ポップアップ
-============================ -->
-<div id="popup" class="popup-overlay">
-  <div class="popup-content">
-    <div class="popup-close" onclick="closePopup()">✕</div>
-    <div id="popup-body"></div>
+<!-- モーダル -->
+<div id="popup" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closePopup()">✕</span>
+    <div id="modal-body"></div>
   </div>
 </div>
 
 <script>
 console.log("JS動いてるよ");
 
-/* ============================
-   設定
-============================ */
 let CURRENT_CALENDAR = 1;
 
 const CALENDAR_IDS = {
@@ -812,9 +645,7 @@ const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
 
-/* ============================
-   印刷タイトル更新
-============================ */
+/* 印刷タイトル */
 function updatePrintHeader() {
   const facility =
     CURRENT_CALENDAR === "all"
@@ -828,9 +659,7 @@ function updatePrintHeader() {
     `${facility}　${monthLabel}`;
 }
 
-/* ============================
-   キーワード色
-============================ */
+/* キーワード色 */
 function getKeywordColor(title) {
   const KEYWORD_COLORS = [
     { keywords: ["仮）"], color: "#a9a9a9" },
@@ -847,9 +676,7 @@ function getKeywordColor(title) {
   return null;
 }
 
-/* ============================
-   イベント HTML
-============================ */
+/* イベント HTML */
 function createEventHTML(ev, baseColor) {
   const title = ev.summary || "";
   const keywordColor = getKeywordColor(title);
@@ -873,21 +700,19 @@ function createEventHTML(ev, baseColor) {
     .map(line => `<div class="tooltip-line">${line}</div>`)
     .join("");
 
-return `
-  <div class="event" style="background:${color}"
-       data-location="${ev.location ? ev.location.replace(/"/g, '&quot;') : ''}">
-    <div class="event-time">${timeLabel}</div>
-    <div class="event-title ${facilityClass}">
-      ${title}
-      <div class="tooltip">${detailLines}</div>
+  return `
+    <div class="event" style="background:${color}"
+         data-location="${ev.location ? ev.location.replace(/"/g, '&quot;') : ''}">
+      <div class="event-time">${timeLabel}</div>
+      <div class="event-title ${facilityClass}">
+        ${title}
+        <div class="tooltip">${detailLines}</div>
+      </div>
     </div>
-  </div>
-`;
+  `;
 }
 
-/* ============================
-   Google Calendar API
-============================ */
+/* Google Calendar API */
 async function fetchEvents(calendarId, year, month) {
   const start = new Date(year, month, 1).toISOString();
   const end = new Date(year, month + 1, 1).toISOString();
@@ -906,9 +731,7 @@ function classifyTime(ev) {
   return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
 }
 
-/* ============================
-   祝日
-============================ */
+/* 祝日 */
 function createHolidayMap(holidayEvents) {
   const map = {};
   holidayEvents.forEach(ev => {
@@ -934,9 +757,7 @@ function getRowClass(dateObj, holidayMap, dateStr) {
   return "";
 }
 
-/* ============================
-   テーブル描画
-============================ */
+/* テーブル描画 */
 function renderTable(events, holidayMap, year, month, title, themeColor) {
   const box = document.createElement("div");
   box.className = "calendar-box";
@@ -1033,9 +854,7 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
   return box;
 }
 
-/* ============================
-   月読み込み
-============================ */
+/* 月読み込み（統合版） */
 async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
@@ -1085,17 +904,13 @@ async function loadMonth(year, month) {
   updatePrintHeader();
 }
 
-/* ============================
-   月タブ生成
-============================ */
+/* 月タブ生成（統合版） */
 const months = [];
 for (let i = -1; i <= 12; i++) {
   const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
   months.push({ label: `${d.getFullYear()}年${d.getMonth()+1}月`, year: d.getFullYear(), month: d.getMonth() });
 }
-
 const tabArea = document.getElementById("monthTabs");
-
 months.forEach((m, idx) => {
   const tab = document.createElement("div");
   tab.className = "tab" + (idx === 1 ? " active" : "");
@@ -1106,7 +921,6 @@ months.forEach((m, idx) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
-
     loadMonth(m.year, m.month);
     updatePrintHeader();
   });
@@ -1114,9 +928,7 @@ months.forEach((m, idx) => {
   tabArea.appendChild(tab);
 });
 
-/* ============================
-   施設ボタン
-============================ */
+/* 施設ボタン */
 document.querySelectorAll(".calendar-buttons button").forEach(btn => {
   btn.addEventListener("click", () => {
     const cal = btn.dataset.cal;
@@ -1143,88 +955,8 @@ document.querySelectorAll(".calendar-buttons button").forEach(btn => {
   });
 });
 
-/* ============================
-   クリックでポップアップ表示（完全修正版）
-============================ */
-document.addEventListener("click", function(e) {
-  const eventEl = e.target.closest(".event");
-  if (!eventEl) {
-    closePopup();
-    return;
-  }
-
-  const titleEl = eventEl.querySelector(".event-title");
-  const timeEl  = eventEl.querySelector(".event-time");
-  const tooltip = eventEl.querySelector(".tooltip");
-
-  const title = getTitleOnly(titleEl);
-let time = "(時間なし)";
-if (timeEl) {
-  const raw = timeEl.textContent.trim();   // "18:00–19:00" など
-  const isAllDay = raw === "";             // 終日イベント判定（必要に応じて調整）
-  time = toAmPm(raw, isAllDay);
-}
-
-  // ★ 場所を data-location から取得
-  const placeRaw = eventEl.dataset.location || "";
-  const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
-
-  // ★ 説明（改行反映）
-  let description = "(説明なし)";
-  if (tooltip) {
-    const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
-      el.textContent.trim()
-    );
-    if (lines.length > 0) description = lines.join("<br>");
-  }
-
-  // ★ 施設クラス（k / t / b）
-  const facilityClass =
-    titleEl.classList.contains("facility-k") ? "k" :
-    titleEl.classList.contains("facility-t") ? "t" :
-    titleEl.classList.contains("facility-b") ? "b" : "";
-
-  const popupContent = document.querySelector(".popup-content");
-  popupContent.classList.remove("k", "t", "b");
-  if (facilityClass) popupContent.classList.add(facilityClass);
-
-  // ★ ポップアップ内容
-  const html = `
-    <div><strong>タイトル：</strong>${title}</div>
-    <div><strong>時間：</strong>${time}</div>
-    <div><strong>場所：</strong>${place}</div>
-    <div><strong>説明：</strong>${description}</div>
-  `;
-
-  document.getElementById("popup-body").innerHTML = html;
-  document.getElementById("popup").style.display = "flex";
-});
-
-/* タイトルだけを取得する関数 */
-function getTitleOnly(el) {
-  for (const node of el.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      return node.textContent.trim();
-    }
-  }
-  return "(タイトルなし)";
-}
-
-/* 背景クリックで閉じる */
-document.getElementById("popup").addEventListener("click", function(e) {
-  if (e.target === this) closePopup();
-});
-
-function closePopup() {
-  document.getElementById("popup").style.display = "none";
-
-}
-
-/* ===========================
-   時間変換（正午・午後0時・終日・終了なし対応）
-=========================== */
+/* 時間変換 */
 function toAmPm(timeRange, isAllDay = false) {
-
   if (isAllDay) return "終日";
 
   if (!timeRange.includes("–")) {
@@ -1286,15 +1018,20 @@ function toAmPm(timeRange, isAllDay = false) {
   }
 }
 
-/* ===========================
-   ポップアップ表示処理
-=========================== */
+/* タイトルだけ取得 */
+function getTitleOnly(el) {
+  for (const node of el.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent.trim();
+    }
+  }
+  return "(タイトルなし)";
+}
+
+/* クリックでモーダル表示（1本だけ） */
 document.addEventListener("click", function(e) {
   const eventEl = e.target.closest(".event");
-  if (!eventEl) {
-    closePopup();
-    return;
-  }
+  if (!eventEl) return;
 
   const titleEl = eventEl.querySelector(".event-title");
   const timeEl  = eventEl.querySelector(".event-time");
@@ -1320,39 +1057,47 @@ document.addEventListener("click", function(e) {
     if (lines.length > 0) description = lines.join("<br>");
   }
 
-  const facilityClass =
-    titleEl.classList.contains("facility-k") ? "k" :
-    titleEl.classList.contains("facility-t") ? "t" :
-    titleEl.classList.contains("facility-b") ? "b" : "";
-
-  const popupContent = document.querySelector(".popup-content");
-  popupContent.classList.remove("k", "t", "b");
-  if (facilityClass) popupContent.classList.add(facilityClass);
-
   const html = `
-    <div class="popup-field"><strong>タイトル：</strong>${title}</div>
-    <div class="popup-field"><strong>時間：</strong>${time}</div>
-    <div class="popup-field"><strong>場所：</strong>${place}</div>
-    <div class="popup-field"><strong>説明：</strong>${description}</div>
+    <h3>${title}</h3>
+
+    <div class="modal-info-box">
+      <div class="modal-info-title">時間</div>
+      <div>${time}</div>
+    </div>
+
+    <div class="modal-info-box">
+      <div class="modal-info-title">場所</div>
+      <div>${place}</div>
+    </div>
+
+    <div class="modal-info-box">
+      <div class="modal-info-title">説明</div>
+      <div>${description}</div>
+    </div>
   `;
 
-  document.getElementById("popup-body").innerHTML = html;
-  document.getElementById("popup").style.display = "flex";
+  document.getElementById("modal-body").innerHTML = html;
+  document.getElementById("popup").style.display = "block";
 });
 
-/* ===========================
-   ポップアップを閉じる
-=========================== */
+/* 背景クリックで閉じる */
+document.getElementById("popup").addEventListener("click", function(e) {
+  if (e.target === this) closePopup();
+});
+
 function closePopup() {
   document.getElementById("popup").style.display = "none";
 }
 
-/* ============================
-   初期表示
-============================ */
+/* 初期表示 */
 (function init() {
   document.body.classList.add("bg-kouminkan");
-  loadMonth(today.getFullYear(), today.getMonth());
+  const activeTab = document.querySelector("#monthTabs .active");
+  if (activeTab) {
+    loadMonth(Number(activeTab.dataset.year), Number(activeTab.dataset.month));
+  } else {
+    loadMonth(today.getFullYear(), today.getMonth());
+  }
   updatePrintHeader();
 })();
 </script>

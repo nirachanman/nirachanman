@@ -197,19 +197,17 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   }
 }
 
+/* ここから下の tooltip は「内容の保持用」として残すが、表示はポップアップに任せる */
 @media (max-width: 600px) {
   .tooltip {
     position: absolute !important;
     left: 50% !important;
     transform: translateX(-50%) translateY(-130%) !important;
-
-    width: 190px !important;      /* ← 大きすぎない固定幅 */
-    max-width: 85vw !important;   /* ← 画面からはみ出さない */
+    width: 190px !important;
+    max-width: 85vw !important;
     padding: 4px 4px !important;
-
     font-size: 15px !important;
     line-height: 1.5 !important;
-
     background: rgba(255,255,255,0.95) !important;
     color: #333 !important;
     z-index: 9999 !important;
@@ -251,7 +249,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
 }
 
 .tab {
-  padding: 4px 12px;
+  padding: 4px 8px;
   border-radius: 9999px;
   background: white;
   border: 2px solid rgba(255,255,255,0.7);
@@ -300,11 +298,9 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
     padding: 2px 6px;
     font-size: 10px;
     max-width: 80px;
-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
     direction: rtl;     /* 左側を省略 */
     text-align: left;   /* 見た目は左揃え */
   }
@@ -334,6 +330,7 @@ table {
 }
 
 th, td {
+  width: auto;
   border: 1px solid var(--color-border);
   padding: 4px 6px;
   font-size: 12px;
@@ -400,6 +397,12 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   display: flex;
   flex-wrap: wrap;
   gap: 2px 4px;
+  cursor: pointer; /* クリックできる要素として指マーク */
+}
+
+.event-box:hover {
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
 }
 
 .event {
@@ -414,7 +417,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   position: relative;
 }
 
-/* Tooltip */
+/* Tooltip（内容保持用） */
 .tooltip {
   position: absolute;
   top: -8px;
@@ -432,7 +435,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   box-shadow: 0 4px 12px rgba(0,0,0,0.35);
   border: 1px solid rgba(0,0,0,0.1);
   pointer-events: none;
-  display: none;
+  display: none; /* hover では表示しない */
 }
 
 .tooltip-line {
@@ -449,28 +452,21 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   line-height: 1.3;
 }
 
-.event-title:hover .tooltip {
-  display: block;
-}
-
-/* Tooltip Colors */
-/* 公民館（青・淡い色） */
+/* Tooltip Colors（淡色 + 黒文字） */
 .event-title.facility-k .tooltip {
-  background: #e8f0ff !important;   /* 淡い青 */
-  color: #000 !important;           /* 黒文字 */
-  border: 1px solid rgba(0,0,0,0.15);
-}
-
-/* 体育館（緑・淡い色） */
-.event-title.facility-t .tooltip {
-  background: #e6f7ef !important;   /* 淡い緑 */
+  background: #e8f0ff !important;
   color: #000 !important;
   border: 1px solid rgba(0,0,0,0.15);
 }
 
-/* 別館（オレンジ・淡い色） */
+.event-title.facility-t .tooltip {
+  background: #e6f7ef !important;
+  color: #000 !important;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
 .event-title.facility-b .tooltip {
-  background: #fff4e0 !important;   /* 淡いオレンジ */
+  background: #fff4e0 !important;
   color: #000 !important;
   border: 1px solid rgba(0,0,0,0.15);
 }
@@ -542,7 +538,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   }
 }
 
-/* Disable hover on touch devices */
+/* Disable hover tooltip on touch devices */
 @media (hover: none) {
   .event-title:hover .tooltip {
     display: none;
@@ -656,6 +652,56 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
     display: block;
   }
 }
+
+/* ============================
+   ポップアップ（クリック詳細表示）
+============================ */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* 公民館（青） */
+.popup-content.k {
+  background: #e8f0ff;   /* 淡い青 */
+  color: #0a3a8c;
+}
+
+/* 体育館（緑） */
+.popup-content.t {
+  background: #e6f7ef;   /* 淡い緑 */
+  color: #0a5222;
+}
+
+/* 別館（オレンジ） */
+.popup-content.b {
+  background: #fff4e0;   /* 淡いオレンジ */
+  color: #7a4f00;
+}
+
+.popup-content {
+  background: #fff;
+  padding: 6px 8px;
+  border-radius: 10px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.popup-close {
+  text-align: right;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
 </style>
 </head>
 
@@ -674,11 +720,10 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
       <button id="btn-bekkan" data-cal="3">📚 別館</button>
       <button id="btn-all" data-cal="all">🔘 全施設</button>
     </div>
-<a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
-  <span class="google-cal-icon">📅</span>
-  <span class="google-cal-label">Google カレンダーで編集</span>
-</a>
-
+    <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
+      <span class="google-cal-icon">📅</span>
+      <span class="google-cal-label">Google カレンダーで編集</span>
+    </a>
   </div>
 
   <div class="tabs" id="monthTabs"></div>
@@ -687,6 +732,16 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 <div id="calendarContainer" class="calendar-wrapper">
   <div class="loading">読み込み中...</div>
+</div>
+
+<!-- ============================
+     クリック詳細用ポップアップ
+============================ -->
+<div id="popup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-close" onclick="closePopup()">✕</div>
+    <div id="popup-body"></div>
+  </div>
 </div>
 
 <script>
@@ -745,11 +800,7 @@ function updatePrintHeader() {
 }
 
 /* ============================
-   キーワード色備忘録
-    { keywords: ["1f", "囲碁部", "習字", "若妻会"], color: "#4a6fa5" },
-    { keywords: ["2fs", "PC", "キルト", "英語"], color: "#7058a3" },
-    { keywords: ["2f", "ヨガ", "体操", "洋品店"], color: "#9d5b8b" },
-    { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" }
+   キーワード色
 ============================ */
 function getKeywordColor(title) {
   const KEYWORD_COLORS = [
@@ -782,31 +833,29 @@ function createEventHTML(ev, baseColor) {
     ? `${String(start.getHours()).padStart(2,"0")}:${String(start.getMinutes()).padStart(2,"0")}–${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}`
     : "";
 
-  // 施設クラスを決定
   const facilityClass =
     ev._facility === "公民館" ? "facility-k" :
     ev._facility === "体育館"   ? "facility-t" :
     ev._facility === "別館"   ? "facility-b" :
     "facility-default";
 
-  // ★ 説明文を行ごとに分割して箇条書きHTMLに変換
   const detailLines = (ev.description || "")
     .split("\n")
     .map(line => `<div class="tooltip-line">${line}</div>`)
     .join("");
 
-  return `
-    <div class="event" style="background:${color}">
-      <div class="event-time">${timeLabel}</div>
-
-      <div class="event-title ${facilityClass}">
-        ${title}
-        <div class="tooltip">${detailLines}</div>
-      </div>
-
+return `
+  <div class="event" style="background:${color}"
+       data-location="${ev.location ? ev.location.replace(/"/g, '&quot;') : ''}">
+    <div class="event-time">${timeLabel}</div>
+    <div class="event-title ${facilityClass}">
+      ${title}
+      <div class="tooltip">${detailLines}</div>
     </div>
-  `;
+  </div>
+`;
 }
+
 /* ============================
    Google Calendar API
 ============================ */
@@ -984,30 +1033,27 @@ async function loadMonth(year, month) {
     return;
   }
 
-// ★ 単独施設モード
-const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
+  const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
+  events.forEach(ev => {
+    ev._facility = CALENDAR_NAMES[CURRENT_CALENDAR];
+  });
 
-// ★ ここを追加：単独施設モードでも _facility を付ける
-events.forEach(ev => {
-  ev._facility = CALENDAR_NAMES[CURRENT_CALENDAR];
-});
+  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+  const holidayMap = createHolidayMap(holidayEvents);
 
-const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
-const holidayMap = createHolidayMap(holidayEvents);
+  container.innerHTML = "";
+  container.appendChild(
+    renderTable(
+      events,
+      holidayMap,
+      year,
+      month,
+      CALENDAR_NAMES[CURRENT_CALENDAR],
+      CALENDAR_COLORS[CURRENT_CALENDAR]
+    )
+  );
 
-container.innerHTML = "";
-container.appendChild(
-  renderTable(
-    events,
-    holidayMap,
-    year,
-    month,
-    CALENDAR_NAMES[CURRENT_CALENDAR],
-    CALENDAR_COLORS[CURRENT_CALENDAR]
-  )
-);
-
-updatePrintHeader();
+  updatePrintHeader();
 }
 
 /* ============================
@@ -1054,7 +1100,7 @@ document.querySelectorAll(".calendar-buttons button").forEach(btn => {
     document.documentElement.style.setProperty(
       "--color-primary",
       CALENDAR_COLORS[CURRENT_CALENDAR]
- );
+    );
 
     document.body.classList.remove("bg-gym", "bg-kouminkan", "bg-bekkan", "bg-all");
     if (cal === "1") document.body.classList.add("bg-kouminkan");
@@ -1068,24 +1114,157 @@ document.querySelectorAll(".calendar-buttons button").forEach(btn => {
   });
 });
 
+/* ============================
+   クリックでポップアップ表示（完全修正版）
+============================ */
 document.addEventListener("click", function(e) {
-  const title = e.target.closest(".event-title");
-  if (!title) return;
-
-  const tooltip = title.querySelector(".tooltip");
-  if (!tooltip) return;
-
-  // すでに表示中なら閉じる
-  if (tooltip.style.display === "block") {
-    tooltip.style.display = "none";
-  } else {
-    // 他のツールチップを全部閉じる
-    document.querySelectorAll(".tooltip").forEach(t => t.style.display = "none");
-
-    // このツールチップを開く
-    tooltip.style.display = "block";
+  const eventEl = e.target.closest(".event");
+  if (!eventEl) {
+    closePopup();
+    return;
   }
+
+  const titleEl = eventEl.querySelector(".event-title");
+  const timeEl  = eventEl.querySelector(".event-time");
+  const tooltip = eventEl.querySelector(".tooltip");
+
+  const title = getTitleOnly(titleEl);
+let time = "(時間なし)";
+if (timeEl) {
+  const raw = timeEl.textContent.trim();   // "18:00–19:00" など
+  const isAllDay = raw === "";             // 終日イベント判定（必要に応じて調整）
+  time = toAmPm(raw, isAllDay);
+}
+
+  // ★ 場所を data-location から取得
+  const placeRaw = eventEl.dataset.location || "";
+  const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
+
+  // ★ 説明（改行反映）
+  let description = "(説明なし)";
+  if (tooltip) {
+    const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
+      el.textContent.trim()
+    );
+    if (lines.length > 0) description = lines.join("<br>");
+  }
+
+  // ★ 施設クラス（k / t / b）
+  const facilityClass =
+    titleEl.classList.contains("facility-k") ? "k" :
+    titleEl.classList.contains("facility-t") ? "t" :
+    titleEl.classList.contains("facility-b") ? "b" : "";
+
+  const popupContent = document.querySelector(".popup-content");
+  popupContent.classList.remove("k", "t", "b");
+  if (facilityClass) popupContent.classList.add(facilityClass);
+
+  // ★ ポップアップ内容
+  const html = `
+    <div><strong>タイトル：</strong>${title}</div>
+    <div><strong>時間：</strong>${time}</div>
+    <div><strong>場所：</strong>${place}</div>
+    <div><strong>説明：</strong>${description}</div>
+  `;
+
+  document.getElementById("popup-body").innerHTML = html;
+  document.getElementById("popup").style.display = "flex";
 });
+
+/* タイトルだけを取得する関数 */
+function getTitleOnly(el) {
+  for (const node of el.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent.trim();
+    }
+  }
+  return "(タイトルなし)";
+}
+
+/* 背景クリックで閉じる */
+document.getElementById("popup").addEventListener("click", function(e) {
+  if (e.target === this) closePopup();
+});
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+
+}
+
+function toAmPm(timeRange, isAllDay = false) {
+
+  // ★ 終日イベント
+  if (isAllDay) return "終日";
+
+  // ★ 終了時刻が無い場合（例：18:00）
+  if (!timeRange.includes("–")) {
+    const startObj = parseTime(timeRange);
+    return `${startObj.label}〜`;
+  }
+
+  // ★ 通常の時間帯（例：09:00–11:00）
+  const [start, end] = timeRange.split("–");
+  const startObj = parseTime(start);
+  const endObj   = parseTime(end);
+
+  // 正午をまたぐかどうか
+  const crossesNoon =
+    (startObj.period === "午前" && endObj.period === "午後") ||
+    (startObj.isNoon && !endObj.isNoon);
+
+  // 前半は必ず period を付ける（ただし正午は「正午」）
+  const startStr = startObj.label;
+
+  // 後半は通常 period を省略、ただし正午またぎは付ける
+  const endStr = crossesNoon ? endObj.label : endObj.labelNoPeriod;
+
+  return `${startStr}〜${endStr}`;
+
+
+  // ★ 内部関数：24時間 → 午前/午後/正午 + 12時間制
+  function parseTime(t) {
+    const [h, m] = t.split(":").map(Number);
+
+    // ★ 正午（12:00）
+    if (h === 12 && m === 0) {
+      return {
+        period: "",
+        hour: "",
+        min: "",
+        isNoon: true,
+        label: "正午",
+        labelNoPeriod: "正午"
+      };
+    }
+
+    // ★ 12:01〜12:59 は「午後0時◯分」
+    if (h === 12 && m > 0) {
+      const min = m === 0 ? "" : `${m}分`;
+      return {
+        period: "午後",
+        hour: 0,
+        min,
+        isNoon: false,
+        label: `午後0時${min}`,
+        labelNoPeriod: `0時${min}`
+      };
+    }
+
+    // ★ 通常の午前/午後
+    const period = h < 12 ? "午前" : "午後";
+    const hour12 = h % 12 === 0 ? 12 : h % 12;
+    const min = m === 0 ? "" : `${m}分`;
+
+    return {
+      period,
+      hour: hour12,
+      min,
+      isNoon: false,
+      label: `${period}${hour12}時${min}`,
+      labelNoPeriod: `${hour12}時${min}`
+    };
+  }
+}
 
 /* ============================
    初期表示
@@ -1098,4 +1277,3 @@ document.addEventListener("click", function(e) {
 </script>
 </body>
 </html>
-

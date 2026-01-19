@@ -539,6 +539,34 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   font-size: 14px;
   border-top: 6px solid #28a745;
 }
+
+/* 公民館（青） */
+.modal-content.k {
+  border-top: 6px solid #4a7bd1;
+}
+.modal-content.k h3,
+.modal-content.k .modal-info-title {
+  color: #0a3a8c;
+}
+
+/* 体育館（緑） */
+.modal-content.t {
+  border-top: 6px solid #3aa86b;
+}
+.modal-content.t h3,
+.modal-content.t .modal-info-title {
+  color: #0a5222;
+}
+
+/* 別館（橙） */
+.modal-content.b {
+  border-top: 6px solid #e08a2e;
+}
+.modal-content.b h3,
+.modal-content.b .modal-info-title {
+  color: #7a4f00;
+}
+
 .modal-content h3 {
   margin-top: 0;
   margin-bottom: 10px;
@@ -1057,6 +1085,17 @@ document.addEventListener("click", function(e) {
     if (lines.length > 0) description = lines.join("<br>");
   }
 
+  /* ★ 施設カラーをモーダルに反映 */
+  const facilityClass =
+    titleEl.classList.contains("facility-k") ? "k" :
+    titleEl.classList.contains("facility-t") ? "t" :
+    titleEl.classList.contains("facility-b") ? "b" : "";
+
+  const modalContent = document.querySelector(".modal-content");
+  modalContent.classList.remove("k", "t", "b");
+  if (facilityClass) modalContent.classList.add(facilityClass);
+
+  /* モーダル内容 */
   const html = `
     <h3>${title}</h3>
 

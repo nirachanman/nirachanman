@@ -698,10 +698,39 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
 
 .popup-close {
   text-align: right;
-  font-size: 18px;
+  font-size: 30px;
   cursor: pointer;
   margin-bottom: 8px;
 }
+
+/* ポップアップの基本 */
+.popup-content {
+  padding: 8px 10px;
+  border-radius: 10px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-size: 15px;
+  line-height: 1.6;
+  border: 2px solid #ccc; /* デフォルト */
+}
+
+/* 施設カラー枠線 */
+.popup-content.k { border-color: #4a7bd1; }
+.popup-content.t { border-color: #3aa86b; }
+.popup-content.b { border-color: #e08a2e; }
+
+/* 時間・場所などの枠囲み（中立色） */
+.popup-field {
+  border: 1px solid #ccc;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin: 4px 0;
+  background: #fff;
+}
+
 </style>
 </head>
 
@@ -1191,41 +1220,34 @@ function closePopup() {
 
 }
 
+/* ===========================
+   時間変換（正午・午後0時・終日・終了なし対応）
+=========================== */
 function toAmPm(timeRange, isAllDay = false) {
 
-  // ★ 終日イベント
   if (isAllDay) return "終日";
 
-  // ★ 終了時刻が無い場合（例：18:00）
   if (!timeRange.includes("–")) {
     const startObj = parseTime(timeRange);
     return `${startObj.label}〜`;
   }
 
-  // ★ 通常の時間帯（例：09:00–11:00）
   const [start, end] = timeRange.split("–");
   const startObj = parseTime(start);
   const endObj   = parseTime(end);
 
-  // 正午をまたぐかどうか
   const crossesNoon =
     (startObj.period === "午前" && endObj.period === "午後") ||
     (startObj.isNoon && !endObj.isNoon);
 
-  // 前半は必ず period を付ける（ただし正午は「正午」）
   const startStr = startObj.label;
-
-  // 後半は通常 period を省略、ただし正午またぎは付ける
   const endStr = crossesNoon ? endObj.label : endObj.labelNoPeriod;
 
   return `${startStr}〜${endStr}`;
 
-
-  // ★ 内部関数：24時間 → 午前/午後/正午 + 12時間制
   function parseTime(t) {
     const [h, m] = t.split(":").map(Number);
 
-    // ★ 正午（12:00）
     if (h === 12 && m === 0) {
       return {
         period: "",
@@ -1237,7 +1259,6 @@ function toAmPm(timeRange, isAllDay = false) {
       };
     }
 
-    // ★ 12:01〜12:59 は「午後0時◯分」
     if (h === 12 && m > 0) {
       const min = m === 0 ? "" : `${m}分`;
       return {
@@ -1250,7 +1271,6 @@ function toAmPm(timeRange, isAllDay = false) {
       };
     }
 
-    // ★ 通常の午前/午後
     const period = h < 12 ? "午前" : "午後";
     const hour12 = h % 12 === 0 ? 12 : h % 12;
     const min = m === 0 ? "" : `${m}分`;
@@ -1264,6 +1284,67 @@ function toAmPm(timeRange, isAllDay = false) {
       labelNoPeriod: `${hour12}時${min}`
     };
   }
+}
+
+/* ===========================
+   ポップアップ表示処理
+=========================== */
+document.addEventListener("click", function(e) {
+  const eventEl = e.target.closest(".event");
+  if (!eventEl) {
+    closePopup();
+    return;
+  }
+
+  const titleEl = eventEl.querySelector(".event-title");
+  const timeEl  = eventEl.querySelector(".event-time");
+  const tooltip = eventEl.querySelector(".tooltip");
+
+  const title = getTitleOnly(titleEl);
+
+  let time = "(時間なし)";
+  if (timeEl) {
+    const raw = timeEl.textContent.trim();
+    const isAllDay = raw === "";
+    time = toAmPm(raw, isAllDay);
+  }
+
+  const placeRaw = eventEl.dataset.location || "";
+  const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
+
+  let description = "(説明なし)";
+  if (tooltip) {
+    const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
+      el.textContent.trim()
+    );
+    if (lines.length > 0) description = lines.join("<br>");
+  }
+
+  const facilityClass =
+    titleEl.classList.contains("facility-k") ? "k" :
+    titleEl.classList.contains("facility-t") ? "t" :
+    titleEl.classList.contains("facility-b") ? "b" : "";
+
+  const popupContent = document.querySelector(".popup-content");
+  popupContent.classList.remove("k", "t", "b");
+  if (facilityClass) popupContent.classList.add(facilityClass);
+
+  const html = `
+    <div class="popup-field"><strong>タイトル：</strong>${title}</div>
+    <div class="popup-field"><strong>時間：</strong>${time}</div>
+    <div class="popup-field"><strong>場所：</strong>${place}</div>
+    <div class="popup-field"><strong>説明：</strong>${description}</div>
+  `;
+
+  document.getElementById("popup-body").innerHTML = html;
+  document.getElementById("popup").style.display = "flex";
+});
+
+/* ===========================
+   ポップアップを閉じる
+=========================== */
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
 }
 
 /* ============================

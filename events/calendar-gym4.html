@@ -401,6 +401,39 @@
       box-sizing: border-box !important;
     }
   }
+
+/* ===== スマホ専用：モーダル文字を大きく＋余白を狭く ===== */
+@media (max-width: 480px) {
+
+  .modal-content {
+    font-size: 16px;
+    padding: 8px 10px;     /* ← 余白を狭くした */
+    width: 88%;             /* ← 横幅も少し絞って中央に */
+    max-width: 320px;       /* ← 全体をコンパクトに */
+  }
+
+  .modal-content h3 {
+    font-size: 20px;
+    margin-bottom: 8px;     /* ← タイトル下の余白も縮小 */
+  }
+
+  .modal-info-box {
+    font-size: 18px;
+    padding: 4px 6px;      /* ← 枠内の余白を少し狭く */
+    margin: 6px 0;          /* ← ボックス間の余白も縮める */
+  }
+
+  .modal-info-title {
+    font-size: 16px;
+    margin-bottom: 3px;     /* ← タイトル下の余白を縮小 */
+  }
+
+  .modal-close {
+    font-size: 26px;
+    margin-top: -6px;       /* ← ボタン位置を微調整 */
+  }
+}
+
   </style>
 </head>
 

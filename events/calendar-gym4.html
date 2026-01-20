@@ -317,127 +317,118 @@ body {
   }
 }
 
-/* =========================================
-   印刷レイアウト
-   ========================================= */
-@media print {
+  /* =========================================
+     印刷レイアウト（最適化版）
+     ========================================= */
+  @media print {
 
-  /* 余白を減らして2列印刷 */
-  @page {
-    margin: 8mm;
+    .title {
+      display: none !important;
+    }
+
+    body, body * {
+      background: #fff !important;
+      color: #000 !important;
+      box-shadow: none !important;
+    }
+
+    #print-header {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px solid #000;
+    }
+    #print-header div {
+      flex: 1;
+      text-align: center;
+      font-size: 16px !important;
+      font-weight: bold;
+    }
+    .print-title-left  { text-align: left !important; }
+    .print-title-right { text-align: right !important; }
+
+    .month-title {
+      display: none !important;
+    }
+
+    .month-content {
+      display: none !important;
+    }
+    .month-content.open {
+      display: block !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    .day-box {
+      page-break-inside: avoid;
+      border: 1px solid #000 !important;
+      padding: 6px;
+      margin-bottom: 6px;
+    }
+
+    .event-list {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      gap: 4px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .event-item {
+      display: inline-block !important;
+      width: auto !important;
+      margin: 0 !important;
+      padding: 4px 6px !important;
+      border: 1px solid #ccc !important;
+      background: #f2f2f2 !important;
+      page-break-inside: avoid;
+      white-space: nowrap !important;
+      flex: 1 1 auto !important;
+      max-width: 100% !important;
+      flex-shrink: 1 !important;
+      min-width: 120px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .time-am,
+    .time-pm,
+    .time-all {
+      color: #000 !important;
+    }
+
+    .modal {
+      display: none !important;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 5mm;
+    }
+
+    html, body {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 11px;
+    }
+
+    .page,
+    .month-content,
+    .day-box,
+    .event-list {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      box-sizing: border-box !important;
+    }
   }
-
-  body {
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-    background: white !important;
-  }
-
-  /* 施設名・印刷月・印刷日を1行に集約 */
-  #print-header {
-    display: block !important;
-    font-size: 13px !important;
-    font-weight: bold;
-    margin-bottom: 6px !important;
-    text-align: left;
-  }
-
-  /* 例：JS側で結合して出力する想定
-     川口地区社会体育館　2026年1月　2026年1月20日現在
-  */
-
-  /* 当月以外の帯（緑帯）は印刷しない */
-  .month-title {
-    display: none !important;
-  }
-
-  /* 2列レイアウト（紙面効率UP） */
-  .month-container {
-    break-inside: avoid;
-    width: 48%;
-    display: inline-block;
-    vertical-align: top;
-    margin-right: 2%;
-  }
-
-  /* 最後の列の余白調整 */
-  .month-container:nth-child(2n) {
-    margin-right: 0;
-  }
-
-  /* 日付ボックスの見た目を印刷向けに調整 */
-  .day-box {
-    border: 1px solid #999 !important;
-    background: #fff !important;
-    padding: 4px 6px !important;
-    margin-bottom: 4px !important;
-    box-shadow: none !important;
-  }
-
-  /* 日付（3月15日など） */
-  .day-header span {
-    font-size: 13px !important;
-  }
-
-  /* 祝日名は控えめに */
-  .holiday-name {
-    font-size: 11px !important;
-    opacity: 0.7 !important;
-  }
-
-  /* イベントボックスをコンパクトに */
-  .event-item {
-    padding: 2px 4px !important;
-    margin-bottom: 2px !important;
-    border: 1px solid #ccc !important;
-    border-radius: 4px !important;
-  }
-
-  /* 時刻とタイトルの行間を最大限詰める */
-  .event-time-title {
-    display: flex;
-    flex-direction: column;
-    gap: 0 !important;
-  }
-
-  .event-time-title .time-block,
-  .event-time-title strong:not(.time-block) {
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-  }
-
-  /* モーダルなど印刷不要要素は非表示 */
-  .modal,
-  .title {
-    display: none !important;
-  }
-
-  /* 2列レイアウトの基本設定 */
-  .month-container {
-    width: 48% !important;          /* ← 横幅を明確に指定 */
-    display: inline-block !important;
-    vertical-align: top !important;
-    margin-right: 2% !important;    /* ← 2列の間の余白 */
-    page-break-inside: avoid !important;
-  }
-
-  /* 右側の列は余白なし */
-  .month-container:nth-child(2n) {
-    margin-right: 0 !important;
-  }
-
-  /* 親要素が幅100%を持つように */
-  .calendar-wrapper,
-  .calendar-container {
-    width: 100% !important;
-  }
-
-  /* 月タイトル帯は印刷しない */
-  .month-title {
-    display: none !important;
-  }
-}
 
 /* ===== スマホ専用：モーダル文字を大きく＋余白を狭く ===== */
 @media (max-width: 480px) {

@@ -343,7 +343,7 @@ body {
     #print-header div {
       flex: 1;
       text-align: center;
-      font-size: 16px !important;
+      font-size: 24px !important;
       font-weight: bold;
     }
     .print-title-left  { text-align: left !important; }
@@ -419,6 +419,23 @@ body {
       font-size: 11px;
     }
 
+/* ★ 2段カラム化（開いている月だけ） */
+.month-content.open {
+  column-count: 2;
+  column-gap: 8mm;
+  -webkit-column-count: 2;
+  -webkit-column-gap: 8mm;
+  -moz-column-count: 2;
+  -moz-column-gap: 8mm;
+}
+
+/* ★ day-box がカラムの途中で割れないようにする */
+.day-box {
+  break-inside: avoid-column;
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+}
+
     .page,
     .month-content,
     .day-box,
@@ -428,7 +445,14 @@ body {
       min-width: 100% !important;
       box-sizing: border-box !important;
     }
+
+ @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+}
+
 
 /* ===== スマホ専用：モーダル文字を大きく＋余白を狭く ===== */
 @media (max-width: 480px) {

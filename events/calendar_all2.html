@@ -616,6 +616,25 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   margin: 6px 0;
   line-height: 1.4;
 }
+
+@media (max-width: 600px) {
+  .modal-content {
+    font-size: 17px !important;   /* ← 重要 */
+  }
+  .modal-info-box {
+    font-size: 20px !important;   /* ← 本文のサイズ */
+  }
+  .modal-info-title {
+    font-size: 18px !important;   /* ← 見出し */
+  }
+  #modal-body {
+    font-size: 17px !important;   /* ← 説明文 */
+  }
+  .modal-content .modal-info-box {
+    padding: 4px 6px !important;   /* ← ここが確実に効く */
+  }
+}
+
 </style>
 </head>
 

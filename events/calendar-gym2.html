@@ -240,8 +240,15 @@
   background: #ffeb3b;
   padding: 6px 10px;
   border-radius: 6px;
-  display: inline-block;
-  margin: 0 auto 10px auto; /* ← 中央寄せの決め手 */
+
+  display: inline-block;   /* ← これが必須 */
+  margin-left: auto;       /* ← これも必須 */
+  margin-right: auto;      /* ← これも必須 */
+
+  text-align: center;
+}
+
+.modal-content {
   text-align: center;
 }
 
@@ -251,6 +258,11 @@
 
 #modal-time {
   margin-top: -2px;   /* 少しだけ上に寄せる */
+}
+#modal-desc {
+  text-align: left;
+  margin-top: 10px;
+  line-height: 1.6;
 }
 
     .color-cancel       { background: var(--color-cancel); }

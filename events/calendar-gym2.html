@@ -208,6 +208,50 @@
       color:#ffff22;
       font-weight: 700;
     }
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #fff;
+  width: 80%;
+  max-width: 400px;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#modal-time {
+  font-size: 30px;
+  font-weight: 700;
+  background: #ffeb3b;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 0 auto 10px auto; /* ← 中央寄せの決め手 */
+  text-align: center;
+}
+
+#modal-title {
+  margin-bottom: 2px;
+}
+
+#modal-time {
+  margin-top: -2px;   /* 少しだけ上に寄せる */
+}
 
     .color-cancel       { background: var(--color-cancel); }
     .color-badminton   { background: var(--color-badminton); }
@@ -380,7 +424,6 @@
     }
   </style>
 </head>
-
 <body>
 
   <h1>川口地区社会体育館 日程表</h1>
@@ -562,10 +605,17 @@ function mergeEventsForMobile() {
             ? `${timeLabel} ${title}`
             : title;
 
-          slots[time].push({
-            start: start,
-            html: `<div class="event ${color}" data-fulltext="${hoverText}">${displayText}</div>`
-          });
+slots[time].push({
+  start: start,
+html: `
+  <div class="event ${color}"
+       data-title="${title}"
+       data-time="${timeLabel}"
+       data-desc="${(ev.description || '').replace(/\n/g, '<br>')}">
+    ${displayText}
+  </div>
+`
+});
         });
 
         slots["午前"].sort((a, b) => a.start - b.start);
@@ -633,20 +683,25 @@ tr.innerHTML = `
         table.appendChild(tr);
       }
 
-      table.addEventListener("click", function(e) {
-        const eventDiv = e.target.closest(".event");
-        if (!eventDiv) return;
+table.addEventListener("click", function(e) {
+  const eventDiv = e.target.closest(".event");
+  if (!eventDiv) return;
 
-        const text = eventDiv.getAttribute("data-fulltext") || eventDiv.textContent;
+  document.getElementById("modal-title").textContent = eventDiv.dataset.title || "";
+  document.getElementById("modal-time").textContent  = eventDiv.dataset.time  || "";
+  document.getElementById("modal-desc").innerHTML = eventDiv.dataset.desc || "";
 
-        const modal = document.getElementById("eventModal");
-        modal.textContent = text;
-        modal.style.display = "block";
+  document.getElementById("eventModal").style.display = "block";
+});
 
-        setTimeout(() => {
-          modal.style.display = "none";
-        }, 3000);
-      });
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("close")) {
+    document.getElementById("eventModal").style.display = "none";
+  }
+  if (e.target.id === "eventModal") {
+    document.getElementById("eventModal").style.display = "none";
+  }
+});
 
       container.appendChild(table);
 
@@ -676,6 +731,16 @@ tr.innerHTML = `
       loadMonth(today.getFullYear(), today.getMonth());
     });
   </script>
+<!-- ▼ モーダル本体 -->
+<div id="eventModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <h2 id="modal-title"></h2>
+    <p id="modal-time"></p>
+    <p id="modal-desc"></p>
+  </div>
+</div>
+
 </body>
 </html>
-

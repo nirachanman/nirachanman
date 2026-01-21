@@ -371,6 +371,22 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
   .sp-only { display: table-cell !important; }
 }
 
+.reload-btn {
+  padding: 6px 10px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.reload-btn:active {
+  transform: scale(0.95);
+}
+
 /* PC Event Layout */
 @media (min-width: 769px) {
   .event {
@@ -649,6 +665,7 @@ th:nth-child(3), td:nth-child(3) { width: 55% !important; }
       <button id="btn-bekkan" data-cal="3">📚 別館</button>
       <button id="btn-all" data-cal="all">🔘 全施設</button>
     </div>
+    <button id="reload-btn" class="sp-only reload-btn">🔄</button>
     <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
       <span class="google-cal-icon">📅</span>
       <span class="google-cal-label">Google カレンダーで編集</span>
@@ -1156,6 +1173,14 @@ if (facilityClass) modalContent.classList.add(facilityClass);
 /* 背景クリックで閉じる */
 document.getElementById("popup").addEventListener("click", function(e) {
   if (e.target === this) closePopup();
+});
+
+document.getElementById("reload-btn").addEventListener("click", () => {
+  const activeTab = document.querySelector("#monthTabs .active");
+  const year = Number(activeTab.dataset.year);
+  const month = Number(activeTab.dataset.month);
+
+  loadMonth(year, month);
 });
 
 function closePopup() {

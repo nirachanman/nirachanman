@@ -789,8 +789,12 @@ function createEventHTML(ev, baseColor) {
     .map(line => `<div class="tooltip-line">${line}</div>`)
     .join("");
 
+  /* ★★★ ここで data-date を追加 ★★★ */
+  const dateRaw = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
+
   return `
     <div class="event" style="background:${color}"
+         data-date="${dateRaw}"
          data-location="${ev.location ? ev.location.replace(/"/g, '&quot;') : ''}">
       <div class="event-time">${timeLabel}</div>
       <div class="event-title ${facilityClass}">
@@ -1128,16 +1132,31 @@ document.addEventListener("click", function(e) {
 
   const title = getTitleOnly(titleEl);
 
+  /* ★★★ 日付＋曜日を作る（ここを追加） ★★★ */
+  const dateRaw = eventEl.dataset.date;   // loadMonth で data-date を付けている前提
+  let dateStr = "";
+  if (dateRaw) {
+    const d = new Date(dateRaw);
+    const youbi = ["日", "月", "火", "水", "木", "金", "土"];
+    dateStr = `${d.getMonth() + 1}/${d.getDate()}(${youbi[d.getDay()]})`;
+  }
+
+  /* ★★★ 時間を作る（既存） ★★★ */
   let time = "(時間なし)";
   if (timeEl) {
     const raw = timeEl.textContent.trim();
     const isAllDay = raw === "";
-    time = toAmPm(raw, isAllDay);
+    const jpTime = toAmPm(raw, isAllDay);
+
+    // ★ 日付が取得できた場合は「日付＋時間」にまとめる
+    time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
+  /* 場所 */
   const placeRaw = eventEl.dataset.location || "";
   const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
 
+  /* 説明 */
   let description = "(説明なし)";
   if (tooltip) {
     const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
@@ -1146,23 +1165,23 @@ document.addEventListener("click", function(e) {
     if (lines.length > 0) description = lines.join("<br>");
   }
 
-// 施設クラス（k / t / b）
-const facilityClass =
-  titleEl.classList.contains("facility-k") ? "k" :
-  titleEl.classList.contains("facility-t") ? "t" :
-  titleEl.classList.contains("facility-b") ? "b" : "";
+  /* 施設クラス（k / t / b） */
+  const facilityClass =
+    titleEl.classList.contains("facility-k") ? "k" :
+    titleEl.classList.contains("facility-t") ? "t" :
+    titleEl.classList.contains("facility-b") ? "b" : "";
 
-// モーダルに施設カラーを反映
-const modalContent = document.querySelector(".modal-content");
-modalContent.classList.remove("k", "t", "b");
-if (facilityClass) modalContent.classList.add(facilityClass);
+  /* モーダルに施設カラーを反映 */
+  const modalContent = document.querySelector(".modal-content");
+  modalContent.classList.remove("k", "t", "b");
+  if (facilityClass) modalContent.classList.add(facilityClass);
 
   /* モーダル内容 */
   const html = `
     <h3>${title}</h3>
 
     <div class="modal-info-box">
-      <div class="modal-info-title">時間</div>
+      <div class="modal-info-title">日時</div>
       <div>${time}</div>
     </div>
 
@@ -1180,7 +1199,6 @@ if (facilityClass) modalContent.classList.add(facilityClass);
   document.getElementById("modal-body").innerHTML = html;
   document.getElementById("popup").style.display = "block";
 });
-
 /* 背景クリックで閉じる */
 document.getElementById("popup").addEventListener("click", function(e) {
   if (e.target === this) closePopup();

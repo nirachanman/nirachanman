@@ -208,61 +208,75 @@
       color:#ffff22;
       font-weight: 700;
     }
+
 .modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 9999;
 }
 
 .modal-content {
   background: #fff;
+  padding: 8px;
+  margin: 100px auto;
   width: 80%;
   max-width: 400px;
-  margin: 10% auto;
-  padding: 20px;
   border-radius: 8px;
-  position: relative;
+  position: relative; /* ← ✖ の基準位置になる */
 }
 
-.close {
-  position: absolute;
-  right: 12px;
-  top: 8px;
-  font-size: 24px;
-  cursor: pointer;
+/* 共通カードデザイン（枠線追加） */
+.modal-box {
+  background: #ffffff;
+  padding: 2px 2px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  border: 1px solid #ddd;   /* ← 枠線追加 */
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* タイトル（中央寄せ） */
+#modal-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;       /* ← 中央寄せ */
+}
+
+/* 時間（中央寄せ・背景色） */
 #modal-time {
   font-size: 30px;
   font-weight: 700;
   background: #ffeb3b;
-  padding: 6px 10px;
-  border-radius: 6px;
-
-  display: inline-block;   /* ← これが必須 */
-  margin-left: auto;       /* ← これも必須 */
-  margin-right: auto;      /* ← これも必須 */
-
+  padding: 8px 12px;
+  border-radius: 8px;
   text-align: center;
+  margin: 0;
 }
 
-.modal-content {
-  text-align: center;
-}
-
-#modal-title {
-  margin-bottom: 2px;
-}
-
-#modal-time {
-  margin-top: -2px;   /* 少しだけ上に寄せる */
-}
+/* 説明文（スクロール対応） */
 #modal-desc {
-  text-align: left;
-  margin-top: 10px;
+  font-size: 15px;
   line-height: 1.6;
+  text-align: left;
+  margin: 0;
+
+  max-height: 200px;        /* ← スクロール枠の高さ */
+  overflow-y: auto;         /* ← スクロール可能にする */
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 12px;   /* ← ここで右側に配置 */
+  font-size: 30px;
+  cursor: pointer;
+  color: #666;
+  transition: 0.2s;
 }
 
     .color-cancel       { background: var(--color-cancel); }
@@ -746,11 +760,21 @@ document.addEventListener("click", (e) => {
 <!-- ▼ モーダル本体 -->
 <div id="eventModal" class="modal">
   <div class="modal-content">
+
     <span class="close">&times;</span>
 
-    <h2 id="modal-title"></h2>
-    <p id="modal-time"></p>
-    <p id="modal-desc"></p>
+    <div class="modal-box">
+      <h2 id="modal-title"></h2>
+    </div>
+
+    <div class="modal-box">
+      <p id="modal-time"></p>
+    </div>
+
+    <div class="modal-box">
+      <p id="modal-desc"></p>
+    </div>
+
   </div>
 </div>
 

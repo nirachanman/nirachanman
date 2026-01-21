@@ -240,6 +240,16 @@ th, td {
   line-height: 1.2;
 }
 
+/* カレンダー全体のフォント統一 */
+.calendar-table, 
+.calendar-table th, 
+.calendar-table td {
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+.calendar-table td {
+  font-weight: 500;
+}
+
 /* Date Cells */
 th:nth-child(1), td:nth-child(1) { width: 15% !important; }
 th:nth-child(2), td:nth-child(2) { width: 35% !important; }
@@ -252,9 +262,10 @@ th:nth-child(3), td:nth-child(3) { width: 50% !important; }
   font-weight: 600;
   font-size: 18px;
 }
-.day-number {
+/* .day-number {
   font-family: "Roboto Mono", "Courier New", monospace;
-}
+} */
+
 .today-highlight td {
   background: #fef9c3 !important;
   border-color: #facc15 !important;
@@ -1201,4 +1212,3 @@ function closePopup() {
 </script>
 </body>
 </html>
-

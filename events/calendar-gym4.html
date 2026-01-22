@@ -343,7 +343,7 @@ body {
     #print-header div {
       flex: 1;
       text-align: center;
-      font-size: 24px !important;
+      font-size: 30px !important;
       font-weight: bold;
     }
     .print-title-left  { text-align: left !important; }
@@ -367,33 +367,45 @@ body {
       border: 1px solid #000 !important;
       padding: 6px;
       margin-bottom: 6px;
+      border: 2px solid #000 !important; /* ← 太くする */
     }
+
+/* 土曜日を薄い青 */
+.day-box.sat {
+  background: #e9f3ff !important;
+}
+
+/* 日曜日・祝日を薄い赤（ピンク） */
+.day-box.sun,
+.day-box.holiday {
+  background: #ffecec !important;
+}
 
     .event-list {
-      display: block !important; /* flex を解除して縦並びにする */
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-      gap: 4px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
+display: flex !important;
+flex-direction: column !important; /* 縦に並べる設定 */
+gap: 2px !important;              /* 要素間の隙間 */
+width: 100% !important;
+box-sizing: border-box !important;    }
 
-    .event-item {
-      display: block !important; /* 1 行ずつ縦に並ぶ */
-      width: auto !important;
-      margin: 0 0 4px 0 !important;
-      padding: 4px 6px !important;
-      border: 1px solid #ccc !important;
-      background: #f2f2f2 !important;
-      page-break-inside: avoid;
-      white-space: nowrap !important;
-      flex: 1 1 auto !important; /* 親幅いっぱいに広げる */
-      max-width: 100% !important;
-      flex-shrink: 1 !important;
-      min-width: 120px !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-    }
+.event-item {
+  display: block !important;
+  width: auto !important;
+  margin: 0 0 1px 0 !important;
+  padding: 4px 6px !important;
+
+  border: 1px solid #aaa !important;   /* ← にじみ防止でスッキリ */
+  background: #fff !important;         /* ← 内側の影が完全に消える */
+
+  page-break-inside: avoid;
+  white-space: nowrap !important;
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+  flex-shrink: 1 !important;
+  min-width: 120px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 
     .time-am,
     .time-pm,

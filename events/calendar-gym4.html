@@ -370,7 +370,7 @@ body {
     }
 
     .event-list {
-      display: flex !important;
+      display: block !important; /* flex を解除して縦並びにする */
       flex-direction: row !important;
       flex-wrap: wrap !important;
       gap: 4px !important;
@@ -379,15 +379,15 @@ body {
     }
 
     .event-item {
-      display: inline-block !important;
+      display: block !important; /* 1 行ずつ縦に並ぶ */
       width: auto !important;
-      margin: 0 !important;
+      margin: 0 0 4px 0 !important;
       padding: 4px 6px !important;
       border: 1px solid #ccc !important;
       background: #f2f2f2 !important;
       page-break-inside: avoid;
       white-space: nowrap !important;
-      flex: 1 1 auto !important;
+      flex: 1 1 auto !important; /* 親幅いっぱいに広げる */
       max-width: 100% !important;
       flex-shrink: 1 !important;
       min-width: 120px !important;
@@ -416,7 +416,7 @@ body {
       min-width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
-      font-size: 11px;
+      font-size: 10px;
     }
 
 /* ★ 2段カラム化（開いている月だけ） */

@@ -751,7 +751,38 @@ document.addEventListener("click", (e) => {
     }
 
     loadMonth(today.getFullYear(), today.getMonth());
-    
+    async function loadMonth(year, month) {
+  const container = document.getElementById("calendarContainer");
+  container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+  const events = await fetchEvents(CALENDAR_ID, year, month);
+  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+
+  const holidayMap = {};
+
+  // ★ 表示しない行事名リスト
+  const excludeHolidays = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
+  holidayEvents.forEach(ev => {
+    const date = ev.start.date || ev.start.dateTime.split("T")[0];
+
+    // ★ 除外対象なら holidayMap に入れない
+    if (excludeHolidays.includes(ev.summary)) return;
+
+    holidayMap[date] = ev.summary;
+  });
+
+  renderTable(events, holidayMap, year, month);
+}
+
     // ▼ ここに追加（縦→横、横→縦で再描画する）
     window.addEventListener("orientationchange", () => {
       loadMonth(today.getFullYear(), today.getMonth());

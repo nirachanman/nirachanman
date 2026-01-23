@@ -83,8 +83,6 @@ async function initClient() {
   buildCalendar(year, month);
 }
 
-
-
 /* -----------------------------
    Google Calendar API 取得
 ----------------------------- */
@@ -197,10 +195,12 @@ function renderTable(data, year, month) {
    メイン処理
 ----------------------------- */
 async function buildCalendar(year, month) {
-  console.log("buildCalendar が呼ばれました");
+  console.log("buildCalendar が呼ばれました", year, month);
 
   const events = await fetchEvents(
-    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
+    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com",
+    year,
+    month
   );
 
   console.log("取得イベント:", events);
@@ -213,5 +213,3 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
-
-

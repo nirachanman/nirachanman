@@ -827,10 +827,28 @@ function classifyTime(ev) {
 /* 祝日 */
 function createHolidayMap(holidayEvents) {
   const map = {};
+
+  // ★ 表示しない行事リスト
+  const ignoreList = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
   holidayEvents.forEach(ev => {
+    const name = ev.summary;
+
+    // ★ 除外対象ならスキップ
+    if (ignoreList.includes(name)) return;
+
     const date = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split("T")[0] : "");
-    map[date] = ev.summary;
+    map[date] = name;
   });
+
   return map;
 }
 

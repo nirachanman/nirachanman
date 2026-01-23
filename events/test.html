@@ -55,16 +55,12 @@
 
 <script>
 /* -----------------------------
-   Google API 初期化（GitHub Pages対応）
+   Google API 初期化
 ----------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOMContentLoaded → gapi.load 実行");
-  if (window.gapi) {
-    gapi.load("client", initClient);
-  } else {
-    console.error("gapi が読み込まれていません");
-  }
-});
+
+function start() {
+  gapi.load("client", initClient);
+}
 
 async function initClient() {
   console.log("initClient が呼ばれました");
@@ -84,21 +80,13 @@ async function initClient() {
   buildCalendar(year, month);
 }
 
-
 /* -----------------------------
    Google Calendar API 取得
 ----------------------------- */
-async function fetchEvents(calendarId, year, month) {
-  const firstDay = new Date(year, month - 1, 1);
-  const lastDay = new Date(year, month, 0); // 月末日
 
-  const timeMin = firstDay.toISOString();
-  const timeMax = new Date(
-    lastDay.getFullYear(),
-    lastDay.getMonth(),
-    lastDay.getDate(),
-    23, 59, 59
-  ).toISOString();
+async function fetchEvents(calendarId, year, month) {
+  const timeMin = new Date(year, month - 1, 1).toISOString();
+  const timeMax = new Date(year, month, 0, 23, 59, 59).toISOString();
 
   const response = await gapi.client.calendar.events.list({
     calendarId,
@@ -114,6 +102,7 @@ async function fetchEvents(calendarId, year, month) {
 /* -----------------------------
    日付・部屋ごとに分類
 ----------------------------- */
+
 const youbi = ["日", "月", "火", "水", "木", "金", "土"];
 
 function formatDate(dateStr) {
@@ -128,8 +117,9 @@ function formatTime(obj) {
 }
 
 /* -----------------------------
-   安全な日付抽出（終日イベント対応）
+   安全な日付抽出（修正版）
 ----------------------------- */
+
 function getEventDate(ev) {
   if (ev.start?.date) return ev.start.date;
   if (ev.start?.dateTime) return ev.start.dateTime.split("T")[0];
@@ -137,22 +127,28 @@ function getEventDate(ev) {
 }
 
 /* -----------------------------
-   キーワードで部屋を判定
-   [調理室] [和室] [小会議室]
+   キーワードで部屋を判定（修正版）
 ----------------------------- */
+
 function detectRoom(ev) {
   const text = (ev.summary + " " + (ev.description || "")).toLowerCase();
 
-  if (text.includes("[調理室]") || text.includes("調理室")) return "cooking";
-  if (text.includes("[和室]")   || text.includes("和室"))   return "washitsu";
-  if (text.includes("[小会議室]") || text.includes("小会議室")) return "meeting";
+  if (text.includes("料理室") || text.includes("[料理室]") || text.includes("kitchen"))
+    return "cooking";
+
+  if (text.includes("和室") || text.includes("[和室]") || text.includes("washitsu"))
+    return "washitsu";
+
+  if (text.includes("小会議室") || text.includes("[小会議室]") || text.includes("meeting"))
+    return "meeting";
 
   return "unknown";
 }
 
 /* -----------------------------
-   1つのカレンダーから分類
+   1つのカレンダーから分類（修正版）
 ----------------------------- */
+
 function classifyEvents(events) {
   const map = {};
 
@@ -178,6 +174,7 @@ function classifyEvents(events) {
 /* -----------------------------
    HTML に描画
 ----------------------------- */
+
 function renderTable(data, year, month) {
   document.getElementById("title").textContent =
     `川口コミュニティセンター 利用予定表（${year}年${month}月）`;
@@ -204,14 +201,9 @@ function renderTable(data, year, month) {
 /* -----------------------------
    メイン処理
 ----------------------------- */
+
 async function buildCalendar(year, month) {
-  console.log("buildCalendar が呼ばれました");
-
-  const events = await fetchEvents(
-    "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com"
-  );
-
-  console.log("取得イベント:", events);
+  const events = await fetchEvents("31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com", year, month);
 
   const data = classifyEvents(events);
 
@@ -221,4 +213,3 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
-

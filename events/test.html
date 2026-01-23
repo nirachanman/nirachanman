@@ -58,6 +58,7 @@
    Google API 初期化（GitHub Pages対応）
 ----------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded → gapi.load 実行");
   if (window.gapi) {
     gapi.load("client", initClient);
   } else {
@@ -82,8 +83,16 @@ async function initClient() {
    Google Calendar API 取得
 ----------------------------- */
 async function fetchEvents(calendarId, year, month) {
-  const timeMin = new Date(year, month - 1, 1).toISOString();
-  const timeMax = new Date(year, month, 0, 23, 59, 59).toISOString();
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0); // 月末日
+
+  const timeMin = firstDay.toISOString();
+  const timeMax = new Date(
+    lastDay.getFullYear(),
+    lastDay.getMonth(),
+    lastDay.getDate(),
+    23, 59, 59
+  ).toISOString();
 
   const response = await gapi.client.calendar.events.list({
     calendarId,
@@ -206,4 +215,3 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
-

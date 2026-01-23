@@ -320,9 +320,6 @@ body {
   /* =========================================
      印刷レイアウト（最適化版）
      ========================================= */
-/* =========================================
-   印刷レイアウト（最適化版）
-========================================= */
 @media print {
 
   /* 全体の基本設定 */
@@ -404,12 +401,48 @@ body {
 
   /* 曜日別背景色 */
   .day-box.sat {
-    background: #b3d1ff !important; /* 濃いめの青 */
+    background: #b3d1ff !important;
   }
 
   .day-box.sun,
   .day-box.holiday {
-    background: #ffb3b3 !important; /* 濃いめの赤系ピンク */
+    background: #ffb3b3 !important;
+  }
+
+  /* 日付行（day-header） */
+  .day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 祝祭日名（小さく） */
+  .holiday-name {
+    font-size: 6px !important;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  /* ★ 日付・曜日（左側の span）を横幅いっぱいに塗りつぶす */
+  .day-header span:first-child {
+    display: block !important;
+    width: 100% !important;
+    background: #2a5da8 !important;
+    color: #fff !important;
+    padding: 4px 6px !important;
+    border-radius: 2px;
+    font-weight: bold !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ★ 祝祭日名は背景なし・黒文字に戻す */
+  .holiday-name {
+    background: none !important;
+    color: #000 !important;
+    padding: 0 !important;
+    font-size: 8px !important;
+    white-space: nowrap !important;
   }
 
   /* イベントリスト */
@@ -448,56 +481,20 @@ body {
     color: #000 !important;
   }
 
-    .page,
-    .month-content,
-    .day-box,
-    .event-list {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 100% !important;
-      box-sizing: border-box !important;
-    }
-
-  /* 印刷色補正（色を忠実に再現） */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-@media print {
-  .day-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .holiday-name {
-    font-size: 6px !important;
-    margin-top: 2px;
-    text-align: center;
-  }
-
-@media print {
-
-  /* ★ 日付・曜日（左側の span）を横幅いっぱいに塗りつぶす */
-  .day-header span:first-child {
-    display: block !important;
+  .page,
+  .month-content,
+  .day-box,
+  .event-list {
     width: 100% !important;
-    background: #2a5da8 !important; /* 好きな色に変更可能 */
-    color: #fff !important; /* 白文字のまま */
-    padding: 4px 6px !important;
-    border-radius: 2px;
-    font-weight: bold !important;
-    text-align: center !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  /* ★ 祝祭日名は背景なし・黒文字に戻す */
-  .holiday-name {
-    background: none !important;
-    color: #000 !important;
-    padding: 0 !important;
-    font-size: 8px !important;
-    white-space: nowrap !important;
+  /* 印刷色補正 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 

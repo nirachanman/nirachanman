@@ -694,10 +694,30 @@ async function loadHolidays(startDate, endDate) {
   url.searchParams.set("timeMax", endDate.toISOString());
   const res = await fetch(url);
   const data = await res.json();
+
+  const IGNORE_EVENTS = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
   const map = {};
+
   (data.items || []).forEach(ev => {
-    if (ev.start.date) map[ev.start.date] = ev.summary;
+    if (!ev.start?.date) return;
+
+    const name = ev.summary;
+
+    // ★ ここで行事を除外する（配置場所はここが最適）
+    if (IGNORE_EVENTS.includes(name)) return;
+
+    map[ev.start.date] = name;
   });
+
   return map;
 }
 

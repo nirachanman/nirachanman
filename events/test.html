@@ -66,17 +66,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initClient() {
-  console.log("initClient が呼ばれました");
-
   await gapi.client.init({
-    apiKey: "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI",  // ←あなたのAPIキー
+    apiKey: "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI",
     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
   });
 
-  console.log("Google API 初期化完了");
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
 
-  buildCalendar(2025, 8);
+  buildCalendar(year, month);
 }
+
 
 /* -----------------------------
    Google Calendar API 取得
@@ -206,3 +207,4 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
+

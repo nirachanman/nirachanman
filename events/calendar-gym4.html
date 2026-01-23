@@ -320,133 +320,133 @@ body {
   /* =========================================
      印刷レイアウト（最適化版）
      ========================================= */
-  @media print {
+/* =========================================
+   印刷レイアウト（最適化版）
+========================================= */
+@media print {
 
-    .title {
-      display: none !important;
-    }
+  /* 全体の基本設定 */
+  html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px;
+    background: #fff !important;
+    color: #000 !important;
+  }
 
-    body, body * {
-      background: #fff !important;
-      color: #000 !important;
-      box-shadow: none !important;
-    }
+  body * {
+    box-shadow: none !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
 
-    #print-header {
-      display: flex !important;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-      padding-bottom: 2px;
-      border-bottom: 1px solid #000;
-    }
-    #print-header div {
-      flex: 1;
-      text-align: center;
-      font-size: 30px !important;
-      font-weight: bold;
-    }
-    .print-title-left  { text-align: left !important; }
-    .print-title-right { text-align: right !important; }
+  /* 不要要素を非表示 */
+  .title,
+  .month-title,
+  .modal {
+    display: none !important;
+  }
 
-    .month-title {
-      display: none !important;
-    }
+  /* ヘッダー */
+  #print-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #000;
+  }
 
-    .month-content {
-      display: none !important;
-    }
-    .month-content.open {
-      display: block !important;
-      max-height: none !important;
-      overflow: visible !important;
-    }
+  #print-header div {
+    flex: 1;
+    text-align: center;
+    font-size: 30px !important;
+    font-weight: bold;
+  }
 
-    .day-box {
-      page-break-inside: avoid;
-      border: 1px solid #000 !important;
-      padding: 6px;
-      margin-bottom: 6px;
-      border: 2px solid #000 !important; /* ← 太くする */
-    }
+  .print-title-left  { text-align: left !important; }
+  .print-title-right { text-align: right !important; }
 
-/* 土曜日を薄い青 */
-.day-box.sat {
-  background: #e9f3ff !important;
-}
+  /* 月コンテンツ（開いている月だけ表示） */
+  .month-content {
+    display: none !important;
+  }
 
-/* 日曜日・祝日を薄い赤（ピンク） */
-.day-box.sun,
-.day-box.holiday {
-  background: #ffecec !important;
-}
+  .month-content.open {
+    display: block !important;
+    max-height: none !important;
+    overflow: visible !important;
 
-    .event-list {
-display: flex !important;
-flex-direction: column !important; /* 縦に並べる設定 */
-gap: 2px !important;              /* 要素間の隙間 */
-width: 100% !important;
-box-sizing: border-box !important;    }
+    column-count: 2;
+    column-gap: 8mm;
+    -webkit-column-count: 2;
+    -webkit-column-gap: 8mm;
+    -moz-column-count: 2;
+    -moz-column-gap: 8mm;
+  }
 
-.event-item {
-  display: block !important;
-  width: auto !important;
-  margin: 0 0 1px 0 !important;
-  padding: 4px 6px !important;
+  /* 日ボックス */
+  .day-box {
+    page-break-inside: avoid;
+    break-inside: avoid-column;
+    -webkit-column-break-inside: avoid;
+    -moz-column-break-inside: avoid;
 
-  border: 1px solid #aaa !important;   /* ← にじみ防止でスッキリ */
-  background: #fff !important;         /* ← 内側の影が完全に消える */
+    border: 2px solid #000 !important;
+    padding: 6px;
+    margin-bottom: 6px;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-  page-break-inside: avoid;
-  white-space: nowrap !important;
-  flex: 1 1 auto !important;
-  max-width: 100% !important;
-  flex-shrink: 1 !important;
-  min-width: 120px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
+  /* 曜日別背景色 */
+  .day-box.sat {
+    background: #b3d1ff !important; /* 濃いめの青 */
+  }
 
-    .time-am,
-    .time-pm,
-    .time-all {
-      color: #000 !important;
-    }
+  .day-box.sun,
+  .day-box.holiday {
+    background: #ffb3b3 !important; /* 濃いめの赤系ピンク */
+  }
 
-    .modal {
-      display: none !important;
-    }
+  /* イベントリスト */
+  .event-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-    @page {
-      size: A4 portrait;
-      margin: 5mm;
-    }
+  /* イベントボックス */
+  .event-item {
+    display: block !important;
+    width: auto !important;
+    margin: 0 0 1px 0 !important;
+    padding: 4px 6px !important;
 
-    html, body {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      font-size: 10px;
-    }
+    border: 1px solid #aaa !important;
+    background: #fff !important;
 
-/* ★ 2段カラム化（開いている月だけ） */
-.month-content.open {
-  column-count: 2;
-  column-gap: 8mm;
-  -webkit-column-count: 2;
-  -webkit-column-gap: 8mm;
-  -moz-column-count: 2;
-  -moz-column-gap: 8mm;
-}
+    page-break-inside: avoid;
+    white-space: nowrap !important;
+    flex: 1 1 auto !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+    min-width: 120px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 
-/* ★ day-box がカラムの途中で割れないようにする */
-.day-box {
-  break-inside: avoid-column;
-  -webkit-column-break-inside: avoid;
-  -moz-column-break-inside: avoid;
-}
+  /* 時刻の色 */
+  .time-am,
+  .time-pm,
+  .time-all {
+    color: #000 !important;
+  }
 
     .page,
     .month-content,
@@ -458,13 +458,48 @@ box-sizing: border-box !important;    }
       box-sizing: border-box !important;
     }
 
- @media print {
+  /* 印刷色補正（色を忠実に再現） */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-}
+@media print {
+  .day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
+  .holiday-name {
+    font-size: 6px !important;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+@media print {
+
+  /* ★ 日付・曜日（左側の span）を横幅いっぱいに塗りつぶす */
+  .day-header span:first-child {
+    display: block !important;
+    width: 100% !important;
+    background: #2a5da8 !important; /* 好きな色に変更可能 */
+    color: #fff !important; /* 白文字のまま */
+    padding: 4px 6px !important;
+    border-radius: 2px;
+    font-weight: bold !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ★ 祝祭日名は背景なし・黒文字に戻す */
+  .holiday-name {
+    background: none !important;
+    color: #000 !important;
+    padding: 0 !important;
+    font-size: 8px !important;
+    white-space: nowrap !important;
+  }
+}
 
 /* ===== スマホ専用：モーダル文字を大きく＋余白を狭く ===== */
 @media (max-width: 480px) {

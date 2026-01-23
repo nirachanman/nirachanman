@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>川口コミュニティセンター 利用予定表</title>
+
+  <style>
+    body {
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      vertical-align: top;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    th {
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    @media print {
+      body { margin: 0 }
+      table { page-break-inside: avoid }
+    }
+  </style>
+
+  <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+
+<h1 id="title"></h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>1階 料理室</th>
+      <th>2階 和室</th>
+      <th>2階 小会議室</th>
+    </tr>
+  </thead>
+  <tbody id="calendar-body"></tbody>
+</table>
+
+<script>
+/* -----------------------------
+   Google API 初期化
+----------------------------- */
+
+function start() {
+  gapi.load("client", initClient);
+}
+
+async function initClient() {
+  await gapi.client.init({
+    apiKey: "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI",
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
+  });
+
+  buildCalendar(2025, 8); // ← 表示したい年月
+}
+
+window.onload = start;
+
+/* -----------------------------
+   Google Calendar API 取得
+----------------------------- */
+
+async function fetchEvents(calendarId, year, month) {
+  const timeMin = new Date(year, month - 1, 1).toISOString();
+  const timeMax = new Date(year, month, 0, 23, 59, 59).toISOString();
+
+  const response = await gapi.client.calendar.events.list({
+    calendarId,
+    timeMin,
+    timeMax,
+    singleEvents: true,
+    orderBy: "startTime"
+  });
+
+  return response.result.items;
+}
+
+/* -----------------------------
+   日付・部屋ごとに分類
+----------------------------- */
+
+const youbi = ["日", "月", "火", "水", "木", "金", "土"];
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getMonth() + 1}月${d.getDate()}日（${youbi[d.getDay()]}）`;
+}
+
+function formatTime(obj) {
+  if (!obj || !obj.dateTime) return "";
+  const d = new Date(obj.dateTime);
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+/* -----------------------------
+   キーワードで部屋を判定
+----------------------------- */
+
+function detectRoom(ev) {
+  const text = (ev.summary + " " + (ev.description || "")).toLowerCase();
+
+  if (text.includes("料理室") || text.includes("[料理室]") || text.includes("kitchen"))
+    return "cooking";
+
+  if (text.includes("和室") || text.includes("[和室]") || text.includes("washitsu"))
+    return "washitsu";
+
+  if (text.includes("小会議室") || text.includes("[小会議室]") || text.includes("meeting"))
+    return "meeting";
+
+  return "unknown";
+}
+
+/* -----------------------------
+   1つのカレンダーから分類
+----------------------------- */
+
+function classifyEvents(events) {
+  const map = {};
+
+  events.forEach(ev => {
+    const date = ev.start.date || ev.start.dateTime.split("T")[0];
+    if (!map[date]) {
+      map[date] = { cooking: "", washitsu: "", meeting: "" };
+    }
+
+    const room = detectRoom(ev);
+    const text = `${ev.summary} ${formatTime(ev.start)}～${formatTime(ev.end)}`;
+
+    if (room === "cooking") map[date].cooking += text + "\n";
+    if (room === "washitsu") map[date].washitsu += text + "\n";
+    if (room === "meeting") map[date].meeting += text + "\n";
+  });
+
+  return map;
+}
+
+/* -----------------------------
+   HTML に描画
+----------------------------- */
+
+function renderTable(data, year, month) {
+  document.getElementById("title").textContent =
+    `川口コミュニティセンター 利用予定表（${year}年${month}月）`;
+
+  const tbody = document.getElementById("calendar-body");
+  tbody.innerHTML = "";
+
+  const dates = Object.keys(data).sort();
+
+  dates.forEach(dateStr => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${formatDate(dateStr)}</td>
+      <td>${data[dateStr].cooking}</td>
+      <td>${data[dateStr].washitsu}</td>
+      <td>${data[dateStr].meeting}</td>
+    `;
+
+    tbody.appendChild(row);
+  });
+}
+
+/* -----------------------------
+   メイン処理
+----------------------------- */
+
+async function buildCalendar(year, month) {
+  const events = await fetchEvents("31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com", year, month);
+
+  const data = classifyEvents(events);
+
+  renderTable(data, year, month);
+}
+</script>
+
+</body>
+</html>

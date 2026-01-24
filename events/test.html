@@ -134,7 +134,7 @@ function detectRoom(ev) {
   const text = (ev.summary + " " + (ev.description || "")).toLowerCase();
 
   if (text.includes("[調理室]") || text.includes("調理室")) return "cooking";
-  if (text.includes("[和室]")   || text.includes("和室"))   return "washitsu";
+  if (text.includes("[日本間]")   || text.includes("日本間"))   return "nihonma";
   if (text.includes("[小会議室]") || text.includes("小会議室")) return "meeting";
 
   return "unknown";
@@ -213,4 +213,5 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
+
 

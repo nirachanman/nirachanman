@@ -46,7 +46,7 @@
     <tr>
       <th>日付</th>
       <th>1階 調理室</th>
-      <th>2階 日本間</th>
+      <th>2階・日本間</th>
       <th>2階 小会議室</th>
     </tr>
   </thead>
@@ -128,7 +128,7 @@ function getEventDate(ev) {
 
 /* -----------------------------
    キーワードで部屋を判定
-   [調理室] [日本間] [小会議室]
+   [調理室] [和室] [小会議室]
 ----------------------------- */
 function detectRoom(ev) {
   const text = (ev.summary + " " + (ev.description || "")).toLowerCase();
@@ -150,13 +150,16 @@ function classifyEvents(events) {
     const date = getEventDate(ev);
     if (!date) return;
 
-if (!map[date]) {
-  map[date] = { cooking: "", nihonma: "", meeting: "" };
-}
+    if (!map[date]) {
+      map[date] = { cooking: "", washitsu: "", meeting: "" };
+    }
 
-if (room === "cooking") map[date].cooking += text + "\n";
-if (room === "nihonma") map[date].nihonma += text + "\n";
-if (room === "meeting") map[date].meeting += text + "\n";
+    const room = detectRoom(ev);
+    const text = `${ev.summary} ${formatTime(ev.start)}～${formatTime(ev.end)}`;
+
+    if (room === "cooking") map[date].cooking += text + "\n";
+    if (room === "washitsu") map[date].washitsu += text + "\n";
+    if (room === "meeting") map[date].meeting += text + "\n";
   });
 
   return map;
@@ -180,7 +183,7 @@ function renderTable(data, year, month) {
     row.innerHTML = `
       <td>${formatDate(dateStr)}</td>
       <td>${data[dateStr].cooking}</td>
-      <td>${data[dateStr].nihonma}</td>
+      <td>${data[dateStr].washitsu}</td>
       <td>${data[dateStr].meeting}</td>
     `;
 
@@ -210,3 +213,4 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
+

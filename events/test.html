@@ -151,14 +151,14 @@ function classifyEvents(events) {
     if (!date) return;
 
     if (!map[date]) {
-      map[date] = { cooking: "", washitsu: "", meeting: "" };
+      map[date] = { cooking: "", nihonma: "", meeting: "" };
     }
 
     const room = detectRoom(ev);
     const text = `${ev.summary} ${formatTime(ev.start)}～${formatTime(ev.end)}`;
 
     if (room === "cooking") map[date].cooking += text + "\n";
-    if (room === "washitsu") map[date].washitsu += text + "\n";
+    if (room === "washitsu") map[date].nihonma += text + "\n";
     if (room === "meeting") map[date].meeting += text + "\n";
   });
 
@@ -183,7 +183,7 @@ function renderTable(data, year, month) {
     row.innerHTML = `
       <td>${formatDate(dateStr)}</td>
       <td>${data[dateStr].cooking}</td>
-      <td>${data[dateStr].washitsu}</td>
+      <td>${data[dateStr].nihonma}</td>
       <td>${data[dateStr].meeting}</td>
     `;
 
@@ -213,4 +213,5 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
+
 

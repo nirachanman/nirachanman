@@ -40,6 +40,9 @@
 <body>
 
 <h1 id="title"></h1>
+<div style="text-align:center; margin-bottom: 15px;">
+  <select id="monthSelector"></select>
+</div>
 
 <table>
   <thead>
@@ -66,21 +69,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initClient() {
-  console.log("initClient が呼ばれました");
-
   await gapi.client.init({
     apiKey: "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI",
     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
   });
 
-  console.log("Google API 初期化完了");
+  // ★ セレクトボックス生成
+  setupMonthSelector();
 
-  // ★ 今月を自動表示
+  // ★ 初期表示（今月）
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
-
-  buildCalendar(year, month);
+  buildCalendar(today.getFullYear(), today.getMonth() + 1);
 }
 
 /* -----------------------------
@@ -209,10 +208,44 @@ async function buildCalendar(year, month) {
 
   renderTable(data, year, month);
 }
+
+function setupMonthSelector() {
+  const selector = document.getElementById("monthSelector");
+  selector.innerHTML = "";
+
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth() - 1, 1); // 前月
+  const end = new Date(today.getFullYear(), today.getMonth() + 12, 1); // 12ヶ月先
+
+  let cursor = new Date(start);
+
+  while (cursor <= end) {
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth() + 1;
+
+    const option = document.createElement("option");
+    option.value = `${y}-${m}`;
+    option.textContent = `${y}年${m}月`;
+
+    // 当月を初期選択
+    if (y === today.getFullYear() && m === today.getMonth() + 1) {
+      option.selected = true;
+    }
+
+    selector.appendChild(option);
+
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  // 選択されたらカレンダー更新
+  selector.addEventListener("change", () => {
+    const [year, month] = selector.value.split("-").map(Number);
+    buildCalendar(year, month);
+  });
+}
+
 </script>
 
 </body>
 </html>
-
-
 

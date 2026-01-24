@@ -7,12 +7,21 @@
   <style>
     body {
       font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
-      margin: 20px;
+      margin: 10px;
     }
     h1 {
       text-align: center;
       margin-bottom: 10px;
     }
+
+#title {
+  font-size: 20px;      /* ← 好きなサイズに調整可能（例：18px でもOK） */
+  margin-top: 2px;      /* 上の余白を縮める */
+  margin-bottom: 2px;   /* 下の余白を縮める */
+  line-height: 1.2;     /* 行間を少し詰める */
+  text-align: center;   /* 中央揃え（必要なら） */
+}
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -25,14 +34,62 @@
       font-size: 14px;
       white-space: pre-wrap;
     }
+
     th {
       background-color: #f0f0f0;
       text-align: center;
     }
+
     @media print {
       body { margin: 0 }
       table { page-break-inside: avoid }
     }
+
+.cooking {
+  background-color: #fff7e6;
+}
+
+.nihonma {
+  background-color: #f0f8ff;
+}
+
+.meeting {
+  background-color: #f5f5f5;
+}
+
+.bikou {
+  background-color: #ffffff;
+}
+
+/* ★ イベント文字を小さくする */
+td.cooking,
+td.nihonma,
+td.meeting {
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+/* ★ 日付文字を小さくする（1列目） */
+#calendar-body td:first-child {
+  font-size: 18px !important;
+  line-height: 1.3;
+}
+
+.holiday {
+  background-color: #ffe5e5;
+  color: #d40000;
+}
+
+.saturday {
+  background-color: #e8f1ff;
+  color: #0044cc;
+}
+
+.sunday {
+  background-color: #ffe5e5;
+  color: #d40000;
+}
+
   </style>
 
   <script src="https://apis.google.com/js/api.js"></script>
@@ -45,14 +102,15 @@
 </div>
 
 <table>
-  <thead>
-    <tr>
-      <th>日付</th>
-      <th>1階 調理室</th>
-      <th>2階・日本間</th>
-      <th>2階 小会議室</th>
-    </tr>
-  </thead>
+<thead>
+  <tr>
+    <th style="width:12%;">日付</th>
+    <th style="width:26%;">1階 調理室</th>
+    <th style="width:26%;">2階 日本間</th>
+    <th style="width:26%;">2階 小会議室</th>
+    <th style="width:10%;">備考欄</th>
+  </tr>
+</thead>
   <tbody id="calendar-body"></tbody>
 </table>
 
@@ -103,17 +161,44 @@ async function fetchEvents(calendarId, year, month) {
 /* -----------------------------
    日付・部屋ごとに分類
 ----------------------------- */
-const youbi = ["日", "月", "火", "水", "木", "金", "土"];
-
 function formatDate(dateStr) {
   const d = new Date(dateStr);
-  return `${d.getMonth() + 1}月${d.getDate()}日（${youbi[d.getDay()]}）`;
+
+  const youbi = ["日", "月", "火", "水", "木", "金", "土"];
+  const w = youbi[d.getDay()];
+
+  // ★ 年を表示しない
+  return `${d.getMonth() + 1}月${d.getDate()}日（${w}）`;
 }
 
 function formatTime(obj) {
   if (!obj || !obj.dateTime) return "";
   const d = new Date(obj.dateTime);
   return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function isJapaneseHoliday(dateStr) {
+  const holidays = {
+    "2026-01-01": "元日",
+    "2026-01-12": "成人の日",
+    "2026-02-11": "建国記念の日",
+    "2026-02-23": "天皇誕生日",
+    "2026-03-20": "春分の日",
+    "2026-04-29": "昭和の日",
+    "2026-05-03": "憲法記念日",
+    "2026-05-04": "みどりの日",
+    "2026-05-05": "こどもの日",
+    "2026-07-20": "海の日",
+    "2026-08-11": "山の日",
+    "2026-09-21": "敬老の日",
+    "2026-09-22": "国民の休日",
+    "2026-09-23": "秋分の日",
+    "2026-10-12": "スポーツの日",
+    "2026-11-03": "文化の日",
+    "2026-11-23": "勤労感謝の日"
+  };
+
+  return holidays[dateStr] !== undefined;
 }
 
 /* -----------------------------
@@ -176,18 +261,31 @@ function renderTable(data, year, month) {
 
   const dates = Object.keys(data).sort();
 
-  dates.forEach(dateStr => {
-    const row = document.createElement("tr");
+dates.forEach(dateStr => {
+  const row = document.createElement("tr");
 
-    row.innerHTML = `
-      <td>${formatDate(dateStr)}</td>
-      <td>${data[dateStr].cooking}</td>
-      <td>${data[dateStr].nihonma}</td>
-      <td>${data[dateStr].meeting}</td>
-    `;
+  const d = new Date(dateStr);
+  const day = d.getDay();
 
-    tbody.appendChild(row);
-  });
+  let dateClass = "";
+  if (isJapaneseHoliday(dateStr)) {
+    dateClass = "holiday";
+  } else if (day === 0) {
+    dateClass = "sunday";
+  } else if (day === 6) {
+    dateClass = "saturday";
+  }
+
+  row.innerHTML = `
+    <td class="datecell ${dateClass}">${formatDate(dateStr)}</td>
+<td class="cooking">${(data[dateStr].cooking || "").replace(/\n/g, "<br>")}</td>
+<td class="nihonma">${(data[dateStr].nihonma || "").replace(/\n/g, "<br>")}</td>
+<td class="meeting">${(data[dateStr].meeting || "").replace(/\n/g, "<br>")}</td>
+    <td class="bikou"></td>
+  `;
+
+  tbody.appendChild(row);
+});
 }
 
 /* -----------------------------
@@ -196,6 +294,17 @@ function renderTable(data, year, month) {
 async function buildCalendar(year, month) {
   console.log("buildCalendar が呼ばれました", year, month);
 
+  // ★ 月末日を取得
+  const lastDay = new Date(year, month, 0).getDate();
+
+  // ★ 全日付を先に作る（ズレない方式）
+  const data = {};
+  for (let day = 1; day <= lastDay; day++) {
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    data[dateStr] = { cooking: "", nihonma: "", meeting: "" };
+  }
+
+  // ★ Google カレンダーのイベントを取得
   const events = await fetchEvents(
     "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com",
     year,
@@ -204,8 +313,16 @@ async function buildCalendar(year, month) {
 
   console.log("取得イベント:", events);
 
-  const data = classifyEvents(events);
+  // ★ イベントを分類して data に上書き
+  const classified = classifyEvents(events);
 
+  for (const date in classified) {
+    if (data[date]) {
+      data[date] = classified[date];
+    }
+  }
+
+  // ★ 全日付を描画
   renderTable(data, year, month);
 }
 

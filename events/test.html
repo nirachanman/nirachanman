@@ -158,7 +158,7 @@ function classifyEvents(events) {
     const text = `${ev.summary} ${formatTime(ev.start)}～${formatTime(ev.end)}`;
 
     if (room === "cooking") map[date].cooking += text + "\n";
-    if (room === "washitsu") map[date].nihonma += text + "\n";
+    if (room === "nihonma") map[date].nihonma += text + "\n";
     if (room === "meeting") map[date].meeting += text + "\n";
   });
 
@@ -213,5 +213,6 @@ async function buildCalendar(year, month) {
 
 </body>
 </html>
+
 
 

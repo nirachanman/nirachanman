@@ -95,6 +95,11 @@ html {
   font-weight: 700;
 }
 
+/* 平日（日・土・祝 以外）の日付セル */
+.date-cell:not(.date-sat):not(.date-sun):not(.date-holiday) {
+  background: #f0f0f0;
+}
+
 /* 日付セルだけ少し強調 */
 .date-sat {
   color: #0d47a1;
@@ -116,7 +121,7 @@ html {
 /* 曜日バッチ */
 .youbi-badge {
   display: inline-block;
-  background: #ddd;
+  background: #fff;
   color: #333;
   padding: 1px 6px;
   border-radius: 10px;
@@ -126,17 +131,17 @@ html {
 
 /* 曜日ごとの色 */
 .youbi-badge.日 {
-  background: #ffcccc;
+  background: #ffecec;
   color: #b71c1c;
 }
 
 .youbi-badge.土 {
-  background: #cce0ff;
+  background: #e8f2ff;
   color: #0d47a1;
 }
 /* ★ 祝日の曜日バッチ（赤系で強調） */
 .date-holiday .youbi-badge {
-  background: #ffcc99;
+  background: #fff2e0;
   color: #b74a00;
 }
 

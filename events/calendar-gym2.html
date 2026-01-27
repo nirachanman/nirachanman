@@ -6,7 +6,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#f57c00">
 
-  <title>Googleカレンダー体育館gym2</title>
+  <title>口地区社会体育館 日程表</title>
 
   <style>
     /* =========================================================
@@ -366,6 +366,22 @@
   }
 }
 
+/* ▼ 画面では非表示（印刷時だけ表示する） */
+#print-month-banner {
+  display: none;
+}
+
+/* ▼ 印刷時にだけ表示される当月バナー */
+@media print {
+  #print-month-banner {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 4px 0 10px;
+    text-align: center;
+  }
+}
+
         /* 印刷用（あなたのコードそのまま） */
     @media print {
 
@@ -452,13 +468,16 @@
 </head>
 <body>
 
-  <h1>川口地区社会体育館 日程表</h1>
+<h1>川口地区社会体育館 日程表</h1>
 
-  <div class="tabs" id="monthTabs"></div>
+<!-- ★ 印刷時だけ表示される当月バナー -->
+<div id="print-month-banner"></div>
 
-  <div id="calendarContainer">
-    <div class="loading">読み込み中...</div>
-  </div>
+<div class="tabs" id="monthTabs"></div>
+
+<div id="calendarContainer">
+  <div class="loading">読み込み中...</div>
+</div>
 
   <script>
     const CALENDAR_ID =
@@ -735,7 +754,8 @@ document.addEventListener("click", (e) => {
     }
 
     async function loadMonth(year, month) {
-      const container = document.getElementById("calendarContainer");
+     
+ const container = document.getElementById("calendarContainer");
       container.innerHTML = `<div class="loading">読み込み中...</div>`;
 
       const events = await fetchEvents(CALENDAR_ID, year, month);
@@ -751,9 +771,13 @@ document.addEventListener("click", (e) => {
     }
 
     loadMonth(today.getFullYear(), today.getMonth());
-    async function loadMonth(year, month) {
+async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
+
+  // ★ 印刷専用バナーに当月をセット
+  document.getElementById("print-month-banner").textContent =
+    `${year}年${month + 1}月`;
 
   const events = await fetchEvents(CALENDAR_ID, year, month);
   const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);

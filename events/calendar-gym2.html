@@ -400,8 +400,8 @@
       }
 
       th:nth-child(1), td:nth-child(1) { width: 10% !important; }
-      th:nth-child(2), td:nth-child(2) { width: 40% !important; }
-      th:nth-child(3), td:nth-child(3) { width: 50% !important; }
+      th:nth-child(2), td:nth-child(2) { width: 33% !important; }
+      th:nth-child(3), td:nth-child(3) { width: 57% !important; }
 
       table {
         width: 100%;
@@ -462,8 +462,11 @@
         border: 1px solid #000 !important;
       }
 
-      /* 省略：あなたのコードをそのまま保持 */
-    }
+  .event {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
   </style>
 </head>
 <body>
@@ -811,6 +814,26 @@ async function loadMonth(year, month) {
     window.addEventListener("orientationchange", () => {
       loadMonth(today.getFullYear(), today.getMonth());
     });
+
+// ★ 印刷前にイベントを【 】で囲む
+window.addEventListener("beforeprint", () => {
+  document.querySelectorAll(".event").forEach(ev => {
+    if (!ev.dataset.originalText) {
+      ev.dataset.originalText = ev.innerHTML;
+    }
+    ev.innerHTML = `【${ev.dataset.originalText}】`;
+  });
+});
+
+// ★ 印刷後に元に戻す
+window.addEventListener("afterprint", () => {
+  document.querySelectorAll(".event").forEach(ev => {
+    if (ev.dataset.originalText) {
+      ev.innerHTML = ev.dataset.originalText;
+    }
+  });
+});
+
   </script>
 <!-- ▼ モーダル本体 -->
 <div id="eventModal" class="modal">

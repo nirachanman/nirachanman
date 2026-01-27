@@ -62,7 +62,7 @@ html {
     border: 1px solid #ccc;
     padding: 6px 4px;
     vertical-align: top;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
 
   th {
@@ -158,16 +158,65 @@ html {
 }
 
 @media print {
+
   body {
-    background: #fff;
-    padding: 0.5rem;
+    font-size: 1.5rem;
   }
-  table {
-    page-break-inside: avoid;
+
+  #calendar-body td {
+    font-size: 1.4rem;
+    line-height: 1.25;
   }
-  #month-selector {
+
+  .header-row h1 {
+    font-size: 1.6rem;
+  }
+
+  /* #month-selector {
     display: none;
+  } */
+
+  /* 行の背景色（印刷でも色が出るように） */
+  .tr-sat {
+    background: #e8f2ff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
+
+  .tr-sun {
+    background: #ffecec !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .tr-holiday {
+    background: #fff2e0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 日付セルの背景色（平日） */
+  .date-cell:not(.date-sat):not(.date-sun):not(.date-holiday) {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 曜日バッチも印刷で色が出るように */
+  .youbi-badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 白黒印刷時は文字色を黒に */
+  body, body * {
+    color: #000 !important;
+  }
+
+  .youbi-badge {
+    color: #000 !important;
+  }
+
 }
 </style>
 </head>

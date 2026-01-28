@@ -403,7 +403,7 @@
     const HOLIDAY_CALENDAR_ID =
       "japanese__ja@holiday.calendar.google.com";
 
-    const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+    const API_KEY = "";
 
     const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -435,19 +435,41 @@
     });
 
     // イベント取得
-    async function fetchEvents(calendarId, year, month) {
-      const start = new Date(year, month, 1).toISOString();
-      const end = new Date(year, month + 1, 1).toISOString();
+async function loadHolidays(startDate, endDate) {
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(HOLIDAY_CAL_ID)}` +
+    `&timeMin=${startDate.toISOString()}` +
+    `&timeMax=${endDate.toISOString()}`;
 
-      const url =
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
-        `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
-        `&singleEvents=true&orderBy=startTime`;
+  const res = await fetch(url);
+  const data = await res.json();
 
-      const res = await fetch(url);
-      const data = await res.json();
-      return data.items || [];
-    }
+  const IGNORE_EVENTS = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
+  const map = {};
+
+  (data.items || []).forEach(ev => {
+    if (!ev.start?.date) return;
+
+    const name = ev.summary;
+
+    if (IGNORE_EVENTS.includes(name)) return;
+
+    map[ev.start.date] = name;
+  });
+
+  return map;
+}
+
 
     // 時間帯分類（終日イベントは午前扱い）
     function classifyTime(ev) {
@@ -635,4 +657,5 @@
 </script>
 </body>
 </html>
+
 

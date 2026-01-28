@@ -636,7 +636,7 @@ body {
 
   <script>
 /* ===== Google カレンダー API ===== */
-const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+const API_KEY = "";
 const CALENDAR_ID = "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
@@ -676,24 +676,24 @@ function formatJapaneseTime(date) {
 
 /* ===== Google カレンダー取得 ===== */
 async function loadEvents(startDate, endDate) {
-  const url = new URL("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(CALENDAR_ID) + "/events");
-  url.searchParams.set("key", API_KEY);
-  url.searchParams.set("singleEvents", "true");
-  url.searchParams.set("orderBy", "startTime");
-  url.searchParams.set("timeMin", startDate.toISOString());
-  url.searchParams.set("timeMax", endDate.toISOString());
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(CALENDAR_ID)}` +
+    `&timeMin=${startDate.toISOString()}` +
+    `&timeMax=${endDate.toISOString()}`;
+
   const res = await fetch(url);
   const data = await res.json();
   return data.items || [];
 }
 
 async function loadHolidays(startDate, endDate) {
-  const url = new URL("https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(HOLIDAY_CAL_ID) + "/events");
-  url.searchParams.set("key", API_KEY);
-  url.searchParams.set("singleEvents", "true");
-  url.searchParams.set("orderBy", "startTime");
-  url.searchParams.set("timeMin", startDate.toISOString());
-  url.searchParams.set("timeMax", endDate.toISOString());
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(HOLIDAY_CAL_ID)}` +
+    `&timeMin=${startDate.toISOString()}` +
+    `&timeMax=${endDate.toISOString()}`;
+
   const res = await fetch(url);
   const data = await res.json();
 
@@ -714,7 +714,6 @@ async function loadHolidays(startDate, endDate) {
 
     const name = ev.summary;
 
-    // ★ ここで行事を除外する（配置場所はここが最適）
     if (IGNORE_EVENTS.includes(name)) return;
 
     map[ev.start.date] = name;
@@ -1007,4 +1006,3 @@ renderCalendar();
   </script>
 </body>
 </html>
-

@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function initClient() {
   await gapi.client.init({
-    apiKey: "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI",
+    apiKey: "",
     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
   });
 
@@ -147,15 +147,16 @@ async function fetchEvents(calendarId, year, month) {
   const timeMin = new Date(year, month - 1, 1).toISOString();
   const timeMax = new Date(year, month, 0, 23, 59, 59).toISOString();
 
-  const response = await gapi.client.calendar.events.list({
-    calendarId,
-    timeMin,
-    timeMax,
-    singleEvents: true,
-    orderBy: "startTime"
-  });
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(calendarId)}` +
+    `&timeMin=${timeMin}` +
+    `&timeMax=${timeMax}`;
 
-  return response.result.items;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  return data.items || [];
 }
 
 /* -----------------------------

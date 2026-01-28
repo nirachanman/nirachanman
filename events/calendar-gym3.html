@@ -460,7 +460,7 @@
   const CALENDAR_ID =
     "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
   const HOLIDAY_CALENDAR_ID = "japanese__ja@holiday.calendar.google.com";
-  const API_KEY = "AIzaSyA5YSgL1PG9e61Nk7b-SbPV99XMvHeGGtI";
+  const API_KEY = "";
 
   const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
   const today = new Date();
@@ -535,21 +535,21 @@
   });
 
   /* =========================================================
-     Google Calendar API 取得
+     Google Calendar API 取得  fetchEvents（完全安全版）
      ========================================================= */
-  async function fetchEvents(calendarId, year, month) {
-    const start = new Date(year, month, 1).toISOString();
-    const end = new Date(year, month + 1, 1).toISOString();
+async function fetchEvents(calendarId, year, month) {
+  const start = new Date(year, month, 1).toISOString();
+  const end = new Date(year, month + 1, 1).toISOString();
 
-    const url =
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events` +
-      `?key=${API_KEY}&timeMin=${start}&timeMax=${end}` +
-      `&singleEvents=true&orderBy=startTime`;
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(calendarId)}` +
+    `&timeMin=${start}&timeMax=${end}`;
 
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.items || [];
-  }
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.items || [];
+}
 
   function classifyTime(ev) {
     if (!ev.start.dateTime) return "午前";

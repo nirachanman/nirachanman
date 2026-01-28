@@ -243,7 +243,6 @@ html {
 
 <script>
 /* ★★★ 必ず差し替えてください ★★★ */
-const API_KEY     = "${{ secrets.MY_API_KEY }}";
 const CALENDAR_ID = "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
@@ -293,15 +292,11 @@ function getMonthRange(ym) {
 async function fetchEventsForMonth(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
 
-  const params = new URLSearchParams({
-    key: API_KEY,
-    timeMin,
-    timeMax,
-    singleEvents: "true",
-    orderBy: "startTime"
-  });
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(CALENDAR_ID)}` +
+    `&timeMin=${timeMin}&timeMax=${timeMax}`;
 
-  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?${params}`;
   const res = await fetch(url);
   const data = await res.json();
 
@@ -314,15 +309,11 @@ async function fetchEventsForMonth(ym) {
 async function fetchHolidays(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
 
-  const params = new URLSearchParams({
-    key: API_KEY,
-    timeMin,
-    timeMax,
-    singleEvents: "true",
-    orderBy: "startTime"
-  });
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(HOLIDAY_CAL_ID)}` +
+    `&timeMin=${timeMin}&timeMax=${timeMax}`;
 
-  const url = `https://www.googleapis.com/calendar/v3/calendars/${HOLIDAY_CAL_ID}/events?${params}`;
   const res = await fetch(url);
   const data = await res.json();
 
@@ -518,4 +509,3 @@ async function loadCalendar(ym) {
 
 </body>
 </html>
-

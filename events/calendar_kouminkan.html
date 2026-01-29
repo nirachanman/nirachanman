@@ -481,12 +481,29 @@ function formatTime(start, end) {
 -------------------------- */
 function detectRoom(ev) {
   const text = ev.description || "";
+  const rooms = [];
 
-  if (text.match(/1f|調理室|キッチン/)) return "cooking";
-  if (text.match(/2f|和室|日本間/)) return "japanese";
-  if (text.match(/2fs|小会議室|ミーティング/)) return "meeting";
+  // 料理室（1F）
+  if (text.match(/1f|調理室|キッチン/)) {
+    rooms.push("cooking");
+  }
 
-  return "note";
+  // 和室（2F）
+  if (text.match(/2f|和室|日本間/)) {
+    rooms.push("japanese");
+  }
+
+  // 小会議室（2FS）
+  if (text.match(/2fs|小会議室|ミーティング/)) {
+    rooms.push("meeting");
+  }
+
+  // どれにも該当しない場合は note
+  if (rooms.length === 0) {
+    rooms.push("note");
+  }
+
+  return rooms; // ← ★ 配列で返す
 }
 
 /* -------------------------
@@ -523,14 +540,18 @@ function render(events, ym, holidayMap) {
   const lastDay = new Date(year, month, 0).getDate();
 
   const grouped = {};
-  events.forEach(ev => {
-    const key = toDateKey(ev.start.dateTime || ev.start.date);
-    if (!grouped[key]) {
-      grouped[key] = { cooking: [], japanese: [], meeting: [], note: [] };
-    }
-    const room = detectRoom(ev);
+events.forEach(ev => {
+  const key = toDateKey(ev.start.dateTime || ev.start.date);
+  if (!grouped[key]) {
+    grouped[key] = { cooking: [], japanese: [], meeting: [], note: [] };
+  }
+
+  const rooms = detectRoom(ev);   // ← 配列で受け取る
+
+  rooms.forEach(room => {         // ← 複数部屋に振り分け
     grouped[key][room].push(ev);
   });
+});
 
   for (let day = 1; day <= lastDay; day++) {
     const dateObj = new Date(year, month - 1, day);

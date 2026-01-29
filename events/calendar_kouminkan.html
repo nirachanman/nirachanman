@@ -7,33 +7,26 @@
 
 <style>
 html {
-  overflow-y: scroll; /* 常に縦スクロールバーを確保 */
+  overflow-y: scroll;
 }
 
-  body {
-    font-family: system-ui, sans-serif;
-    padding: 0.2rem;
-    background: #f7f7f7;
-    padding-top: 0.5rem;  /* ← かなり詰まる */
+body {
+  font-family: system-ui, sans-serif;
+  padding: 0.2rem;
+  background: #f7f7f7;
+  padding-top: 0.5rem;
 }
-
-  }
-
-  h1 {
-    margin-top: 0;
-  }
 
 /* タイトルとプルダウンを横並びで中央配置 */
 .header-row {
   display: flex;
-  justify-content: center;   /* ← 中央寄せの決め手 */
+  justify-content: center;
   align-items: center;
-  gap: 1rem;                 /* タイトルとプルダウンの間隔 */
-  margin: 0.2rem 0 0.4rem 0; /* 上下の余白を詰める */
+  gap: 1rem;
+  margin: 0.2rem 0 0.4rem 0;
   padding: 0;
 }
 
-/* タイトルの余白を最小限に */
 .header-row h1 {
   margin: 0;
   padding: 0;
@@ -42,7 +35,6 @@ html {
   text-align: center;
 }
 
-/* プルダウンの余白も最小限に */
 #month-selector {
   margin: 0;
   padding: 3px 6px;
@@ -50,66 +42,72 @@ html {
   line-height: 1.1;
 }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    margin-top: 0.3rem; /* ← ほぼゼロに */
-    table-layout: fixed;
-  }
+/* テーブルをスクロール可能にするラッパー（ヘッダー固定のため） */
+.table-wrapper {
+  max-height: 80vh;
+  overflow-y: auto;
+}
 
-  th, td {
-    border: 1px solid #ccc;
-    padding: 6px 4px;
-    vertical-align: top;
-    font-size: 1.2rem;
-  }
+/* テーブル本体 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  margin-top: 0.3rem;
+  table-layout: fixed;
+}
 
-  th {
-    background: #eee;
-    text-align: center;
-  }
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px 4px;
+  vertical-align: top;
+  font-size: 1.2rem;
+}
+
+/* ヘッダー行（固定＋青背景＋白文字） */
+#calendar-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #1e3a8a;
+  color: #fff;
+  text-align: center;
+}
 
 /* 行の背景色 */
 .tr-sat {
-  background: #e8f2ff; /* 薄い青 */
+  background: #e8f2ff;
 }
 .tr-sun {
-  background: #ffecec; /* 薄い赤 */
+  background: #ffecec;
 }
- .tr-holiday {
-  background-color: #fff2e0;  /* 薄いオレンジ */
+.tr-holiday {
+  background-color: #fff2e0;
 }
 
-/* 日付セルの背景色（行より少し濃く） */
+/* 日付セルの背景色 */
 .date-sat {
   background: #d9e8ff;
+  color: #0d47a1;
   font-weight: 700;
 }
 .date-sun {
   background: #ffdada;
+  color: #b71c1c;
   font-weight: 700;
 }
 .date-holiday {
   background: #ffe8cc;
-  font-weight: 700;
-}
-
-/* 平日（日・土・祝 以外）の日付セル */
-.date-cell:not(.date-sat):not(.date-sun):not(.date-holiday) {
-  background: #f0f0f0;
-}
-
-/* 日付セルだけ少し強調 */
-.date-sat {
-  color: #0d47a1;
-  font-weight: 700;
-}
-.date-sun, .date-holiday {
   color: #b71c1c;
   font-weight: 700;
 }
 
+/* 平日の日付セル */
+.date-cell:not(.date-sat):not(.date-sun):not(.date-holiday) {
+  background: #f0f0f0;
+}
+
+/* 日付セル（右寄せ） */
 .date-cell {
   text-align: right;   /* ★ 右寄せに変更 */
   white-space: nowrap;
@@ -129,113 +127,79 @@ html {
   margin-left: 4px;
 }
 
-/* 曜日ごとの色 */
 .youbi-badge.日 {
   background: #ffecec;
   color: #b71c1c;
 }
-
 .youbi-badge.土 {
   background: #e8f2ff;
   color: #0d47a1;
 }
-/* ★ 祝日の曜日バッチ（赤系で強調） */
 .date-holiday .youbi-badge {
   background: #fff2e0;
   color: #b74a00;
 }
 
-/* ★ 行の高さを最適化（70px 推奨） */
+/* 行の高さ最適化 */
 #calendar-body td {
   height: 40px;
   overflow: hidden;
-  padding: 2px 2px;   /* 余白を小さくして高さを有効活用 */
+  padding: 2px 2px;
 }
 
-/* ★ イベント行の行間 */
+/* イベント行の行間 */
 #calendar-body td div {
   line-height: 1.2;
 }
 
-/* ツールチップの基本スタイル */
-.tooltip {
-  position: relative;
-}
-
-.tooltip .tooltip-text {
-  position: fixed;        /* ← これが決め手 */
-  z-index: 9999;
-  background: #333;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  white-space: pre-line;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* カーソル追従ツールチップ */
+/* カーソル追従ツールチップ（青背景） */
 .tooltip-follow {
   position: fixed;
   z-index: 9999;
-  background: #333;
+  background: #1e3a8a;
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   white-space: pre-line;
-  pointer-events: none; /* ← マウス操作を邪魔しない */
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.1s;
 }
 
-/* ホバー時に表示 */
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* 部屋ごとのイベント色分け */
+/* 部屋ごとのイベント色分け（太字なし） */
 .event-cooking {
-  color: #0d47a1;        /* 青系（和室） */
+  color: #0d47a1;
   font-weight: normal;
 }
-
 .event-japanese {
-  color: #6a1b9a;        /* 紫系（備考・その他） */
+  color: #6a1b9a;
   font-weight: normal;
 }
-
 .event-meeting {
-  color: #2e7d32;        /* 緑系（会議室） */
+  color: #2e7d32;
   font-weight: normal;
 }
-
 .event-note {
-  color: #b74a00;        /* オレンジ系（料理室） */
+  color: #b74a00;
   font-weight: normal;
 }
 
+/* Googleカレンダーボタン（青） */
 #gcal-button {
   padding: 4px 10px;
   font-size: 0.9rem;
-  border: 1px solid #888;
-  background: #f5f5f5;
+  border: 1px solid #1e3a8a;
+  background: #1e3a8a;
+  color: #fff;
   border-radius: 4px;
   cursor: pointer;
 }
-
 #gcal-button:hover {
-  background: #e0e0e0;
+  background: #2a4fb8;
 }
 
+/* 印刷設定 */
 @media print {
 
   body {
@@ -251,43 +215,17 @@ html {
     font-size: 1.6rem;
   }
 
-  /* #month-selector {
-    display: none;
-  } */
-
-  /* 行の背景色（印刷でも色が出るように） */
-  .tr-sat {
-    background: #e8f2ff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .tr-sun {
-    background: #ffecec !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .tr-holiday {
-    background: #fff2e0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* 日付セルの背景色（平日） */
-  .date-cell:not(.date-sat):not(.date-sun):not(.date-holiday) {
-    background: #f0f0f0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* 曜日バッチも印刷で色が出るように */
+  /* 行の背景色を印刷でも出す */
+  .tr-sat,
+  .tr-sun,
+  .tr-holiday,
+  .date-cell:not(.date-sat):not(.date-sun):not(.date-holiday),
   .youbi-badge {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* 白黒印刷時は文字色を黒に */
+  /* 白黒印刷時の文字色 */
   body, body * {
     color: #000 !important;
   }
@@ -295,7 +233,6 @@ html {
   .youbi-badge {
     color: #000 !important;
   }
-
 }
 </style>
 </head>
@@ -310,16 +247,20 @@ html {
 </div>
 
 <table>
-<thead>
-  <tr>
-    <th style="width:12%;">日付</th>
-    <th style="width:26%;">1階 調理室</th>
-    <th style="width:26%;">2階 和室</th>
-    <th style="width:26%;">2階 小会議室</th>
-    <th style="width:10%;">備考欄</th>
-  </tr>
-</thead>
-<tbody id="calendar-body"></tbody>
+<div class="table-wrapper">
+  <table id="calendar-table">
+    <thead>
+      <tr>
+        <th style="width:12%;">日付</th>
+        <th style="width:26%;">1階 調理室</th>
+        <th style="width:26%;">2階 和室</th>
+        <th style="width:26%;">2階 小会議室</th>
+        <th style="width:10%;">備考欄</th>
+      </tr>
+    </thead>
+    <tbody id="calendar-body"></tbody>
+  </table>
+</div>
 </table>
 
 <script>

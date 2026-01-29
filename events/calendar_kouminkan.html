@@ -610,10 +610,10 @@ dayEvents[room].forEach(ev => {
     tooltip.style.opacity = 1;
   });
 
-  div.addEventListener("mousemove", e => {
-    tooltip.style.left = (e.clientX + 12) + "px";
-    tooltip.style.top = (e.clientY + 12) + "px";
-  });
+div.addEventListener("mousemove", e => {
+  tooltip.style.left = (e.clientX + 12) + "px";
+  tooltip.style.top = (e.clientY - tooltip.offsetHeight - 12) + "px";
+});
 
   div.addEventListener("mouseleave", () => {
     tooltip.style.opacity = 0;

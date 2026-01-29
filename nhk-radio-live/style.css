@@ -1,0 +1,21 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background-color: #87ceeb;
+}
+
+#header {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 12px 0;
+  border-bottom: 1px solid #ccc;
+  background-color: #FF6347;
+}
+
+#channelSelector {
+  width: 100%;
+  padding: 6px;
+  font-size: 13px;
+  margin: 12px 0;
+}

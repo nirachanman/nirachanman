@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "NHKラジオライブプレイヤー",
+  "version": "1.0",
+  "permissions": ["sidePanel"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "NHKラジオ"
+  },
+  "side_panel": {
+    "default_path": "sidebar.html"
+  }
+}

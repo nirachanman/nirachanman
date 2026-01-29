@@ -157,6 +157,85 @@ html {
   line-height: 1.2;
 }
 
+/* ツールチップの基本スタイル */
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltip-text {
+  position: fixed;        /* ← これが決め手 */
+  z-index: 9999;
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: pre-line;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* カーソル追従ツールチップ */
+.tooltip-follow {
+  position: fixed;
+  z-index: 9999;
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: pre-line;
+  pointer-events: none; /* ← マウス操作を邪魔しない */
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+/* ホバー時に表示 */
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 部屋ごとのイベント色分け */
+.event-cooking {
+  color: #0d47a1;        /* 青系（和室） */
+  font-weight: 600;
+}
+
+.event-japanese {
+  color: #6a1b9a;        /* 紫系（備考・その他） */
+  font-weight: 600;
+}
+
+.event-meeting {
+  color: #2e7d32;        /* 緑系（会議室） */
+  font-weight: 600;
+}
+
+.event-note {
+  color: #b74a00;        /* オレンジ系（料理室） */
+  font-weight: 600;
+}
+
+#gcal-button {
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #888;
+  background: #f5f5f5;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#gcal-button:hover {
+  background: #e0e0e0;
+}
+
 @media print {
 
   body {
@@ -226,6 +305,8 @@ html {
 <div class="header-row">
   <h1>川口公民館カレンダー（Google カレンダー連携）</h1>
   <select id="month-selector"></select>
+<button id="gcal-button" onclick="openGoogleCalendar()">Googleカレンダー</button>
+
 </div>
 
 <table>
@@ -270,6 +351,10 @@ function setupMonthSelector() {
   selector.addEventListener("change", () => {
     loadCalendar(selector.value);
   });
+}
+
+function openGoogleCalendar() {
+  window.open("https://calendar.google.com/calendar/u/0/r", "_blank");
 }
 
 /* -------------------------
@@ -425,6 +510,15 @@ function render(events, ym, holidayMap) {
   const body = document.getElementById("calendar-body");
   body.innerHTML = "";
 
+  /* ★ カーソル追従ツールチップ要素を1つだけ作成 */
+  let tooltip = document.getElementById("cursor-tooltip");
+  if (!tooltip) {
+    tooltip = document.createElement("div");
+    tooltip.id = "cursor-tooltip";
+    tooltip.className = "tooltip-follow";
+    document.body.appendChild(tooltip);
+  }
+
   const [year, month] = ym.split("-").map(Number);
   const lastDay = new Date(year, month, 0).getDate();
 
@@ -468,11 +562,51 @@ function render(events, ym, holidayMap) {
 
     ["cooking", "japanese", "meeting", "note"].forEach(room => {
       const td = document.createElement("td");
-      dayEvents[room].forEach(ev => {
-        const div = document.createElement("div");
-        div.textContent = `${formatTime(ev.start, ev.end)} ${ev.summary}`;
-        td.appendChild(div);
-      });
+
+dayEvents[room].forEach(ev => {
+  const div = document.createElement("div");
+
+  /* 表示テキスト */
+  const textSpan = document.createElement("span");
+  textSpan.textContent = `${formatTime(ev.start, ev.end)} ${ev.summary}`;
+  textSpan.style.cursor = "default";
+
+  /* ★ 部屋ごとの色分けクラスを付与 */
+  textSpan.classList.add(`event-${room}`);
+
+  div.appendChild(textSpan);
+
+  /* ★ ツールチップ内容 */
+  const tooltipText =
+    `開始: ${formatTime(ev.start, ev.end)}\n` +
+    `タイトル: ${ev.summary}\n` +
+    (ev.location ? `場所: ${ev.location}\n` : "") +
+    (ev.description ? `説明: ${ev.description}` : "");
+
+  /* ★ カーソル追従ツールチップ */
+  div.addEventListener("mouseenter", () => {
+    tooltip.textContent = tooltipText;
+    tooltip.style.opacity = 1;
+  });
+
+  div.addEventListener("mousemove", e => {
+    tooltip.style.left = (e.clientX + 12) + "px";
+    tooltip.style.top = (e.clientY + 12) + "px";
+  });
+
+  div.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = 0;
+  });
+
+  /* ★ 右クリックで編集画面を開く */
+  div.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    window.open(ev.htmlLink, "_blank", "noopener");
+  });
+
+  td.appendChild(div);
+});
+
       tr.appendChild(td);
     });
 
@@ -484,7 +618,6 @@ function render(events, ym, holidayMap) {
     });
   }
 }
-
 /* -------------------------
    指定月のカレンダーを読み込む
 -------------------------- */

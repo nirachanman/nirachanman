@@ -1016,7 +1016,7 @@ async function loadMonth(year, month) {
 
 /* 月タブ生成（統合版） */
 const months = [];
-for (let i = -1; i <= 12; i++) {
+for (let i = -1; i <= 14; i++) {
   const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
   months.push({ label: `${d.getFullYear()}年${d.getMonth()+1}月`, year: d.getFullYear(), month: d.getMonth() });
 }
@@ -1247,5 +1247,6 @@ function closePopup() {
 </script>
 </body>
 </html>
+
 
 

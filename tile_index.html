@@ -15,24 +15,28 @@
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 15px; /* スマホ用に余白を少し詰め */
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent; /* タップ時の青い枠を消す */
         }
         h1 {
             text-align: center;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            margin: 10px 0 20px 0;
         }
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            /* 最小幅を少し広げ、スマホで1〜2列が最適になるよう調整 */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 12px;
             max-width: 800px;
             margin: 0 auto;
             flex: 1;
+            width: 100%;
+            box-sizing: border-box;
         }
         .tile-link {
             text-decoration: none;
@@ -44,55 +48,75 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 15px 10px;
-            aspect-ratio: 1 / 0.8;
+            padding: 15px 12px;
+            /* 文字数が多い場合に備えて可変に。最低でも正方形に近い高さを確保 */
+            min-height: 120px; 
             transition: transform 0.1s, background-color 0.2s;
             text-align: center;
             border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        /* スマホでの「押し心地」を改善 */
+        @media (hover: hover) {
+            .tile-link:hover {
+                background-color: var(--tile-hover);
+                transform: translateY(-2px);
+            }
         }
         .tile-link:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
             background-color: var(--tile-hover);
         }
-        .tile-title { font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; display: block; }
-        .tile-sub { font-size: 0.7rem; color: #777; display: block; }
+        .tile-title { 
+            font-weight: bold; 
+            font-size: 0.85rem; 
+            margin-bottom: 8px; 
+            display: block; 
+            line-height: 1.4;
+        }
+        .tile-sub { 
+            font-size: 0.65rem; 
+            color: #888; 
+            display: block; 
+            word-break: break-all; /* 長い英字ファイル名の改行対策 */
+        }
 
         .footer-area {
             text-align: center;
             margin-top: 40px;
-            padding-bottom: 20px;
+            padding: 20px 0;
         }
         .github-btn {
             background-color: var(--github-bg);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 15px 24px; /* 高さを出して押しやすく */
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            width: 80%;
-            max-width: 300px;
-            transition: opacity 0.2s;
+            width: 100%; /* スマホでは横いっぱい */
+            max-width: 320px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .github-btn:active {
-            opacity: 0.7;
+            opacity: 0.8;
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
 
-    <h1>日程表・表示テストページ</h1>
+    <h1>カレンダー・日程表一覧</h1>
 
     <div class="grid-container">
-        <!-- 各リンクをタイルとして配置 -->
         <a href="events/calendar_all2.html" class="tile-link">
             <span class="tile-title">川口公民館3施設<br>(Google)</span>
             <span class="tile-sub">calendar_all2.html</span>
         </a>
 
         <a href="events/calendar_kouminkan.html" class="tile-link">
-            <span class="tile-title">川口公民館（印刷用）<br>(Google)</span>
+            <span class="tile-title">川口公民館（PC印刷用）<br>(Google)</span>
             <span class="tile-sub">calendar_kouminkan.html</span>
         </a>
 
@@ -102,7 +126,7 @@
         </a>
 
         <a href="events/calendar-gym4.html" class="tile-link">
-            <span class="tile-title">川口地区社会体育館<br>(月タイトル（緑の帯）をクリックで開閉)</span>
+            <span class="tile-title">川口地区社会体育館<br>(月タイトルクリックで開閉)</span>
             <span class="tile-sub">calendar-gym4.html</span>
         </a>
 
@@ -116,7 +140,6 @@
             <span class="tile-sub">calendar-gym2.html</span>
         </a>
 
-
         <a href="events/calendar_shisethu.html" class="tile-link">
             <span class="tile-title">施設カレンダー（統合）<br>(PC用)</span>
             <span class="tile-sub">calendar_shisethu.html</span>
@@ -126,14 +149,11 @@
             <span class="tile-title">行事予定カレンダー（統合）<br>(PC用)</span>
             <span class="tile-sub">calendar_all1.html</span>
         </a>
-
    </div>
 
     <div class="footer-area">
-        <button class="github-btn" onclick="window.open('https://github.com/', '_blank')">GitHub</button>
+        <button class="github-btn" onclick="window.open('https://github.com/', '_blank')">GitHubで管理状況を確認</button>
     </div>
 
 </body>
 </html>
-
-

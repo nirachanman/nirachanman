@@ -13,7 +13,7 @@
   --color-border: #999;
 
   --cal1-color: #4a6fa5;
-  --cal2-color: #0d8a6a;
+  --cal2-color: #006400;
   --cal3-color: #b06f07;
   --calAll-color: #6b7280;
 
@@ -750,9 +750,9 @@ function getKeywordColor(title, description) {
   const KEYWORD_COLORS = [
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
     { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" },
-    { keywords: ["1f", "調理室", "1f", "1f"], color: "#324c71" },
-    { keywords: ["2fs", "小会議室", "2fs", "2fs"], color: "#3a7c81" },
-    { keywords: ["2f", "日本間", "和室", "2f"], color: "#514aa5" },
+    { keywords: ["1f", "調理室", "1f", "1f"], color: "#ee7b1a" },
+    { keywords: ["2fs", "小会議室", "2fs", "2fs"], color: "#0000cd" },
+    { keywords: ["2f", "日本間", "和室", "2f"], color: "#4b0082" },
     { keywords: ["研修室", "託児室"], color: "#704b3c" },
     { keywords: ["託児室", "研修室"], color: "#704b3c" },
     { keywords: ["調理室"], color: "#9e5e3Dd" },
@@ -855,7 +855,7 @@ items.forEach(ev => {
 
 function classifyTime(ev) {
   if (!ev.start.dateTime) return "午前";
-  return new Date(ev.start.dateTime).getHours() < 14 ? "午前" : "午後";
+  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
 }
 
 /* 祝日 */

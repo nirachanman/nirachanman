@@ -201,7 +201,6 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   background: var(--color-primary);
   color: #7fff00;
   font-weight: 600;
-/* transform: translateY(-2px); ← 削除 */
 }
 @media (max-width: 500px) {
   .tab {
@@ -262,9 +261,6 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   font-weight: 600;
   font-size: 18px;
 }
-/* .day-number {
-  font-family: "Roboto Mono", "Courier New", monospace;
-} */
 
 .today-highlight td {
   background: #fef9c3 !important;
@@ -302,7 +298,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   display: flex;
   flex-wrap: wrap;
   gap: 2px 4px;
-  cursor: default; /* または削除 */
+  cursor: default;
 }
 .event-box:hover {
   opacity: 0.9;
@@ -321,7 +317,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 }
 .event-title { position: relative; }
 
-/* Tooltip（保持用） */
+/* Tooltip */
 .tooltip {
   position: absolute;
   top: -8px;
@@ -393,7 +389,6 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   cursor: pointer;
 }
-
 .reload-btn:active {
   transform: scale(0.95);
 }
@@ -450,27 +445,28 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 #print-header { display: none; }
 
 @media print {
-  #print-header { display: none; }
-
-  @media print {
-    .top-bar,
-    .tabs,
-    .header-fixed {
-      display: none !important;
-    }
+  #print-header {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding: 6px 0;
+    text-align: center;
+    border-bottom: 2px solid #000;
   }
 
-  @media print {
-    #print-header {
-      display: block;
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      padding: 6px 0;
-      text-align: center;
-      border-bottom: 2px solid #000;
-    }
+  .top-bar,
+  .tabs,
+  .header-fixed {
+    display: none !important;
   }
+
+  /* 印刷時は「日付＋その日のイベント1列」にする */
+  .pc-only { display: none !important; }
+  .sp-only { display: table-cell !important; }
+
+  th:nth-child(1), td:nth-child(1) { width: 15% !important; }
+  th:nth-child(4), td:nth-child(4) { width: 85% !important; }
 
   * {
     color: #000 !important;
@@ -540,6 +536,18 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   .event-title:hover .tooltip { display: block; }
 }
 
+@media print {
+  /* 日付の色 */
+  .day-number.weekday-sun     { color: #e11d48 !important; }
+  .day-number.weekday-sat     { color: #2563eb !important; }
+  .day-number.weekday-holiday { color: #d97706 !important; }
+
+  /* 曜日の色 */
+  .weekday-sun     { color: #e11d48 !important; }
+  .weekday-sat     { color: #2563eb !important; }
+  .weekday-holiday { color: #d97706 !important; }
+}
+
 /* モーダル（クリック詳細表示） */
 .modal {
   display: none;
@@ -565,7 +573,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 
 /* 公民館（青） */
 .modal-content.k {
-  background: #e8f0ff;   /* 淡い青 */
+  background: #e8f0ff;
   border-top: 6px solid #4a7bd1;
 }
 .modal-content.k h3,
@@ -575,7 +583,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 
 /* 体育館（緑） */
 .modal-content.t {
-  background: #e6f7ef;   /* 淡い緑 */
+  background: #e6f7ef;
   border-top: 6px solid #3aa86b;
 }
 .modal-content.t h3,
@@ -585,7 +593,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 
 /* 別館（橙） */
 .modal-content.b {
-  background: #fff4e0;   /* 淡いオレンジ */
+  background: #fff4e0;
   border-top: 6px solid #e08a2e;
 }
 .modal-content.b h3,
@@ -612,7 +620,7 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   margin-top: 0;
   margin-bottom: 10px;
   color: #28a745;
-  font-size: 22px;   /* ← 見出し */
+  font-size: 22px;
   font-weight: bold;
   text-align: center;
 }
@@ -622,14 +630,14 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
   padding: 8px 10px;
   border-radius: 6px;
   margin: 8px 0;
-  font-size: 18px;   /* ← 本文のサイズ */
+  font-size: 18px;
   line-height: 1.4;
 }
 .modal-info-title {
   font-weight: bold;
   color: #28a745;
   margin-bottom: 4px;
-  font-size: 18px;   /* ← 見出し */
+  font-size: 18px;
 }
 .modal-close {
   float: right;
@@ -646,22 +654,21 @@ th:nth-child(3), td:nth-child(3) { width: 53% !important; }
 
 @media (max-width: 600px) {
   .modal-content {
-    font-size: 22px !important;   /* ← 重要 */
+    font-size: 22px !important;
   }
   .modal-info-box {
-    font-size: 22px !important;   /* ← 本文のサイズ */
+    font-size: 22px !important;
   }
   .modal-info-title {
-    font-size: 18px !important;   /* ← 見出し */
+    font-size: 18px !important;
   }
   #modal-body {
-    font-size: 22px !important;   /* ← 説明文 */
+    font-size: 22px !important;
   }
   .modal-content .modal-info-box {
-    padding: 4px 6px !important;   /* ← ここが確実に効く */
+    padding: 4px 6px !important;
   }
 }
-
 </style>
 </head>
 <body>
@@ -748,9 +755,8 @@ function updatePrintHeader() {
 /* キーワード色（整理済み） */
 function getKeywordColor(title, description) {
   const KEYWORD_COLORS = [
-
-    { keywords: ["／", "選挙", "役場", "検診"], color: "#8b5cf6" },   
-    { keywords: [ "＆", "＆", "全館", "全室"], color: "#1e90ff" },   
+    { keywords: ["／", "選挙", "役場", "検診"], color: "#8b5cf6" },
+    { keywords: ["＆", "＆", "全館", "全室"], color: "#1e90ff" },
 
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
     { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" },
@@ -775,10 +781,8 @@ function getKeywordColor(title, description) {
 
     // 北アリーナ
     { keywords: ["北アリーナ", "北側"], color: "#008080" }
-
   ];
 
-  // タイトル＋詳細をまとめて検索
   const text = `${title || ""}\n${description || ""}`.toLowerCase();
 
   for (const rule of KEYWORD_COLORS) {
@@ -809,9 +813,7 @@ function createEventHTML(ev, baseColor) {
   const title = ev.summary || "";
   const description = ev.description || "";
 
-  // ★ 修正：title と description の両方を渡す
   const keywordColor = getKeywordColor(title, description);
-
   const color = keywordColor || baseColor;
 
   const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
@@ -866,10 +868,10 @@ async function fetchEvents(calendarId, year, month) {
     data.items ||
     [];
 
-items.forEach(ev => {
-  ev._calendarId = calendarId;
-  ev.id = normalizeEventId(ev);   // ★ これを追加
-});
+  items.forEach(ev => {
+    ev._calendarId = calendarId;
+    ev.id = normalizeEventId(ev);
+  });
 
   return items;
 }
@@ -936,60 +938,68 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
     </tr>
   `;
 
-const days = new Date(year, month + 1, 0).getDate();
+  const days = new Date(year, month + 1, 0).getDate();
 
-for (let day = 1; day <= days; day++) {
-  const dateObj = new Date(year, month, day);
-  const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-  const weekday = WEEKDAYS[dateObj.getDay()];
+  for (let day = 1; day <= days; day++) {
+    const dateObj = new Date(year, month, day);
+    const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const weekday = WEEKDAYS[dateObj.getDay()];
 
-  const dayEvents = events.filter(ev => {
-    const d =
-      ev.start?.date ||
-      (ev.start?.dateTime ? ev.start.dateTime.split("T")[0] : null);
+    const dayEvents = events.filter(ev => {
+      const d =
+        ev.start?.date ||
+        (ev.start?.dateTime ? ev.start.dateTime.split("T")[0] : null);
 
-    if (!d) return false;
-    return d === dateStr;
-  });
+      if (!d) return false;
+      return d === dateStr;
+    });
 
-  // ★★★ slots は必ずここで宣言する ★★★
-  const slots = { "午前": [], "午後": [] };
+    const slots = { "午前": [], "午後": [] };
 
-dayEvents.forEach(ev => {
-  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
-  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+    dayEvents.forEach(ev => {
+      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+      const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
 
-  const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
-  const item = {
-    start,
-    html: createEventHTML(ev, color)
-  };
+      const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
+      const item = {
+        start,
+        html: createEventHTML(ev, color)
+      };
 
-  // 終日イベント（dateのみ）は午前へ
-  if (!start || !end) {
-    slots["午前"].push(item);
-    return;
-  }
+      if (!start || !end) {
+        slots["午前"].push(item);
+        return;
+      }
 
-  const startHour = start.getHours();
-  const endHour   = end.getHours();
+      const startHour = start.getHours();
+      const endHour   = end.getHours();
 
-  // ★ 正午またぎ（12:00ちょうどは含めない）
-  const crossesNoon = (startHour < 12 && endHour > 12);
+      const crossesNoon = (startHour < 12 && endHour > 12);
 
-  if (crossesNoon) {
-    slots["午前"].push(item);
-    slots["午後"].push(item);
-  } else {
-    const time = classifyTime(ev);
-    slots[time].push(item);
+      if (crossesNoon) {
+        slots["午前"].push(item);
+        slots["午後"].push(item);
+      } else {
+        const time = classifyTime(ev);
+        slots[time].push(item);
+      }
+    });
+
+    slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+    slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+
+    // ★ 印刷用：午前＋午後をまとめるが、重複は排除する
+const merged = [];
+const seen = new Set();
+
+[...slots["午前"], ...slots["午後"]].forEach(ev => {
+  const html = ev.html;
+  if (!seen.has(html)) {
+    merged.push(ev);
+    seen.add(html);
   }
 });
 
-  slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
-  slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
-
-    const merged = [...slots["午前"], ...slots["午後"]];
 
     const holidayName = holidayMap[dateStr]
       ? `<div class="holiday-name">${holidayMap[dateStr]}</div>`
@@ -1044,54 +1054,72 @@ dayEvents.forEach(ev => {
   box.appendChild(table);
   return box;
 }
-/* 月読み込み（統合版） */
+
+/* 月読み込み */
 async function loadMonth(year, month) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = `<div class="loading">読み込み中...</div>`;
 
-  if (CURRENT_CALENDAR === "all") {
-    const allEvents = [];
-    for (let c = 1; c <= 3; c++) {
-      const evs = await fetchEvents(CALENDAR_IDS[c], year, month);
-      evs.forEach(ev => {
-        ev._facility = CALENDAR_NAMES[c];
-        allEvents.push(ev);
-      });
-    }
+  try {
+    const calendarIds =
+      CURRENT_CALENDAR === "all"
+        ? [CALENDAR_IDS[1], CALENDAR_IDS[2], CALENDAR_IDS[3]]
+        : [CALENDAR_IDS[CURRENT_CALENDAR]];
 
-    const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
+    const [holidayEvents, ...calEventsList] = await Promise.all([
+      fetchEvents(HOLIDAY_CALENDAR_ID, year, month),
+      ...calendarIds.map(id => fetchEvents(id, year, month))
+    ]);
+
     const holidayMap = createHolidayMap(holidayEvents);
 
     container.innerHTML = "";
-    container.appendChild(
-      renderTable(allEvents, holidayMap, year, month, "全施設統合", CALENDAR_COLORS.all)
-    );
 
-    updatePrintHeader();
-    return;
+    /* ★★★ 全施設 → 3つのイベントを統合して1つの表にする ★★★ */
+    if (CURRENT_CALENDAR === "all") {
+      let mergedEvents = [];
+
+      calEventsList.forEach((events, idx) => {
+        const facilityName = CALENDAR_NAMES[idx + 1];
+
+        events.forEach(ev => {
+          ev._facility = facilityName;
+          ev._rawId = ev.id;
+        });
+
+        mergedEvents = mergedEvents.concat(events);
+      });
+
+      const box = renderTable(
+        mergedEvents,
+        holidayMap,
+        year,
+        month,
+        "全施設",
+        CALENDAR_COLORS.all
+      );
+
+      container.appendChild(box);
+      return;
+    }
+
+    /* ★★★ 個別施設 → 今まで通り ★★★ */
+    const events = calEventsList[0];
+    const facilityName = CALENDAR_NAMES[CURRENT_CALENDAR];
+    const themeColor = CALENDAR_COLORS[CURRENT_CALENDAR];
+
+    events.forEach(ev => {
+      ev._facility = facilityName;
+      ev._rawId = ev.id;
+    });
+
+    const box = renderTable(events, holidayMap, year, month, facilityName, themeColor);
+    container.appendChild(box);
+
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = `<div class="loading">読み込みに失敗しました</div>`;
   }
-
-  const events = await fetchEvents(CALENDAR_IDS[CURRENT_CALENDAR], year, month);
-  events.forEach(ev => {
-    ev._facility = CALENDAR_NAMES[CURRENT_CALENDAR];
-  });
-
-  const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
-  const holidayMap = createHolidayMap(holidayEvents);
-
-  container.innerHTML = "";
-  container.appendChild(
-    renderTable(
-      events,
-      holidayMap,
-      year,
-      month,
-      CALENDAR_NAMES[CURRENT_CALENDAR],
-      CALENDAR_COLORS[CURRENT_CALENDAR]
-    )
-  );
-
-  updatePrintHeader();
 }
 
 /* 月タブ生成（統合版） */
@@ -1300,7 +1328,6 @@ document.addEventListener("contextmenu", function(e) {
 
   if (!eventId || !calendarId) return;
 
-  // Google カレンダーの eid は base64url 形式
   const raw = `${eventId} ${calendarId}`;
   const eid = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_');
 

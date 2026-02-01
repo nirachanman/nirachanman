@@ -13,7 +13,7 @@
   --color-border: #999;
 
   --cal1-color: #4a6fa5;
-  --cal2-color: #006400;
+  --cal2-color: #0d8a6a;
   --cal3-color: #b06f07;
   --calAll-color: #6b7280;
 
@@ -745,26 +745,46 @@ function updatePrintHeader() {
     `${facility}　${monthLabel}`;
 }
 
-/* キーワード色 */
+/* キーワード色（整理済み） */
 function getKeywordColor(title, description) {
   const KEYWORD_COLORS = [
+
+    { keywords: ["／", "＆", "兼用", "共用"], color: "#8b5cf6" },   
+
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
     { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#dc2626" },
-    { keywords: ["1f", "調理室", "1f", "1f"], color: "#ee7b1a" },
-    { keywords: ["2fs", "小会議室", "2fs", "2fs"], color: "#0000cd" },
-    { keywords: ["2f", "日本間", "和室", "2f"], color: "#4b0082" },
+
+    // 1F 調理室
+    { keywords: ["1f", "調理室"], color: "#d2691e" },
+
+    // 2F 日本間・和室
+    { keywords: ["2f", "日本間", "和室"], color: "#4169e1" },
+
+    // 2FS 小会議室
+    { keywords: ["2fs", "小会議室"], color: "#808000" },
+
+    // 研修室・託児室（同じ色）
     { keywords: ["研修室", "託児室"], color: "#704b3c" },
-    { keywords: ["託児室", "研修室"], color: "#704b3c" },
-    { keywords: ["調理室"], color: "#9e5e3Dd" },
+
+    // 軽運動室
     { keywords: ["軽運動室"], color: "#d28048" },
-    { keywords: ["講習室"], color: "#ebad7c" }
+
+    // 講習室
+    { keywords: ["講習室"], color: "#ebad7c" },
+
+    // 北アリーナ
+    { keywords: ["北アリーナ", "北側"], color: "#006400" }
+
   ];
 
-  const text= `${title || ""}\n${description || ""}`;
+  // タイトル＋詳細をまとめて検索
+  const text = `${title || ""}\n${description || ""}`.toLowerCase();
 
   for (const rule of KEYWORD_COLORS) {
     for (const kw of rule.keywords) {
-      if (text.includes(kw)) return rule.color;
+      if (text.includes(kw.toLowerCase())) {
+        return rule.color;
+      }
     }
   }
   return null;

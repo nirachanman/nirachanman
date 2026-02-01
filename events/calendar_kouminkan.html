@@ -200,40 +200,73 @@ th, td {
 #gcal-button:hover {
   background: #2a4fb8;
 }
+/* 画面では通常表示 */
+#month-selector {
+  display: inline-block;
+}
 
-/* 印刷設定 */
+/* 印刷用設定 */
 @media print {
 
-  body {
-    font-size: 1.5rem;
+  @page {
+    size: A4 portrait;
+
+    /* 左を広く、右を狭く */
+    margin-left: 15mm;
+    margin-right: 5mm;
+
+    /* 上下はそのままでも調整可能 */
+    margin-top: 10mm;
+    margin-bottom: 10mm;
   }
 
-  #calendar-body td {
-    font-size: 1.4rem;
-    line-height: 1.25;
-  }
-
-  .header-row h1 {
-    font-size: 1.6rem;
-  }
-
-  /* 行の背景色を印刷でも出す */
-  .tr-sat,
-  .tr-sun,
-  .tr-holiday,
-  .date-cell:not(.date-sat):not(.date-sun):not(.date-holiday),
-  .youbi-badge {
+  /* 文字は黒にするが、背景色はそのまま印刷 */
+  * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-
-  /* 白黒印刷時の文字色 */
-  body, body * {
     color: #000 !important;
   }
 
-  .youbi-badge {
-    color: #000 !important;
+  /* ★ ヘッダー行だけ白文字を維持する（上書き） */
+  thead th {
+    color: #fff !important;
+  }
+
+  /* Googleカレンダーボタンは印刷しない */
+  #gcal-button {
+    display: none !important;
+  }
+
+  /* 月選択タブは印刷時も表示 */
+  #month-selector {
+    display: inline-block !important;
+    margin-left: 1rem;
+    font-size: 11pt;
+  }
+
+  /* スクロール解除 */
+  .table-wrapper {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* thead を各ページの先頭に繰り返す */
+  thead {
+    display: table-header-group;
+  }
+
+  tbody {
+    display: table-row-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 4px 6px;
   }
 }
 </style>

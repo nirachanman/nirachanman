@@ -42,15 +42,17 @@ body {
   line-height: 1.1;
 }
 
-/* テーブルをスクロール可能にするラッパー（ヘッダー固定のため） */
+/* カレンダー全体の外枠（スクロール領域） */
 .table-wrapper {
-  max-height: 80vh;
-  overflow-y: auto;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* テーブル本体 */
 table {
-  width: 100%;
+  width: 100%;         /* ★ wrapper に合わせて縮む */
+  max-width: 1200px;   /* ★ 広い画面では 1200px で止まる */
   border-collapse: collapse;
   background: #fff;
   margin-top: 0.3rem;
@@ -242,11 +244,9 @@ th, td {
 <div class="header-row">
   <h1>川口公民館カレンダー（Google カレンダー連携）</h1>
   <select id="month-selector"></select>
-<button id="gcal-button" onclick="openGoogleCalendar()">Googleカレンダー</button>
-
+  <button id="gcal-button" onclick="openGoogleCalendar()">Googleカレンダー</button>
 </div>
 
-<table>
 <div class="table-wrapper">
   <table id="calendar-table">
     <thead>
@@ -261,8 +261,8 @@ th, td {
     <tbody id="calendar-body"></tbody>
   </table>
 </div>
-</table>
 
+</body>
 <script>
 /* ★★★ 必ず差し替えてください ★★★ */
 const CALENDAR_ID = "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
@@ -609,4 +609,3 @@ async function loadCalendar(ym) {
 
 </body>
 </html>
-

@@ -551,11 +551,36 @@ async function fetchEvents(calendarId, year, month) {
   return data.items || [];
 }
 
-  function classifyTime(ev) {
-    if (!ev.start.dateTime) return "午前";
-    const hour = new Date(ev.start.dateTime).getHours();
-    return hour < 12 ? "午前" : "午後";
+function classifyTime(ev) {
+  if (!ev.start.dateTime || !ev.end.dateTime) {
+    return ["午前"]; // 終日扱いは午前だけ（必要なら調整可）
   }
+
+  const start = new Date(ev.start.dateTime);
+  const end   = new Date(ev.end.dateTime);
+
+  const startHour = start.getHours() + start.getMinutes() / 60;
+  const endHour   = end.getHours() + end.getMinutes() / 60;
+
+  // ★ 正午をまたぐイベント（12:00 を超えて午後に入る）
+  const crossesNoon = startHour < 12 && endHour > 12;
+
+  if (crossesNoon) {
+    return ["午前", "午後"];
+  }
+
+  // ★ 終了が 12:00 ちょうど → 午前扱い
+  if (endHour === 12 && startHour < 12) {
+    return ["午前"];
+  }
+
+  // ★ 開始が 12:00 ちょうど → 午後扱い
+  if (startHour === 12) {
+    return ["午後"];
+  }
+
+  return startHour < 12 ? ["午前"] : ["午後"];
+}
 
   function detectColor(title) {
     if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
@@ -570,64 +595,74 @@ async function fetchEvents(calendarId, year, month) {
   /* =========================================================
      カレンダー描画
      ========================================================= */
-  function renderTable(events, holidayMap, year, month) {
-    const container = document.getElementById("calendarContainer");
-    container.innerHTML = "";
+    function renderTable(events, holidayMap, year, month) {
+      const container = document.getElementById("calendarContainer");
+      container.innerHTML = "";
 
-    const table = document.createElement("table");
-    table.innerHTML = `
-      <tr>
-        <th>日</th>
-        <th>午前</th>
-        <th>午後</th>
-      </tr>
-    `;
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <tr>
+          <th>日</th>
+          <th>午前</th>
+          <th>午後</th>
+        </tr>
+      `;
 
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateObj = new Date(year, month, day);
-      const weekday = WEEKDAYS[dateObj.getDay()];
-      const dateStr =
-        `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateObj = new Date(year, month, day);
+        const weekday = WEEKDAYS[dateObj.getDay()];
+        const dateStr =
+          `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-      const dayEvents = events.filter(ev => {
-        const d = ev.start.date || ev.start.dateTime.split("T")[0];
-        return d === dateStr;
-      });
-
-      const slots = { "午前": [], "午後": [] };
-
-      dayEvents.forEach(ev => {
-        const time = classifyTime(ev);
-        const color = detectColor(ev.summary || "");
-        const title = ev.summary || "";
-
-        const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
-        const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
-
-        const format = d =>
-          String(d.getHours()).padStart(2, "0") + ":" +
-          String(d.getMinutes()).padStart(2, "0");
-
-        let timeLabel = "";
-        if (start && end) {
-          timeLabel = `${format(start)}–${format(end)}`;
-        }
-
-        const displayText = timeLabel
-          ? `<time>${timeLabel}</time> ${title}`
-          : title;
-
-        const hoverText = timeLabel
-          ? `${timeLabel} ${title}`
-          : title;
-
-        slots[time].push({
-          start: start,
-          html: `<div class="event ${color}" aria-label="${hoverText}">${displayText}</div>`
+        const dayEvents = events.filter(ev => {
+          const d = ev.start.date || ev.start.dateTime.split("T")[0];
+          return d === dateStr;
         });
-      });
+
+const slots = { "午前": [], "午後": [] };
+
+dayEvents.forEach(ev => {
+  const times = classifyTime(ev);   // ★ 配列で返る
+  const color = detectColor(ev.summary || "");
+  const title = ev.summary || "";
+
+  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+  const format = d =>
+    String(d.getHours()).padStart(2, "0") + ":" +
+    String(d.getMinutes()).padStart(2, "0");
+
+  let timeLabel = "";
+  if (start && end) {
+    timeLabel = `${format(start)}–${format(end)}`;
+  }
+
+  const displayText = timeLabel
+    ? `<time>${timeLabel}</time> ${title}`
+    : title;
+
+  const hoverText = timeLabel
+    ? `${timeLabel} ${title}`
+    : title;
+
+  // ★ 午前・午後どちらにも入る可能性がある
+  times.forEach(t => {
+    slots[t].push({
+      start: start,
+      html: `
+        <div class="event ${color}"
+             data-title="${title}"
+             data-time="${timeLabel}"
+             data-desc="${(ev.description || '').replace(/\n/g, '<br>')}">
+          ${displayText}
+        </div>
+      `
+    });
+  });
+});
 
       slots["午前"].sort((a, b) => a.start - b.start);
       slots["午後"].sort((a, b) => a.start - b.start);

@@ -935,35 +935,58 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
     </tr>
   `;
 
-  const days = new Date(year, month + 1, 0).getDate();
+const days = new Date(year, month + 1, 0).getDate();
 
-  for (let day = 1; day <= days; day++) {
-    const dateObj = new Date(year, month, day);
-    const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    const weekday = WEEKDAYS[dateObj.getDay()];
+for (let day = 1; day <= days; day++) {
+  const dateObj = new Date(year, month, day);
+  const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  const weekday = WEEKDAYS[dateObj.getDay()];
 
-    const dayEvents = events.filter(ev => {
-      const d =
-        ev.start?.date ||
-        (ev.start?.dateTime ? ev.start.dateTime.split("T")[0] : null);
+  const dayEvents = events.filter(ev => {
+    const d =
+      ev.start?.date ||
+      (ev.start?.dateTime ? ev.start.dateTime.split("T")[0] : null);
 
-      if (!d) return false;
-      return d === dateStr;
-    });
+    if (!d) return false;
+    return d === dateStr;
+  });
 
-    const slots = { "午前": [], "午後": [] };
+  // ★★★ slots は必ずここで宣言する ★★★
+  const slots = { "午前": [], "午後": [] };
 
-    dayEvents.forEach(ev => {
-      const time = classifyTime(ev);
-      const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
-      slots[time].push({
-        start: ev.start.dateTime ? new Date(ev.start.dateTime) : null,
-        html: createEventHTML(ev, color)
-      });
-    });
+dayEvents.forEach(ev => {
+  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
 
-    slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
-    slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+  const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
+  const item = {
+    start,
+    html: createEventHTML(ev, color)
+  };
+
+  // 終日イベント（dateのみ）は午前へ
+  if (!start || !end) {
+    slots["午前"].push(item);
+    return;
+  }
+
+  const startHour = start.getHours();
+  const endHour   = end.getHours();
+
+  // ★ 正午またぎ（12:00ちょうどは含めない）
+  const crossesNoon = (startHour < 12 && endHour > 12);
+
+  if (crossesNoon) {
+    slots["午前"].push(item);
+    slots["午後"].push(item);
+  } else {
+    const time = classifyTime(ev);
+    slots[time].push(item);
+  }
+});
+
+  slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
+  slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));
 
     const merged = [...slots["午前"], ...slots["午後"]];
 

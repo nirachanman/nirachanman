@@ -170,7 +170,7 @@ th, td {
 /* 部屋ごとのイベント色分け（太字なし） */
 .event-cooking {
   color: #0d47a1;
-  font-weight: normal;
+  font-weight: 400;
 }
 .event-japanese {
   color: #6a1b9a;
@@ -403,7 +403,8 @@ function formatDate(dateStr) {
    時間表示
 -------------------------- */
 function formatTime(start, end) {
-  if (start.date && !start.dateTime) return "終日";
+  // ★ 終日イベントは何も表示しない
+  if (start.date && !start.dateTime) return "";
 
   const s = new Date(start.dateTime);
   const e = end?.dateTime ? new Date(end.dateTime) : null;

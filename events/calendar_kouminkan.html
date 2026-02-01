@@ -553,8 +553,12 @@ dayEvents[room].forEach(ev => {
   });
 
 div.addEventListener("mousemove", e => {
-  tooltip.style.left = (e.clientX + 12) + "px";
-  tooltip.style.top = (e.clientY - tooltip.offsetHeight - 12) + "px";
+  const tooltipWidth = tooltip.offsetWidth;
+  const x = e.clientX - tooltipWidth / 2;  // ★ カーソル中央に合わせる
+  const y = e.clientY - tooltip.offsetHeight - 12; // ★ カーソルの上に表示
+
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top  = `${y}px`;
 });
 
   div.addEventListener("mouseleave", () => {
@@ -605,3 +609,4 @@ async function loadCalendar(ym) {
 
 </body>
 </html>
+

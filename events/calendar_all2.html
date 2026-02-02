@@ -445,6 +445,21 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 #print-header { display: none; }
 
 @media print {
+
+  #print-header {
+    font-size: 28px !important;
+  }
+
+  /* 背景は完全に白 */
+  body,
+  body.bg-gym,
+  body.bg-kouminkan,
+  body.bg-bekkan,
+  body.bg-all {
+    background: #ffffff !important;
+  }
+
+  /* 印刷タイトル */
   #print-header {
     display: block;
     font-size: 20px;
@@ -455,35 +470,44 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     border-bottom: 2px solid #000;
   }
 
+  /* 画面用 UI を非表示 */
   .top-bar,
   .tabs,
   .header-fixed {
     display: none !important;
   }
 
-  /* 印刷時は「日付＋その日のイベント1列」にする */
+  /* 印刷時は「日付＋イベント」の2列構成（sp-only を使う） */
   .pc-only { display: none !important; }
   .sp-only { display: table-cell !important; }
 
-  th:nth-child(1), td:nth-child(1) { width: 15% !important; }
-  th:nth-child(4), td:nth-child(4) { width: 85% !important; }
+  /* 列幅 */
+  th:nth-child(1), td:nth-child(1) { width: 10% !important; }
+  th:nth-child(4), td:nth-child(4) { width: 90% !important; }
 
+  /* 白黒印刷時は文字を完全に黒 */
   * {
     color: #000 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  .weekday-sun,
-  .weekday-sat,
-  .weekday-holiday {
-    color: #000 !important;
-  }
-
+  /* 行背景（淡い色は残す） */
   .row-sun     { background: #fff1f2 !important; }
   .row-sat     { background: #eff6ff !important; }
   .row-holiday { background: #fff7ed !important; }
 
+  tr.row-sun td     { background: #fff1f2 !important; }
+  tr.row-sat td     { background: #eff6ff !important; }
+  tr.row-holiday td { background: #fff7ed !important; }
+
+  /* 今日の行 */
+  .today-highlight td {
+    background: #fff !important;
+    border-color: #999 !important;
+  }
+
+  /* カレンダー本体の背景は白 */
   .event,
   .holiday-name,
   .calendar-box,
@@ -493,17 +517,10 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     background: #fff !important;
   }
 
-  tr.row-sun td     { background: #fff1f2 !important; }
-  tr.row-sat td     { background: #eff6ff !important; }
-  tr.row-holiday td { background: #fff7ed !important; }
-
-  .today-highlight td {
-    background: #fff !important;
-    border-color: #999 !important;
-  }
-
+  /* イベント時間は黒 */
   .event-time { color: #000 !important; }
 
+  /* ボタン類は白黒 */
   .tab,
   .calendar-buttons button {
     color: #000 !important;
@@ -512,40 +529,34 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     border: 1px solid #000 !important;
     transform: none !important;
   }
-
   .calendar-buttons button::before { display: none !important; }
 
-  .tooltip {
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translate(-50%, -100%);
-    background: rgba(0,0,0,0.9);
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    line-height: 1.6;
-    width: 360px;
-    text-align: left;
-    z-index: 9999;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-    pointer-events: none;
-    display: none;
-  }
-  .event-title:hover .tooltip { display: block; }
-}
+  /* ツールチップは印刷しない */
+  .tooltip { display: none !important; }
 
-@media print {
-  /* 日付の色 */
+  /* カラー印刷時のみ色を残す（日付・曜日） */
   .day-number.weekday-sun     { color: #e11d48 !important; }
   .day-number.weekday-sat     { color: #2563eb !important; }
   .day-number.weekday-holiday { color: #d97706 !important; }
 
-  /* 曜日の色（←今回追加する部分） */
   .weekday-sun     { color: #e11d48 !important; }
   .weekday-sat     { color: #2563eb !important; }
   .weekday-holiday { color: #d97706 !important; }
+
+  /* ★ 白黒印刷時は完全に黒に強制（最重要） */
+  .day-number,
+  .weekday-sun,
+  .weekday-sat,
+  .weekday-holiday {
+    color: #000 !important;
+  }
+
+  /* イベントボックス（カード風） */
+  .event {
+    border: 1px solid #999 !important;
+    padding: 3px 6px !important;
+    border-radius: 4px !important;
+  }
 }
 
 /* モーダル（クリック詳細表示） */
@@ -1371,4 +1382,3 @@ function closePopup() {
 </script>
 </body>
 </html>
-

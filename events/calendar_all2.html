@@ -891,8 +891,31 @@ async function fetchEvents(calendarId, year, month) {
 }
 
 function classifyTime(ev) {
-  if (!ev.start.dateTime) return "午前";
-  return new Date(ev.start.dateTime).getHours() < 12 ? "午前" : "午後";
+  const start = new Date(ev.start.dateTime);
+  const end   = new Date(ev.end.dateTime);
+
+  const startMin = start.getHours() * 60 + start.getMinutes();
+  const endMin   = end.getHours() * 60 + end.getMinutes();
+
+  const boundary = 13 * 60; // 13:00 = 780分
+
+  // 完全に13:00より前 → 午前
+  if (endMin <= boundary) {
+    return "午前";
+  }
+
+  // 完全に13:00以降 → 午後
+  if (startMin >= boundary) {
+    return "午後";
+  }
+
+  // ここに来るのは「またぎ」
+  // ただし 12:00–14:00 は午後扱い（あなたの仕様）
+  if (startMin >= 12 * 60) {
+    return "午後";
+  }
+
+  return "午前＋午後";
 }
 
 /* 祝日 */
@@ -970,34 +993,45 @@ function renderTable(events, holidayMap, year, month, title, themeColor) {
 
     const slots = { "午前": [], "午後": [] };
 
-    dayEvents.forEach(ev => {
-      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
-      const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+dayEvents.forEach(ev => {
+  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
 
-      const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
-      const item = {
-        start,
-        html: createEventHTML(ev, color)
-      };
+  const color = ev._facility ? FACILITY_COLOR[ev._facility] : themeColor;
+  const item = {
+    start,
+    html: createEventHTML(ev, color)
+  };
 
-      if (!start || !end) {
-        slots["午前"].push(item);
-        return;
-      }
+  // 終日イベント（dateのみ）は午前へ
+  if (!start || !end) {
+    slots["午前"].push(item);
+    return;
+  }
 
-      const startHour = start.getHours();
-      const endHour   = end.getHours();
+  // 分まで含めて判定
+  const startMin = start.getHours() * 60 + start.getMinutes();
+  const endMin   = end.getHours() * 60 + end.getMinutes();
 
-      const crossesNoon = (startHour < 12 && endHour > 12);
+  const boundary = 13 * 60; // 13:00 = 780分
 
-      if (crossesNoon) {
-        slots["午前"].push(item);
-        slots["午後"].push(item);
-      } else {
-        const time = classifyTime(ev);
-        slots[time].push(item);
-      }
-    });
+  // ★ 13:00 またぎ
+  const crossesOne = (startMin < boundary && endMin > boundary);
+
+  if (crossesOne) {
+    // 12:00–14:00 は午後扱い（あなたの仕様）
+    if (startMin >= 12 * 60) {
+      slots["午後"].push(item);
+    } else {
+      slots["午前"].push(item);
+      slots["午後"].push(item);
+    }
+  } else {
+    // またがない場合は classifyTime に任せる
+    const time = classifyTime(ev);
+    slots[time].push(item);
+  }
+});
 
     slots["午前"].sort((a,b)=> (a.start || 0) - (b.start || 0));
     slots["午後"].sort((a,b)=> (a.start || 0) - (b.start || 0));

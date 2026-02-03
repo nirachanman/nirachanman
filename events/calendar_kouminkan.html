@@ -250,10 +250,9 @@ th, td {
   }
 
   /* スクロール解除 */
-  .table-wrapper {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
+  #calendar-table thead th {
+    position: static !important;
+    top: auto !important;
   }
 
   /* thead を各ページの先頭に繰り返す */

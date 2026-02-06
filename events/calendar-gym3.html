@@ -225,6 +225,59 @@
     font-weight: 700;
   }
 
+/* ===== モーダル ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;   /* ★ 中央 → 上部に変更 */
+  padding-top: 40px;         /* ★ 上に少し余白を追加 */
+  z-index: 9999;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-size: 15px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.modal-time {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.modal-desc {
+  font-size: 14px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.modal-close {
+  margin-top: 16px;
+  padding: 8px 14px;
+  background: #4a6fa5;
+  color: #fff;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
   .color-cancel       { background: var(--color-cancel); }
   .color-badminton   { background: var(--color-badminton); }
   .color-tabletennis { background: var(--color-tabletennis); }
@@ -595,140 +648,141 @@ function classifyTime(ev) {
   /* =========================================================
      カレンダー描画
      ========================================================= */
-    function renderTable(events, holidayMap, year, month) {
-      const container = document.getElementById("calendarContainer");
-      container.innerHTML = "";
+function renderTable(events, holidayMap, year, month) {
+  const container = document.getElementById("calendarContainer");
+  container.innerHTML = "";
 
-      const table = document.createElement("table");
-      table.innerHTML = `
-        <tr>
-          <th>日</th>
-          <th>午前</th>
-          <th>午後</th>
-        </tr>
-      `;
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <tr>
+      <th>日</th>
+      <th>午前</th>
+      <th>午後</th>
+    </tr>
+  `;
 
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateObj = new Date(year, month, day);
-        const weekday = WEEKDAYS[dateObj.getDay()];
-        const dateStr =
-          `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(year, month, day);
+    const weekday = WEEKDAYS[dateObj.getDay()];
+    const dateStr =
+      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-        const dayEvents = events.filter(ev => {
-          const d = ev.start.date || ev.start.dateTime.split("T")[0];
-          return d === dateStr;
-        });
-
-const slots = { "午前": [], "午後": [] };
-
-dayEvents.forEach(ev => {
-  const times = classifyTime(ev);   // ★ 配列で返る
-  const color = detectColor(ev.summary || "");
-  const title = ev.summary || "";
-
-  const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
-  const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
-
-  const format = d =>
-    String(d.getHours()).padStart(2, "0") + ":" +
-    String(d.getMinutes()).padStart(2, "0");
-
-  let timeLabel = "";
-  if (start && end) {
-    timeLabel = `${format(start)}–${format(end)}`;
-  }
-
-  const displayText = timeLabel
-    ? `<time>${timeLabel}</time> ${title}`
-    : title;
-
-  const hoverText = timeLabel
-    ? `${timeLabel} ${title}`
-    : title;
-
-  // ★ 午前・午後どちらにも入る可能性がある
-  times.forEach(t => {
-    slots[t].push({
-      start: start,
-      html: `
-        <div class="event ${color}"
-             data-title="${title}"
-             data-time="${timeLabel}"
-             data-desc="${(ev.description || '').replace(/\n/g, '<br>')}">
-          ${displayText}
-        </div>
-      `
+    const dayEvents = events.filter(ev => {
+      const d = ev.start.date || ev.start.dateTime.split("T")[0];
+      return d === dateStr;
     });
-  });
-});
 
-      slots["午前"].sort((a, b) => a.start - b.start);
-      slots["午後"].sort((a, b) => a.start - b.start);
+    const slots = { "午前": [], "午後": [] };
 
-      const weekdayClass = {
-        "日": "w-sun",
-        "月": "w-mon",
-        "火": "w-tue",
-        "水": "w-wed",
-        "木": "w-thu",
-        "金": "w-fri",
-        "土": "w-sat"
-      }[weekday];
+    dayEvents.forEach(ev => {
+      const times = classifyTime(ev);
+      const color = detectColor(ev.summary || "");
+      const title = ev.summary || "";
 
-      const dateCell = `
-        <div class="date-cell">
-          <div class="date-top">
-            ${day}
-            <span class="weekday-badge ${weekdayClass}">${weekday}</span>
-          </div>
-          <div class="date-bottom">
-            ${window.innerWidth <= 600 ? (holidayMap[dateStr] || "") : ""}
-          </div>
+      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
+      const end   = ev.end.dateTime   ? new Date(ev.end.dateTime)   : null;
+
+      const format = d =>
+        String(d.getHours()).padStart(2, "0") + ":" +
+        String(d.getMinutes()).padStart(2, "0");
+
+      let timeLabel = "";
+      if (start && end) {
+        timeLabel = `${format(start)}–${format(end)}`;
+      }
+
+      const displayText = timeLabel
+        ? `<time>${timeLabel}</time> ${title}`
+        : title;
+
+      // ★ DOM で安全に組み立てる（ここが重要）
+      const el = document.createElement("div");
+      el.className = `event ${color}`;
+      el.dataset.title = title;
+      el.dataset.time = timeLabel;
+      el.dataset.desc = ev.description || "";  // ← HTMLを入れても安全
+
+      el.innerHTML = displayText;
+
+      // ★ outerHTML を slots に入れる（あなたの構造を維持）
+      const safeHTML = el.outerHTML;
+
+      times.forEach(t => {
+        slots[t].push({
+          start: start,
+          html: safeHTML
+        });
+      });
+    });
+
+    slots["午前"].sort((a, b) => a.start - b.start);
+    slots["午後"].sort((a, b) => a.start - b.start);
+
+    const weekdayClass = {
+      "日": "w-sun",
+      "月": "w-mon",
+      "火": "w-tue",
+      "水": "w-wed",
+      "木": "w-thu",
+      "金": "w-fri",
+      "土": "w-sat"
+    }[weekday];
+
+    const dateCell = `
+      <div class="date-cell">
+        <div class="date-top">
+          ${day}
+          <span class="weekday-badge ${weekdayClass}">${weekday}</span>
         </div>
-      `;
+        <div class="date-bottom">
+          ${window.innerWidth <= 600 ? (holidayMap[dateStr] || "") : ""}
+        </div>
+      </div>
+    `;
 
-      let rowClass = "";
-      if (holidayMap[dateStr]) rowClass = "holiday";
-      else if (weekday === "日") rowClass = "sunday";
-      else if (weekday === "土") rowClass = "saturday";
+    let rowClass = "";
+    if (holidayMap[dateStr]) rowClass = "holiday";
+    else if (weekday === "日") rowClass = "sunday";
+    else if (weekday === "土") rowClass = "saturday";
 
-      const isToday = (dateStr === todayStr);
+    const isToday = (dateStr === todayStr);
 
-      const tr = document.createElement("tr");
-      tr.className = rowClass + (isToday ? " today-row" : "");
+    const tr = document.createElement("tr");
+    tr.className = rowClass + (isToday ? " today-row" : "");
 
-      const isPC = window.innerWidth > 600;
+    const isPC = window.innerWidth > 600;
 
-      const holidayLabel = holidayMap[dateStr]
-        ? `<div class="holiday-label">${holidayMap[dateStr]}</div>`
-        : "";
+    const holidayLabel = holidayMap[dateStr]
+      ? `<div class="holiday-label">${holidayMap[dateStr]}</div>`
+      : "";
 
-      tr.innerHTML = `
-        <td>${dateCell}</td>
+    tr.innerHTML = `
+      <td>${dateCell}</td>
 
-        <td>
-          <div class="event-box">
-            ${isPC ? holidayLabel : ""}
-            ${slots["午前"].map(e => e.html).join("")}
-          </div>
-        </td>
+      <td>
+        <div class="event-box">
+          ${isPC ? holidayLabel : ""}
+          ${slots["午前"].map(e => e.html).join("")}
+        </div>
+      </td>
 
-        <td>
-          <div class="event-box">
-            ${slots["午後"].map(e => e.html).join("")}
-          </div>
-        </td>
-      `;
+      <td>
+        <div class="event-box">
+          ${slots["午後"].map(e => e.html).join("")}
+        </div>
+      </td>
+    `;
 
-      table.appendChild(tr);
-    }
-
-    container.appendChild(table);
-
-    mergeEventsForMobile();
+    table.appendChild(tr);
   }
+
+  container.appendChild(table);
+
+  mergeEventsForMobile();
+setupModalEvents();
+}
 
   /* =========================================================
      月読み込み
@@ -761,9 +815,46 @@ dayEvents.forEach(ev => {
   window.addEventListener("orientationchange", () => {
     loadMonth(today.getFullYear(), today.getMonth());
   });
+
+/* =========================================================
+   モーダル機能
+   ========================================================= */
+function setupModalEvents() {
+  const overlay = document.getElementById("modalOverlay");
+  const mTitle  = document.getElementById("modalTitle");
+  const mTime   = document.getElementById("modalTime");
+  const mDesc   = document.getElementById("modalDesc");
+  const mClose  = document.getElementById("modalClose");
+
+  document.querySelectorAll(".event").forEach(ev => {
+    ev.addEventListener("click", () => {
+      mTitle.textContent = ev.dataset.title || "";
+      mTime.textContent  = ev.dataset.time || "";
+
+      // description は HTML を安全に表示
+      mDesc.innerHTML = (ev.dataset.desc || "")
+        .replace(/\n/g, "<br>");
+
+      overlay.style.display = "flex";
+    });
+  });
+
+  mClose.onclick = () => overlay.style.display = "none";
+  overlay.onclick = e => {
+    if (e.target === overlay) overlay.style.display = "none";
+  };
+}
+
   </script>
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-time" id="modalTime"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-close" id="modalClose">閉じる</div>
+  </div>
+</div>
 
 </body>
 </html>
-
 

@@ -193,6 +193,11 @@
       flex-wrap: wrap;
       gap: 2px 4px;
     }
+.event-box a {
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-word;
+}
 
     .event {
       padding: 2px 6px;
@@ -652,7 +657,7 @@ function classifyTime(ev) {
 const slots = { "午前": [], "午後": [] };
 
 dayEvents.forEach(ev => {
-  const times = classifyTime(ev);   // ★ 配列で返る
+  const times = classifyTime(ev);
   const color = detectColor(ev.summary || "");
   const title = ev.summary || "";
 
@@ -672,11 +677,25 @@ dayEvents.forEach(ev => {
     ? `<time>${timeLabel}</time> ${title}`
     : title;
 
-  const hoverText = timeLabel
-    ? `${timeLabel} ${title}`
-    : title;
+  // ▼ リンク抽出
+  const rawDesc = ev.description || "";
+  const linkMatch = rawDesc.match(/https?:\/\/[^\s]+/);
+  const eventLink = linkMatch ? linkMatch[0] : "";
+const safeDesc = rawDesc
+  // ① <a href="..."> の開始タグを丸ごと削除
+  .replace(/<a[^>]*>/gi, "")
+  // ② </a> を削除（Google が返す場合もある）
+  .replace(/<\/a>/gi, "")
+  // ③ URL を削除（壊れたものも含む）
+  .replace(/https?:\/\/[^\s"<]+/g, "")
+  // ④ Google カレンダー特有の壊れた `">` を削除
+  .replace(/">/g, "")
+  // ⑤ 残った " を削除
+  .replace(/"/g, "")
+  // ⑥ 改行を <br> に
+  .replace(/\n/g, "<br>");
 
-  // ★ 午前・午後どちらにも入る可能性がある
+  // ▼ 午前・午後どちらにも入る可能性
   times.forEach(t => {
     slots[t].push({
       start: start,
@@ -684,13 +703,15 @@ dayEvents.forEach(ev => {
         <div class="event ${color}"
              data-title="${title}"
              data-time="${timeLabel}"
-             data-desc="${(ev.description || '').replace(/\n/g, '<br>')}">
+             data-desc="${safeDesc}"
+             data-link="${eventLink}">
           ${displayText}
         </div>
       `
     });
   });
-});
+
+});  // ★★★ ここが重要！ forEach の正しい閉じ位置 ★★★
 
         slots["午前"].sort((a, b) => a.start - b.start);
         slots["午後"].sort((a, b) => a.start - b.start);
@@ -880,6 +901,9 @@ window.addEventListener("afterprint", () => {
     <div class="modal-box">
       <p id="modal-desc"></p>
     </div>
+
+    <!-- ★ ここに追加（リンクはモーダルだけに表示） -->
+    <div class="modal-box" id="modal-link" style="display:none;"></div>
 
   </div>
 </div>

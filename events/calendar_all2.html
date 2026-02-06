@@ -576,7 +576,7 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   padding: 8px 10px;
   border-radius: 12px;
   width: 85%;
-  max-width: 500px;
+  max-width: 600px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   font-size: 14px;
   border-top: 6px solid #28a745;
@@ -661,6 +661,11 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 #modal-body p {
   margin: 6px 0;
   line-height: 1.4;
+}
+
+#modal-body a {
+  color: #2563eb !important;
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {
@@ -822,10 +827,31 @@ function normalizeEventId(ev) {
   return ev.id;
 }
 
+// 説明欄に a タグがあっても、テキスト＋URL を残す版
+function stripHTML(html) {
+  if (!html) return "";
+
+  const div = document.createElement("div");
+  div.innerHTML = html;
+
+  // aタグを「ラベル|URL」という形式に変換して保持
+  div.querySelectorAll("a").forEach(a => {
+    const href = a.getAttribute("href") || "";
+    const label = a.textContent.trim();
+    const rep = `__LINK_LABEL__${label}__LINK_URL__${href}__ENDLINK__`;
+    a.replaceWith(document.createTextNode(rep));
+  });
+
+  return div.textContent || div.innerText || "";
+}
+
 /* イベント HTML（右クリック編集対応版） */
 function createEventHTML(ev, baseColor) {
   const title = ev.summary || "";
-  const description = ev.description || "";
+  const rawDescription = ev.description || "";
+
+  /* ★ 説明欄の HTML を完全に除去してテキスト化 */
+  const description = stripHTML(rawDescription);
 
   const keywordColor = getKeywordColor(title, description);
   const color = keywordColor || baseColor;
@@ -843,6 +869,7 @@ function createEventHTML(ev, baseColor) {
     ev._facility === "別館"   ? "facility-b" :
     "facility-default";
 
+  /* ★ HTML を除去した description を安全に行分割 */
   const detailLines = description
     .split("\n")
     .map(line => `<div class="tooltip-line">${line}</div>`)
@@ -1293,7 +1320,20 @@ function getTitleOnly(el) {
   return "(タイトルなし)";
 }
 
-/* クリックでモーダル表示（1本だけ） */
+/* URL をリンク化する */
+function linkify(text) {
+  if (!text) return "";
+
+  return text
+    .replace(/__LINK_LABEL__(.*?)__LINK_URL__(.*?)__ENDLINK__/g,
+      (match, label, url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      }
+    )
+    .replace(/\n/g, "<br>");
+}
+
+/* クリックでモーダル表示 */
 document.addEventListener("click", function(e) {
   const eventEl = e.target.closest(".event");
   if (!eventEl) return;
@@ -1304,6 +1344,7 @@ document.addEventListener("click", function(e) {
 
   const title = getTitleOnly(titleEl);
 
+  /* 日付 */
   const dateRaw = eventEl.dataset.date;
   let dateStr = "";
   if (dateRaw) {
@@ -1312,6 +1353,7 @@ document.addEventListener("click", function(e) {
     dateStr = `${d.getMonth() + 1}/${d.getDate()}(${youbi[d.getDay()]})`;
   }
 
+  /* 時間 */
   let time = "(時間なし)";
   if (timeEl) {
     const raw = timeEl.textContent.trim();
@@ -1320,17 +1362,22 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
+  /* 場所 */
   const placeRaw = eventEl.dataset.location || "";
   const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
 
+  /* 説明（textContent → 改行 → linkify） */
   let description = "(説明なし)";
   if (tooltip) {
     const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
       el.textContent.trim()
     );
-    if (lines.length > 0) description = lines.join("<br>");
+    if (lines.length > 0) {
+      description = lines.join("\n");
+    }
   }
 
+  /* 施設カラー */
   const facilityClass =
     titleEl.classList.contains("facility-k") ? "k" :
     titleEl.classList.contains("facility-t") ? "t" :
@@ -1340,7 +1387,15 @@ document.addEventListener("click", function(e) {
   modalContent.classList.remove("k", "t", "b");
   if (facilityClass) modalContent.classList.add(facilityClass);
 
-  const html = `
+  /* ★ modal-body を完全クリア */
+  const modalBody = document.getElementById("modal-body");
+  modalBody.innerHTML = "";
+
+  /* ★ 独立 DOM（他の JS に上書きされない） */
+  const box = document.createElement("div");
+  box.className = "modal-inner-safe";
+
+  box.innerHTML = `
     <h3>${title}</h3>
 
     <div class="modal-info-box">
@@ -1355,11 +1410,12 @@ document.addEventListener("click", function(e) {
 
     <div class="modal-info-box">
       <div class="modal-info-title">説明</div>
-      <div>${description}</div>
+      <div class="modal-description">${linkify(description)}</div>
     </div>
   `;
 
-  document.getElementById("modal-body").innerHTML = html;
+  modalBody.appendChild(box);
+
   document.getElementById("popup").style.display = "block";
 });
 
@@ -1416,4 +1472,3 @@ function closePopup() {
 </script>
 </body>
 </html>
-

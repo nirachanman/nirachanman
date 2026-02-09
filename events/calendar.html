@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>サークル予定カレンダー（Workers API版・14か月自動生成・場所補完・施設名タイトル）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; line-height: 1.4; }
+
+    h2 { margin-top: 0; }
+
+    .top-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .calendar-buttons button {
+      padding: 6px 18px;
+      border-radius: 9999px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 120px;
+      border: 1px solid #ccc;
+    }
+    .calendar-buttons button.active {
+      background: #dff3e6;
+      color: #0f6a2c;
+      border-color: #0f6a2c;
+    }
+
+    select, button { font-size: 14px; }
+
+    .calendar-frame {
+      width: 100%;
+      border: 0;
+      display: none;
+      height: calc(100dvh - 150px);
+    }
+    .calendar-frame.active { display: block; }
+
+    #print-area { display: none; }
+
+    table.print-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+    table.print-table th,
+    table.print-table td {
+      border: 1px solid #000;
+      padding: 3px 4px;
+      vertical-align: top;
+    }
+    table.print-table th {
+      font-size: 11pt;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { margin: 0; }
+      iframe.calendar-frame, .top-controls, h2 { display: none !important; }
+      #print-area { display: block !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>施設カレンダー</h2>
+
+  <div class="top-controls">
+    <div class="calendar-buttons">
+      <button id="btn-gym"       class="active" onclick="showCalendar('gym')">🏟 体育館</button>
+      <button id="btn-kouminkan"             onclick="showCalendar('kouminkan')">🏫 公民館</button>
+      <button id="btn-bekkan"               onclick="showCalendar('bekkan')">🏢 別館</button>
+      <button id="btn-all"                  onclick="showCalendar('all')">📅 全て</button>
+    </div>
+
+    <div>
+      <label for="print-month">印刷する月：</label>
+      <select id="print-month"></select>
+    </div>
+
+    <button onclick="printWithEvents()">🖨 印刷</button>
+  </div>
+
+  <!-- 表示用 iframe -->
+  <iframe id="cal-gym" class="calendar-frame active"
+    src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&ctz=Asia/Tokyo">
+  </iframe>
+
+  <iframe id="cal-kouminkan" class="calendar-frame"
+    src="https://calendar.google.com/calendar/embed?src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&ctz=Asia/Tokyo">
+  </iframe>
+
+  <iframe id="cal-bekkan" class="calendar-frame"
+    src="https://calendar.google.com/calendar/embed?src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
+  </iframe>
+
+  <iframe id="cal-all" class="calendar-frame"
+    src="https://calendar.google.com/calendar/embed?src=c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com&src=31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com&src=kawaguchi.public.hall.annex@gmail.com&ctz=Asia/Tokyo">
+  </iframe>
+
+  <div id="print-area"></div>
+
+<script>
+/* ===== カレンダーID ===== */
+const CALENDARS = {
+  gym: {
+    id: "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com",
+    label: "体育館"
+  },
+  kouminkan: {
+    id: "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com",
+    label: "公民館"
+  },
+  bekkan: {
+    id: "kawaguchi.public.hall.annex@gmail.com",
+    label: "別館"
+  }
+};
+
+/* ===== Workers API URL ===== */
+const WORKER_URL = "https://black-sky-4fd3.yajirobe-einstein.workers.dev/api/calendar";
+
+/* ---------------- 印刷月プルダウン（今月 → 14か月先） ---------------- */
+function setupMonthSelector() {
+  const sel = document.getElementById("print-month");
+  sel.innerHTML = "";
+
+  const today = new Date();
+  let y = today.getFullYear();
+  let m = today.getMonth() + 1;
+
+  const totalMonths = 14;
+
+  for (let i = 0; i < totalMonths; i++) {
+    const value = `${y}-${String(m).padStart(2, "0")}`;
+    const label = `${y}年${m}月`;
+
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    sel.appendChild(opt);
+
+    m++;
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
+  }
+
+  sel.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/* ---------------- タブ切り替え ---------------- */
+function showCalendar(target) {
+  document.querySelectorAll(".calendar-frame").forEach(el => el.classList.remove("active"));
+  document.getElementById("cal-" + target).classList.add("active");
+
+  document.querySelectorAll(".calendar-buttons button").forEach(el => el.classList.remove("active"));
+  document.getElementById("btn-" + target).classList.add("active");
+}
+
+/* ---------------- 選択中のタブ判定 ---------------- */
+function getActiveFacility() {
+  if (document.getElementById("btn-gym").classList.contains("active")) return "gym";
+  if (document.getElementById("btn-kouminkan").classList.contains("active")) return "kouminkan";
+  if (document.getElementById("btn-bekkan").classList.contains("active")) return "bekkan";
+  return "all";
+}
+
+/* ---------------- 月選択 ---------------- */
+function getSelectedYearMonth() {
+  const sel = document.getElementById("print-month").value;
+  const [y, m] = sel.split("-");
+  return { year: Number(y), month: Number(m) };
+}
+
+/* ---------------- 日付ラベル ---------------- */
+function parseDateLabel(dateObj) {
+  const m = dateObj.getMonth() + 1;
+  const d = dateObj.getDate();
+  const youbi = ["日","月","火","水","木","金","土"][dateObj.getDay()];
+  return `${m}月${d}日（${youbi}）`;
+}
+
+/* ---------------- 可変祝日 ---------------- */
+function calcVernalEquinox(year) {
+  return Math.floor(20.8431 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4);
+}
+function calcAutumnEquinox(year) {
+  return Math.floor(23.2488 + 0.242194 * (year - 1980)) - Math.floor((year - 1980) / 4);
+}
+
+function isHoliday(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = dateObj.getMonth() + 1;
+  const d = dateObj.getDate();
+
+  const fixed = [
+    `${m}-${d}` === "1-1",
+    `${m}-${d}` === "2-11",
+    `${m}-${d}` === "4-29",
+    `${m}-${d}` === "5-3",
+    `${m}-${d}` === "5-4",
+    `${m}-${d}` === "5-5",
+    `${m}-${d}` === "11-3",
+    `${m}-${d}` === "11-23"
+  ];
+  if (fixed.includes(true)) return true;
+
+  if (m === 3 && d === calcVernalEquinox(y)) return true;
+  if (m === 9 && d === calcAutumnEquinox(y)) return true;
+
+  const w = dateObj.getDay();
+  if (w === 1) {
+    const week = Math.floor((d - 1) / 7) + 1;
+    if (m === 1 && week === 2) return true;
+    if (m === 7 && week === 3) return true;
+    if (m === 9 && week === 3) return true;
+    if (m === 10 && week === 2) return true;
+  }
+
+  return false;
+}
+
+/* ---------------- Workers 経由でイベント取得 ---------------- */
+async function fetchEventsFromCalendar(calendarId, facilityName, year, month) {
+  const timeMin = new Date(year, month - 1, 1).toISOString();
+  const timeMax = new Date(year, month, 0, 23, 59, 59).toISOString();
+
+  const url =
+    `${WORKER_URL}?calendarId=${encodeURIComponent(calendarId)}` +
+    `&timeMin=${encodeURIComponent(timeMin)}` +
+    `&timeMax=${encodeURIComponent(timeMax)}`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.error("Worker API error", await res.text());
+    return [];
+  }
+
+  const data = await res.json();
+  if (!data.items) return [];
+
+  return data.items.map(ev => ({
+    facility: facilityName,
+    summary: ev.summary || "",
+    location: ev.location || "",   // ← 追加：イベントの場所
+    start: ev.start,
+    end: ev.end
+  }));
+}
+
+/* ---------------- 複数カレンダーまとめて取得 ---------------- */
+async function loadEventsForMonth(year, month, active) {
+  if (active !== "all") {
+    const c = CALENDARS[active];
+    return fetchEventsFromCalendar(c.id, c.label, year, month);
+  }
+
+  const [gym, kou, bek] = await Promise.all([
+    fetchEventsFromCalendar(CALENDARS.gym.id,       CALENDARS.gym.label,       year, month),
+    fetchEventsFromCalendar(CALENDARS.kouminkan.id, CALENDARS.kouminkan.label, year, month),
+    fetchEventsFromCalendar(CALENDARS.bekkan.id,    CALENDARS.bekkan.label,    year, month)
+  ]);
+
+  return [...gym, ...kou, ...bek];
+}
+
+/* ---------------- 時間帯表示 ---------------- */
+function formatTimeRangeFromApi(ev) {
+  if (ev.start.date) return "（終日）";
+
+  const startDate = new Date(ev.start.dateTime);
+  const endDate   = new Date(ev.end.dateTime);
+
+  const pad = n => String(n).padStart(2, "0");
+
+  function toAmPm(date) {
+    let h = date.getHours();
+    const m = pad(date.getMinutes());
+    const ampm = h < 12 ? "午前" : "午後";
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return `${ampm}${h}:${m}`;
+  }
+
+  return `${toAmPm(startDate)}〜${toAmPm(endDate)}`;
+}
+
+/* ---------------- 印刷エリア更新 ---------------- */
+async function updatePrintAreaWithEvents() {
+  const { year, month } = getSelectedYearMonth();
+  const active = getActiveFacility();
+
+  let events = await loadEventsForMonth(year, month, active);
+
+  events.sort((a, b) => {
+    const aStart = a.start.dateTime || a.start.date;
+    const bStart = b.start.dateTime || b.start.date;
+    return aStart > bStart ? 1 : -1;
+  });
+
+  /* ★★★ タイトルに施設名を入れる ★★★ */
+  let titleFacility = "";
+  if (active === "gym")       titleFacility = "体育館";
+  else if (active === "kouminkan") titleFacility = "公民館";
+  else if (active === "bekkan")    titleFacility = "別館";
+  else titleFacility = "全施設";
+
+  let html = `<h1>${titleFacility}　${year}年${month}月の予定</h1>`;
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  html += `<table class="print-table">
+    <tr>
+      <th style="width:15%;">日付</th>
+      <th style="width:25%;">時間</th>
+      <th style="width:45%;">内容</th>
+      <th style="width:15%;">場所</th>
+    </tr>`;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(year, month - 1, day);
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    const ymd = `${y}-${m}-${d}`;
+
+    const todays = events.filter(ev => {
+      const s = ev.start.dateTime || ev.start.date;
+      return typeof s === "string" && s.startsWith(ymd);
+    });
+
+    let timeCell = "";
+    let summaryCell = "";
+    let locationCell = "";
+
+    todays.forEach(ev => {
+      timeCell     += formatTimeRangeFromApi(ev) + "<br>";
+      summaryCell  += ev.summary + "<br>";
+      locationCell += (ev.location || ev.facility) + "<br>";  // ← location が空なら施設名を補完
+    });
+
+    const w = dateObj.getDay();
+    const holiday = isHoliday(dateObj);
+
+    let rowBg = "";
+    if (holiday)      rowBg = 'style="background-color:#f0f0f0;"';
+    else if (w === 0) rowBg = 'style="background-color:#ffe5e5;"';
+    else if (w === 6) rowBg = 'style="background-color:#e5f0ff;"';
+
+    html += `
+      <tr ${rowBg}>
+        <td style="text-align:right; font-weight:bold;">${parseDateLabel(dateObj)}</td>
+        <td>${timeCell}</td>
+        <td>${summaryCell}</td>
+        <td>${locationCell}</td>
+      </tr>`;
+  }
+
+  html += "</table>";
+  document.getElementById("print-area").innerHTML = html;
+}
+
+/* ---------------- 印刷処理 ---------------- */
+async function printWithEvents() {
+  await updatePrintAreaWithEvents();
+  window.print();
+}
+
+/* ---------------- 初期化 ---------------- */
+document.addEventListener("DOMContentLoaded", setupMonthSelector);
+</script>
+
+</body>
+</html>

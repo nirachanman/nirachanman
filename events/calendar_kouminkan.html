@@ -272,6 +272,11 @@ th, td {
     border: 1px solid #000 !important;
     padding: 4px 6px;
   }
+
+@media print {
+  #print-button {
+    display: none !important;
+  }
 }
 </style>
 </head>
@@ -282,6 +287,7 @@ th, td {
   <h1>川口公民館カレンダー（Google カレンダー連携）</h1>
   <select id="month-selector"></select>
   <button id="gcal-button" onclick="openGoogleCalendar()">Googleカレンダー</button>
+  <button id="print-button" onclick="window.print()">印刷🖨️</button>
 </div>
 
 <div class="table-wrapper">

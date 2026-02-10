@@ -462,10 +462,11 @@ function formatTime(start, end) {
 }
 
 /* -------------------------
-   部屋判定
+   部屋判定（description + location 両対応）
 -------------------------- */
 function detectRoom(ev) {
-  const text = ev.description || "";
+  // 説明欄 + 場所欄 をまとめて判定
+  const text = (ev.description || "") + " " + (ev.location || "");
   const rooms = [];
 
   // 料理室（1F）

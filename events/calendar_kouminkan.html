@@ -11,6 +11,7 @@ html {
 }
 
 body {
+
   font-family: system-ui, sans-serif;
   padding: 0.2rem;
   background: #f7f7f7;
@@ -51,8 +52,8 @@ body {
 
 /* テーブル本体 */
 table {
-  width: 100%;         /* ★ wrapper に合わせて縮む */
-  max-width: 1200px;   /* ★ 広い画面では 1200px で止まる */
+  width: 100%;
+  max-width: 1200px;
   border-collapse: collapse;
   background: #fff;
   margin-top: 0.3rem;
@@ -77,15 +78,9 @@ th, td {
 }
 
 /* 行の背景色 */
-.tr-sat {
-  background: #e8f2ff;
-}
-.tr-sun {
-  background: #ffecec;
-}
-.tr-holiday {
-  background-color: #fff2e0;
-}
+.tr-sat { background: #e8f2ff; }
+.tr-sun { background: #ffecec; }
+.tr-holiday { background-color: #fff2e0; }
 
 /* 日付セルの背景色 */
 .date-sat {
@@ -111,11 +106,11 @@ th, td {
 
 /* 日付セル（右寄せ） */
 .date-cell {
-  text-align: right;   /* ★ 右寄せに変更 */
+  text-align: right;
   white-space: nowrap;
   font-weight: 600;
-  padding-right: 6px;  /* ★ 少し余白を追加すると綺麗 */
-  vertical-align: middle; /* ★ これを追加 */
+  padding-right: 6px;
+  vertical-align: middle;
 }
 
 /* 曜日バッチ */
@@ -128,19 +123,9 @@ th, td {
   font-size: 0.75rem;
   margin-left: 4px;
 }
-
-.youbi-badge.日 {
-  background: #ffecec;
-  color: #b71c1c;
-}
-.youbi-badge.土 {
-  background: #e8f2ff;
-  color: #0d47a1;
-}
-.date-holiday .youbi-badge {
-  background: #fff2e0;
-  color: #b74a00;
-}
+.youbi-badge.日 { background: #ffecec; color: #b71c1c; }
+.youbi-badge.土 { background: #e8f2ff; color: #0d47a1; }
+.date-holiday .youbi-badge { background: #fff2e0; color: #b74a00; }
 
 /* 行の高さ最適化 */
 #calendar-body td {
@@ -152,6 +137,11 @@ th, td {
 /* イベント行の行間 */
 #calendar-body td div {
   line-height: 1.2;
+}
+
+/* ★ 説明文の改行を保持 */
+.event-desc {
+  white-space: pre-wrap;
 }
 
 /* カーソル追従ツールチップ（青背景） */
@@ -169,25 +159,13 @@ th, td {
   transition: opacity 0.1s;
 }
 
-/* 部屋ごとのイベント色分け（太字なし） */
-.event-cooking {
-  color: #0d47a1;
-  font-weight: 400;
-}
-.event-japanese {
-  color: #6a1b9a;
-  font-weight: normal;
-}
-.event-meeting {
-  color: #2e7d32;
-  font-weight: normal;
-}
-.event-note {
-  color: #b74a00;
-  font-weight: normal;
-}
+/* 部屋ごとのイベント色分け */
+.event-cooking { color: #0d47a1; }
+.event-japanese { color: #6a1b9a; }
+.event-meeting { color: #2e7d32; }
+.event-note { color: #b74a00; }
 
-/* Googleカレンダーボタン（青） */
+/* Googleカレンダーボタン */
 #gcal-button {
   padding: 4px 10px;
   font-size: 0.9rem;
@@ -197,85 +175,64 @@ th, td {
   border-radius: 4px;
   cursor: pointer;
 }
-#gcal-button:hover {
-  background: #2a4fb8;
+#gcal-button:hover { background: #2a4fb8; }
+
+/* 印刷ボタン */
+#print-button {
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #444;
+  background: #444;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
 }
-/* 画面では通常表示 */
-#month-selector {
-  display: inline-block;
-}
+#print-button:hover { background: #666; }
 
 /* 印刷用設定 */
 @media print {
 
   @page {
     size: A4 portrait;
-
-    /* 左を広く、右を狭く */
     margin-left: 15mm;
     margin-right: 5mm;
-
-    /* 上下はそのままでも調整可能 */
     margin-top: 10mm;
     margin-bottom: 10mm;
   }
 
-  /* 文字は黒にするが、背景色はそのまま印刷 */
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     color: #000 !important;
   }
 
-  /* ★ ヘッダー行だけ白文字を維持する（上書き） */
-  thead th {
-    color: #fff !important;
-  }
+  thead th { color: #fff !important; }
 
-  /* Googleカレンダーボタンは印刷しない */
-  #gcal-button {
+  #gcal-button,
+  #print-button {
     display: none !important;
   }
-  /* 背景は完全に白 */
-  body,
-  body.bg-all {
-    background: #ffffff !important;
-  }
 
-  /* 月選択タブは印刷時も表示 */
+  body { background: #ffffff !important; }
+
   #month-selector {
     display: inline-block !important;
     margin-left: 1rem;
     font-size: 11pt;
   }
 
-  /* スクロール解除 */
   #calendar-table thead th {
     position: static !important;
     top: auto !important;
   }
 
-  /* thead を各ページの先頭に繰り返す */
-  thead {
-    display: table-header-group;
-  }
-
-  tbody {
-    display: table-row-group;
-  }
-
-  tr {
-    page-break-inside: avoid;
-  }
+  thead { display: table-header-group; }
+  tbody { display: table-row-group; }
+  tr { page-break-inside: avoid; }
 
   th, td {
     border: 1px solid #000 !important;
     padding: 4px 6px;
-  }
-
-@media print {
-  #print-button {
-    display: none !important;
   }
 }
 </style>
@@ -305,15 +262,13 @@ th, td {
   </table>
 </div>
 
-</body>
 <script>
-/* ★★★ 必ず差し替えてください ★★★ */
-const CALENDAR_ID = "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
+/* ★★★ カレンダーID ★★★ */
+const CALENDAR_ID =
+"31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
-/* -------------------------
-   月選択プルダウンの生成
--------------------------- */
+/* 月選択プルダウン */
 function setupMonthSelector() {
   const selector = document.getElementById("month-selector");
   const now = new Date();
@@ -341,9 +296,7 @@ function openGoogleCalendar() {
   window.open("https://calendar.google.com/calendar/u/0/r", "_blank");
 }
 
-/* -------------------------
-   指定月の timeMin/timeMax
--------------------------- */
+/* 月の範囲 */
 function getMonthRange(ym) {
   const [year, month] = ym.split("-").map(Number);
   const start = new Date(year, month - 1, 1);
@@ -355,9 +308,7 @@ function getMonthRange(ym) {
   };
 }
 
-/* -------------------------
-   公民館イベント取得
--------------------------- */
+/* イベント取得 */
 async function fetchEventsForMonth(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
 
@@ -372,9 +323,7 @@ async function fetchEventsForMonth(ym) {
   return (data.items || []).filter(ev => ev.status !== "cancelled");
 }
 
-/* -------------------------
-   日本の祝日カレンダー取得
--------------------------- */
+/* 祝日取得 */
 async function fetchHolidays(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
 
@@ -389,18 +338,11 @@ async function fetchHolidays(ym) {
   return data.items || [];
 }
 
-/* -------------------------
-   祝日を日付キーでマッピング
--------------------------- */
+/* 祝日マッピング */
 function mapHolidays(holidayEvents) {
   const ignoreList = [
-    "銀行休業日",
-    "節分",
-    "雛祭り",
-    "母の日",
-    "七夕",
-    "七五三",
-    "クリスマス"
+    "銀行休業日","節分","雛祭り","母の日",
+    "七夕","七五三","クリスマス"
   ];
 
   const map = {};
@@ -408,9 +350,7 @@ function mapHolidays(holidayEvents) {
   holidayEvents.forEach(ev => {
     const name = ev.summary;
 
-    if (ignoreList.some(x => name.includes(x))) {
-      return;
-    }
+    if (ignoreList.some(x => name.includes(x))) return;
 
     const key = toDateKey(ev.start.date || ev.start.dateTime);
     map[key] = name;
@@ -419,9 +359,7 @@ function mapHolidays(holidayEvents) {
   return map;
 }
 
-/* -------------------------
-   日付キー
--------------------------- */
+/* 日付キー */
 function toDateKey(dateStr) {
   const d = new Date(dateStr);
   const y = d.getFullYear();
@@ -430,23 +368,16 @@ function toDateKey(dateStr) {
   return `${y}-${m}-${day}`;
 }
 
-/* -------------------------
-   日付＋曜日の表示
--------------------------- */
+/* 日付表示 */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
-  const youbi = ["日", "月", "火", "水", "木", "金", "土"];
+  const youbi = ["日","月","火","水","木","金","土"];
   const w = youbi[d.getDay()];
-
   return `${d.getMonth() + 1}月${d.getDate()}日 <span class="youbi-badge ${w}">${w}</span>`;
-
 }
 
-/* -------------------------
-   時間表示
--------------------------- */
+/* 時間表示 */
 function formatTime(start, end) {
-  // ★ 終日イベントは何も表示しない
   if (start.date && !start.dateTime) return "";
 
   const s = new Date(start.dateTime);
@@ -461,44 +392,34 @@ function formatTime(start, end) {
   return sStr === eStr ? sStr : `${sStr}〜${eStr}`;
 }
 
-/* -------------------------
-   部屋判定（description + location 両対応）
--------------------------- */
+/* 部屋判定（description + location） */
 function detectRoom(ev) {
-  // 説明欄 + 場所欄 をまとめて判定
   const text = (ev.description || "") + " " + (ev.location || "");
   const rooms = [];
 
-  // 料理室（1F）
-  if (text.match(/1f|調理室|キッチン/)) {
-    rooms.push("cooking");
-  }
+  if (text.match(/1f|調理室|キッチン/)) rooms.push("cooking");
+  if (text.match(/2f|和室|日本間/)) rooms.push("japanese");
+  if (text.match(/2fs|小会議室|ミーティング/)) rooms.push("meeting");
 
-  // 和室（2F）
-  if (text.match(/2f|和室|日本間/)) {
-    rooms.push("japanese");
-  }
+  if (rooms.length === 0) rooms.push("note");
 
-  // 小会議室（2FS）
-  if (text.match(/2fs|小会議室|ミーティング/)) {
-    rooms.push("meeting");
-  }
-
-  // どれにも該当しない場合は note
-  if (rooms.length === 0) {
-    rooms.push("note");
-  }
-
-  return rooms; // ← ★ 配列で返す
+  return rooms;
 }
 
-/* -------------------------
-   ★ 行の高さに合わせて自動縮小
--------------------------- */
+/* ★ 説明文を純テキスト化（改行保持） */
+function toPlainText(text) {
+  if (!text) return "";
+  return text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\r/g, "");
+}
+
+/* 自動縮小 */
 function autoShrinkFont(cell) {
-  let size = 13; // 初期フォントサイズ
+  let size = 13;
   cell.style.fontSize = size + "px";
-  cell.style.lineHeight = "1.2"; // ★ 行間を少し詰める
+  cell.style.lineHeight = "1.2";
 
   while (cell.scrollHeight > cell.clientHeight && size > 9) {
     size--;
@@ -506,14 +427,11 @@ function autoShrinkFont(cell) {
   }
 }
 
-/* -------------------------
-   テーブル描画（祝日対応）
--------------------------- */
+/* 描画 */
 function render(events, ym, holidayMap) {
   const body = document.getElementById("calendar-body");
   body.innerHTML = "";
 
-  /* ★ カーソル追従ツールチップ要素を1つだけ作成 */
   let tooltip = document.getElementById("cursor-tooltip");
   if (!tooltip) {
     tooltip = document.createElement("div");
@@ -526,18 +444,15 @@ function render(events, ym, holidayMap) {
   const lastDay = new Date(year, month, 0).getDate();
 
   const grouped = {};
-events.forEach(ev => {
-  const key = toDateKey(ev.start.dateTime || ev.start.date);
-  if (!grouped[key]) {
-    grouped[key] = { cooking: [], japanese: [], meeting: [], note: [] };
-  }
+  events.forEach(ev => {
+    const key = toDateKey(ev.start.dateTime || ev.start.date);
+    if (!grouped[key]) {
+      grouped[key] = { cooking: [], japanese: [], meeting: [], note: [] };
+    }
 
-  const rooms = detectRoom(ev);   // ← 配列で受け取る
-
-  rooms.forEach(room => {         // ← 複数部屋に振り分け
-    grouped[key][room].push(ev);
+    const rooms = detectRoom(ev);
+    rooms.forEach(room => grouped[key][room].push(ev));
   });
-});
 
   for (let day = 1; day <= lastDay; day++) {
     const dateObj = new Date(year, month - 1, day);
@@ -570,68 +485,60 @@ events.forEach(ev => {
     ["cooking", "japanese", "meeting", "note"].forEach(room => {
       const td = document.createElement("td");
 
-dayEvents[room].forEach(ev => {
-  const div = document.createElement("div");
+      dayEvents[room].forEach(ev => {
+        const div = document.createElement("div");
 
-  /* 表示テキスト */
-  const textSpan = document.createElement("span");
-  textSpan.textContent = `${formatTime(ev.start, ev.end)} ${ev.summary}`;
-  textSpan.style.cursor = "default";
+        /* ★ セルにはタイトルだけ */
+        const textSpan = document.createElement("span");
+        textSpan.textContent = `${formatTime(ev.start, ev.end)} ${ev.summary}`;
+        textSpan.classList.add(`event-${room}`);
+        div.appendChild(textSpan);
 
-  /* ★ 部屋ごとの色分けクラスを付与 */
-  textSpan.classList.add(`event-${room}`);
+        /* ★ ツールチップ内容（説明文は純テキスト化して改行保持） */
+        const tooltipText =
+          `開始: ${formatTime(ev.start, ev.end)}\n` +
+          `タイトル: ${ev.summary}\n` +
+          (ev.location ? `場所: ${ev.location}\n` : "") +
+          (ev.description ? `説明:\n${toPlainText(ev.description)}` : "");
 
-  div.appendChild(textSpan);
+        div.addEventListener("mouseenter", () => {
+          tooltip.textContent = tooltipText;
+          tooltip.style.opacity = 1;
+        });
 
-  /* ★ ツールチップ内容 */
-  const tooltipText =
-    `開始: ${formatTime(ev.start, ev.end)}\n` +
-    `タイトル: ${ev.summary}\n` +
-    (ev.location ? `場所: ${ev.location}\n` : "") +
-    (ev.description ? `説明: ${ev.description}` : "");
+        div.addEventListener("mousemove", e => {
+          const tooltipWidth = tooltip.offsetWidth;
+          const x = e.clientX - tooltipWidth / 2;
+          const y = e.clientY - tooltip.offsetHeight - 12;
 
-  /* ★ カーソル追従ツールチップ */
-  div.addEventListener("mouseenter", () => {
-    tooltip.textContent = tooltipText;
-    tooltip.style.opacity = 1;
-  });
+          tooltip.style.left = `${x}px`;
+          tooltip.style.top  = `${y}px`;
+        });
 
-div.addEventListener("mousemove", e => {
-  const tooltipWidth = tooltip.offsetWidth;
-  const x = e.clientX - tooltipWidth / 2;  // ★ カーソル中央に合わせる
-  const y = e.clientY - tooltip.offsetHeight - 12; // ★ カーソルの上に表示
+        div.addEventListener("mouseleave", () => {
+          tooltip.style.opacity = 0;
+        });
 
-  tooltip.style.left = `${x}px`;
-  tooltip.style.top  = `${y}px`;
-});
+        div.addEventListener("contextmenu", e => {
+          e.preventDefault();
+          window.open(ev.htmlLink, "_blank", "noopener");
+        });
 
-  div.addEventListener("mouseleave", () => {
-    tooltip.style.opacity = 0;
-  });
-
-  /* ★ 右クリックで編集画面を開く */
-  div.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    window.open(ev.htmlLink, "_blank", "noopener");
-  });
-
-  td.appendChild(div);
-});
+        td.appendChild(div);
+      });
 
       tr.appendChild(td);
     });
 
     body.appendChild(tr);
 
-    /* ★ イベントセルの自動縮小（1列目の日付を除く） */
     tr.querySelectorAll("td:nth-child(n+2)").forEach(td => {
       autoShrinkFont(td);
     });
   }
 }
-/* -------------------------
-   指定月のカレンダーを読み込む
--------------------------- */
+
+/* 読み込み */
 async function loadCalendar(ym) {
   const events = await fetchEventsForMonth(ym);
   const holidayEvents = await fetchHolidays(ym);
@@ -640,9 +547,7 @@ async function loadCalendar(ym) {
   render(events, ym, holidayMap);
 }
 
-/* -------------------------
-   初期化
--------------------------- */
+/* 初期化 */
 (async function init() {
   setupMonthSelector();
 

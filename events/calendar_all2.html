@@ -658,6 +658,7 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   margin-top: -4px;
 }
 .modal-close:hover { color: #d9534f; }
+
 #modal-body p {
   margin: 6px 0;
   line-height: 1.4;
@@ -666,6 +667,13 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 #modal-body a {
   color: #2563eb !important;
   text-decoration: underline;
+}
+
+/* 説明文の改行を保持し、リンクを含んでも一列に潰れない */
+.modal-description {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  word-break: break-word;
 }
 
 @media (max-width: 600px) {
@@ -834,7 +842,7 @@ function stripHTML(html) {
   const div = document.createElement("div");
   div.innerHTML = html;
 
-  // aタグを「ラベル|URL」という形式に変換して保持
+  // aタグ → ラベルとURLのセットに変換
   div.querySelectorAll("a").forEach(a => {
     const href = a.getAttribute("href") || "";
     const label = a.textContent.trim();
@@ -842,7 +850,13 @@ function stripHTML(html) {
     a.replaceWith(document.createTextNode(rep));
   });
 
-  return div.textContent || div.innerText || "";
+  // ★ ここが最重要：<br> を改行に変換して保持する
+  div.querySelectorAll("br").forEach(br => {
+    br.replaceWith("\n");
+  });
+
+  // ★ innerHTML ではなく textContent を使う
+  return div.textContent;
 }
 
 /* イベント HTML（右クリック編集対応版） */
@@ -1395,24 +1409,25 @@ document.addEventListener("click", function(e) {
   const box = document.createElement("div");
   box.className = "modal-inner-safe";
 
-  box.innerHTML = `
-    <h3>${title}</h3>
+/* ★ モーダル HTML（説明文が必ず modal-description に入る） */
+box.innerHTML = `
+  <h3>${title}</h3>
 
-    <div class="modal-info-box">
-      <div class="modal-info-title">日時</div>
-      <div>${time}</div>
-    </div>
+  <div class="modal-info-box">
+    <div class="modal-info-title">日時</div>
+    <div>${time}</div>
+  </div>
 
-    <div class="modal-info-box">
-      <div class="modal-info-title">場所</div>
-      <div>${place}</div>
-    </div>
+  <div class="modal-info-box">
+    <div class="modal-info-title">場所</div>
+    <div>${place}</div>
+  </div>
 
-    <div class="modal-info-box">
-      <div class="modal-info-title">説明</div>
-      <div class="modal-description">${linkify(description)}</div>
-    </div>
-  `;
+  <div class="modal-info-box">
+    <div class="modal-info-title">説明</div>
+    <div class="modal-description">${linkify(description)}</div>
+  </div>
+`;
 
   modalBody.appendChild(box);
 

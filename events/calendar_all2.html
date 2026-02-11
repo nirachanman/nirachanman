@@ -392,6 +392,20 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 .reload-btn:active {
   transform: scale(0.95);
 }
+.print-btn {
+  margin-right: 10px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.print-btn:hover {
+  background: #1d4ed8;
+}
 
 /* PC Event Layout */
 @media (min-width: 769px) {
@@ -433,6 +447,12 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   .google-cal-wrapper,
   .google-cal-label {
     display: none !important;
+  }
+}
+/* スマホでは非表示 */
+@media (max-width: 600px) {
+  .print-btn {
+    display: none;
   }
 }
 
@@ -706,7 +726,12 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
       <button id="btn-bekkan" data-cal="3">📚 別館</button>
       <button id="btn-all" data-cal="all">🔘 全施設</button>
     </div>
+
     <button id="reload-btn" class="sp-only reload-btn">🔄</button>
+
+    <!-- ★ 印刷ボタン（Googleで編集の左側） -->
+    <button id="print-btn" class="print-btn pc-only">🖨 印刷</button>
+
     <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
       <span class="google-cal-icon">📅</span>
       <span class="google-cal-label">Googleで編集</span>
@@ -850,13 +875,26 @@ function stripHTML(html) {
     a.replaceWith(document.createTextNode(rep));
   });
 
-  // ★ ここが最重要：<br> を改行に変換して保持する
-  div.querySelectorAll("br").forEach(br => {
-    br.replaceWith("\n");
+  // ★ Googleカレンダーの改行タグをすべて改行に変換
+  div.querySelectorAll("br, div, p").forEach(el => {
+    const text = el.textContent;
+    el.replaceWith("\n" + text);
   });
 
-  // ★ innerHTML ではなく textContent を使う
-  return div.textContent;
+  // ★ span が改行目的で使われる場合に対応
+  div.querySelectorAll("span").forEach(el => {
+    if (el.innerHTML.trim() === "") {
+      el.replaceWith("\n");
+    }
+  });
+
+  // ★ 最終テキスト取得
+  let text = div.textContent;
+
+  // ★ 連続改行を整理（多すぎる改行を2つに）
+  text = text.replace(/\n{3,}/g, "\n\n");
+
+  return text;
 }
 
 /* イベント HTML（右クリック編集対応版） */
@@ -1484,6 +1522,16 @@ function closePopup() {
 
   updatePrintHeader();
 })();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const printBtn = document.getElementById("print-btn");
+  if (printBtn) {
+    printBtn.addEventListener("click", () => {
+      window.print();
+    });
+  }
+});
+
 </script>
 </body>
 </html>

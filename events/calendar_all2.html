@@ -466,6 +466,14 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 
 @media print {
 
+  /* ★ 印刷余白を狭くする（上下5mm・左右10mm） */
+  @page {
+    margin-top: 5mm;
+    margin-bottom: 5mm;
+    margin-left: 10mm;
+    margin-right: 10mm;
+  }
+
   #print-header {
     font-size: 28px !important;
   }
@@ -577,7 +585,15 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     padding: 3px 6px !important;
     border-radius: 4px !important;
   }
+
+  /* ★ 印刷時：イベント文字を小さくする（最強版） */
+  .event,
+  .event * {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+  }
 }
+
 
 /* モーダル（クリック詳細表示） */
 .modal {

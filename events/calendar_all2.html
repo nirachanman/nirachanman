@@ -834,8 +834,8 @@ function updatePrintHeader() {
   }
 }
 
-/* キーワード色（整理済み） */
-function getKeywordColor(title, description) {
+/* キーワード色（場所も含めて判定する最終版） */
+function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
     { keywords: ["／", "選挙", "役場", "検診"], color: "#8b5cf6" },
     { keywords: ["＆", "＆", "全館", "全室"], color: "#4169e1" },
@@ -855,7 +855,7 @@ function getKeywordColor(title, description) {
     // 別館 調理室
     { keywords: ["調理室"], color: "#bc611e" },
 
-    // 研修室・託児室（同じ色）
+    // 研修室・託児室
     { keywords: ["研修室", "託児室"], color: "#8b4513" },
 
     // 軽運動室
@@ -868,7 +868,8 @@ function getKeywordColor(title, description) {
     { keywords: ["北アリーナ", "北側"], color: "#008080" }
   ];
 
-  const text = `${title || ""}\n${description || ""}`.toLowerCase();
+  // ★ title + description + location をまとめて検索対象にする
+  const text = `${title || ""}\n${description || ""}\n${location || ""}`.toLowerCase();
 
   for (const rule of KEYWORD_COLORS) {
     for (const kw of rule.keywords) {
@@ -879,6 +880,7 @@ function getKeywordColor(title, description) {
   }
   return null;
 }
+
 
 function normalizeEventId(ev) {
   if (!ev.recurringEventId) return ev.id;
@@ -935,10 +937,14 @@ function createEventHTML(ev, baseColor) {
   const title = ev.summary || "";
   const rawDescription = ev.description || "";
 
-  /* ★ 説明欄の HTML を完全に除去してテキスト化 */
+  // ★ 説明欄の HTML を完全に除去してテキスト化
   const description = stripHTML(rawDescription);
 
-  const keywordColor = getKeywordColor(title, description);
+  // ★ 場所（Location）も取得
+  const location = ev.location || "";
+
+  // ★ title + description + location で色判定
+  const keywordColor = getKeywordColor(title, description, location);
   const color = keywordColor || baseColor;
 
   const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;

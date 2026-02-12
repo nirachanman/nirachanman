@@ -523,44 +523,69 @@
   /* =========================================================
      スマホ用：午前・午後を統合
      ========================================================= */
-  function mergeEventsForMobile() {
-    if (window.innerWidth > 600) return;
+function mergeEventsForMobile() {
+  if (window.innerWidth > 600) return;
 
-    document.querySelectorAll("#calendarContainer table tr").forEach(row => {
-      const amCell = row.querySelector("td:nth-child(2)");
-      const pmCell = row.querySelector("td:nth-child(3)");
-      if (!amCell || !pmCell) return;
+  document.querySelectorAll("#calendarContainer table tr").forEach(row => {
+    const amCell = row.querySelector("td:nth-child(2)");
+    const pmCell = row.querySelector("td:nth-child(3)");
 
-      const merged = document.createElement("td");
-      merged.className = "merged-events";
+    if (!amCell || !pmCell) return;
 
-      const convert = html => {
-        const div = document.createElement("div");
-        div.innerHTML = html;
-        div.querySelectorAll(".event").forEach(ev => {
-          const html = ev.innerHTML.trim();
-          const timeMatch = html.match(/<time>(.*?)<\/time>/);
-          const title = html.replace(/<time>.*?<\/time>/, "").trim();
-          const time = timeMatch ? timeMatch[1] : "";
+    const merged = document.createElement("td");
+    merged.className = "merged-events";
 
-          ev.innerHTML = `
-            <div class="event-time">${time}</div>
-            <div class="event-title">${title}</div>
-          `;
-        });
-        return div.innerHTML;
-      };
+    // ▼ 午前・午後のイベントを2段構造に変換
+    const convert = html => {
+      const div = document.createElement("div");
+      div.innerHTML = html;
 
-      merged.innerHTML = `
-        <div class="event-box">
-          ${convert(amCell.innerHTML)}
-          ${convert(pmCell.innerHTML)}
-        </div>
-      `;
+      div.querySelectorAll(".event").forEach(ev => {
+        const html = ev.innerHTML.trim();
+        const timeMatch = html.match(/<time>(.*?)<\/time>/);
+        const title = html.replace(/<time>.*?<\/time>/, "").trim();
+        const time = timeMatch ? timeMatch[1] : "";
 
-      row.appendChild(merged);
+        ev.innerHTML = `
+          <div class="event-time">${time}</div>
+          <div class="event-title">${title}</div>
+        `;
+      });
+
+      return [...div.querySelectorAll(".event")];
+    };
+
+    // ▼ 午前・午後のイベントを配列として取得
+    const amEvents = convert(amCell.innerHTML);
+    const pmEvents = convert(pmCell.innerHTML);
+
+    // ▼ 午前・午後を統合
+    let mergedEvents = [...amEvents, ...pmEvents];
+
+    // ▼ ★ 重複イベントを削除（タイトル＋時間が同じものは1つにまとめる）
+    mergedEvents = mergedEvents.filter((ev, index, self) => {
+      const time = ev.querySelector(".event-time")?.textContent.trim();
+      const title = ev.querySelector(".event-title")?.textContent.trim();
+
+      return index === self.findIndex(e => {
+        const t2 = e.querySelector(".event-time")?.textContent.trim();
+        const ti2 = e.querySelector(".event-title")?.textContent.trim();
+        return t2 === time && ti2 === title;
+      });
     });
-  }
+
+    // ▼ HTML に戻す
+    merged.innerHTML = `
+      <td class="merged-events">
+        <div class="event-box">
+          ${mergedEvents.map(ev => ev.outerHTML).join("")}
+        </div>
+      </td>
+    `;
+
+    row.appendChild(merged);
+  });
+}
 
   /* =========================================================
      月タブ生成
@@ -795,11 +820,27 @@ setupModalEvents();
     const events = await fetchEvents(CALENDAR_ID, year, month);
     const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
 
-    const holidayMap = {};
-    holidayEvents.forEach(ev => {
-      const date = ev.start.date || ev.start.dateTime.split("T")[0];
-      holidayMap[date] = ev.summary;
-    });
+  const holidayMap = {};
+
+  // ★ 表示しない行事名リスト
+  const excludeHolidays = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
+  holidayEvents.forEach(ev => {
+    const date = ev.start.date || ev.start.dateTime.split("T")[0];
+
+    // ★ 除外対象なら holidayMap に入れない
+    if (excludeHolidays.includes(ev.summary)) return;
+
+    holidayMap[date] = ev.summary;
+  });
 
     /* 印刷用の当月表示を更新 */
     document.getElementById("printMonthHeader").textContent =

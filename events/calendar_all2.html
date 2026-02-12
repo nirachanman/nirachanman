@@ -474,10 +474,6 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     margin-right: 10mm;
   }
 
-  #print-header {
-    font-size: 28px !important;
-  }
-
   /* 背景は完全に白 */
   body,
   body.bg-gym,
@@ -496,6 +492,22 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     padding: 6px 0;
     text-align: center;
     border-bottom: 2px solid #000;
+    font-size: 28px !important;
+  }
+
+  /* 印刷日を括弧で囲む */
+  #print-date::before {
+    content: "（";
+  }
+  #print-date::after {
+    content: "）";
+  }
+
+  /* 印刷日のフォントを小さくする */
+  #print-date {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    opacity: 0.85;
   }
 
   /* 画面用 UI を非表示 */
@@ -732,7 +744,10 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 </style>
 </head>
 <body>
-<div id="print-header"></div>
+<div id="print-header">
+  <span id="print-title"></span>
+  <span id="print-date"></span>
+</div>
 
 <div class="header-fixed">
   <div class="top-bar">
@@ -813,8 +828,10 @@ function updatePrintHeader() {
   const activeTab = document.querySelector("#monthTabs .active");
   const monthLabel = activeTab ? activeTab.textContent : "";
 
-  document.getElementById("print-header").textContent =
-    `${facility}　${monthLabel}`;
+  const titleEl = document.getElementById("print-title");
+  if (titleEl) {
+    titleEl.textContent = `${facility}　${monthLabel}`;
+  }
 }
 
 /* キーワード色（整理済み） */
@@ -1545,6 +1562,16 @@ document.addEventListener("DOMContentLoaded", () => {
     printBtn.addEventListener("click", () => {
       window.print();
     });
+  }
+
+  /* ★ 印刷日セット（ここに入れるのが正解） */
+  const printDateEl = document.getElementById("print-date");
+  if (printDateEl) {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    printDateEl.textContent = `印刷日：${y}/${m}/${d}`;
   }
 });
 

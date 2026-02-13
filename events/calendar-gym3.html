@@ -826,11 +826,27 @@ setupModalEvents();
     const events = await fetchEvents(CALENDAR_ID, year, month);
     const holidayEvents = await fetchEvents(HOLIDAY_CALENDAR_ID, year, month);
 
-    const holidayMap = {};
-    holidayEvents.forEach(ev => {
-      const date = ev.start.date || ev.start.dateTime.split("T")[0];
-      holidayMap[date] = ev.summary;
-    });
+  const holidayMap = {};
+
+  // ★ 表示しない行事名リスト
+  const excludeHolidays = [
+    "銀行休業日",
+    "節分",
+    "雛祭り",
+    "母の日",
+    "七夕",
+    "七五三",
+    "クリスマス"
+  ];
+
+  holidayEvents.forEach(ev => {
+    const date = ev.start.date || ev.start.dateTime.split("T")[0];
+
+    // ★ 除外対象なら holidayMap に入れない
+    if (excludeHolidays.includes(ev.summary)) return;
+
+    holidayMap[date] = ev.summary;
+  });
 
     /* 印刷用の当月表示を更新 */
     document.getElementById("printMonthHeader").textContent =

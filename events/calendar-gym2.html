@@ -22,11 +22,13 @@
       --color-sun: #fff7f7;
       --color-holiday: #fffdf5;
 
-      --color-badminton: #4caf50;
+      --color-badminton: #b8860b;
+      --color-tabletennis1: #20b2aa;
       --color-tabletennis: #2196f3;
-      --color-volleyball: #cca152;
+      --color-volleyball: #808000;
       --color-kids: #9c27b0;
       --color-iwate: #ff69b4;
+      --color-haneru: #a52a2a;
       --color-cancel: #ed1a3d;
       --color-default: #607d8b;
 
@@ -286,12 +288,13 @@
 
     .color-cancel       { background: var(--color-cancel); }
     .color-badminton   { background: var(--color-badminton); }
+    .color-tabletennis1 { background: var(--color-tabletennis1); }
     .color-tabletennis { background: var(--color-tabletennis); }
     .color-volleyball  { background: var(--color-volleyball); }
     .color-kids        { background: var(--color-kids); }
     .color-iwate       { background: var(--color-iwate); }
     .color-default     { background: var(--color-default); }
-
+    .color-haneru       { background: var(--color-haneru); }
 /* =========================================================
    ▼ スマホ縦向き（午前・午後 → 1列に統合）
    ========================================================= */
@@ -519,6 +522,7 @@ function mergeEventsForMobile() {
     const convert = html => {
       const div = document.createElement("div");
       div.innerHTML = html;
+
       div.querySelectorAll(".event").forEach(ev => {
         const html = ev.innerHTML.trim();
         const timeMatch = html.match(/<time>(.*?)<\/time>/);
@@ -530,14 +534,36 @@ function mergeEventsForMobile() {
           <div class="event-title">${title}</div>
         `;
       });
-      return div.innerHTML;
+
+      return [...div.querySelectorAll(".event")];
     };
 
+    // ▼ 午前・午後のイベントを配列として取得
+    const amEvents = convert(amCell.innerHTML);
+    const pmEvents = convert(pmCell.innerHTML);
+
+    // ▼ 午前・午後を統合
+    let mergedEvents = [...amEvents, ...pmEvents];
+
+    // ▼ ★ 重複イベントを削除（タイトル＋時間が同じものは1つにまとめる）
+    mergedEvents = mergedEvents.filter((ev, index, self) => {
+      const time = ev.querySelector(".event-time")?.textContent.trim();
+      const title = ev.querySelector(".event-title")?.textContent.trim();
+
+      return index === self.findIndex(e => {
+        const t2 = e.querySelector(".event-time")?.textContent.trim();
+        const ti2 = e.querySelector(".event-title")?.textContent.trim();
+        return t2 === time && ti2 === title;
+      });
+    });
+
+    // ▼ HTML に戻す
     merged.innerHTML = `
-      <div class="event-box">
-        ${convert(amCell.innerHTML)}
-        ${convert(pmCell.innerHTML)}
-      </div>
+      <td class="merged-events">
+        <div class="event-box">
+          ${mergedEvents.map(ev => ev.outerHTML).join("")}
+        </div>
+      </td>
     `;
 
     row.appendChild(merged);
@@ -619,12 +645,12 @@ function classifyTime(ev) {
     function detectColor(title) {
       if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
       if (title.includes("バド")) return "color-badminton";
+      if (title.includes("川口クラ")) return "color-tabletennis1";
       if (title.includes("卓球")) return "color-tabletennis";
       if (title.includes("バレー")) return "color-volleyball";
       if (title.includes("スマイル")) return "color-kids";
       if (title.includes("いわて")) return "color-iwate";
-
-
+      if (title.includes("羽根る")) return "color-haneru";
       return "color-default";
     }
 
@@ -910,3 +936,4 @@ window.addEventListener("afterprint", () => {
 
 </body>
 </html>
+

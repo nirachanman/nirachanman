@@ -9,207 +9,210 @@
   <title>川口地区社会体育館 日程表</title>
 
   <style>
-  /* =========================================================
-     1. テーマ変数
-     ========================================================= */
-  :root {
-    --color-primary: #4a6fa5;
-    --color-bg: #f3f4f6;
-    --color-white: #ffffff;
-    --color-border: #999;
+/* =========================================================
+   1. テーマ変数
+   ========================================================= */
+:root {
+  --color-primary: #4a6fa5;
+  --color-bg: #f3f4f6;
+  --color-white: #ffffff;
+  --color-border: #999;
 
-    --color-sat: #f7fbff;
-    --color-sun: #fff7f7;
-    --color-holiday: #fffdf5;
+  --color-sat: #f7fbff;
+  --color-sun: #fff7f7;
+  --color-holiday: #fffdf5;
 
-    --color-badminton: #4caf50;
-    --color-tabletennis: #2196f3;
-    --color-volleyball: #cca152;
-    --color-kids: #9c27b0;
-    --color-iwate: #ff69b4;
-    --color-cancel: #ed1a3d;
-    --color-default: #607d8b;
+  --color-badminton: #b8860b;
+  --color-tabletennis1: #20b2aa;
+  --color-tabletennis: #2196f3;
+  --color-volleyball: #808000;
+  --color-kids: #9c27b0;
+  --color-iwate: #ff69b4;
+  --color-haneru: #a52a2a;
+  --color-cancel: #ed1a3d;
+  --color-default: #607d8b;
 
-    --badge-sun: #e57373;
-    --badge-sat: #339FF6;
-    --badge-weekday: #d1b3ff;
-    --badge-holiday: var(--badge-sun);
+  --badge-sun: #e57373;
+  --badge-sat: #339FF6;
+  --badge-weekday: #d1b3ff;
+  --badge-holiday: var(--badge-sun);
 
-    --radius: 6px;
-    --radius-pill: 20px;
-    --shadow: 0 2px 6px rgba(0,0,0,0.15);
+  --radius: 6px;
+  --radius-pill: 20px;
+  --shadow: 0 2px 6px rgba(0,0,0,0.15);
 
-    --font-base: 12px;
-    --font-small: 11px;
-    --font-xs: 10px;
-    --font-title: 20px;
+  --font-base: 12px;
+  --font-small: 11px;
+  --font-xs: 10px;
+  --font-title: 20px;
 
-    --space-xs: 4px;
-    --space-s: 6px;
-    --space-m: 12px;
-    --space-l: 18px;
+  --space-xs: 4px;
+  --space-s: 6px;
+  --space-m: 12px;
+  --space-l: 18px;
 
-    --print-row-height: 35px;
-  }
+  --print-row-height: 35px;
+}
 
-  /* =========================================================
-     2. ベース
-     ========================================================= */
-  body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: var(--color-bg);
-  }
+/* =========================================================
+   2. ベース
+   ========================================================= */
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
 
-  h1 {
-    text-align: center;
-    padding: var(--space-s);
-    margin: 0;
-    background: var(--color-primary);
-    color: var(--color-white);
-    font-size: var(--font-title);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
+h1 {
+  text-align: center;
+  padding: var(--space-s);
+  margin: 0;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-title);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 
-  /* 印刷時だけ当月を表示する領域 */
-  .print-month-header {
-    display: none;
-  }
+/* 印刷時だけ当月を表示する領域 */
+.print-month-header {
+  display: none;
+}
 
-  /* =========================================================
-     3. レイアウト
-     ========================================================= */
-  .tabs {
-    display: flex;
-    gap: var(--space-s);
-    padding: var(--space-s);
-    overflow-x: auto;
-    background: var(--color-white);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    scrollbar-gutter: stable;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
+/* =========================================================
+   3. レイアウト
+   ========================================================= */
+.tabs {
+  display: flex;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  overflow-x: auto;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  scrollbar-gutter: stable;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
 
-  .tab {
-    padding: 8px 18px;
-    border-radius: var(--radius-pill);
-    background: #e6e6e6;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 14px;
-    transition: 0.2s;
-  }
+.tab {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: #e6e6e6;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: 0.2s;
+}
 
-  .tab:hover {
-    background: #d5d5d5;
-  }
+.tab:hover {
+  background: #d5d5d5;
+}
 
-  .tab.active {
-    background: var(--color-primary);
-    color: var(--color-white);
-    font-weight: 600;
-    box-shadow: var(--shadow);
-  }
+.tab.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
 
-  /* カレンダー外枠 */
-  .calendar-wrapper {
-    padding: 6px;
-  }
+/* カレンダー外枠 */
+.calendar-wrapper {
+  padding: 6px;
+}
 
-  .calendar-box {
-    background: var(--color-primary);
-    border-radius: 5px;
-    box-shadow: var(--shadow);
-    padding: 6px;
-    margin: 6px auto;
-    max-width: 1200px;
-  }
+.calendar-box {
+  background: var(--color-primary);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+  padding: 6px;
+  margin: 6px auto;
+  max-width: 1200px;
+}
 
-  /* =========================================================
-     4. カレンダー（テーブル）
-     ========================================================= */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    table-layout: fixed;
-  }
+/* =========================================================
+   4. カレンダー（テーブル）
+   ========================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  table-layout: fixed;
+  border: none !important; /* ← 追加：太線の原因を除去 */
+}
 
-  th {
-    background: #f5f5f5;
-    font-weight: 600;
-    padding: var(--space-s);
-  }
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: var(--space-s);
+}
 
-  th, td {
-    border: 1px solid var(--color-border);
-    padding: var(--space-xs) var(--space-s);
-    font-size: var(--font-base);
-    line-height: 1.2;
-    white-space: normal;
-    min-height: 48px;
-  }
+th, td {
+  border: 0.5px solid var(--color-border) !important; /* ← 追加：細線化 */
+  padding: var(--space-xs) var(--space-s);
+  font-size: var(--font-base);
+  line-height: 1.2;
+  white-space: normal;
+  min-height: 48px;
+}
 
-  th:nth-child(1), td:nth-child(1) { width: 10%; }
-  th:nth-child(2), td:nth-child(2) { width: 35%; }
-  th:nth-child(3), td:nth-child(3) { width: 55%; }
+th:nth-child(1), td:nth-child(1) { width: 10%; }
+th:nth-child(2), td:nth-child(2) { width: 35%; }
+th:nth-child(3), td:nth-child(3) { width: 55%; }
 
-  .saturday { background: var(--color-sat); }
-  .sunday   { background: var(--color-sun); }
-  .holiday  { background: var(--color-holiday); }
+.saturday { background: var(--color-sat); }
+.sunday   { background: var(--color-sun); }
+.holiday  { background: var(--color-holiday); }
 
-  .date-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 
 .holiday-label {
-  color: #d9534f !important; /* 落ち着いた朱色 */
+  color: #d9534f !important;
   font-weight: 400;
 }
 
-  .date-top {
-    font-size: 20px;
-    font-weight: 600;
-  }
+.date-top {
+  font-size: 20px;
+  font-weight: 600;
+}
 
-  .date-bottom {
-    font-size: var(--font-xs);
-    color: #d32f2f;
-    margin-top: 2px;
-  }
+.date-bottom {
+  font-size: var(--font-xs);
+  color: #d32f2f;
+  margin-top: 2px;
+}
 
-  .weekday-badge {
-    padding: 1px 4px;
-    margin-left: 3px;
-    border-radius: 8px;
-    font-size: 9px;
-    color: #fff;
-  }
+.weekday-badge {
+  padding: 1px 4px;
+  margin-left: 3px;
+  border-radius: 8px;
+  font-size: 9px;
+  color: #fff;
+}
 
-  .w-sun { background: var(--badge-sun); }
-  .w-sat { background: var(--badge-sat); }
-  .w-mon,
-  .w-tue,
-  .w-wed,
-  .w-thu,
-  .w-fri { background: var(--badge-weekday); }
+.w-sun { background: var(--badge-sun); }
+.w-sat { background: var(--badge-sat); }
+.w-mon,
+.w-tue,
+.w-wed,
+.w-thu,
+.w-fri { background: var(--badge-weekday); }
 
-  .holiday .weekday-badge {
-    background: var(--badge-holiday) !important;
-  }
+.holiday .weekday-badge {
+  background: var(--badge-holiday) !important;
+}
 
-  .event-box {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 4px;
-  }
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+}
 
 .event {
   padding: 2px 6px;
@@ -218,13 +221,13 @@
   font-size: var(--font-small);
   line-height: 1.2;
   box-shadow: var(--shadow);
-  cursor: pointer;   /* ← これを追加 */
+  cursor: pointer;
 }
 
-  .event time {
-    color:#ffff22;
-    font-weight: 700;
-  }
+.event time {
+  color:#ffff22;
+  font-weight: 700;
+}
 
 /* ===== モーダル ===== */
 .modal-overlay {
@@ -236,8 +239,8 @@
   background: rgba(0,0,0,0.55);
   display: none;
   justify-content: center;
-  align-items: flex-start;   /* ★ 中央 → 上部に変更 */
-  padding-top: 40px;         /* ★ 上に少し余白を追加 */
+  align-items: flex-start;
+  padding-top: 40px;
   z-index: 9999;
 }
 
@@ -279,213 +282,206 @@
   cursor: pointer;
 }
 
-  .color-cancel       { background: var(--color-cancel); }
-  .color-badminton   { background: var(--color-badminton); }
-  .color-tabletennis { background: var(--color-tabletennis); }
-  .color-volleyball  { background: var(--color-volleyball); }
-  .color-kids        { background: var(--color-kids); }
-  .color-iwate       { background: var(--color-iwate); }
-  .color-default     { background: var(--color-default); }
+/* 色分類 */
+.color-cancel       { background: var(--color-cancel); }
+.color-badminton   { background: var(--color-badminton); }
+.color-tabletennis1 { background: var(--color-tabletennis1); }
+.color-tabletennis { background: var(--color-tabletennis); }
+.color-volleyball  { background: var(--color-volleyball); }
+.color-kids        { background: var(--color-kids); }
+.color-iwate       { background: var(--color-iwate); }
+.color-default     { background: var(--color-default); }
+.color-haneru      { background: var(--color-haneru); }
 
-  /* =========================================================
-     5. スマホ最適化
-     ========================================================= */
-  @media (max-width: 600px) {
-
-    th:nth-child(2),
-    td:nth-child(2),
-    th:nth-child(3),
-    td:nth-child(3) {
-      display: none !important;
-    }
-
-    th:nth-child(1),
-    td:nth-child(1) {
-      width: 20% !important;
-    }
-
-    td.merged-events {
-      width: 80% !important;
-      display: table-cell !important;
-      vertical-align: top !important;
-    }
-
-    th, td {
-      font-size: 16px !important;
-      padding: 4px 8px !important;
-    }
-
-    .event {
-      font-size: 15px !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      padding: 2px 4px !important;
-    }
-
-    .event time,
-    .event-time {
-      color:#ffff22 !important;
-      font-weight:600 !important;
-    }
-
-    .event-title {
-      font-size: 14px !important;
-    }
-
-    .weekday-badge {
-      font-size: 12px !important;
-      padding: 1px 4px !important;
-    }
-
-    .event-box {
-      column-gap: 1px !important;
-      row-gap: 2px !important;
-    }
-
-    .tabs {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 20 !important;
-    }
-  }
-
-  /* =========================================================
-     6. 印刷最適化（当月表示＋土日祝バッジ色復活）
-     ========================================================= */
-  @media print {
-
-    @page {
-      size: A3 portrait;
-      margin: 10mm;
-    }
-
-    .tabs {
-      display: none !important;
-    }
-
-    h1 {
-      display: block !important;
-      margin-bottom: 6px;
-      font-size: 20px !important;
-    }
-
-    /* 印刷時に当月を真ん中に表示 */
-    .print-month-header {
-      display: block !important;
-      font-size: 26px;
-      font-weight: 600;
-      margin-bottom: 2px !important; /* ← 余白はあなたの調整値のまま */
-      text-align: center !important; /* ← 中央寄せに変更 */
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    th, td {
-      border: 1px solid #000;
-      padding: 3px 4px;
-      height: var(--print-row-height);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    :root {
-      --print-row-height: 32px;
-    }
-
-    .event {
-      background: #fff !important;
-      color: #000 !important;
-      border-radius: 0 !important;
-      padding: 2px 4px !important;
-      font-size: 11px !important;
-      box-shadow: none !important;
-    }
-
-    .event time {
-      color: #000 !important;
-      font-weight: 600 !important;
-    }
-
-    /* まず全バッジを白黒に */
-    .weekday-badge,
-    .holiday .weekday-badge {
-      background: none !important;
-      color: #000 !important;
-      border: 1px solid #000 !important;
-      padding: 0 3px !important;
-      font-size: 10px !important;
-    }
-
-    /* 土曜だけ色復活 */
-    .w-sat {
-      background: var(--badge-sat) !important;
-      color: #fff !important;
-      border: none !important;
-    }
-
-    /* 日曜だけ色復活 */
-    .w-sun {
-      background: var(--badge-sun) !important;
-      color: #fff !important;
-      border: none !important;
-    }
-
-    /* 祝日だけ色復活 */
-    .holiday .weekday-badge {
-      background: var(--badge-holiday) !important;
-      color: #fff !important;
-      border: none !important;
-    }
-
-    /* 行背景は白に統一 */
-    .saturday,
-    .sunday,
-    .holiday,
-    tr.today-row {
-      background: #fff !important;
-    }
-
-    * {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    td .event {
-      white-space: normal !important;
-      display: block !important;
-    }
-
-    td {
-      height: auto !important;
-    }
-
-/* 通常は非表示（印刷時だけ表示） */
-.print-header-center {
-  display: none;
-}
-
-@media print {
-  /* 印刷時だけ中央に表示 */
-  .print-header-center {
-    display: block !important;
-    text-align: center !important;
-    font-size: 20px !important;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  /* 通常の h1 は印刷時は非表示 */
-  body > h1 {
+/* =========================================================
+   5. スマホ最適化
+   ========================================================= */
+@media (max-width: 600px) {
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3) {
     display: none !important;
   }
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 20% !important;
+  }
+
+  td.merged-events {
+    width: 80% !important;
+    display: table-cell !important;
+    vertical-align: top !important;
+  }
+
+  th, td {
+    font-size: 16px !important;
+    padding: 4px 8px !important;
+  }
+
+  .event {
+    font-size: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 2px 4px !important;
+  }
+
+  .event time,
+  .event-time {
+    color:#ffff22 !important;
+    font-weight:600 !important;
+  }
+
+  .event-title {
+    font-size: 14px !important;
+  }
+
+  .weekday-badge {
+    font-size: 12px !important;
+    padding: 1px 4px !important;
+  }
+
+  .event-box {
+    column-gap: 1px !important;
+    row-gap: 2px !important;
+  }
+
+  .tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+  }
 }
 
+/* =========================================================
+   6. 印刷最適化（枠線細線化含む）
+   ========================================================= */
+@media print {
+
+  @page {
+    size: A3 portrait;
+    margin: 10mm;
+  }
+
+  .tabs {
+    display: none !important;
+  }
+
+  h1 {
+    display: block !important;
+    margin-bottom: 6px;
+    font-size: 20px !important;
+  }
+
+  .print-month-header {
+    display: block !important;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 2px !important;
+    text-align: center !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  th, td {
+    border: 0.5px solid #000 !important; /* ← 印刷も細線化 */
+    padding: 3px 4px;
+    height: var(--print-row-height);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :root {
+    --print-row-height: 32px;
+  }
+
+  .event {
+    background: #fff !important;
+    color: #000 !important;
+    border-radius: 0 !important;
+    padding: 2px 4px !important;
+    font-size: 11px !important;
+    box-shadow: none !important;
+  }
+
+  .event time {
+    color: #000 !important;
+    font-weight: 600 !important;
+  }
+
+  .weekday-badge,
+  .holiday .weekday-badge {
+    background: none !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+    padding: 0 3px !important;
+    font-size: 10px !important;
+  }
+
+  .w-sat {
+    background: var(--badge-sat) !important;
+    color: #fff !important;
+    border: none !important;
+  }
+
+  .w-sun {
+    background: var(--badge-sun) !important;
+    color: #fff !important;
+    border: none !important;
+  }
+
+  .holiday .weekday-badge {
+    background: var(--badge-holiday) !important;
+    color: #fff !important;
+    border: none !important;
+  }
+
+  .saturday,
+  .sunday,
+  .holiday,
+  tr.today-row {
+    background: #fff !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  td .event {
+    white-space: normal !important;
+    display: block !important;
+  }
+
+  td {
+    height: auto !important;
+  }
+
+  .print-header-center {
+    display: none;
+  }
+
+  @media print {
+    .print-header-center {
+      display: block !important;
+      text-align: center !important;
+      font-size: 20px !important;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    body > h1 {
+      display: none !important;
+    }
+  }
+}
   </style>
 </head>
 
@@ -661,13 +657,15 @@ function classifyTime(ev) {
   return startHour < 12 ? ["午前"] : ["午後"];
 }
 
-  function detectColor(title) {
-    if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
-    if (title.includes("バド")) return "color-badminton";
-    if (title.includes("卓球")) return "color-tabletennis";
-    if (title.includes("バレー")) return "color-volleyball";
-    if (title.includes("スマイル")) return "color-kids";
-    if (title.includes("いわて")) return "color-iwate";
+    function detectColor(title) {
+      if (title.includes("ｷｬﾝｾﾙ")) return "color-cancel";
+      if (title.includes("バド")) return "color-badminton";
+      if (title.includes("川口クラ")) return "color-tabletennis1";
+      if (title.includes("卓球")) return "color-tabletennis";
+      if (title.includes("バレー")) return "color-volleyball";
+      if (title.includes("スマイル")) return "color-kids";
+      if (title.includes("いわて")) return "color-iwate";
+      if (title.includes("羽根る")) return "color-haneru";
     return "color-default";
   }
 

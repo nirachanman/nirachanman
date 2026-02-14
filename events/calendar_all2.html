@@ -902,7 +902,7 @@ function stripHTML(html) {
   const div = document.createElement("div");
   div.innerHTML = html;
 
-  // aタグ → ラベルとURLのセットに変換
+  // ★ aタグ → ラベルとURLのセットに変換
   div.querySelectorAll("a").forEach(a => {
     const href = a.getAttribute("href") || "";
     const label = a.textContent.trim();
@@ -910,7 +910,29 @@ function stripHTML(html) {
     a.replaceWith(document.createTextNode(rep));
   });
 
-  // ★ Googleカレンダーの改行タグをすべて改行に変換
+  // ★ <b> と <strong> は太字マークに変換
+  div.querySelectorAll("b, strong").forEach(el => {
+    const text = el.textContent;
+    el.replaceWith(document.createTextNode(`__BOLD_START__${text}__BOLD_END__`));
+  });
+
+  // ★ <ul><li> と <ol><li> をマーク化して保持
+  div.querySelectorAll("ul, ol").forEach(list => {
+    const isOrdered = list.tagName.toLowerCase() === "ol";
+    let items = [];
+
+    list.querySelectorAll("li").forEach(li => {
+      items.push(li.textContent.trim());
+    });
+
+    const marker = isOrdered
+      ? `__OL_START__${items.join("__LI__")}__OL_END__`
+      : `__UL_START__${items.join("__LI__")}__UL_END__`;
+
+    list.replaceWith(document.createTextNode(marker));
+  });
+
+  // ★ 改行タグを改行に変換
   div.querySelectorAll("br, div, p").forEach(el => {
     const text = el.textContent;
     el.replaceWith("\n" + text);
@@ -923,10 +945,9 @@ function stripHTML(html) {
     }
   });
 
-  // ★ 最終テキスト取得
   let text = div.textContent;
 
-  // ★ 連続改行を整理（多すぎる改行を2つに）
+  // ★ 連続改行を整理
   text = text.replace(/\n{3,}/g, "\n\n");
 
   return text;
@@ -1416,11 +1437,28 @@ function linkify(text) {
   if (!text) return "";
 
   return text
+    // URL 復元
     .replace(/__LINK_LABEL__(.*?)__LINK_URL__(.*?)__ENDLINK__/g,
       (match, label, url) => {
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
       }
     )
+    // 太字復元
+    .replace(/__BOLD_START__(.*?)__BOLD_END__/g, "<strong>$1</strong>")
+
+    // ★ 箇条書き復元（ul）
+    .replace(/__UL_START__(.*?)__UL_END__/g, (match, items) => {
+      const lis = items.split("__LI__").map(i => `<li>${i}</li>`).join("");
+      return `<ul>${lis}</ul>`;
+    })
+
+    // ★ 番号付きリスト復元（ol）
+    .replace(/__OL_START__(.*?)__OL_END__/g, (match, items) => {
+      const lis = items.split("__LI__").map(i => `<li>${i}</li>`).join("");
+      return `<ol>${lis}</ol>`;
+    })
+
+    // 改行を <br> に
     .replace(/\n/g, "<br>");
 }
 

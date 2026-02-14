@@ -745,6 +745,11 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   font-size: 15px;
   margin-top: 4px;
   line-height: 1.3;   /* 標準は1.6〜1.8なので、かなり締まる */
+  max-height: 300px;     /* スクロールが出る高さ（調整可） */
+  overflow-y: auto;      /* 必要なときだけ縦スクロール */
+  padding-right: 6px;    /* スクロールバーで文字が隠れないように */
+  line-height: 1.35;     /* 行間バランス（前回の調整と相性良い） */
+  font-size: 15px;       /* 読みやすいサイズ */
 }
 
 /* ★ モーダル下部の閉じるボックス */
@@ -804,6 +809,9 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   }
   .modal-content .modal-info-box {
     padding: 4px 6px !important;
+  }
+  .modal-description {
+    max-height: 220px;
   }
 }
 

@@ -616,7 +616,7 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   top: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.35);
+  background: transparent; /* ← 背景を透明にする */
 }
 .modal-content {
   background: #f6fff6;
@@ -624,7 +624,7 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   padding: 8px 10px;
   border-radius: 12px;
   width: 85%;
-  max-width: 600px;
+  max-width: 500px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   font-size: 14px;
   border-top: 6px solid #28a745;
@@ -716,17 +716,82 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   color: #2563eb !important;
   text-decoration: underline;
 }
+/* ★ モーダルアニメーション（上から落ちてくる） */
+.modal {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  transform: translateY(-20px);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.modal.show .modal-content {
+  transform: translateY(0);
+  opacity: 1;
+}
 
 /* 説明文の改行を保持し、リンクを含んでも一列に潰れない */
 .modal-description {
   white-space: pre-wrap;
   line-height: 1.6;
   word-break: break-word;
+  font-size: 15px;
+  margin-top: 4px;
+  line-height: 1.3;   /* 標準は1.6〜1.8なので、かなり締まる */
+}
+
+/* ★ モーダル下部の閉じるボックス */
+.modal-footer-close {
+  margin-top: 16px;
+  padding: 10px 0;
+  text-align: center;
+  background: #2563eb;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.modal-footer-close:hover {
+  background: #1d4ed8;
+}
+/* ★ 閉じるボックスを施設カラーに連動 */
+.modal-footer-close {
+  margin-top: 16px;
+  padding: 10px 0;
+  text-align: center;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.modal-footer-close:hover {
+  background: color-mix(in srgb, var(--color-primary) 85%, black);
 }
 
 @media (max-width: 600px) {
+  .modal-footer-close {
+    font-size: 22px;
+    padding: 14px 0;
+  }
   .modal-content {
     font-size: 22px !important;
+    line-height: 1.35;
   }
   .modal-info-box {
     font-size: 22px !important;
@@ -741,6 +806,7 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
     padding: 4px 6px !important;
   }
 }
+
 </style>
 </head>
 <body>
@@ -778,8 +844,12 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
 
 <div id="popup" class="modal">
   <div class="modal-content">
-    <span class="modal-close" onclick="closePopup()">✕</span>
     <div id="modal-body"></div>
+
+    <!-- ★ 下部に閉じるボックスを追加 -->
+    <div class="modal-footer-close" onclick="closePopup()">
+      閉じる
+    </div>
   </div>
 </div>
 
@@ -1546,7 +1616,11 @@ box.innerHTML = `
 
   modalBody.appendChild(box);
 
-  document.getElementById("popup").style.display = "block";
+const popup = document.getElementById("popup");
+popup.style.display = "block";
+
+// ★ 少し遅らせて show クラスを付ける（アニメ開始）
+setTimeout(() => popup.classList.add("show"), 10);
 });
 
 /* 右クリックで Google カレンダー編集画面を開く */
@@ -1583,7 +1657,13 @@ document.getElementById("reload-btn").addEventListener("click", () => {
 });
 
 function closePopup() {
-  document.getElementById("popup").style.display = "none";
+  const popup = document.getElementById("popup");
+  popup.classList.remove("show");
+
+  // ★ アニメーション終了後に display:none
+  setTimeout(() => {
+    popup.style.display = "none";
+  }, 300);
 }
 
 /* 初期表示 */

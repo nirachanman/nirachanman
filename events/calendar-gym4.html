@@ -211,17 +211,6 @@ body {
   text-align: center;
 }
 
-.modal-close {
-  float: right;
-  font-size: 20px;
-  cursor: pointer;
-  color: #444;
-}
-
-.modal-close:hover {
-  color: #d9534f;
-}
-
 /* ===== 情報ボックス ===== */
 .modal-info-box {
   border: 1px solid #c8e6c9;
@@ -236,6 +225,28 @@ body {
   font-weight: bold;
   color: #28a745;
   margin-bottom: 4px;
+}
+
+.modal-close-bar {
+  margin-top: 16px;
+  padding: 10px 0;
+  text-align: center;
+  background: #28a745;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-close-bar:hover {
+  background: #218838;
+}
+/* 説明欄のスクロールボックス */
+.modal-desc-box {
+  max-height: 180px;      /* ★ 高さ制限（調整可） */
+  overflow-y: auto;       /* ★ 縦スクロールバー */
+  padding-right: 6px;     /* スクロールバー分の余白 */
+  line-height: 1.2; /* ★ 行間を狭くする */
 }
 
 /* ===== スマホ最適化 ===== */
@@ -629,7 +640,6 @@ body {
   <!-- イベント詳細モーダル -->
   <div id="event-modal" class="modal">
     <div class="modal-content">
-      <span id="modal-close" class="modal-close">×</span>
       <div id="modal-body"></div>
     </div>
   </div>
@@ -982,23 +992,32 @@ document.addEventListener("click", function(e) {
       <div>${loc}</div>
     </div>
 
-    <div class="modal-info-box">
-      <div class="modal-info-title">説明</div>
-      <div>${desc.replace(/\n/g, "<br>")}</div>
-    </div>
+<div class="modal-info-box">
+  <div class="modal-info-title">説明</div>
+  <div class="modal-desc-box">
+    ${desc.replace(/\n/g, "<br>")}
+  </div>
+</div>
+
+    <!-- ★ 下部の閉じるバー -->
+    <div class="modal-close-bar">閉じる</div>
   `;
 
   document.getElementById("event-modal").style.display = "block";
   document.getElementById("modal-body").innerHTML = body;
 });
 
-document.getElementById("modal-close").addEventListener("click", function() {
-  document.getElementById("event-modal").style.display = "none";
-});
-
+/* ===== 背景クリックで閉じる（既存） ===== */
 document.getElementById("event-modal").addEventListener("click", function(e) {
   if (e.target === this) {
     this.style.display = "none";
+  }
+});
+
+/* ===== ★ 下部の閉じるバーで閉じる（追加） ===== */
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("modal-close-bar")) {
+    document.getElementById("event-modal").style.display = "none";
   }
 });
 

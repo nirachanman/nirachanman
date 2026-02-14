@@ -228,57 +228,104 @@
     font-weight: 700;
   }
 
-/* ===== モーダル ===== */
+/* ===== モーダル（チラシ風デザイン） ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.45);
   display: none;
   justify-content: center;
-  align-items: flex-start;   /* ★ 中央 → 上部に変更 */
-  padding-top: 40px;         /* ★ 上に少し余白を追加 */
+  align-items: flex-start;
+  padding-top: 30px;
   z-index: 9999;
 }
 
 .modal-box {
-  background: #fff;
-  padding: 18px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 420px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-size: 15px;
+  background: #fffaf0;   /* ← クリーム色（FloralWhite） */
+  padding: 6px 8px;
+  border-radius: 10px;
+  width: 92%;
+  max-width: 480px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  font-size: 16px;
+  line-height: 1.7;
+  color: #333;
 }
 
+/* タイトル（チラシ風に大きく中央） */
 .modal-title {
   font-size: 22px;
   font-weight: 700;
-  margin-bottom: 8px;
+  text-align: center;
+  margin-bottom: 14px;
+  color: #222;
 }
 
+/* 時間（少し強調） */
 .modal-time {
-  font-size: 22px;
-  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
   color: #444;
 }
 
+/* ===== 本文カード（スクロール対応） ===== */
 .modal-desc {
-  font-size: 14px;
-  white-space: normal;
-  word-break: break-word;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+  /* スクロール対応 */
+  max-height: 300px;      /* ← 好きな高さに調整可能 */
+  overflow-y: auto;
+
+  /* 読み物としての見やすさ */
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
 }
 
+/* 閉じるボタン（紙チラシ風の落ち着いた色） */
 .modal-close {
-  margin-top: 16px;
-  padding: 8px 14px;
+  margin-top: 10px;
+  padding: 10px 14px;
   background: #4a6fa5;
   color: #fff;
   border-radius: 6px;
   text-align: center;
   cursor: pointer;
+  font-size: 15px;
+}
+/* ===== モーダルのタイトル＋時間をカード風に ===== */
+.modal-header-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+/* タイトル（カード内） */
+.modal-header-card .modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+/* 時間（カード内） */
+.modal-header-card .modal-time {
+  font-size: 26px;
+  font-weight: 600;
+  color: #444;
+  margin: 0;
 }
 
     .color-cancel       { background: var(--color-cancel); }
@@ -900,10 +947,15 @@ function setupModalEvents() {
   </script>
 <div id="modalOverlay" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-time" id="modalTime"></div>
+
+    <div class="modal-header-card">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-time" id="modalTime"></div>
+    </div>
+
     <div class="modal-desc" id="modalDesc"></div>
     <div class="modal-close" id="modalClose">閉じる</div>
+
   </div>
 </div>
 

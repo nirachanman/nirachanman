@@ -581,9 +581,9 @@ tr.row-holiday td { background: #fff7ed !important; }
     margin-right: 10mm;
   }
 
-  /* ★ 印刷時の場所表示（括弧・記号は自由に変更可） */
+  /* ★ 印刷時の場所表示（➡括弧・記号は自由に変更可） */
 .print-only-location::before {
-  content: "➡" attr(data-print-location) "";
+  content: "[" attr(data-print-location) "]";
 }
 
   /* 背景は完全に白 */
@@ -742,6 +742,20 @@ tr.row-holiday td { background: #fff7ed !important; }
 .print-btn:hover {
   background: #1d4ed8;
 }
+/* スマホ表示のときだけ日付フォントを小さくする */
+@media (max-width: 768px) {
+  .calendar-table .day-number,
+  .calendar-table .weekday-sun,
+  .calendar-table .weekday-sat {
+    font-size: 1.0rem;   /* ← 好きなサイズに調整可能 */
+  }
+
+  /* 日付セル全体を少し小さくしたい場合 */
+  .calendar-table td .date-cell {
+    font-size: 1.0rem;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -950,6 +964,56 @@ function detectFacility(ev) {
   return "";
 }
 
+/* --------------------------------------------------
+   場所が「場所っぽい」か判定する
+-------------------------------------------------- */
+function isPlaceLike(text) {
+  if (!text) return false;
+
+  const patterns = [
+    /[0-9]+F/,                 // 1F, 2F
+    /(室|教室|会議室)/,        // 会議室A、日本間、調理室
+    /(ホール|体育館)/,
+    /(和室|日本間)/,
+    /(アリーナ|研修室|講習室)/
+  ];
+
+  return patterns.some(p => p.test(text));
+}
+
+/* --------------------------------------------------
+   タイトルの（〇〇）から場所を抽出
+-------------------------------------------------- */
+function extractPlaceFromTitle(title) {
+  const m = title.match(/（(.+?)）/);
+  return m ? m[1].trim() : "";
+}
+
+/* --------------------------------------------------
+   場所抽出ロジック（①→②→③→④）
+-------------------------------------------------- */
+function resolvePlace(ev, description) {
+  // ① Google location があれば最優先
+  if (ev.location && ev.location.trim() !== "") {
+    return ev.location.trim();
+  }
+
+  // ② description の 1 行目が場所っぽいなら採用
+  const firstLine = description.split("\n")[0].trim();
+  if (isPlaceLike(firstLine)) {
+    return firstLine;
+  }
+
+  // ③ タイトルの（〇〇）から抽出
+  const fromTitle = extractPlaceFromTitle(ev.summary || "");
+  if (fromTitle) {
+    return fromTitle;
+  }
+
+  // ④ どれも無い → 場所なし
+  return "";
+}
+
 /* イベント HTML（右クリック編集対応版） */
 function createEventHTML(ev, baseColor) {
   ev._facility = ev._facility || detectFacility(ev);
@@ -958,17 +1022,17 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  const googleLocation = ev.location || "";
-
-  let displayLocation = "";
+  // ★ 印刷用の場所：description の 1 行目だけ
+  let printLocation = "";
   const firstLine = description.split("\n")[0].trim();
-  if (/^(.*?)(室|教室|会議室|ホール|体育館|公民館|[0-9]+F)/.test(firstLine)) {
-    displayLocation = firstLine;
+  if (firstLine !== "") {
+    printLocation = firstLine;
   }
 
-  const printLocation = googleLocation || displayLocation || "";
+  // ★ モーダル用の場所：Google location（空文字も許容）
+  const modalLocation = ev.location ?? "";   // ← ここが重要（|| ではなく ??）
 
-  const keywordColor = getKeywordColor(title, description, displayLocation);
+  const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;
 
   const start = ev.start.dateTime ? new Date(ev.start.dateTime) : null;
@@ -993,8 +1057,8 @@ function createEventHTML(ev, baseColor) {
          data-raw-id="${ev._rawId}"
          data-calendar-id="${ev._calendarId}"
          data-date="${ev.start.date || ev.start.dateTime?.split("T")[0]}"
-         data-location="${displayLocation}"
          data-print-location="${printLocation}"
+         data-modal-location="${modalLocation}"
          data-facility="${facilityClass}">
 
       <div class="event-time">${timeLabel}</div>
@@ -1438,15 +1502,12 @@ function linkify(text) {
     .replace(/\n/g, "<br>");
 }
 
-/* クリックでモーダル表示（施設カラー反映版） */
+/* モーダル表示処理（施設カラー + 場所表示 完全版） */
 document.addEventListener("click", function(e) {
   const eventEl = e.target.closest(".event");
   if (!eventEl) return;
 
   const titleEl = eventEl.querySelector(".event-title");
-  const timeEl  = eventEl.querySelector(".event-time");
-  const tooltip = eventEl.querySelector(".tooltip");
-
   const title = getTitleOnly(titleEl);
 
   const dateRaw = eventEl.dataset.date;
@@ -1457,6 +1518,7 @@ document.addEventListener("click", function(e) {
     dateStr = `${d.getMonth() + 1}/${d.getDate()}(${youbi[d.getDay()]})`;
   }
 
+  const timeEl = eventEl.querySelector(".event-time");
   let time = "(時間なし)";
   if (timeEl) {
     const raw = timeEl.textContent.trim();
@@ -1465,9 +1527,14 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
-  const placeRaw = eventEl.dataset.location || "";
-  const place = placeRaw.trim() !== "" ? placeRaw : "(場所なし)";
+let place = eventEl.dataset.modalLocation;
 
+// 空文字は「場所なし」にしない
+if (place == null) {
+  place = "";
+}
+
+  const tooltip = eventEl.querySelector(".tooltip");
   let description = "(説明なし)";
   if (tooltip) {
     const lines = [...tooltip.querySelectorAll(".tooltip-line")].map(el =>
@@ -1479,7 +1546,6 @@ document.addEventListener("click", function(e) {
   }
 
   const facilityClass = eventEl.dataset.facility || "";
-
   const modalContent = document.querySelector(".modal-content");
   modalContent.classList.remove("k", "t", "b");
   if (facilityClass) modalContent.classList.add(facilityClass);

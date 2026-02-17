@@ -1527,12 +1527,17 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
+/* -------------------------
+   場所（resolvePlace の結果をそのまま使う）
+------------------------- */
 let place = eventEl.dataset.modalLocation;
 
-// 空文字は「場所なし」にしない
+// undefined / null のときだけ "(場所なし)"
 if (place == null) {
-  place = "";
+  place = "(場所なし)";
 }
+
+// 空文字 "" はそのまま表示（＝場所なし扱いしない）
 
   const tooltip = eventEl.querySelector(".tooltip");
   let description = "(説明なし)";

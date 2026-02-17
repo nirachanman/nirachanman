@@ -742,6 +742,20 @@ tr.row-holiday td { background: #fff7ed !important; }
 .print-btn:hover {
   background: #1d4ed8;
 }
+/* スマホ表示のときだけ日付フォントを小さくする */
+@media (max-width: 768px) {
+  .calendar-table .day-number,
+  .calendar-table .weekday-sun,
+  .calendar-table .weekday-sat {
+    font-size: 0.8rem;   /* ← 好きなサイズに調整可能 */
+  }
+
+  /* 日付セル全体を少し小さくしたい場合 */
+  .calendar-table td .date-cell {
+    font-size: 0.8rem;
+  }
+}
+
 </style>
 </head>
 <body>

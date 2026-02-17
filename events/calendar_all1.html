@@ -581,9 +581,9 @@ tr.row-holiday td { background: #fff7ed !important; }
     margin-right: 10mm;
   }
 
-  /* ★ 印刷時の場所表示（括弧・記号は自由に変更可） */
+  /* ★ 印刷時の場所表示（➡括弧・記号は自由に変更可） */
 .print-only-location::before {
-  content: "➡" attr(data-print-location) "";
+  content: "[" attr(data-print-location) "]";
 }
 
   /* 背景は完全に白 */
@@ -961,6 +961,56 @@ function detectFacility(ev) {
   if (text.includes("体育館")) return "t";
   if (text.includes("別館"))   return "b";
 
+  return "";
+}
+
+/* --------------------------------------------------
+   場所が「場所っぽい」か判定する
+-------------------------------------------------- */
+function isPlaceLike(text) {
+  if (!text) return false;
+
+  const patterns = [
+    /[0-9]+F/,                 // 1F, 2F
+    /(室|教室|会議室)/,        // 会議室A、日本間、調理室
+    /(ホール|体育館)/,
+    /(和室|日本間)/,
+    /(アリーナ|研修室|講習室)/
+  ];
+
+  return patterns.some(p => p.test(text));
+}
+
+/* --------------------------------------------------
+   タイトルの（〇〇）から場所を抽出
+-------------------------------------------------- */
+function extractPlaceFromTitle(title) {
+  const m = title.match(/（(.+?)）/);
+  return m ? m[1].trim() : "";
+}
+
+/* --------------------------------------------------
+   場所抽出ロジック（①→②→③→④）
+-------------------------------------------------- */
+function resolvePlace(ev, description) {
+  // ① Google location があれば最優先
+  if (ev.location && ev.location.trim() !== "") {
+    return ev.location.trim();
+  }
+
+  // ② description の 1 行目が場所っぽいなら採用
+  const firstLine = description.split("\n")[0].trim();
+  if (isPlaceLike(firstLine)) {
+    return firstLine;
+  }
+
+  // ③ タイトルの（〇〇）から抽出
+  const fromTitle = extractPlaceFromTitle(ev.summary || "");
+  if (fromTitle) {
+    return fromTitle;
+  }
+
+  // ④ どれも無い → 場所なし
   return "";
 }
 
@@ -1477,13 +1527,12 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
-  // ★ 空文字は「場所なし」にしない
-  let place = eventEl.dataset.modalLocation;
+let place = eventEl.dataset.modalLocation;
 
-  // undefined / null のときだけ fallback
-  if (place == null) {
-    place = "(場所なし)";
-  }
+// 空文字は「場所なし」にしない
+if (place == null) {
+  place = "";
+}
 
   const tooltip = eventEl.querySelector(".tooltip");
   let description = "(説明なし)";
@@ -1609,4 +1658,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-

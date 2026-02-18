@@ -964,21 +964,46 @@ function detectFacility(ev) {
   return "";
 }
 
+const PLACE_PATTERNS = [
+  /調理室[^\s、。]*/,
+  /日本間[^\s、。]*/,
+  /和室[^\s、。]*/,
+  /小会議室[^\s、。]*/,
+  /ロビー[^\s、。]*/,
+  /託児室[^\s、。]*/,
+  /研修室[^\s、。]*/,
+  /託児室＆研修室[^\s、。]*/,
+  /別館調理室[^\s、。]*/,
+  /軽運動室[^\s、。]*/,
+  /別館ロビー[^\s、。]*/,
+  /別館駐車場[^\s、。]*/,
+  /体育館[^\s、。]*/,
+  /体育館全[^\s、。]*/,
+  /体育館北[^\s、。]*/,
+  /体育館南[^\s、。]*/,
+  /駐車場[^\s、。]*/,
+];
+
 /* --------------------------------------------------
    場所が「場所っぽい」か判定する
 -------------------------------------------------- */
 function isPlaceLike(text) {
   if (!text) return false;
+  return PLACE_PATTERNS.some(p => p.test(text));
+}
 
-  const patterns = [
-    /[0-9]+F/,                 // 1F, 2F
-    /(室|教室|会議室)/,        // 会議室A、日本間、調理室
-    /(ホール|体育館)/,
-    /(和室|日本間)/,
-    /(アリーナ|研修室|講習室)/
-  ];
+/* --------------------------------------------------
+   長文から場所語だけ抽出
+-------------------------------------------------- */
+function extractPlaceFromLongText(text) {
+  if (!text) return "";
 
-  return patterns.some(p => p.test(text));
+  for (const pattern of PLACE_PATTERNS) {
+    const m = text.match(pattern);
+    if (m) return m[0].trim();
+  }
+
+  return "";
 }
 
 /* --------------------------------------------------
@@ -991,30 +1016,30 @@ function extractPlaceFromTitle(title) {
 
 /* --------------------------------------------------
    場所抽出ロジック（①→②→③→④）
+   ※ Google location は完全に無視
 -------------------------------------------------- */
 function resolvePlace(ev, description) {
-  // ① Google location があれば最優先
-  if (ev.location && ev.location.trim() !== "") {
-    return ev.location.trim();
-  }
 
-  // ② description の 1 行目が場所っぽいなら採用
   const firstLine = description.split("\n")[0].trim();
-  if (isPlaceLike(firstLine)) {
-    return firstLine;
-  }
 
-  // ③ タイトルの（〇〇）から抽出
+  // ① 長文から場所語だけ抽出
+  const extracted = extractPlaceFromLongText(firstLine);
+  if (extracted) return extracted;
+
+  // ② 行全体が場所っぽい
+  if (isPlaceLike(firstLine)) return firstLine;
+
+  // ③ タイトルの（〇〇）
   const fromTitle = extractPlaceFromTitle(ev.summary || "");
-  if (fromTitle) {
-    return fromTitle;
-  }
+  if (fromTitle) return fromTitle;
 
-  // ④ どれも無い → 場所なし
+  // ④ どれも無い
   return "";
 }
 
-/* イベント HTML（右クリック編集対応版） */
+/* --------------------------------------------------
+   イベント HTML（右クリック編集対応版）
+-------------------------------------------------- */
 function createEventHTML(ev, baseColor) {
   ev._facility = ev._facility || detectFacility(ev);
 
@@ -1022,15 +1047,11 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  // ★ 印刷用の場所：description の 1 行目だけ
-  let printLocation = "";
-  const firstLine = description.split("\n")[0].trim();
-  if (firstLine !== "") {
-    printLocation = firstLine;
-  }
+  // ★ 場所抽出（Google location は完全無視）
+  const resolvedPlace = resolvePlace(ev, description);
 
-  // ★ モーダル用の場所：Google location（空文字も許容）
-  const modalLocation = ev.location ?? "";   // ← ここが重要（|| ではなく ??）
+  const printLocation = resolvedPlace;
+  const modalLocation = resolvedPlace;
 
   const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;
@@ -1663,6 +1684,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
-
-

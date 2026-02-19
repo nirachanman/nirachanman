@@ -755,16 +755,21 @@ tr.row-holiday td { background: #fff7ed !important; }
     font-size: 1.0rem;
   }
 }
+/* --------------------------------------------------
+   ★ 施設タブ + 月タブをまとめて固定（最も安定する方法）
+-------------------------------------------------- */
+.header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+  background: white;
+}
 
-/* スマホ（幅 600px 以下）で日付列を広げる */
-@media (max-width: 600px) {
-  table.calendar-table td.date-col,
-  table.calendar-table th.date-col {
-    width: 70px !important;   /* ← 好きな幅に調整可能 */
-    min-width: 70px !important;
-    max-width: 70px !important;
-    font-size: 1.1em;         /* 少し大きくして見やすく */
-  }
+/* スクロール時に下の内容が透けないように */
+.header-fixed .top-bar,
+.header-fixed .tabs {
+  background: white;
+  z-index: 3001;
 }
 
 </style>

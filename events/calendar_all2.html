@@ -755,6 +755,22 @@ tr.row-holiday td { background: #fff7ed !important; }
     font-size: 0.9rem;
   }
 }
+/* --------------------------------------------------
+   ★ 施設タブ + 月タブをまとめて固定（最も安定する方法）
+-------------------------------------------------- */
+.header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+  background: white;
+}
+
+/* スクロール時に下の内容が透けないように */
+.header-fixed .top-bar,
+.header-fixed .tabs {
+  background: white;
+  z-index: 3001;
+}
 
 </style>
 </head>

@@ -1032,7 +1032,7 @@ function extractPlaceFromTitle(title) {
 
 /* --------------------------------------------------
    場所抽出ロジック（①→②→③→④）
-   ※ Google location は完全に無視
+   ※ Google location は完全に無視（印刷用）
 -------------------------------------------------- */
 function resolvePlace(ev, description) {
 
@@ -1054,6 +1054,22 @@ function resolvePlace(ev, description) {
 }
 
 /* --------------------------------------------------
+   Google location の短縮処理（モーダル用）
+-------------------------------------------------- */
+function shortenGoogleLocation(loc) {
+  if (!loc) return ""; // 空白ならそのまま空白
+
+  return loc
+    .replace(/^岩手県岩手郡/, "")
+    .replace(/^岩手県盛岡市/, "")
+    .replace(/^盛岡市/, "")
+    .replace(/^岩手町/, "")
+    .replace(/^ 日本、/, "")
+    .replace(/^日本/, "")
+    .trim();
+}
+
+/* --------------------------------------------------
    イベント HTML（右クリック編集対応版）
 -------------------------------------------------- */
 function createEventHTML(ev, baseColor) {
@@ -1063,11 +1079,15 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  // ★ 場所抽出（Google location は完全無視）
-  const resolvedPlace = resolvePlace(ev, description);
+  // ★ 印刷用：説明1行目から抽出
+  const printLocation = resolvePlace(ev, description);
 
-  const printLocation = resolvedPlace;
-  const modalLocation = resolvedPlace;
+  // ★ モーダル用：Google location を優先し、短縮する
+  let modalLocation = "";
+  if (ev.location) {
+    modalLocation = shortenGoogleLocation(ev.location);
+  }
+  // Google location が空なら空白のまま（printLocation に fallback しない）
 
   const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;
@@ -1700,3 +1720,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
+

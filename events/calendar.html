@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>サークル予定カレンダー（Workers API版・14か月自動生成・場所補完・施設名タイトル）</title>
+  <title>サークル予定カレンダー（Workers API版・14か月自動生成・場所辞書抽出・施設名タイトル）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -69,19 +69,18 @@
       text-align: center;
     }
 
-@media print {
-  @page { size: A4 portrait; margin: 10mm; }
-  body { margin: 0; }
-  iframe.calendar-frame, .top-controls, h2 { display: none !important; }
-  #print-area { display: block !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { margin: 0; }
+      iframe.calendar-frame, .top-controls, h2 { display: none !important; }
+      #print-area { display: block !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* ★ 印刷タイトルを中央寄せ＋余白ゼロ ★ */
-  #print-area h1 {
-    text-align: center;
-    margin: 0;
-  }
-}
+      #print-area h1 {
+        text-align: center;
+        margin: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -142,6 +141,26 @@ const CALENDARS = {
 
 /* ===== Workers API URL ===== */
 const WORKER_URL = "https://black-sky-4fd3.yajirobe-einstein.workers.dev/api/calendar";
+
+/* ===== 場所語辞書（description 1行目から抽出） ===== */
+const LOCATION_WORDS = [
+  "調理室",
+  "日本間",
+  "和室",
+  "小会議室",
+  "ロビー",
+  "託児室",
+  "研修室",
+  "託児室＆研修室",
+  "別館調理室",
+  "軽運動室",
+  "別館ロビー",
+  "別館駐車場",
+  "体育館・全アリーナ",
+  "体育館・北フロア",
+  "体育館・南フロア",
+  "駐車場"
+];
 
 /* ---------------- 印刷月プルダウン（今月 → 14か月先） ---------------- */
 function setupMonthSelector() {
@@ -245,6 +264,23 @@ function isHoliday(dateObj) {
   return false;
 }
 
+/* ---------------- description 1行目から場所を抽出 ---------------- */
+function extractLocationFromDescription(ev) {
+  if (!ev.description) return "";
+
+  const firstLine = ev.description.split("\n")[0];
+  const found = [];
+
+  for (const word of LOCATION_WORDS) {
+    if (firstLine.includes(word)) {
+      found.push(word);
+    }
+  }
+
+  // 見つかった語を全部つなげて返す（例：調理室＆小会議室）
+  return found.join("＆");
+}
+
 /* ---------------- Workers 経由でイベント取得 ---------------- */
 async function fetchEventsFromCalendar(calendarId, facilityName, year, month) {
   const timeMin = new Date(year, month - 1, 1).toISOString();
@@ -264,10 +300,11 @@ async function fetchEventsFromCalendar(calendarId, facilityName, year, month) {
   const data = await res.json();
   if (!data.items) return [];
 
+  // Google location は無視し、description を受け取る
   return data.items.map(ev => ({
     facility: facilityName,
     summary: ev.summary || "",
-    location: ev.location || "",   // ← 追加：イベントの場所
+    description: ev.description || "",
     start: ev.start,
     end: ev.end
   }));
@@ -323,7 +360,7 @@ async function updatePrintAreaWithEvents() {
     return aStart > bStart ? 1 : -1;
   });
 
-  /* ★★★ タイトルに施設名を入れる ★★★ */
+  /* タイトルに施設名を入れる */
   let titleFacility = "";
   if (active === "gym")       titleFacility = "体育館";
   else if (active === "kouminkan") titleFacility = "公民館";
@@ -336,10 +373,10 @@ async function updatePrintAreaWithEvents() {
 
   html += `<table class="print-table">
     <tr>
-      <th style="width:15%;">日付</th>
-      <th style="width:20%;">時間</th>
-      <th style="width:40%;">内容</th>
-      <th style="width:25%;">場所</th>
+      <th style="width:18%;">日付</th>
+      <th style="width:25%;">時間</th>
+      <th style="width:38%;">内容</th>
+      <th style="width:20%;">場所</th>
     </tr>`;
 
   for (let day = 1; day <= daysInMonth; day++) {
@@ -359,9 +396,12 @@ async function updatePrintAreaWithEvents() {
     let locationCell = "";
 
     todays.forEach(ev => {
-      timeCell     += formatTimeRangeFromApi(ev) + "<br>";
-      summaryCell  += ev.summary + "<br>";
-      locationCell += (ev.location || ev.facility) + "<br>";  // ← location が空なら施設名を補完
+      timeCell    += formatTimeRangeFromApi(ev) + "<br>";
+      summaryCell += ev.summary + "<br>";
+
+      // description 1行目から場所を抽出し、なければ施設名
+      const extracted = extractLocationFromDescription(ev);
+      locationCell += (extracted || ev.facility) + "<br>";
     });
 
     const w = dateObj.getDay();

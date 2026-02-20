@@ -872,7 +872,7 @@ function updatePrintHeader() {
 /* キーワード色（場所も含めて判定する最終版） */
 function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
-    { keywords: ["／", "選挙", "役場", "検診"], color: "#8b5cf6" },
+    { keywords: ["／", "選挙", "検診"], color: "#8b5cf6" },
     { keywords: ["＆", "＆", "全館", "全室"], color: "#4169e1" },
 
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
@@ -885,7 +885,7 @@ function getKeywordColor(title, description, location) {
     { keywords: ["研修室", "託児室"], color: "#8b4513" },
     { keywords: ["軽運動室"], color: "#d28048" },
     { keywords: ["講習室"], color: "#ebad7c" },
-    { keywords: ["北アリーナ", "北", "北側"], color: "#008080" }
+    { keywords: ["北フロア", "北", "北側"], color: "#008080" }
   ];
 
   const text = `${title || ""}\n${description || ""}\n${location || ""}`.toLowerCase();

@@ -11,7 +11,6 @@ html {
 }
 
 body {
-
   font-family: system-ui, sans-serif;
   padding: 0.2rem;
   background: #f7f7f7;
@@ -25,7 +24,6 @@ body {
   align-items: center;
   gap: 1rem;
   margin: 0.2rem 0 0.4rem 0;
-  padding: 0;
 }
 
 .header-row h1 {
@@ -43,7 +41,7 @@ body {
   line-height: 1.1;
 }
 
-/* カレンダー全体の外枠（スクロール領域） */
+/* カレンダー全体の外枠 */
 .table-wrapper {
   max-width: 1200px;
   width: 100%;
@@ -139,12 +137,7 @@ th, td {
   line-height: 1.2;
 }
 
-/* ★ 説明文の改行を保持 */
-.event-desc {
-  white-space: pre-wrap;
-}
-
-/* カーソル追従ツールチップ（青背景） */
+/* ★ ツールチップ（幅固定＋改行保持） */
 .tooltip-follow {
   position: fixed;
   z-index: 9999;
@@ -152,8 +145,13 @@ th, td {
   color: #fff;
   padding: 6px 10px;
   border-radius: 4px;
-  font-size: 0.6rem;
-  white-space: pre-line;
+  font-size: 0.75rem;
+
+  width: 260px;        /* ★ 幅固定 */
+  max-width: 260px;
+  white-space: pre-wrap; /* ★ 改行保持＋折り返し */
+  overflow-wrap: break-word;
+
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.1s;
@@ -235,6 +233,7 @@ th, td {
     padding: 4px 6px;
   }
 }
+
 </style>
 </head>
 

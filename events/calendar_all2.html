@@ -742,6 +742,7 @@ tr.row-holiday td { background: #fff7ed !important; }
 .print-btn:hover {
   background: #1d4ed8;
 }
+
 /* スマホ表示のときだけ日付フォントを小さくする */
 @media (max-width: 768px) {
   .calendar-table .day-number,
@@ -873,7 +874,7 @@ function updatePrintHeader() {
 function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
     { keywords: ["／", "選挙", "検診"], color: "#8b5cf6" },
-    { keywords: ["全館", "全室"], color: "#4169e1" },
+    { keywords: ["＆", "＆", "全館", "全室"], color: "#4169e1" },
 
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
     { keywords: ["ｷｬﾝｾﾙ", "キャンセル", "中止"], color: "#ff3333" },
@@ -1054,6 +1055,33 @@ function resolvePlace(ev, description) {
 }
 
 /* --------------------------------------------------
+   体育館の場所を正規化（印刷用）
+   体育館全アリーナ → 全アリーナ
+   体育館南フロア → 南フロア
+   体育館北フロア → 北フロア
+-------------------------------------------------- */
+function normalizeGymLocation(text) {
+  if (!text) return "";
+
+  // 体育館全アリーナ / 体育館全フロア
+  if (/^体育館全.*(アリーナ|フロア)/.test(text)) {
+    return "全アリーナ";
+  }
+
+  // 体育館南アリーナ / 体育館南フロア
+  if (/^体育館南.*(アリーナ|フロア)/.test(text)) {
+    return "南フロア";
+  }
+
+  // 体育館北アリーナ / 体育館北フロア
+  if (/^体育館北.*(アリーナ|フロア)/.test(text)) {
+    return "北フロア";
+  }
+
+  return text;
+}
+
+/* --------------------------------------------------
    Google location の短縮処理（モーダル用）
 -------------------------------------------------- */
 function shortenGoogleLocation(loc) {
@@ -1080,7 +1108,10 @@ function createEventHTML(ev, baseColor) {
   const description = stripHTML(rawDescription);
 
   // ★ 印刷用：説明1行目から抽出
-  const printLocation = resolvePlace(ev, description);
+  let printLocation = resolvePlace(ev, description);
+
+  // ★ 体育館の場所を正規化（あなたの要望）
+  printLocation = normalizeGymLocation(printLocation);
 
   // ★ モーダル用：Google location を優先し、短縮する
   let modalLocation = "";
@@ -1720,6 +1751,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
-
-

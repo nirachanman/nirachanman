@@ -466,7 +466,7 @@ function render(events, ym, holidayMap) {
           `開始: ${formatTime(ev.start, ev.end)}\n` +
           `タイトル: ${ev.summary}\n` +
           (ev.location ? `場所: ${ev.location}\n` : "") +
-          (ev.description ? `説明:\n${toPlainText(ev.description)}` : "");
+          (ev.description ? `説明: ${toPlainText(ev.description)}` : "説明:");
 
         div.addEventListener("mouseenter", () => {
           tooltip.textContent = tooltipText;

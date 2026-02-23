@@ -405,13 +405,19 @@ function detectRoom(ev) {
   return rooms;
 }
 
-/* ★ 説明文を純テキスト化（改行保持） */
+/* ★ 説明文を純テキスト化（1行目が消えない） */
 function toPlainText(text) {
   if (!text) return "";
+
   return text
     .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<div[^>]*>/gi, "")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<p[^>]*>/gi, "")
+    .replace(/<\/p>/gi, "\n")
     .replace(/<[^>]+>/g, "")
-    .replace(/\r/g, "");
+    .replace(/\r/g, "")
+    .replace(/\n{2,}/g, "\n");
 }
 
 /* 自動縮小 */
@@ -493,12 +499,12 @@ function render(events, ym, holidayMap) {
         textSpan.classList.add(`event-${room}`);
         div.appendChild(textSpan);
 
-        /* ★ ツールチップ内容（説明文は純テキスト化して改行保持） */
+        /* ★ ツールチップ内容（説明: の後に改行を入れない） */
         const tooltipText =
           `開始: ${formatTime(ev.start, ev.end)}\n` +
           `タイトル: ${ev.summary}\n` +
           (ev.location ? `場所: ${ev.location}\n` : "") +
-          (ev.description ? `説明:\n${toPlainText(ev.description)}` : "");
+          (ev.description ? `説明: ${toPlainText(ev.description)}` : "説明:");
 
         div.addEventListener("mouseenter", () => {
           tooltip.textContent = tooltipText;

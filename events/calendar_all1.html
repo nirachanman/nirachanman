@@ -742,6 +742,7 @@ tr.row-holiday td { background: #fff7ed !important; }
 .print-btn:hover {
   background: #1d4ed8;
 }
+
 /* スマホ表示のときだけ日付フォントを小さくする */
 @media (max-width: 768px) {
   .calendar-table .day-number,
@@ -872,7 +873,7 @@ function updatePrintHeader() {
 /* キーワード色（場所も含めて判定する最終版） */
 function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
-    { keywords: ["／", "選挙", "役場", "検診"], color: "#8b5cf6" },
+    { keywords: ["／", "選挙", "検診"], color: "#8b5cf6" },
     { keywords: ["＆", "＆", "全館", "全室"], color: "#4169e1" },
 
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
@@ -885,7 +886,7 @@ function getKeywordColor(title, description, location) {
     { keywords: ["研修室", "託児室"], color: "#8b4513" },
     { keywords: ["軽運動室"], color: "#d28048" },
     { keywords: ["講習室"], color: "#ebad7c" },
-    { keywords: ["北アリーナ", "北側"], color: "#008080" }
+    { keywords: ["北フロア", "北", "北側"], color: "#008080" }
   ];
 
   const text = `${title || ""}\n${description || ""}\n${location || ""}`.toLowerCase();
@@ -998,6 +999,7 @@ const PLACE_PATTERNS = [
   /体育館北[^\s、。]*/,
   /体育館南[^\s、。]*/,
   /駐車場[^\s、。]*/,
+  /全館[^\s、。]*/,
 ];
 
 /* --------------------------------------------------
@@ -1032,7 +1034,7 @@ function extractPlaceFromTitle(title) {
 
 /* --------------------------------------------------
    場所抽出ロジック（①→②→③→④）
-   ※ Google location は完全に無視
+   ※ Google location は完全に無視（印刷用）
 -------------------------------------------------- */
 function resolvePlace(ev, description) {
 
@@ -1054,6 +1056,49 @@ function resolvePlace(ev, description) {
 }
 
 /* --------------------------------------------------
+   体育館の場所を正規化（印刷用）
+   体育館全アリーナ → 全アリーナ
+   体育館南フロア → 南フロア
+   体育館北フロア → 北フロア
+-------------------------------------------------- */
+function normalizeGymLocation(text) {
+  if (!text) return "";
+
+  // 体育館全アリーナ / 体育館全フロア
+  if (/^体育館全.*(アリーナ|フロア)/.test(text)) {
+    return "全アリーナ";
+  }
+
+  // 体育館南アリーナ / 体育館南フロア
+  if (/^体育館南.*(アリーナ|フロア)/.test(text)) {
+    return "南フロア";
+  }
+
+  // 体育館北アリーナ / 体育館北フロア
+  if (/^体育館北.*(アリーナ|フロア)/.test(text)) {
+    return "北フロア";
+  }
+
+  return text;
+}
+
+/* --------------------------------------------------
+   Google location の短縮処理（モーダル用）
+-------------------------------------------------- */
+function shortenGoogleLocation(loc) {
+  if (!loc) return ""; // 空白ならそのまま空白
+
+  return loc
+    .replace(/^岩手県岩手郡/, "")
+    .replace(/^岩手県盛岡市/, "")
+    .replace(/^盛岡市/, "")
+    .replace(/^岩手町/, "")
+    .replace(/^ 日本、/, "")
+    .replace(/^日本/, "")
+    .trim();
+}
+
+/* --------------------------------------------------
    イベント HTML（右クリック編集対応版）
 -------------------------------------------------- */
 function createEventHTML(ev, baseColor) {
@@ -1063,11 +1108,18 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  // ★ 場所抽出（Google location は完全無視）
-  const resolvedPlace = resolvePlace(ev, description);
+  // ★ 印刷用：説明1行目から抽出
+  let printLocation = resolvePlace(ev, description);
 
-  const printLocation = resolvedPlace;
-  const modalLocation = resolvedPlace;
+  // ★ 体育館の場所を正規化（あなたの要望）
+  printLocation = normalizeGymLocation(printLocation);
+
+  // ★ モーダル用：Google location を優先し、短縮する
+  let modalLocation = "";
+  if (ev.location) {
+    modalLocation = shortenGoogleLocation(ev.location);
+  }
+  // Google location が空なら空白のまま（printLocation に fallback しない）
 
   const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;

@@ -5,18 +5,48 @@
   <title>サークル予定カレンダー（Workers API版・14か月自動生成・場所辞書抽出・施設名タイトル）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 20px; line-height: 1.4; }
+<style>
+    body { font-family: system-ui, sans-serif; margin: 0px; line-height: 1.4; }
 
     h2 { margin-top: 0; }
 
-    .top-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+.top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+
+  /* 上下余白をなくす */
+  margin: 0;
+  padding: 0 10px; /* ★ 左右に余白を追加（例：8px） */
+
+  /* タブ行を固定 */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  /* ★ タブ行だけ背景色を付ける ★ */
+  background: #9370db;   /* ← 好きな色に変更可能 */
+}
+
+.google-link {
+  margin-left: auto;   /* ★ 右端に寄せる */
+}
+
+.google-link a {
+  display: inline-block;
+  padding: 6px 6px;
+  background: #4285F4;   /* Googleブルー */
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.google-link a:hover {
+  background: #3367D6;
+}
 
     .calendar-buttons {
       display: flex;
@@ -46,7 +76,7 @@
       width: 100%;
       border: 0;
       display: none;
-      height: calc(100dvh - 150px);
+      height: calc(150dvh - 150px);
     }
     .calendar-frame.active { display: block; }
 
@@ -69,6 +99,10 @@
       text-align: center;
     }
 
+    @media screen {
+      h2 { display: none; }
+    }
+
     @media print {
       @page { size: A4 portrait; margin: 10mm; }
       body { margin: 0; }
@@ -81,13 +115,13 @@
         margin: 0;
       }
     }
-  </style>
+</style>
 </head>
 <body>
 
   <h2>施設カレンダー</h2>
 
-  <div class="top-controls">
+<div class="top-controls">
     <div class="calendar-buttons">
       <button id="btn-gym"       class="active" onclick="showCalendar('gym')">🏟 体育館</button>
       <button id="btn-kouminkan"             onclick="showCalendar('kouminkan')">🏫 公民館</button>
@@ -101,7 +135,12 @@
     </div>
 
     <button onclick="printWithEvents()">🖨 印刷</button>
-  </div>
+
+    <!-- ★ 追加：Google カレンダーリンクボタン（右寄せ） -->
+    <div class="google-link">
+      <a href="https://calendar.google.com/" target="_blank">Googleカレンダーへ</a>
+    </div>
+</div>
 
   <!-- 表示用 iframe -->
   <iframe id="cal-gym" class="calendar-frame active"

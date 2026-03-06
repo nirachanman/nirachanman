@@ -242,7 +242,10 @@ th, td {
 
 <div class="header-row">
   <h1>川口公民館カレンダー（Google カレンダー連携）</h1>
+
+  <select id="year-selector"></select>
   <select id="month-selector"></select>
+
   <button id="gcal-button" onclick="openGoogleCalendar()">Googleカレンダー</button>
   <button id="print-button" onclick="window.print()">印刷🖨️</button>
 </div>
@@ -268,27 +271,40 @@ const CALENDAR_ID =
 "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
-/* 月選択プルダウン */
-function setupMonthSelector() {
-  const selector = document.getElementById("month-selector");
+/* 年・月プルダウンのセットアップ */
+function setupYMSelectors() {
+  const yearSel = document.getElementById("year-selector");
+  const monthSel = document.getElementById("month-selector");
+
   const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
 
-  for (let offset = -1; offset <= 14; offset++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
-
+  /* 年プルダウン（過去5年〜未来5年） */
+  for (let y = currentYear - 5; y <= currentYear + 5; y++) {
     const opt = document.createElement("option");
-    opt.value = `${y}-${("0" + m).slice(-2)}`;
-    opt.textContent = `${y}年${m}月`;
-
-    if (offset === 0) opt.selected = true;
-
-    selector.appendChild(opt);
+    opt.value = y;
+    opt.textContent = `${y}年`;
+    if (y === currentYear) opt.selected = true;
+    yearSel.appendChild(opt);
   }
 
-  selector.addEventListener("change", () => {
-    loadCalendar(selector.value);
+  /* 月プルダウン（1〜12） */
+  for (let m = 1; m <= 12; m++) {
+    const opt = document.createElement("option");
+    opt.value = ("0" + m).slice(-2);
+    opt.textContent = `${m}月`;
+    if (m === currentMonth) opt.selected = true;
+    monthSel.appendChild(opt);
+  }
+
+  /* 変更イベント */
+  yearSel.addEventListener("change", () => {
+    loadCalendar(`${yearSel.value}-${monthSel.value}`);
+  });
+
+  monthSel.addEventListener("change", () => {
+    loadCalendar(`${yearSel.value}-${monthSel.value}`);
   });
 }
 
@@ -505,39 +521,33 @@ function render(events, ym, holidayMap) {
           `開始: ${formatTime(ev.start, ev.end)}\n` +
           `タイトル: ${ev.summary}\n` +
           (ev.location ? `場所: ${ev.location}\n` : "") +
-          (ev.description ? `説明: ${toPlainText(ev.description)}` : "説明:");
+          (ev.description ? `説明:${toPlainText(ev.description)}` : "説明:");
 
         div.addEventListener("mouseenter", () => {
           tooltip.textContent = tooltipText;
           tooltip.style.opacity = 1;
         });
 
-div.addEventListener("mousemove", e => {
-  const tooltipWidth  = tooltip.offsetWidth;
-  const tooltipHeight = tooltip.offsetHeight;
+        /* ★ ツールチップが画面外に出ないように調整 */
+        div.addEventListener("mousemove", e => {
+          const tooltipWidth  = tooltip.offsetWidth;
+          const tooltipHeight = tooltip.offsetHeight;
 
-  let x = e.clientX - tooltipWidth / 2;
-  let y = e.clientY - tooltipHeight - 12;
+          let x = e.clientX - tooltipWidth / 2;
+          let y = e.clientY - tooltipHeight - 12;
 
-  // 画面の幅・高さ
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
 
-  // ★ 左にはみ出し防止
-  if (x < 0) x = 4;
+          if (x < 0) x = 4;
+          if (x + tooltipWidth > vw) x = vw - tooltipWidth - 4;
 
-  // ★ 右にはみ出し防止
-  if (x + tooltipWidth > vw) x = vw - tooltipWidth - 4;
+          if (y < 0) y = e.clientY + 12;
+          if (y + tooltipHeight > vh) y = vh - tooltipHeight - 4;
 
-  // ★ 上にはみ出し防止（上に置けない場合は下に表示）
-  if (y < 0) y = e.clientY + 12;
-
-  // ★ 下にはみ出し防止（スマホなど）
-  if (y + tooltipHeight > vh) y = vh - tooltipHeight - 4;
-
-  tooltip.style.left = `${x}px`;
-  tooltip.style.top  = `${y}px`;
-});
+          tooltip.style.left = `${x}px`;
+          tooltip.style.top  = `${y}px`;
+        });
 
         div.addEventListener("mouseleave", () => {
           tooltip.style.opacity = 0;
@@ -573,10 +583,12 @@ async function loadCalendar(ym) {
 
 /* 初期化 */
 (async function init() {
-  setupMonthSelector();
+  setupYMSelectors();
 
-  const selector = document.getElementById("month-selector");
-  loadCalendar(selector.value);
+  const yearSel = document.getElementById("year-selector");
+  const monthSel = document.getElementById("month-selector");
+
+  loadCalendar(`${yearSel.value}-${monthSel.value}`);
 })();
 </script>
 

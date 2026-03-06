@@ -118,6 +118,7 @@ th, td {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.1s;
+  box-sizing: border-box;
 }
 
 /* イベント色 */
@@ -472,10 +473,33 @@ function render(events, ym, holidayMap) {
           tooltip.textContent = tooltipText;
           tooltip.style.opacity = 1;
         });
-        div.addEventListener("mousemove", e => {
-          tooltip.style.left = `${e.clientX - tooltip.offsetWidth/2}px`;
-          tooltip.style.top  = `${e.clientY - tooltip.offsetHeight - 12}px`;
-        });
+
+div.addEventListener("mousemove", e => {
+  const tooltipWidth  = tooltip.offsetWidth;
+  const tooltipHeight = tooltip.offsetHeight;
+
+  let x = e.clientX - tooltipWidth / 2;
+  let y = e.clientY - tooltipHeight - 12;
+
+  // 画面の幅・高さ
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // ★ 左にはみ出し防止
+  if (x < 0) x = 4;
+
+  // ★ 右にはみ出し防止
+  if (x + tooltipWidth > vw) x = vw - tooltipWidth - 4;
+
+  // ★ 上にはみ出し防止（上に置けない場合は下に表示）
+  if (y < 0) y = e.clientY + 12;
+
+  // ★ 下にはみ出し防止（スマホなど）
+  if (y + tooltipHeight > vh) y = vh - tooltipHeight - 4;
+
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top  = `${y}px`;
+});
         div.addEventListener("mouseleave", () => tooltip.style.opacity = 0);
 
         div.addEventListener("contextmenu", e => {
@@ -512,4 +536,3 @@ async function loadCalendar(ym) {
 
 </body>
 </html>
-

@@ -34,11 +34,14 @@ body {
   text-align: center;
 }
 
+#year-selector,
 #month-selector {
   margin: 0;
   padding: 3px 6px;
   font-size: 1rem;
   line-height: 1.1;
+  height: 30px;
+  padding: 2px 6px;
 }
 
 /* カレンダー全体の外枠 */
@@ -280,8 +283,8 @@ function setupYMSelectors() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  /* 年プルダウン（過去5年〜未来5年） */
-  for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+  /* 年プルダウン（過去2年〜未来2年） */
+  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
     const opt = document.createElement("option");
     opt.value = y;
     opt.textContent = `${y}年`;

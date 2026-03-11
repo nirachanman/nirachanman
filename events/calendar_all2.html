@@ -563,13 +563,14 @@ tr.row-holiday td { background: #fff7ed !important; }
   .modal-description {
     max-height: 220px;
   }
+}
 /* --------------------------------------------------
-   ★ PC表示：モーダルが画面からはみ出す場合に縦スクロール
+   ★ PC表示：説明ボックスだけスクロール可能にする
 -------------------------------------------------- */
 @media (min-width: 600px) {
-  .modal-content {
-    max-height: 80vh;     /* 画面の80%までに制限 */
-    overflow-y: auto;     /* はみ出したら縦スクロール */
+  .modal-description {
+    max-height: 35vh;
+    overflow-y: auto;
   }
 }
 
@@ -1760,4 +1761,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-

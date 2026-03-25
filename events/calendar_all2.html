@@ -141,6 +141,26 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   border-color: rgba(255,255,255,1);
 }
 
+/* PC専用：コンパクトリンクボタン */
+.link-btn {
+  display: inline-block;
+  padding: 4px 6px;        /* ← 小さめの余白 */
+  margin-left: 6px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;         /* ← 小さめの文字 */
+  color: #333;
+  text-decoration: none;
+  line-height: 1.2;
+  white-space: nowrap;     /* ← 改行させない */
+  transition: background 0.2s ease;
+}
+
+.link-btn:hover {
+  background: #e5e5e5;
+}
+
 /* 施設別カラー */
 #btn-kouminkan.active { background: #c4d7ff; color: #0a3a8c; }
 #btn-gym.active       { background: #bfe8cf; color: #0a5222; }
@@ -564,15 +584,6 @@ tr.row-holiday td { background: #fff7ed !important; }
     max-height: 220px;
   }
 }
-/* --------------------------------------------------
-   ★ PC表示：説明ボックスだけスクロール可能にする
--------------------------------------------------- */
-@media (min-width: 600px) {
-  .modal-description {
-    max-height: 35vh;
-    overflow-y: auto;
-  }
-}
 
 /* --------------------------------------------------
    ⑨ 印刷用 CSS（完全隔離）
@@ -803,6 +814,18 @@ tr.row-holiday td { background: #fff7ed !important; }
 
     <!-- ★ 印刷ボタン（Googleで編集の左側） -->
     <button id="print-btn" class="print-btn pc-only">🖨 印刷</button>
+
+    <!-- ★ 公民館カレンダー（PCのみ） -->
+    <a href="https://nirachanman.github.io/nirachanman/events/calendar_kouminkan.html" 
+       target="_blank" class="pc-only link-btn">
+      🏬公民館カレンダー
+    </a>
+
+    <!-- ★ 体育館カレンダー（PCのみ） -->
+    <a href="https://nirachanman.github.io/nirachanman/events/calendar_taiikukan.html" 
+       target="_blank" class="pc-only link-btn">
+      🏃体育館カレンダー
+    </a>
 
     <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
       <span class="google-cal-icon">📅</span>

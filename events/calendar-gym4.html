@@ -674,24 +674,19 @@ function weekdayName(n) {
   return ["日","月","火","水","木","金","土"][n];
 }
 
-/* ===== 日本語時間表記（正午・午後0時対応） ===== */
+/* ===== 日本語時間表記 ===== */
 function formatJapaneseTime(date) {
   const h = date.getHours();
   const m = date.getMinutes();
 
-  // 正午（12:00）
   if (h === 12 && m === 0) return "正午";
-
-  // 午後0時（12:xx）
   if (h === 12 && m > 0) return `午後0時${m}分`;
 
-  // 午前
   if (h < 12) {
     const hour = h === 0 ? 12 : h;
     return m === 0 ? `午前${hour}時` : `午前${hour}時${m}分`;
   }
 
-  // 午後（13時以降）
   const pmHour = h - 12;
   return m === 0 ? `午後${pmHour}時` : `午後${pmHour}時${m}分`;
 }
@@ -720,25 +715,15 @@ async function loadHolidays(startDate, endDate) {
   const data = await res.json();
 
   const IGNORE_EVENTS = [
-    "銀行休業日",
-    "節分",
-    "雛祭り",
-    "母の日",
-    "七夕",
-    "七五三",
-    "クリスマス"
+    "銀行休業日","節分","雛祭り","母の日",
+    "七夕","七五三","クリスマス"
   ];
 
   const map = {};
-
   (data.items || []).forEach(ev => {
     if (!ev.start?.date) return;
-
-    const name = ev.summary;
-
-    if (IGNORE_EVENTS.includes(name)) return;
-
-    map[ev.start.date] = name;
+    if (IGNORE_EVENTS.includes(ev.summary)) return;
+    map[ev.start.date] = ev.summary;
   });
 
   return map;
@@ -753,7 +738,6 @@ function groupEventsByDate(events) {
     if (seen.has(ev.id)) return;
     seen.add(ev.id);
 
-    // 終日イベント（複数日対応）
     if (ev.start.date && ev.end.date) {
       const startDate = new Date(ev.start.date);
       const endDate = new Date(ev.end.date);
@@ -769,7 +753,6 @@ function groupEventsByDate(events) {
       return;
     }
 
-    // 時間指定イベント
     if (ev.start.dateTime) {
       const d = new Date(ev.start.dateTime);
       const key = formatYMD(d);
@@ -781,7 +764,7 @@ function groupEventsByDate(events) {
   return map;
 }
 
-/* ===== 月 HTML（イベント横並び＋2段表示＋正午対応） ===== */
+/* ===== 月 HTML ===== */
 function renderMonthList(year, month, eventsByDate, holidayMap) {
   const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
 
@@ -932,27 +915,36 @@ async function renderCalendar() {
   const startYear  = now.getFullYear();
   const startMonth = now.getMonth();
 
-  const start = new Date(startYear, startMonth, 1);
-  const end   = new Date(startYear, startMonth + 16, 1);
-
-  const [events, holidayMap] = await Promise.all([
-    loadEvents(start, end),
-    loadHolidays(start, end)
-  ]);
-
-  const eventsByDate = groupEventsByDate(events);
-
   let html = "";
+
+  // ★ 16か月分を「月ごとに」取得して描画
   for (let i = 0; i < 16; i++) {
     const y = startYear + Math.floor((startMonth + i) / 12);
     const m = (startMonth + i) % 12;
+
+    // 月の開始・終了
+    const start = new Date(y, m, 1);
+    const end   = new Date(y, m + 1, 1);
+
+    // ★ 月ごとに API を呼ぶ（高速化＆欠落防止）
+    const [events, holidayMap] = await Promise.all([
+      loadEvents(start, end),
+      loadHolidays(start, end)
+    ]);
+
+    const eventsByDate = groupEventsByDate(events);
+
+    // 月の HTML を追加
     html += renderMonthList(y, m, eventsByDate, holidayMap);
   }
 
+  // 描画
   document.getElementById("calendar-container").innerHTML = html;
 
+  // 開閉処理
   enableMonthToggle();
 
+  // 現在の月だけ開く
   const currentKey = `${startYear}-${startMonth}`;
   const currentContent = document.getElementById(`content-${currentKey}`);
   const currentIcon    = document.getElementById(`icon-${currentKey}`);
@@ -961,6 +953,7 @@ async function renderCalendar() {
     if (currentIcon) currentIcon.textContent = "−";
   }
 
+  // 印刷日付
   const pd = document.getElementById("print-date");
   if (pd) {
     const today = new Date();
@@ -1011,14 +1004,12 @@ document.addEventListener("click", function(e) {
       </div>
     </div>
 
-    <!-- ★ 下部の閉じるバー -->
     <div class="modal-close-bar">閉じる</div>
   `;
 
   const modal = document.getElementById("event-modal");
   modal.style.display = "block";
 
-  // ★ アニメーション発火
   setTimeout(() => {
     modal.classList.add("show");
   }, 10);
@@ -1026,7 +1017,7 @@ document.addEventListener("click", function(e) {
   document.getElementById("modal-body").innerHTML = body;
 });
 
-/* ===== 背景クリックで閉じる（アニメーション対応版） ===== */
+/* ===== 背景クリックで閉じる ===== */
 document.getElementById("event-modal").addEventListener("click", function(e) {
   if (e.target === this) {
     this.classList.remove("show");
@@ -1036,7 +1027,7 @@ document.getElementById("event-modal").addEventListener("click", function(e) {
   }
 });
 
-/* ===== 下部の閉じるバーで閉じる ===== */
+/* ===== 下部バーで閉じる ===== */
 document.addEventListener("click", function(e) {
   if (e.target.classList.contains("modal-close-bar")) {
     const modal = document.getElementById("event-modal");

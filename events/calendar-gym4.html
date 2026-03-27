@@ -658,7 +658,6 @@ body {
 
   <script>
 /* ===== Google カレンダー API ===== */
-const API_KEY = "";
 const CALENDAR_ID = "c15c3451e52f787202dca97fbd0e35c908d5972611deb534d78c8f6b46262895@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
@@ -691,7 +690,7 @@ function formatJapaneseTime(date) {
   return m === 0 ? `午後${pmHour}時` : `午後${pmHour}時${m}分`;
 }
 
-/* ===== Google カレンダー取得 ===== */
+/* ===== Google カレンダー取得（月単位） ===== */
 async function loadEvents(startDate, endDate) {
   const url =
     `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
@@ -764,58 +763,73 @@ function groupEventsByDate(events) {
   return map;
 }
 
-/* ===== 月 HTML ===== */
+/* ============================================================
+   🚀 高速版：DocumentFragment を使った renderMonthList
+   ============================================================ */
 function renderMonthList(year, month, eventsByDate, holidayMap) {
   const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
 
-  const days = [];
+  const fragment = document.createDocumentFragment();
+
+  /* --- 月タイトル --- */
+  const title = document.createElement("div");
+  title.className = "month-title";
+  title.dataset.month = `${year}-${month}`;
+  title.innerHTML = `
+    ${year}年 ${monthNames[month]}
+    <div class="toggle-icon" id="icon-${year}-${month}">＋</div>
+  `;
+  fragment.appendChild(title);
+
+  /* --- 月コンテンツ --- */
+  const content = document.createElement("div");
+  content.className = "month-content";
+  content.id = `content-${year}-${month}`;
+
   const last = new Date(year, month + 1, 0).getDate();
+
   for (let d = 1; d <= last; d++) {
     const date = new Date(year, month, d);
-    days.push({
-      date,
-      ymd: formatYMD(date),
-      day: d,
-      weekday: date.getDay()
-    });
-  }
+    const ymd = formatYMD(date);
+    const weekday = date.getDay();
+    const events = eventsByDate[ymd] || [];
+    const holidayName = holidayMap[ymd] || "";
 
-  let html = `
-    <div class="month-title" data-month="${year}-${month}">
-      ${year}年 ${monthNames[month]}
-      <div class="toggle-icon" id="icon-${year}-${month}">＋</div>
-    </div>
-    <div class="month-content" id="content-${year}-${month}">
-  `;
+    const dayBox = document.createElement("div");
+    dayBox.className = "day-box";
 
-  days.forEach(d => {
-    const events = eventsByDate[d.ymd] || [];
-    const holidayName = holidayMap[d.ymd] || "";
+    if (holidayName) dayBox.classList.add("holiday");
+    else if (weekday === 0) dayBox.classList.add("sun");
+    else if (weekday === 6) dayBox.classList.add("sat");
 
-    let textClass = "";
-    if (holidayName) textClass = "holiday-text";
-    else if (d.weekday === 0) textClass = "sun-text";
-    else if (d.weekday === 6) textClass = "sat-text";
+    const header = document.createElement("div");
+    header.className = "day-header";
 
-    let boxClass = "";
-    if (holidayName) boxClass = "holiday";
-    else if (d.weekday === 0) boxClass = "sun";
-    else if (d.weekday === 6) boxClass = "sat";
+    const span = document.createElement("span");
+    if (holidayName) span.className = "holiday-text";
+    else if (weekday === 0) span.className = "sun-text";
+    else if (weekday === 6) span.className = "sat-text";
 
-    html += `
-      <div class="day-box ${boxClass}">
-        <div class="day-header">
-          <span class="${textClass}">
-            ${month + 1}月${d.day}日（${weekdayName(d.weekday)}）
-          </span>
-          ${holidayName ? `<span class="holiday-name">${holidayName}</span>` : ""}
-        </div>
-    `;
+    span.textContent = `${month + 1}月${d}日（${weekdayName(weekday)}）`;
+    header.appendChild(span);
+
+    if (holidayName) {
+      const h = document.createElement("span");
+      h.className = "holiday-name";
+      h.textContent = holidayName;
+      header.appendChild(h);
+    }
+
+    dayBox.appendChild(header);
 
     if (events.length === 0) {
-      html += `<div class="no-event">イベントなし</div>`;
+      const noEv = document.createElement("div");
+      noEv.className = "no-event";
+      noEv.textContent = "イベントなし";
+      dayBox.appendChild(noEv);
     } else {
-      html += `<div class="event-list">`;
+      const list = document.createElement("div");
+      list.className = "event-list";
 
       events.forEach(ev => {
         const rawTitle = ev.summary || "（無題）";
@@ -829,47 +843,48 @@ function renderMonthList(year, month, eventsByDate, holidayMap) {
         let endLabel = "";
 
         if (startRaw.length === 10) {
-          timeLabel  = `<strong class="time-block time-all">終日</strong>`;
+          timeLabel = `<strong class="time-block time-all">終日</strong>`;
           startLabel = "終日";
-          endLabel   = "";
+          endLabel = "";
         } else {
           const s = new Date(startRaw);
           const e = new Date(endRaw);
           const sLabel = formatJapaneseTime(s);
           const eLabel = formatJapaneseTime(e);
           const timeClass = s.getHours() < 12 ? "time-am" : "time-pm";
-          timeLabel  = `<strong class="time-block ${timeClass}">${sLabel}〜${eLabel}</strong>`;
+
+          timeLabel = `<strong class="time-block ${timeClass}">${sLabel}〜${eLabel}</strong>`;
           startLabel = sLabel;
-          endLabel   = eLabel;
+          endLabel = eLabel;
         }
 
-        const title = rawTitle.replace(/"/g, "&quot;");
-        const desc  = rawDesc.replace(/"/g, "&quot;");
-        const loc   = rawLoc.replace(/"/g, "&quot;");
+        const item = document.createElement("div");
+        item.className = "event-item";
+        item.dataset.title = rawTitle;
+        item.dataset.desc = rawDesc;
+        item.dataset.loc = rawLoc;
+        item.dataset.start = startLabel;
+        item.dataset.end = endLabel;
 
-        html += `
-          <div class="event-item"
-               data-title="${title}"
-               data-desc="${desc}"
-               data-loc="${loc}"
-               data-start="${startLabel}"
-               data-end="${endLabel}">
-            <div class="event-time-title">
-              ${timeLabel}
-              <strong>${rawTitle}</strong>
-            </div>
+        item.innerHTML = `
+          <div class="event-time-title">
+            ${timeLabel}
+            <strong>${rawTitle}</strong>
           </div>
         `;
+
+        list.appendChild(item);
       });
 
-      html += `</div>`;
+      dayBox.appendChild(list);
     }
 
-    html += `</div>`;
-  });
+    content.appendChild(dayBox);
+  }
 
-  html += `</div>`;
-  return html;
+  fragment.appendChild(content);
+
+  return fragment;
 }
 
 /* ===== 月タイトルクリックで開閉 ===== */
@@ -909,24 +924,23 @@ function updatePrintHeader() {
   if (pm) pm.textContent = `${year}年 ${names[monthIndex]}`;
 }
 
-/* ===== カレンダー描画（当月から15か月先まで） ===== */
+/* ============================================================
+   🚀 欠落防止：月ごと API 方式の renderCalendar
+   ============================================================ */
 async function renderCalendar() {
   const now = new Date();
   const startYear  = now.getFullYear();
   const startMonth = now.getMonth();
 
-  let html = "";
+  const container = document.getElementById("calendar-container");
 
-  // ★ 16か月分を「月ごとに」取得して描画
   for (let i = 0; i < 16; i++) {
     const y = startYear + Math.floor((startMonth + i) / 12);
     const m = (startMonth + i) % 12;
 
-    // 月の開始・終了
     const start = new Date(y, m, 1);
     const end   = new Date(y, m + 1, 1);
 
-    // ★ 月ごとに API を呼ぶ（高速化＆欠落防止）
     const [events, holidayMap] = await Promise.all([
       loadEvents(start, end),
       loadHolidays(start, end)
@@ -934,17 +948,12 @@ async function renderCalendar() {
 
     const eventsByDate = groupEventsByDate(events);
 
-    // 月の HTML を追加
-    html += renderMonthList(y, m, eventsByDate, holidayMap);
+    const fragment = renderMonthList(y, m, eventsByDate, holidayMap);
+    container.appendChild(fragment);
   }
 
-  // 描画
-  document.getElementById("calendar-container").innerHTML = html;
-
-  // 開閉処理
   enableMonthToggle();
 
-  // 現在の月だけ開く
   const currentKey = `${startYear}-${startMonth}`;
   const currentContent = document.getElementById(`content-${currentKey}`);
   const currentIcon    = document.getElementById(`icon-${currentKey}`);
@@ -953,7 +962,6 @@ async function renderCalendar() {
     if (currentIcon) currentIcon.textContent = "−";
   }
 
-  // 印刷日付
   const pd = document.getElementById("print-date");
   if (pd) {
     const today = new Date();

@@ -1,75 +1,81 @@
-const audio = document.getElementById('audio');
-const title = document.getElementById('title');
-const list = document.getElementById('list');
-const autoNextCheckbox = document.getElementById('autoNextCheckbox');
-let newsItems = [];
-let currentIndex = 0;
+let items = [];
+let index = 0;
 
-async function fetchNews() {
+async function fetchFeed() {
+  const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
   try {
-    const res = await fetch('https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml');
-    const text = await res.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'application/xml');
-    const items = xml.querySelectorAll('item');
-
-    newsItems = Array.from(items).map(item => ({
-      title: item.querySelector('title')?.textContent || 'タイトル不明',
-      url: item.querySelector('enclosure')?.getAttribute('url') || ''
+    const res = await fetch(feedUrl);
+    const xml = await res.text();
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const entries = [...doc.querySelectorAll('item')];
+    items = entries.map(e => ({
+      title: e.querySelector('title').textContent,
+      url: e.querySelector('enclosure').getAttribute('url')
     }));
-
-    renderList();
+    playCurrent();
   } catch (e) {
-    console.error('ニュース取得失敗:', e);
-    list.innerHTML = '<p>ニュースの読み込みに失敗しました。</p>';
+    alert('NHKラジオニュースの取得に失敗しました');
   }
 }
 
-function renderList() {
-  list.innerHTML = '';
-  newsItems.forEach((item, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = item.title;
-    btn.onclick = () => {
-      currentIndex = i;
-      loadNews(i);
-    };
-    list.appendChild(btn);
-  });
+function playCurrent() {
+  const audio = document.getElementById('audio');
+  const title = document.getElementById('title');
+  audio.src = items[index].url;
+  title.textContent = items[index].title;
+  audio.play();
+  updateList();
 }
 
-function loadNews(index) {
-  const item = newsItems[index];
-  if (!item) return;
-  audio.src = item.url;
-  title.textContent = item.title;
-  audio.play();
-
-  // ハイライト更新
-  const buttons = list.querySelectorAll('button');
-  buttons.forEach((btn, i) => {
-    btn.classList.toggle('playing', i === index);
+function updateList() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.textContent = (i === index ? '▶ ' : '') + item.title;
+    div.className = i === index ? 'active' : '';
+    div.onclick = () => {
+      index = i;
+      playCurrent();
+    };
+    list.appendChild(div);
   });
 }
 
 document.getElementById('prev').onclick = () => {
-  if (newsItems.length === 0) return;
-  currentIndex = (currentIndex - 1 + newsItems.length) % newsItems.length;
-  loadNews(currentIndex);
+  if (index > 0) {
+    index--;
+    playCurrent();
+  } else {
+    alert('最初のニュースです');
+  }
 };
 
 document.getElementById('next').onclick = () => {
-  if (newsItems.length === 0) return;
-  currentIndex = (currentIndex + 1) % newsItems.length;
-  loadNews(currentIndex);
+  if (index < items.length - 1) {
+    index++;
+    playCurrent();
+  } else {
+    alert('最後のニュースです');
+  }
 };
 
-// ✅ 自動再生イベント
-audio.addEventListener('ended', () => {
-  if (autoNextCheckbox.checked && newsItems.length > 0) {
-    currentIndex = (currentIndex + 1) % newsItems.length;
-    loadNews(currentIndex);
+document.getElementById('audio').onended = () => {
+  if (index < items.length - 1) {
+    index++;
+    playCurrent();
+  } else {
+    alert('すべてのニュースの再生が完了しました');
   }
-});
+};
 
-fetchNews();
+document.getElementById('refreshList').onclick = async () => {
+  await fetchFeed();       // RSS再取得
+  playCurrent();           // 現在の再生を維持
+};
+
+document.getElementById('liveButton').onclick = () => {
+  window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
+};
+
+fetchFeed();

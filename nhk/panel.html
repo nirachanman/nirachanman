@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NHKラジオニュース</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+  <img src="podcast.png" alt="NHKロゴ" class="header-icon">
+  NHKラジオニュース
+  </div>
+  <div class="controls">
+    <button id="prev">◀ 前</button>
+    <div id="title" class="title"></div>
+    <button id="next">次 ▶</button>
+  </div>
+  <audio id="audio" controls></audio>
+  <div style="text-align:right; margin-bottom:6px;">
+  </div>
+  <details open>
+    <summary style="display:flex; justify-content:space-between; align-items:center;">
+      <span>▶ ニュース一覧</span>
+      <button id="refreshList">🔄 更新</button>
+      <button id="liveButton">📡 NHK第1</button>
+      </div>
+    </summary>
+    <div id="list" class="list"></div>
+  </details>
+  <script src="panel.js"></script>
+</body>
+</html>

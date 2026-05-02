@@ -1,118 +1,133 @@
 body {
-  font-family: sans-serif;
   margin: 0;
-  padding: 8px;
-  background: #f9f9f9;
+  font-family: sans-serif;
+  background: #80ABA9; /* 水浅葱 みずあさぎ80aba9 */
+  color: #000080;         /* あざやかな青紫系の色で視認性確保 */
+  padding: 6px;
+  font-size: 12px;
 }
-
 .header {
   display: flex;
-  align-items: center;        /* 垂直方向の中央揃え */
-  justify-content: center;    /* 横方向の中央揃え */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #B2EBF2;
+  color: #004D40;
+  padding: 6px;
   font-weight: bold;
-  margin-bottom: 8px;
-  text-align: center;
-  gap: 8px;                   /* アイコンと文字の間に余白 */
+  font-size: 14px;
 }
 
 .header-icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
-
 .controls {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin: 8px 0;
+  margin: 12px 0;
 }
-
 .title {
   flex: 1;
   text-align: center;
 }
-
-.list button {
-  display: block;
-  width: 100%;
-  margin: 2px 0;
-  text-align: left; /* ← これが左寄せのポイント */
-  padding: 6px 8px;
-  font-size: 0.95em;
+.list {
+  max-height: none;       /* 高さ制限を解除 */
 }
-
-.news-summary {
+  overflow-y: auto;
+  margin-top: 6px;
+ background: #B0C4DE; /*明るい灰みの青紫系の色*/
+}
+.list div {
+  padding: 2px 4px;        /* 上下の余白を最小限に */
+  line-height: 1.2;        /* 行間を詰める（通常は1.5前後） */
+  font-size: 12px;         /* 必要に応じて文字サイズも調整 */
+}
+.list .active {
+  font-weight: bold;
+  color: #D2691E; /* あざやかな橙系の色で再生中を明示 */
+}
+body {
+  height: 100vh;               /* ビューポートの高さにフィット */
+  overflow-y: auto;            /* 内容が多い場合はスクロール可能に */
+  box-sizing: border-box;
+}
+button {
+  background: #00AA55;  /* 重厚な緑*/
+  color: #000080;       /* 視認性の高い文字色 */
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover {
+  background: #00BCD4;  /* ホバー時に少し濃く */
+}
+audio {
+  width: 100%;       /* パネルの横幅にフィット */
+  height: 32px;      /* 高さも調整可能 */
+}
+summary {
+  cursor: pointer;
+  padding: 6px 10px;
+  background: #B2EBF2;
+  color: #004D40;
+  border: 2px solid #4DD0E1;
+  border-radius: 6px;
+  font-weight: bold;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
 }
 
-.auto-next-toggle {
-  font-size: 0.9em;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
-
-#header {
-  font-size: 1.6em; /* お好みに応じて 2em や 24px なども可 */
+#refreshList {
+  background: #4DD0E1;
+  color: #004D40;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
   font-weight: bold;
-  text-align: center;
-  margin-bottom: 8px;
+}
+#refreshList:hover {
+  background: #00BCD4;
 }
 
-#audio {
-  width: 100%;
-  box-sizing: border-box;
+#liveButton {
+  background: #FFB74D;
+  color: #4E342E;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+#liveButton:hover {
+  background: #FF9800;
 }
 
-select#channelSelector {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.top-section {
-  background-color: #a9a9a9; /* やや灰色い無彩色 */
+.live-box {
+  background: #E0F7FA;
+  border: 1px solid #4DD0E1;
+  border-radius: 6px;
   padding: 8px;
-  width: 100%;
-  margin-bottom: 16px;
-  border-radius: 4px;
-}
-
-.bottom-section {
-  background-color: #ffebcd; /* とても淡い橙系の色 */
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.list button.playing {
-  background-color: #d0ebff;
-  font-weight: bold;
-  border-left: 4px solid #339af0;
-}
-
-.top-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-header#header {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 8px;
   text-align: center;
+  margin: 10px 0;
 }
-
-select#channelSelector,
-audio#player {
-  width: 100%;
-  box-sizing: border-box;
+.live-link {
+  display: inline-block;
+  background: #FFB74D;
+  color: #4E342E;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+}
+.live-link:hover {
+  background: #FF9800;
 }

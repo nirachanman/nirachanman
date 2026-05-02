@@ -3,30 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <title>NHKラジオニュース</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #80ABA9;
+      color: #000080;
+      padding: 6px;
+      font-size: 12px;
+      height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #B2EBF2;
+      color: #004D40;
+      padding: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+    }
+
+    .title {
+      flex: 1;
+      text-align: center;
+    }
+
+    .list {
+      max-height: none;
+      overflow-y: auto;
+      margin-top: 6px;
+      background: #B0C4DE;
+    }
+
+    .list div {
+      padding: 2px 4px;
+      line-height: 1.2;
+      font-size: 12px;
+    }
+
+    .list .active {
+      font-weight: bold;
+      color: #D2691E;
+    }
+
+    button {
+      background: #00AA55;
+      color: #000080;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #00BCD4;
+    }
+
+    audio {
+      width: 100%;
+      height: 32px;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 6px 10px;
+      background: #B2EBF2;
+      color: #004D40;
+      border: 2px solid #4DD0E1;
+      border-radius: 6px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #refreshList {
+      background: #4DD0E1;
+      color: #004D40;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #refreshList:hover {
+      background: #00BCD4;
+    }
+
+    #liveButton {
+      background: #FFB74D;
+      color: #4E342E;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #liveButton:hover {
+      background: #FF9800;
+    }
+  </style>
 </head>
+
 <body>
   <div class="header">
-  <img src="podcast.png" alt="NHKロゴ" class="header-icon">
-  NHKラジオニュース
+    <img src="podcast.png" alt="NHKロゴ" class="header-icon">
+    NHKラジオニュース
   </div>
+
   <div class="controls">
     <button id="prev">◀ 前</button>
     <div id="title" class="title"></div>
     <button id="next">次 ▶</button>
   </div>
+
   <audio id="audio" controls></audio>
-  <div style="text-align:right; margin-bottom:6px;">
-  </div>
+
   <details open>
-    <summary style="display:flex; justify-content:space-between; align-items:center;">
+    <summary>
       <span>▶ ニュース一覧</span>
       <button id="refreshList">🔄 更新</button>
       <button id="liveButton">📡 NHK第1</button>
-      </div>
     </summary>
+
     <div id="list" class="list"></div>
   </details>
-  <script src="panel.js"></script>
+
+  <script>
+    let items = [];
+    let index = 0;
+
+    async function fetchFeed() {
+      const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
+      try {
+        const res = await fetch(feedUrl);
+        const xml = await res.text();
+        const doc = new DOMParser().parseFromString(xml, 'text/xml');
+        const entries = [...doc.querySelectorAll('item')];
+        items = entries.map(e => ({
+          title: e.querySelector('title').textContent,
+          url: e.querySelector('enclosure').getAttribute('url')
+        }));
+        playCurrent();
+      } catch (e) {
+        alert('NHKラジオニュースの取得に失敗しました');
+      }
+    }
+
+    function playCurrent() {
+      const audio = document.getElementById('audio');
+      const title = document.getElementById('title');
+      audio.src = items[index].url;
+      title.textContent = items[index].title;
+      audio.play();
+      updateList();
+    }
+
+    function updateList() {
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      items.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.textContent = (i === index ? '▶ ' : '') + item.title;
+        div.className = i === index ? 'active' : '';
+        div.onclick = () => {
+          index = i;
+          playCurrent();
+        };
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById('prev').onclick = () => {
+      if (index > 0) {
+        index--;
+        playCurrent();
+      } else {
+        alert('最初のニュースです');
+      }
+    };
+
+    document.getElementById('next').onclick = () => {
+      if (index < items.length - 1) {
+        index++;
+        playCurrent();
+      } else {
+        alert('最後のニュースです');
+      }
+    };
+
+    document.getElementById('audio').onended = () => {
+      if (index < items.length - 1) {
+        index++;
+        playCurrent();
+      } else {
+        alert('すべてのニュースの再生が完了しました');
+      }
+    };
+
+    document.getElementById('refreshList').onclick = async () => {
+      await fetchFeed();
+      playCurrent();
+    };
+
+    document.getElementById('liveButton').onclick = () => {
+      window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
+    };
+
+    fetchFeed();
+  </script>
 </body>
 </html>

@@ -175,7 +175,7 @@
     <summary>
       <span>📰 ニュース一覧</span>
       <button id="refreshList">🔄 更新</button>
-      <button id="liveButton">📡 NHK第1</button>
+      <button id="liveButton">📡 らじる☆らじる</button>
     </summary>
 
     <div id="list" class="list"></div>
@@ -183,6 +183,8 @@
 
   <script>
     let items = [];
+    let oldItems = []; // ← 前回の一覧を保存
+
     let index = 0;
 
     async function fetchFeed() {
@@ -253,10 +255,27 @@
       }
     };
 
-    document.getElementById('refreshList').onclick = async () => {
-      await fetchFeed();
-      playCurrent();
-    };
+document.getElementById('refreshList').onclick = async () => {
+  const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
+  try {
+    const res = await fetch(feedUrl);
+    const xml = await res.text();
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const entries = [...doc.querySelectorAll('item')];
+
+    // items を更新（再生中 index はそのまま）
+    items = entries.map(e => ({
+      title: e.querySelector('title').textContent,
+      url: e.querySelector('enclosure').getAttribute('url')
+    }));
+
+    // ★ 再生は維持したまま、一覧だけ更新
+    updateList();
+
+  } catch (e) {
+    alert('ニュース一覧の更新に失敗しました');
+  }
+};
 
     document.getElementById('liveButton').onclick = () => {
       window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');

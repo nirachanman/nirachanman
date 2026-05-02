@@ -1,122 +1,129 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NHKラジオニュース</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NHKラジオニュース</title>
 
-  <style>
-    /* スマホ最適化済み CSS（前回のバージョンと同じ） */
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #80ABA9;
-      color: #000080;
-      padding: 6px;
-      font-size: 14px;
-      height: 100vh;
-      overflow-y: auto;
-      box-sizing: border-box;
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, sans-serif;
+    background: #fafafa;
+    color: #222;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+  }
+
+  header img {
+    width: 42px;
+    height: 42px;
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .container {
+    padding: 16px;
+  }
+
+  .info {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .time {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #d9534f;
+  }
+
+  /* ボタン */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    text-align: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: #0275d8;
+    color: #fff;
+  }
+
+  .btn-secondary {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+  }
+
+  /* スマホ向けのタップしやすい領域 */
+  @media (max-width: 480px) {
+    header h1 {
+      font-size: 1.1rem;
     }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #B2EBF2;
-      color: #004D40;
-      padding: 8px;
-      font-weight: bold;
-      font-size: 16px;
+    .btn {
+      font-size: 1.05rem;
+      padding: 16px;
     }
-    .header-icon {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-    }
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      margin: 12px 0;
-    }
-    .title {
-      flex: 1;
-      text-align: center;
-      padding: 4px 0;
-      font-size: 15px;
-      font-weight: bold;
-    }
-    button {
-      background: #00AA55;
-      color: #000080;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: bold;
-      min-width: 64px;
-    }
-    button:hover {
-      background: #00BCD4;
-    }
-    audio {
-      width: 100%;
-      height: 40px;
-      margin-bottom: 6px;
-    }
-    summary {
-      cursor: pointer;
-      padding: 10px;
-      background: #B2EBF2;
-      color: #004D40;
-      border: 2px solid #4DD0E1;
-      border-radius: 8px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-    }
-    #refreshList, #liveButton {
-      padding: 8px 10px;
-      font-size: 13px;
-      border-radius: 8px;
-    }
-    #refreshList {
-      background: #4DD0E1;
-      color: #004D40;
-    }
-    #refreshList:hover {
-      background: #00BCD4;
-    }
-    #liveButton {
-      background: #FFB74D;
-      color: #4E342E;
-    }
-    #liveButton:hover {
-      background: #FF9800;
-    }
-    .list {
-      max-height: none;
-      overflow-y: auto;
-      margin-top: 6px;
-      background: #B0C4DE;
-      -webkit-overflow-scrolling: touch;
-    }
-    .list div {
-      padding: 8px 6px;
-      line-height: 1.4;
-      font-size: 14px;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-    .list .active {
-      font-weight: bold;
-      color: #D2691E;
-    }
-  </style>
+  }
+</style>
 </head>
 
 <body>
-  <div class="header">
-    <img src="data:image/png;base64,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
+
+<header>
+  <!-- ★ あなたがアップロードした podcast.png の Base64 を埋め込み ★ -->
+  <img src="data:image/png;base64,
+【ここにあなたの Base64 全文を貼り付け】
+  " alt="Podcast Icon" />
+  <h1>NHKラジオニュース</h1>
+</header>
+
+<div class="container">
+  <div class="info">最新のニュース開始時刻</div>
+  <div id="newsTime" class="time">--:--</div>
+
+  <button class="btn btn-primary" id="btnReload">更新</button>
+  <button class="btn btn-secondary" id="btnOpenNHK">NHKサイトを開く</button>
+</div>
+
+<script>
+  // ニュース開始時刻の表示ロジック（あなたの既存仕様に合わせて簡潔化）
+  function updateNewsTime() {
+    chrome.runtime.sendMessage({ type: "getNewsTime" }, (res) => {
+      if (!res || !res.time) {
+        document.getElementById("newsTime").textContent = "--:--";
+        return;
+      }
+      document.getElementById("newsTime").textContent = res.time;
+    });
+  }
+
+  document.getElementById("btnReload").addEventListener("click", updateNewsTime);
+
+  document.getElementById("btnOpenNHK").addEventListener("click", () => {
+    chrome.tabs.create({ url: "https://www3.nhk.or.jp/news/" });
+  });
+
+  updateNewsTime();
+</script>
+
+</body>
+</html>

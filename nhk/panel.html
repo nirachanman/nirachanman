@@ -123,13 +123,25 @@
       background: #FF9800;
     }
 
-    .list {
-      max-height: none;
-      overflow-y: auto;
-      margin-top: 6px;
-      background: #B0C4DE;
-      -webkit-overflow-scrolling: touch; /* iOS向け慣性スクロール */
-    }
+/* スマホ向けに最適化したニュース一覧スクロール領域 */
+.list {
+  /* スクロールバーの幅を常に確保してレイアウトのズレを防ぐ */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+
+  /* スマホ画面にフィットする高さ（必要に応じて調整） */
+  max-height: calc(100vh - 260px);
+
+  /* スマホの慣性スクロールを有効化 */
+  -webkit-overflow-scrolling: touch;
+
+  /* 指での縦スクロールを安定させる（iOS/Android） */
+  touch-action: pan-y;
+
+  margin-top: 6px;
+  background: #B0C4DE;
+  border-radius: 6px;
+}
 
     .list div {
       padding: 8px 6px; /* スマホ向けに余白拡大 */
@@ -147,7 +159,7 @@
 
 <body>
   <div class="header">
-    <img src="podcast.png" alt="NHKロゴ" class="header-icon">
+    <img src="podcast.png" alt="podcast" class="header-icon">
     NHKラジオニュース
   </div>
 

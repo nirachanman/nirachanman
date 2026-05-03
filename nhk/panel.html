@@ -144,15 +144,19 @@
 }
 
 .list div {
-  padding: 8px 10px;
-  margin: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  margin: 6px;
   background: #FFFFFF;
   border-radius: 8px;
   border: 1px solid rgba(0,0,0,0.15);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+
   font-size: 14px;
   line-height: 1.5;
-  transition: transform 0.1s ease;
 }
 
 .list .active {
@@ -172,16 +176,16 @@
   </div>
 
   <div class="controls">
-    <button id="prev">◀ 上に</button>
+    <button id="prev">🔼 上に</button>
     <div id="title" class="title"></div>
-    <button id="next">下に ▶</button>
+    <button id="next">下に 🔽</button>
   </div>
 
   <audio id="audio" controls></audio>
 
   <details open>
     <summary>
-      <span>📰 ニュース一覧</span>
+      <span>📻 ニュース一覧</span>
       <button id="refreshList">🔄 更新</button>
       <button id="liveButton">📡 らじる☆らじる</button>
     </summary>
@@ -221,20 +225,34 @@
       updateList();
     }
 
-    function updateList() {
-      const list = document.getElementById('list');
-      list.innerHTML = '';
-      items.forEach((item, i) => {
-        const div = document.createElement('div');
-        div.textContent = (i === index ? '▶ ' : '') + item.title;
-        div.className = i === index ? 'active' : '';
-        div.onclick = () => {
-          index = i;
-          playCurrent();
-        };
-        list.appendChild(div);
-      });
-    }
+function updateList() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+
+    // アイコン
+    const icon = document.createElement('span');
+    icon.textContent = '🔊';  // ← 好きなアイコンに変更可能
+    icon.style.fontSize = '18px';
+
+    // タイトル
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = (i === index ? '▶ ' : '') + item.title;
+
+    div.appendChild(icon);
+    div.appendChild(titleSpan);
+
+    div.className = i === index ? 'active' : '';
+    div.onclick = () => {
+      index = i;
+      playCurrent();
+    };
+
+    list.appendChild(div);
+  });
+}
 
     document.getElementById('prev').onclick = () => {
       if (index > 0) {

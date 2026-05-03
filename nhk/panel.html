@@ -199,6 +199,8 @@
 
     let index = 0;
 
+    let firstLoad = true;
+
     async function fetchFeed() {
       const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
       try {
@@ -221,7 +223,13 @@
       const title = document.getElementById('title');
       audio.src = items[index].url;
       title.textContent = items[index].title;
-      audio.play();
+
+      // ★ 初回ロード時は自動再生しない
+      if (!firstLoad) {
+        audio.play();
+      }
+
+      firstLoad = false;
       updateList();
     }
 

@@ -143,17 +143,25 @@
   border-radius: 6px;
 }
 
-    .list div {
-      padding: 8px 6px; /* スマホ向けに余白拡大 */
-      line-height: 1.4;
-      font-size: 14px;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
+.list div {
+  padding: 8px 10px;
+  margin: 3px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  font-size: 14px;
+  line-height: 1.5;
+  transition: transform 0.1s ease;
+}
 
-    .list .active {
-      font-weight: bold;
-      color: #D2691E;
-    }
+.list .active {
+  border: 2px solid #D2691E;
+  background: #FFF3E0;
+  font-weight: bold;
+  color: #D2691E;
+  transform: scale(0.97);
+}
   </style>
 </head>
 
@@ -164,9 +172,9 @@
   </div>
 
   <div class="controls">
-    <button id="prev">◀ 前</button>
+    <button id="prev">◀ 上に</button>
     <div id="title" class="title"></div>
-    <button id="next">次 ▶</button>
+    <button id="next">下に ▶</button>
   </div>
 
   <audio id="audio" controls></audio>
@@ -247,11 +255,11 @@
     };
 
     document.getElementById('audio').onended = () => {
-      if (index < items.length - 1) {
-        index++;
+      if (index > 0) {
+        index--;   // ← 最新方向へ進む
         playCurrent();
       } else {
-        alert('すべてのニュースの再生が完了しました');
+        alert('最新ニュースまで再生しました');
       }
     };
 

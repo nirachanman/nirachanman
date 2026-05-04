@@ -357,9 +357,22 @@ document.getElementById('refreshList').onclick = async () => {
   }
 };
 
-    document.getElementById('liveButton').onclick = () => {
-      window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
-    };
+document.getElementById('liveButton').onclick = () => {
+  const audio = document.getElementById('audio');
+
+  // ★ ニュース再生を停止
+  audio.pause();
+
+  // ★ タイトルを「停止中」に変更
+  document.getElementById('title').textContent = '停止中';
+
+  // ★ 再生中ハイライトを解除
+  index = -1;
+  updateList();
+
+  // ★ らじる☆らじるを開く
+  window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
+};
 
     fetchFeed();
   </script>

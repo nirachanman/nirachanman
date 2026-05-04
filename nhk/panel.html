@@ -202,7 +202,7 @@
   /* ニュース一覧のカードも少し大きく */
   .list div {
     padding: 16px 18px;
-    font-size: 18px;
+    font-size: 24px;
   }
 
   /* アイコンも大きく */
@@ -217,13 +217,14 @@
 <body>
   <div class="header">
     <img src="podcast.png" alt="podcast" class="header-icon">
-    NHKラジオニュース
+    NHKラジオニュースを連続再生
   </div>
 
   <div class="controls">
-    <button id="prev">🔼 上に</button>
+    <button id="next">戻る 🔽</button>
     <div id="title" class="title"></div>
-    <button id="next">下に 🔽</button>
+    <button id="prev">🔼 進む</button>
+
   </div>
 
   <audio id="audio" controls></audio>

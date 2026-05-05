@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Radio Player</title>
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+h1 {
+  text-align: center;
+  color: #0a4fa3; /* NHKブルー */
+  margin-bottom: 20px;
+}
+
+#player {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+#stationList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.station {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 6px solid #0a4fa3;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.station:hover {
+  background: #e8f0ff;
+}
+
+.active {
+  background: #dce9ff;
+  border-left-color: #003f8c;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📻 Internet Radio Player</h1>
+
+<div id="player">
+  <h2 id="nowPlaying">再生していません</h2>
+  <audio id="audio" controls preload="none" style="width:100%;"></audio>
+</div>
+
+<div id="stationList"></div>
+
+<!-- hls.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+// --- ラジオ局リスト ---
+const stations = [
+  { name: "NHK R1", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
+  { name: "NHK FM", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+  { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
+  { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
+  { name: "Gold Instrumental | RADIOS GOLD", url: "https://centova.svdns.com.br:19373/stream.mp3" },
+  { name: "ラヂオもりおか", 
+     url: "https://nhk-proxy.yajirobe-einstein.workers.dev/?url=https://mtist.as.smartstream.ne.jp/30017/livestream/playlist.m3u8" },
+  { name: "カシオペアFM", 
+     url: "https://nhk-proxy.yajirobe-einstein.workers.dev/?url=https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8" },
+  { name: "BeFM", 
+     url: "https://nhk-proxy.yajirobe-einstein.workers.dev/?url=https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8" },
+  { name: "鹿角きりたんぽFM", 
+     url: "https://nhk-proxy.yajirobe-einstein.workers.dev/?url=http://mtist.as.smartstream.ne.jp/30089/livestream/playlist.m3u8" }
+];
+
+const list = document.getElementById("stationList");
+const audio = document.getElementById("audio");
+const nowPlaying = document.getElementById("nowPlaying");
+
+let hlsInstance = null;
+
+// --- UI生成 ---
+stations.forEach((st, i) => {
+  const div = document.createElement("div");
+  div.className = "station";
+  div.textContent = st.name;
+  div.onclick = () => playStation(i);
+  list.appendChild(div);
+});
+
+// --- HLS / 通常再生 切り替え ---
+function playStation(index) {
+  const st = stations[index];
+  const url = st.url;
+
+  // 既存 Hls インスタンス破棄
+  if (hlsInstance) {
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
+
+  // m3u8 かどうか判定
+  const isHls = url.includes(".m3u8");
+
+  if (isHls && window.Hls && Hls.isSupported()) {
+    // hls.js 経由で再生
+    hlsInstance = new Hls();
+    hlsInstance.loadSource(url);
+    hlsInstance.attachMedia(audio);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+      audio.play();
+    });
+  } else {
+    // ブラウザネイティブ再生（mp3 など / Safari のネイティブ HLS もここ）
+    audio.src = url;
+    audio.play();
+  }
+
+  nowPlaying.textContent = "▶ " + st.name;
+
+  // active 表示
+  [...document.querySelectorAll(".station")].forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+  });
+}
+</script>
+
+</body>
+</html>

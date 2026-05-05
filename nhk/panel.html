@@ -372,6 +372,10 @@ document.getElementById('audio').onended = () => {
 
 document.getElementById('refreshList').onclick = async () => {
   const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
+
+  // ★ 再生中のタイトルを記録（index が -1 の場合は null）
+  const currentTitle = index >= 0 ? items[index].title : null;
+
   try {
     const res = await fetch(feedUrl);
     const xml = await res.text();
@@ -383,7 +387,15 @@ document.getElementById('refreshList').onclick = async () => {
       url: e.querySelector('enclosure').getAttribute('url')
     }));
 
-    updateList();
+    // ★ 再生中タイトルがあれば、新しい items の中から探す
+    if (currentTitle) {
+      const newIndex = items.findIndex(it => it.title === currentTitle);
+      if (newIndex !== -1) {
+        index = newIndex;  // ★ 再生中の位置を復元
+      }
+    }
+
+    updateList(); // ★ active が正しく復元される
 
   } catch (e) {
     alert('ニュース一覧の更新に失敗しました');

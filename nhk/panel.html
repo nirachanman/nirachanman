@@ -6,162 +6,162 @@
   <title>NHKラジオニュースを連続再生</title>
 
   <style>
-    /* -------------------------
-       基本レイアウト
-    ------------------------- */
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #80ABA9;
-      color: #000080;
-      padding: 6px;
-      font-size: 14px; /* スマホ向けに少し大きく */
-      height: 100vh;
-      overflow-y: hidden;
-      box-sizing: border-box;
-    }
-
-    /* -------------------------
-       ヘッダー
-    ------------------------- */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #B2EBF2;
-      color: #004D40;
-      padding: 8px;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .header-icon {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-    }
-
-    /* -------------------------
-       コントロールボタン
-    ------------------------- */
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      margin: 12px 0;
-    }
-
-    .title {
-      flex: 1;
-      text-align: center;
-      padding: 4px 0;
-      font-size: 15px;
-      color: #0000CE;
-      font-weight: bold;
-    }
-
-    button {
-      background: #00AA55;
-      color: #000080;
-      border: none;
-      padding: 10px 14px; /* スマホ向けにタップ領域拡大 */
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: bold;
-      min-width: 64px; /* 指で押しやすい幅 */
-    }
-
-    button:hover {
-      background: #00BCD4;
-    }
-
-    /* -------------------------
-       音声プレイヤー
-    ------------------------- */
-    audio {
-      width: 100%;
-      height: 40px; /* スマホで操作しやすい高さ */
-      margin-bottom: 6px;
-    }
+/* -------------------------
+   基本レイアウト
+------------------------- */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #80ABA9;
+  color: #000080;
+  padding: 6px;
+  font-size: 14px;
+  height: 100vh;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
 
 /* -------------------------
-   プレイヤーカード（audio を収める）
+   ヘッダー
+------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: #;
+  color: #004D40;
+  padding: 2px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* -------------------------
+   一体型プレイヤーコンテナ
+------------------------- */
+.player-container {
+  background: #FFF0F0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* -------------------------
+   コントロールボタン
+------------------------- */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;   /* ★ さらにコンパクト化 */
+  gap: 6px;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  padding: 0;
+  font-size: 14px;
+  color: #0000CE;
+  font-weight: bold;
+  line-height: 1.2;    /* ← 高さをさらに圧縮 */
+}
+
+button {
+  background: #00AA55;
+  color: #000080;
+  border: none;
+  padding: 4px 8px; /* さらにコンパクト */
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+  min-width: 60px;
+}
+
+button:hover {
+  background: #00BCD4;
+}
+
+/* -------------------------
+   プレイヤーカード（audio）
 ------------------------- */
 .player-card {
   background: #FFFFFF;
   border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  padding: 6px 8px; /* コンパクト化 */
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
 .player-card audio {
   width: 100%;
-  height: 40px;
+  height: 36px; /* コンパクト */
   border-radius: 6px;
 }
 
-    /* -------------------------
-       ニュース一覧
-    ------------------------- */
-    summary {
-      cursor: pointer;
-      padding: 10px;
-      background: #B2EBF2;
-      color: #004D40;
-      border: 2px solid #4DD0E1;
-      border-radius: 8px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-    }
+.player-card.active {
+  border-left: 6px solid #0000CE;   /* ニュース一覧と統一した強調ライン */
+  background: #E6F0FF;              /* ほんのり青い背景 */
+  box-shadow: 0 0 8px rgba(0,0,128,0.3); /* ふわっと浮く */
+  transition: 0.2s ease;
+}
 
-    #refreshList, #liveButton {
-      padding: 8px 10px;
-      font-size: 13px;
-      border-radius: 8px;
-    }
+/* -------------------------
+   ニュース一覧
+------------------------- */
+.news-block summary {
+  cursor: pointer;
+  padding: 4px 6px; /* コンパクト */
+  background: #B2EBF2;
+  color: #004D40;
+  border: 2px solid #4DD0E1;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
 
-    #refreshList {
-      background: #4DD0E1;
-      color: #004D40;
-    }
-    #refreshList:hover {
-      background: #00BCD4;
-    }
+#refreshList, #liveButton {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 8px;
+}
 
-    #liveButton {
-      background: #FFB74D;
-      color: #4E342E;
-    }
-    #liveButton:hover {
-      background: #FF9800;
-    }
+#refreshList {
+  background: #4DD0E1;
+  color: #004D40;
+}
+#refreshList:hover {
+  background: #00BCD4;
+}
 
-/* スマホ向けに最適化したニュース一覧スクロール領域 */
+#liveButton {
+  background: #FFB74D;
+  color: #4E342E;
+}
+#liveButton:hover {
+  background: #FF9800;
+}
+
+/* ニュース一覧スクロール領域 */
 .list {
-  /* スクロールバーの幅を常に確保してレイアウトのズレを防ぐ */
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-gutter: stable;
-
-  /* スマホ画面にフィットする高さ（必要に応じて調整） */
-  max-height: calc(100vh - 260px);
-
-  /* スマホの慣性スクロールを有効化 */
+  max-height: calc(100vh - 200px); /* 一体型に最適化 */
   -webkit-overflow-scrolling: touch;
-
-  /* 指での縦スクロールを安定させる（iOS/Android） */
   touch-action: pan-y;
-
-  margin-top: 6px;
-  background: #B0C4DE;
+  margin-top: 4px;
+  background: #B2EBF2;
   border-radius: 6px;
 }
 
@@ -169,15 +169,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
-  padding: 10px 12px;
-  margin: 6px;
+  padding: 8px 10px;
+  margin: 4px;
   background: #FFFAF0;
   border-radius: 8px;
   border: 1px solid rgba(0,0,0,0.15);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -186,55 +184,46 @@
   background: #87CEFA;
   font-weight: bold;
   color: #0000CE;
-
-  border-left: 6px solid #0000CE; /* ★ 強調ライン */
-  box-shadow: 0 0 6px rgba(210,105,30,0.3); /* ★ ほんのり浮かせる */
+  border-left: 6px solid #0000CE;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
 }
 
-/* Echo Show 8 専用：大きめボタン UI */
+/* -------------------------
+   Echo Show 8 専用
+------------------------- */
 @media (min-width: 960px) {
-  /* プレイヤー全体をカード化 */
   .controls {
-    padding: 12px;
+    padding: 6px;
     background: #FFFFFF;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    margin-bottom: 12px;
   }
 
-  /* 前後ボタンを大きく丸く */
   button {
     font-size: 20px;
-    padding: 16px 22px;
+    padding: 10px 10px;
     border-radius: 50px;
     min-width: 90px;
   }
 
-  /* タイトルを大きく */
   .title {
     font-size: 20px;
-    font-weight: bold;
     padding: 8px 0;
   }
 
-  /* audio コントロールも大きめに */
-  audio {
+  .player-card audio {
     height: 60px;
-    margin-top: 8px;
   }
 
-  /* ニュース一覧のカードも少し大きく */
   .list div {
     padding: 16px 18px;
     font-size: 18px;
   }
 
-  /* アイコンも大きく */
   .list div span:first-child {
     font-size: 24px;
   }
 }
-
   </style>
 </head>
 
@@ -244,17 +233,19 @@
     NHKラジオニュースを連続再生
   </div>
 
-<div class="controls">
-  <button id="next">戻る 🕰️</button>
-  <div id="title" class="title">ニュースを選択してください</div>
-  <button id="prev">⌚ 進む</button>
-</div>
+<div class="player-container">
 
-<div class="player-card">
-  <audio id="audio" controls></audio>
-</div>
+  <div class="controls">
+    <button id="next">戻る 🕰️</button>
+    <div id="title" class="title">ニュースを選択してください</div>
+    <button id="prev">⌚ 進む</button>
+  </div>
 
-  <details open>
+  <div class="player-card">
+    <audio id="audio" controls></audio>
+  </div>
+
+  <details open class="news-block">
     <summary>
       <span>📻 ニュース一覧</span>
       <button id="refreshList">🔄 更新</button>
@@ -263,6 +254,8 @@
 
     <div id="list" class="list"></div>
   </details>
+
+</div>
 
 <script>
 let items = [];
@@ -301,7 +294,9 @@ function playCurrent() {
   audio.src = items[index].url;
   title.textContent = items[index].title;
 
-  // ★ 初回ロード時は自動再生しない
+  // ★ プレイヤーカードを強調
+  document.querySelector('.player-card').classList.add('active');
+
   if (!firstLoad) {
     audio.play();
   }
@@ -397,27 +392,21 @@ document.getElementById('refreshList').onclick = async () => {
 
 document.getElementById('liveButton').onclick = () => {
   const audio = document.getElementById('audio');
-
-  // ★ ニュース再生を停止
   audio.pause();
 
-  // ★ ニュース操作と連続再生を完全無効化
   disabled = true;
-
-  // ★ タイトルを「停止中」に変更
   document.getElementById('title').textContent = '停止中';
 
-  // ★ 再生中ハイライトを解除
   index = -1;
   updateList();
 
-  // ★ らじる☆らじるを開く（ウィンドウハンドルを保持）
+  // ★ プレイヤーカードの強調を解除
+  document.querySelector('.player-card').classList.remove('active');
+
   liveWindow = window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
 
-  // ★ 閉じたかどうかを監視
   const timer = setInterval(() => {
     if (liveWindow && liveWindow.closed) {
-      // ▼ 閉じた瞬間にニュース操作を再有効化
       disabled = false;
       document.getElementById('title').textContent = 'ニュースを選択してください';
       clearInterval(timer);

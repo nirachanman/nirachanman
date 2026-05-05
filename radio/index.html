@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NHK Radio</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <h1>NHK ラジオ</h1>
+
+  <!-- ライブ再生 -->
+  <section>
+    <h2>ライブ</h2>
+    <button id="play-live">📡 NHK第1 ライブ再生</button>
+    <audio id="live-audio" controls></audio>
+  </section>
+
+  <!-- ニュース再生 -->
+  <section>
+    <h2>ニュース</h2>
+    <audio id="news-audio" controls></audio>
+    <div id="news-list"></div>
+  </section>
+
+  <!-- カスタムステーション -->
+  <section>
+    <h2>カスタムステーション</h2>
+    <div id="station-buttons"></div>
+  </section>
+
+  <!-- 設定ページへのリンク -->
+  <section>
+    <a href="settings.html">⚙ 設定を開く</a>
+  </section>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

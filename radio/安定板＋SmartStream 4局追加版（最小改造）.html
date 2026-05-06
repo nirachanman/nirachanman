@@ -79,7 +79,7 @@ const stations = [
   { name: "ラヂオもりおか",       url: "https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8" },
   { name: "カシオペアFM",         url: "https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8" },
   { name: "BeFM",                 url: "https://mtist.as.smartstream.ne.jp/30079/livestream/chunklist.m3u8" },
-  { name: "鹿角きりたんぽFM",    url: "http://mtist.as.smartstream.ne.jp/30089/livestream/chunklist.m3u8" }
+  { name: "鹿角きりたんぽFM",    url: "https://mtist.as.smartstream.ne.jp/30089/livestream/chunklist.m3u8" }
 ];
 
 const list = document.getElementById("stationList");
@@ -97,12 +97,11 @@ stations.forEach((st, i) => {
   list.appendChild(div);
 });
 
-// --- 再生失敗時の retry（2回クリック対策） ---
 function ensurePlay(retry = 0) {
   const p = audio.play();
   if (p && p.catch) {
     p.catch(() => {
-      if (retry < 3) {
+      if (retry < 5) {               // ← retry 回数を増やす（SmartStream 対策）
         setTimeout(() => ensurePlay(retry + 1), 300);
       }
     });
@@ -128,14 +127,16 @@ function playStation(index) {
   audio.removeAttribute("src");
   audio.load();
 
-  // Edge のネイティブ HLS を最優先
-  if (isHls && audio.canPlayType("application/vnd.apple.mpegurl")) {
+// --- Edge ネイティブ HLS 最優先 ---
+if (isHls && audio.canPlayType("application/vnd.apple.mpegurl")) {
     audio.src = url;
-    ensurePlay();
-  }
-  // ネイティブ不可 → hls.js（保険）
-  else if (isHls && Hls.isSupported()) {
-    hls = new Hls({
+    audio.load();        // ← 初期解析を即開始
+    ensurePlay();        // ← retry 付き再生（SmartStream 対策）
+}
+
+// --- ネイティブ不可 → hls.js（保険） ---
+else if (isHls && Hls.isSupported()) {
+    const hls = new Hls({
       maxBufferLength: 5,
       maxMaxBufferLength: 10,
       liveSyncDuration: 1,
@@ -144,12 +145,13 @@ function playStation(index) {
     hls.loadSource(url);
     hls.attachMedia(audio);
     hls.on(Hls.Events.MANIFEST_PARSED, () => ensurePlay());
-  }
-  // MP3 など
-  else {
+}
+
+// --- MP3など ---
+else {
     audio.src = url;
     ensurePlay();
-  }
+}
 
   [...document.querySelectorAll(".station")].forEach((el, i) => {
     el.classList.toggle("active", i === index);

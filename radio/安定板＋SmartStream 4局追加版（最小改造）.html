@@ -119,6 +119,31 @@ audio {
   width: 100%;
   height: 28px;
 }
+/* ======== 固定プレーヤーの裏に隠れないようにする ======== */
+
+/* プレーヤーの高さ分だけ下に余白を作る */
+body {
+  padding-bottom: 100px;  /* ← ここが重要（90〜110px が最適） */
+}
+
+/* 下部固定プレーヤー */
+#player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 12px;
+  background: white;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+  z-index: 999;
+  border-radius: 0;
+}
+
+/* audio を固定レイアウトに合わせて薄く */
+audio {
+  width: 100%;
+  height: 28px;
+}
 
 </style>
 </head>

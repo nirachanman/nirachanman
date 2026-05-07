@@ -16,30 +16,40 @@ body {
   color: #222;
 }
 
+/* ヘッダーをコンパクトに */
 h1 {
   text-align: center;
   color: #0a4fa3;
-  margin-bottom: 20px;
+  margin: 6px 0 10px 0;   /* ← 上下の余白を大幅に縮小 */
+  font-size: 20px;        /* ← 少し小さくして高さを圧縮 */
 }
 
+/* オーディオカードをコンパクトに */
 #player {
   background: white;
-  padding: 15px;
-  border-radius: 12px;
+  padding: 8px 12px;       /* ← 15px → 8px に圧縮 */
+  border-radius: 10px;     /* ← 少しだけ小さく */
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+  margin-bottom: 15px;     /* ← 20px → 15px に圧縮 */
 }
 
+/* audio コントロールの高さを縮める（Edge で有効） */
+audio {
+  height: 28px;            /* ← デフォルトより低くしてカードを薄く */
+}
+
+/* ステーションリスト */
 #stationList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;                /* ← 10px → 8px に圧縮 */
 }
 
+/* ステーションカードを少し薄く */
 .station {
   background: white;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 10px;           /* ← 12px → 10px に圧縮 */
+  border-radius: 8px;      /* ← 少しだけ小さく */
   border-left: 6px solid #0a4fa3;
   cursor: pointer;
   transition: 0.2s;
@@ -53,6 +63,63 @@ h1 {
   background: #dce9ff;
   border-left-color: #003f8c;
 }
+
+/* ======== モバイル最適化（スマホ幅 600px 以下） ======== */
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px; /* 20px → 12px に圧縮 */
+  }
+
+  h1 {
+    font-size: 18px;      /* 小さめでスッキリ */
+    margin: 4px 0 10px 0; /* 上下の余白を圧縮 */
+  }
+
+  #player {
+    padding: 8px 10px;    /* カードを薄く */
+    margin-bottom: 12px;
+  }
+
+  audio {
+    height: 26px;         /* スマホ向けに薄く */
+    width: 100%;
+  }
+
+  #stationList {
+    gap: 8px;             /* 行間を少し圧縮 */
+  }
+
+  .station {
+    padding: 10px;        /* カードを薄く */
+    font-size: 15px;      /* スマホ向けに少し小さく */
+    border-radius: 8px;
+  }
+}
+/* ======== 下部固定プレーヤー ======== */
+#player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 12px;
+  background: white;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+  z-index: 999;
+  border-radius: 0; /* 固定時は角丸をなくすと自然 */
+}
+
+/* プレーヤーの高さ分だけ下に余白を作る */
+body {
+  padding-bottom: 90px; /* audio の高さに合わせて調整 */
+}
+
+/* audio を固定レイアウトに合わせて薄く */
+audio {
+  width: 100%;
+  height: 28px;
+}
+
 </style>
 </head>
 

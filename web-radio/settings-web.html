@@ -7,25 +7,38 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <h1>NHKラジオ設定（Web版）</h1>
 
-  <section>
-    <label><input type="checkbox" id="live-autoplay-setting" /> ライブ自動再生</label>
-    <label><input type="checkbox" id="news-autoplay-setting" /> ニュース自動再生</label>
+  <!-- ヘッダー（web.html と統一） -->
+  <header>
+    <h1>NHKラジオ設定</h1>
+  </header>
+
+  <!-- カード：自動再生設定 -->
+  <section class="card">
+    <h2 class="card-title">自動再生</h2>
+
+    <label class="setting-item">
+      <input type="checkbox" id="live-autoplay-setting" />
+      ライブ自動再生
+    </label>
   </section>
 
-  <section>
-    <h2>ステーション追加</h2>
+  <!-- カード：ステーション追加 -->
+  <section class="card">
+    <h2 class="card-title">ステーション追加</h2>
+
     <div class="row">
       <input type="text" id="station-name" placeholder="表示名（例: NHK盛岡）" />
       <input type="text" id="station-url" placeholder="ストリームURL（.m3u8 または .mp3）" />
       <input type="text" id="station-region" placeholder="地域（例: 岩手）" />
     </div>
-    <button id="add-station">追加</button>
+
+    <button id="add-station" class="primary-btn">追加</button>
   </section>
 
-  <section>
-    <h2>登録済みステーション</h2>
+  <!-- カード：登録済みステーション -->
+  <section class="card">
+    <h2 class="card-title">登録済みステーション</h2>
     <div id="station-list"></div>
   </section>
 

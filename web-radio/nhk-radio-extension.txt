@@ -1,0 +1,16 @@
+nhk-radio-extension/
+├── background.js
+├── service-worker.js
+├── manifest.json
+├── settings.html
+├── sidepanel.html
+├── js/
+│   ├── libs/
+│   │   └── hls.min.js
+│   ├── app.js
+│   ├── live-player.js
+│   ├── news-fetcher.js
+│   ├── news-playlist.js
+│   └── settings.js
+└── css/
+      └── styles.css

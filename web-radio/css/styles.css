@@ -1,0 +1,191 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #222;
+  font-size: 14px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #005bac;
+  color: white;
+  padding: 8px 12px;
+}
+
+header h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+#settings-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+nav {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+}
+
+nav button {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+}
+
+nav button.active {
+  background: white;
+  border-bottom: 2px solid #005bac;
+  font-weight: bold;
+}
+
+main {
+  padding: 8px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+#live-now {
+  margin: 6px 0;
+  font-weight: bold;
+}
+
+.controls {
+  margin: 6px 0;
+}
+
+button {
+  font-size: 14px;
+  padding: 4px 8px;
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid #ddd;
+}
+
+.meta {
+  flex: 1;
+}
+
+.station-name {
+  font-weight: bold;
+}
+
+.station-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+.icon-btn {
+  font-size: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+#news-list li.playing {
+  background: #e6f0ff;
+  border-left: 4px solid #005bac;
+  padding-left: 6px;
+}
+
+#news-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid #ddd;
+}
+
+.icon-btn {
+  font-size: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+  text-decoration: none;
+}
+
+/* 操作ボタン（ライブ・ニュース共通） */
+.controls button {
+  font-size: 30px;
+  padding: 6px 0;
+  margin-right: 6px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  min-width: 32px;         /* ✅ 幅を揃える */
+  height: 32px;            /* ✅ 高さを揃える */
+  line-height: 32px;       /* ✅ テキスト中央揃え */
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.controls button:hover {
+  background-color: #dbe9ff;
+  color: #005bac;
+}
+
+.controls button:active {
+  background-color: #c0ddff;
+}
+
+.controls button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #005bac33;
+}
+
+.controls button:hover {
+  background-color: #dbe9ff;
+  color: #005bac;
+}
+
+.controls button:active {
+  background-color: #c0ddff;
+}
+
+.controls button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #005bac33;
+}
+
+/* ライブ・ニュースのリスト上に境目 */
+#live-list,
+#news-list {
+  border-top: 3px solid #ccc;
+  margin-top: 6px;
+  padding-top: 4px;
+}
+

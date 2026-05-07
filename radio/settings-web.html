@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NHKラジオ設定（Web版）</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <h1>NHKラジオ設定（Web版）</h1>
+
+  <section>
+    <label><input type="checkbox" id="live-autoplay-setting" /> ライブ自動再生</label>
+    <label><input type="checkbox" id="news-autoplay-setting" /> ニュース自動再生</label>
+  </section>
+
+  <section>
+    <h2>ステーション追加</h2>
+    <div class="row">
+      <input type="text" id="station-name" placeholder="表示名（例: NHK盛岡）" />
+      <input type="text" id="station-url" placeholder="ストリームURL（.m3u8 または .mp3）" />
+      <input type="text" id="station-region" placeholder="地域（例: 岩手）" />
+    </div>
+    <button id="add-station">追加</button>
+  </section>
+
+  <section>
+    <h2>登録済みステーション</h2>
+    <div id="station-list"></div>
+  </section>
+
+  <script type="module" src="js/settings-web.js"></script>
+</body>
+</html>

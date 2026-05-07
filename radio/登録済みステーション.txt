@@ -1,37 +1,28 @@
 登録済みステーション
-NHK R1
-全国
+
+NHK R1 全国
 https://simul.drdi.st.nhk/live/8/joined/master.m3u8
-削除
-NHK FM
-全国
+
+NHK FM 全国
 https://simul.drdi.st.nhk/live/9/joined/master.m3u8
-削除
-101 Smooth Jazz
-アメリカ合衆国
+
+101 Smooth Jazz アメリカ合衆国
 https://jking.cdnstream1.com/b22139_128mp3
-削除
-J-Pop Sakura 懐かしい
-toronto
+
+J-Pop Sakura 懐かしい toronto
 https://quincy.torontocast.com:2070/stream.mp3
-削除
-Gold Instrumental | RADIOS GOLD
-USA
+
+Gold Instrumental | RADIOS GOLD USA
 https://centova.svdns.com.br:19373/stream.mp3
-削除
-ラヂオもりおか
-岩手：盛岡
+
+ラヂオもりおか 岩手：盛岡
 https://mtist.as.smartstream.ne.jp/30017/livestream/playlist.m3u8
-削除
-カシオペアFM
-岩手：二戸市
+
+カシオペアFM 岩手：二戸市
 https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8
-削除
-BeFM
-青森県八戸市
+
+BeFM 青森県八戸市
 https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8
-削除
-鹿角きりたんぽFM
-/秋田県鹿角市
+
+鹿角きりたんぽFM 秋田県鹿角市
 http://mtist.as.smartstream.ne.jp/30089/livestream/playlist.m3u8
-削除

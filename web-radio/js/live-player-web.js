@@ -14,28 +14,37 @@ function render() {
   stations.forEach(s => {
     const li = document.createElement('li');
 
+    // 左側：再生・停止ボタン
+    const controls = document.createElement('div');
+    controls.className = 'station-controls';
+
+    const playBtn = document.createElement('button');
+    playBtn.className = 'play-btn';
+    playBtn.textContent = '▶';
+    playBtn.addEventListener('click', () => playStation(s));
+
+    const stopBtn = document.createElement('button');
+    stopBtn.className = 'stop-btn';
+    stopBtn.textContent = '■';
+    stopBtn.addEventListener('click', stop);
+
+    controls.appendChild(playBtn);
+    controls.appendChild(stopBtn);
+
+    // 右側：局名・地域
     const meta = document.createElement('div');
-    meta.className = 'meta';
+    meta.className = 'station-meta';
     meta.innerHTML = `
       <div class="station-name">${s.name}</div>
       <div class="station-sub">${s.region}</div>
     `;
 
-    const controls = document.createElement('div');
-    const btn = document.createElement('button');
-    btn.className = 'icon-btn';
-    btn.textContent = '▶';
-    btn.setAttribute('data-id', s.id);
-    btn.addEventListener('click', async () => {
-      await playStation(s);
-    });
-
-    controls.appendChild(btn);
-    li.appendChild(meta);
     li.appendChild(controls);
+    li.appendChild(meta);
     listEl.appendChild(li);
   });
 }
+
 
 function updateButtonStates(activeId) {
   listEl.querySelectorAll('.icon-btn').forEach(btn => {

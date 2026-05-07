@@ -24,7 +24,7 @@ const DEFAULTS = {
 
 let settings = null;
 
-// DOM要素
+// DOM
 const tabs = {
   live: document.getElementById('tab-live'),
   news: document.getElementById('tab-news')
@@ -61,33 +61,31 @@ async function saveSettings() {
   });
 }
 
-// 初期化処理
+// 初期化
 (async function init() {
   settings = await loadSettings();
 
-  // NHKニュース一覧をXMLから取得
+  // ニュース取得
   const newsItems = await fetchNHKNewsList();
   if (newsItems.length > 0) {
     settings.newsList = newsItems;
     await saveSettings();
   }
 
-  // UI初期化
-  document.getElementById('live-autoplay').checked = !!settings.liveAutoplay;
-  document.getElementById('news-autoplay').checked = !!settings.newsAutoplay;
+  // UI 初期化（ID 衝突解消済み）
+  document.getElementById('live-autoplay-player').checked = !!settings.liveAutoplay;
+  document.getElementById('news-autoplay-player').checked = !!settings.newsAutoplay;
 
-  // 設定変更イベント
-  document.getElementById('live-autoplay').addEventListener('change', async (e) => {
+  document.getElementById('live-autoplay-player').addEventListener('change', async (e) => {
     settings.liveAutoplay = e.target.checked;
     await saveSettings();
   });
 
-  document.getElementById('news-autoplay').addEventListener('change', async (e) => {
+  document.getElementById('news-autoplay-player').addEventListener('change', async (e) => {
     settings.newsAutoplay = e.target.checked;
     await saveSettings();
   });
 
-  // 設定画面ボタン
   document.getElementById('settings-btn').addEventListener('click', () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
   });

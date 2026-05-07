@@ -1,6 +1,6 @@
 import { fetchNHKNewsListWeb } from './news-fetcher-web.js';
-import { LivePlayer } from './live-player.js';
-import { NewsPlaylist } from './news-playlist.js';
+import { LivePlayer } from './live-player-web.js';
+import { NewsPlaylist } from './news-playlist-web.js';
 
 const DEFAULTS = {
   liveAutoplay: false,

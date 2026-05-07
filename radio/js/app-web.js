@@ -1,7 +1,10 @@
-import { LivePlayer } from './live-player-web.js';
+import { fetchNHKNewsListWeb } from './news-fetcher-web.js';
+import { LivePlayer } from './live-player.js';
+import { NewsPlaylist } from './news-playlist.js';
 
 const DEFAULTS = {
   liveAutoplay: false,
+  newsAutoplay: false,
   stations: [
     {
       id: 'r1',
@@ -14,30 +17,14 @@ const DEFAULTS = {
       name: 'NHK FM',
       streamUrl: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8',
       region: '全国'
-    },
-    {
-      id: 'smooth',
-      name: '101 Smooth Jazz',
-      streamUrl: 'https://ais-sa2.cdnstream1.com/2606_128.mp3',
-      region: 'US'
-    },
-    {
-      id: 'jpop',
-      name: 'J-Pop Sakura',
-      streamUrl: 'https://ais-sa2.cdnstream1.com/2608_128.mp3',
-      region: 'Japan'
-    },
-    {
-      id: 'gold',
-      name: 'Gold Instrumental',
-      streamUrl: 'https://ais-sa2.cdnstream1.com/2605_128.mp3',
-      region: 'US'
     }
-  ]
+  ],
+  newsList: []
 };
 
 let settings = null;
 
+// localStorage ラッパー
 function loadSettings() {
   const raw = localStorage.getItem('nhk_radio_settings');
   return raw ? JSON.parse(raw) : DEFAULTS;
@@ -47,13 +34,48 @@ function saveSettings() {
   localStorage.setItem('nhk_radio_settings', JSON.stringify(settings));
 }
 
+// タブ切り替え
+const tabs = {
+  live: document.getElementById('tab-live'),
+  news: document.getElementById('tab-news')
+};
+const panels = {
+  live: document.getElementById('live-panel'),
+  news: document.getElementById('news-panel')
+};
+
+function showTab(tab) {
+  tabs.live.classList.toggle('active', tab === 'live');
+  tabs.news.classList.toggle('active', tab === 'news');
+  panels.live.classList.toggle('hidden', tab !== 'live');
+  panels.news.classList.toggle('hidden', tab !== 'news');
+}
+
+tabs.live.addEventListener('click', () => showTab('live'));
+tabs.news.addEventListener('click', () => showTab('news'));
+
+// 初期化
 (async function init() {
   settings = loadSettings();
 
+  // ニュース取得（fetch 直接）
+  const newsItems = await fetchNHKNewsListWeb();
+  if (newsItems.length > 0) {
+    settings.newsList = newsItems;
+    saveSettings();
+  }
+
+  // UI 初期化
   document.getElementById('live-autoplay-player').checked = settings.liveAutoplay;
+  document.getElementById('news-autoplay-player').checked = settings.newsAutoplay;
 
   document.getElementById('live-autoplay-player').addEventListener('change', (e) => {
     settings.liveAutoplay = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('news-autoplay-player').addEventListener('change', (e) => {
+    settings.newsAutoplay = e.target.checked;
     saveSettings();
   });
 
@@ -61,5 +83,7 @@ function saveSettings() {
     window.open('settings-web.html', '_blank');
   });
 
+  // プレイヤー初期化
   LivePlayer.init(settings);
+  NewsPlaylist.init(settings);
 })();

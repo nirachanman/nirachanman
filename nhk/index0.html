@@ -3,162 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radio LIVE + Link</title>
+    <title>Deep Blue Radio</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
-            --primary-color: #2a5298;
-            --accent-color: #ff9800;
+            /* 紺色のカラーパレット */
+            --midnight-blue: #0f172a;   /* 最背面（ミッドナイト） */
+            --deep-navy: #1e293b;       /* カード背景（ディープネイビー） */
+            --border-blue: #334155;     /* 境界線 */
+            --soft-blue: #94a3b8;       /* 補助テキスト */
+            --highlight-blue: #38bdf8;  /* アクセント（スカイブルー） */
+            --white-blue: #f1f5f9;      /* メインテキスト */
         }
+
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--midnight-blue);
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--white-blue);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background: #eef2f3;
         }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
+
+        .player-card {
+            background: var(--deep-navy);
             width: 90%;
             max-width: 400px;
+            padding: 10px 30px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-blue);
+            text-align: center;
         }
-        header {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.2rem;
+            margin-bottom: 25px;
+            color: var(--white-blue);
+            text-transform: uppercase;
         }
+
+        .select-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
         select {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 15px;
+            background-color: var(--midnight-blue);
+            border: 1px solid var(--border-blue);
+            border-radius: 14px;
+            color: var(--white-blue);
             font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        select:focus {
+            border-color: var(--highlight-blue);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        /* カスタム矢印 */
+        .select-container::after {
+            content: '↓';
+            font-size: 0.8rem;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--soft-blue);
+            pointer-events: none;
+        }
+
+        .audio-wrapper {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
         audio {
             width: 100%;
-            margin-bottom: 1rem;
+            height: 35px;
+            /* ブラウザの標準プレイヤーを紺色に馴染ませる */
+            filter: invert(100%) hue-rotate(190deg) brightness(1.2);
+            opacity: 0.7;
         }
-        /* リンクボタンのスタイル */
-        .external-link {
-            display: none; /* 初期状態は非表示 */
-            text-decoration: none;
-            background-color: var(--accent-color);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: opacity 0.3s;
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--soft-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
         }
-        .external-link:hover {
-            opacity: 0.8;
+
+        /* 再生中に点滅するランプ */
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--soft-blue);
+            border-radius: 50%;
         }
-        .status {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #666;
+
+        .playing .dot {
+            background-color: var(--highlight-blue);
+            box-shadow: 0 0 8px var(--highlight-blue);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
     </style>
+
 </head>
 <body>
 
-<div class="container">
-    <header>Radio 「LIVE」</header>
+<div class="player-card">
+    <h1>📻 Radio 「LIVE」</h1>
     
     <select id="channelSelector">
         <option value="">放送局を選択してください</option>
         
-        <optgroup label="Music (MP3)">
+        <optgroup label="ニュース・公共放送 (HLS)">
+            <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">NHKラジオ 第1（東京）</option>
+            <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">NHKラジオ 第1（仙台）</option>
+            <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（東京）</option>
+        </optgroup>
+
+        <optgroup label="音楽・リラックス (Direct MP3)">
             <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
             <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
             <option value="https://centova.svdns.com.br:19373/stream.mp3">Gold Instrumental</option>
         </optgroup>
 
-        <optgroup label="NHK (HLS)">
-            <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">NHKラジオ AM（仙台）</option>
-            <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">NHKラジオ AM（東京）</option>
-            <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（東京）</option>
-        </optgroup>
-
-        <optgroup label="Community FM (CORS制限あり)">
-            <option value="https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8">ラヂオもりおか</option>
-            <option value="https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8">カシオペアFM</option>
-            <option value="https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8">BeFM</option>
-        </optgroup>
+       <optgroup label="リラクゼーション (Direct Stream)">
+           <option value="https://streams.calmradio.com/api/161/128/stream">Solo Piano (ソロピアノ)</option>
+           <option value="https://pub0302.101.ru:8443/stream/air/aac/64/102">Nature Sounds (自然音)</option> 
+           <option value="https://relax-mora.vdfm.ru:8000/relax128.mp3">Relax FM - Soft & Calm</option>
+           <option value="https://icecast.unitedradio.it/VirginChill.mp3">Virgin Radio Chill</option>
+       </optgroup>
     </select>
 
-    <audio id="player" controls></audio>
+    <div class="audio-wrapper">
+        <audio id="player" controls></audio>
+    </div>
 
-    <div id="status" class="status">放送局を選んでください</div>
+    <div id="status" class="status-badge">スタンバイ</div>
     
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;">
-    
-    <a id="directLink" href="#" target="_blank" class="external-link">
-        直接リンクで再生（別タブ）
-    </a>
+    <p class="footer-note">GitHub Pages 対応版</p>
 </div>
 
 <script>
     const audio = document.getElementById('player');
     const selector = document.getElementById('channelSelector');
     const status = document.getElementById('status');
-    const directLink = document.getElementById('directLink');
     let hls = null;
 
     selector.addEventListener('change', function() {
         const url = this.value;
         
-        if (!url) {
-            audio.pause();
-            directLink.style.display = "none";
-            status.textContent = "放送局を選んでください";
-            return;
-        }
-
-        // リンクボタンを更新して表示
-        directLink.href = url;
-        directLink.style.display = "inline-block";
-        status.textContent = "読み込み中...";
-
+        // 全てリセット
         if (hls) {
             hls.destroy();
             hls = null;
         }
+        audio.pause();
+        audio.src = "";
 
+        if (!url) {
+            status.textContent = "スタンバイ";
+            return;
+        }
+
+        status.textContent = "接続中...";
+
+        // 再生ロジック
         if (url.includes('.m3u8')) {
+            // NHK等のHLS形式
             if (Hls.isSupported()) {
                 hls = new Hls();
                 hls.loadSource(url);
                 hls.attachMedia(audio);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    audio.play().catch(e => {
-                        status.textContent = "再生エラー：下のボタンを試してください";
-                    });
-                    status.textContent = "HLS形式で再生中...";
+                    audio.play();
+                    status.textContent = "再生中 (HLS)";
                 });
+            } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari用
+                audio.src = url;
+                audio.play();
+                status.textContent = "再生中 (HLS)";
             }
         } else {
+            // Jazz/J-Pop等のMP3形式
             audio.src = url;
             audio.play().then(() => {
-                status.textContent = "MP3形式で再生中...";
-            }).catch(e => {
-                status.textContent = "再生がブロックされました";
+                status.textContent = "再生中 (MP3)";
+            }).catch(err => {
+                status.textContent = "エラー: 再生できません";
+                console.error(err);
             });
         }
     });
 
-    // エラー発生時にもステータスを更新
-    audio.onerror = () => {
-        status.textContent = "再生できません。ボタンから直接開いてください。";
-    };
+    // 通信エラー監視
+    audio.addEventListener('error', () => {
+        if (selector.value) {
+            status.textContent = "読み込みエラー";
+        }
+    });
 </script>
 
 </body>

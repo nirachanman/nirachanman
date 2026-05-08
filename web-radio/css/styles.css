@@ -1,220 +1,65 @@
-/* 全体 */
 body {
-  background: #f5f5f5;
-  font-family: "Yu Gothic", sans-serif;
+  font-family: sans-serif;
   margin: 0;
   padding: 0;
-  color: #222;
 }
 
-/* ヘッダー（NHK公式風） */
 header {
-  background: #0066b3;
+  background: #333;
   color: white;
-  padding: 14px 18px;
+  padding: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 19px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
 #settings-btn {
   background: transparent;
   border: none;
   color: white;
-  font-size: 22px;
-  padding: 6px;
-  cursor: pointer;
+  font-size: 20px;
 }
 
-/* カード（NHKアプリ風） */
 #live-panel {
-  background: white;
-  margin: 18px;
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  padding: 10px;
 }
 
-/* セクションタイトル */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
-  font-size: 17px;
-  font-weight: bold;
-  color: #0066b3;
-}
-
-/* 再生ボタン（NHK公式アプリ風） */
-.controls {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .controls button {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: none;
-  font-size: 22px;
-  background: #0066b3;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  font-size: 20px;
+  padding: 8px 12px;
+  margin-right: 5px;
 }
 
-.controls button:hover {
-  background: #0095d9;
-}
-
-.controls button:active {
-  transform: scale(0.92);
-}
-
-/* ステーションリスト（NHKアプリ風カード） */
 #live-list {
   list-style: none;
   padding: 0;
-  margin: 0;
 }
 
 #live-list li {
-  background: white;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  border-radius: 12px;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  transition: box-shadow 0.2s, transform 0.1s;
 }
 
-#live-list li:hover {
-  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-  transform: translateY(-1px);
-}
-
-/* 局名 */
-#live-list .station-name {
-  font-size: 16px;
+.station-name {
   font-weight: bold;
-  margin-bottom: 4px;
 }
 
-/* 地域名 */
-#live-list .station-sub {
-  font-size: 13px;
+.station-sub {
+  font-size: 12px;
   color: #666;
 }
 
-/* リスト内の再生ボタン */
-#live-list .icon-btn {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: none;
-  background: #0066b3;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-
-#live-list .icon-btn:hover {
-  background: #0095d9;
-}
-
-#live-list .icon-btn:active {
-  transform: scale(0.92);
-}
-
-/* 再生中の行を強調 */
-#live-list li.playing {
-  border-left: 6px solid #0066b3;
-  background: #eaf4ff;
-}
-
-/* 設定ページのカード */
-.card {
-  background: white;
-  margin: 18px;
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-/* カードタイトル */
-.card-title {
-  font-size: 17px;
-  font-weight: bold;
-  color: #0066b3;
-  margin-bottom: 12px;
-}
-
-/* 設定項目 */
-.setting-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  margin-bottom: 10px;
-}
-
-/* 入力欄 */
-.row input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-/* 追加ボタン */
-.primary-btn {
-  background: #0066b3;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.primary-btn:hover {
-  background: #0095d9;
-}
-
-/* 登録済みステーションのカード */
-#station-list .station {
-  background: #fafafa;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border-left: 5px solid #0066b3;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#station-list .station button {
-  background: #d9534f;
-  color: white;
-  border: none;
+.icon-btn {
+  font-size: 18px;
   padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#station-list .station button:hover {
-  background: #c9302c;
 }

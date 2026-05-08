@@ -14,7 +14,13 @@
     <button id="settings-btn" title="設定">⚙</button>
   </header>
 
+  <nav>
+    <button id="tab-live" class="active">ライブ</button>
+    <button id="tab-news">ニュース</button>
+  </nav>
+
   <main>
+    <!-- ライブパネル -->
     <section id="live-panel">
       <div class="section-header">
         <span>ライブ放送</span>
@@ -29,6 +35,23 @@
       </div>
 
       <ul id="live-list"></ul>
+    </section>
+
+    <!-- ニュースパネル -->
+    <section id="news-panel" class="hidden">
+      <div class="section-header">
+        <span>定時ニュース</span>
+        <label><input type="checkbox" id="news-autoplay-player" /> 自動再生</label>
+      </div>
+
+      <div class="controls">
+        <button id="news-play">▶️</button>
+        <button id="news-stop">⏹️</button>
+        <button id="news-prev">⏮️</button>
+        <button id="news-next">⏭️</button>
+      </div>
+
+      <ul id="news-list"></ul>
     </section>
   </main>
 </body>

@@ -1,0 +1,118 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 8px;
+  background: #f9f9f9;
+}
+
+.header {
+  display: flex;
+  align-items: center;        /* 垂直方向の中央揃え */
+  justify-content: center;    /* 横方向の中央揃え */
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+  gap: 8px;                   /* アイコンと文字の間に余白 */
+}
+
+.header-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+}
+
+.list button {
+  display: block;
+  width: 100%;
+  margin: 2px 0;
+  text-align: left; /* ← これが左寄せのポイント */
+  padding: 6px 8px;
+  font-size: 0.95em;
+}
+
+.news-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.auto-next-toggle {
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+#header {
+  font-size: 1.6em; /* お好みに応じて 2em や 24px なども可 */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+#audio {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+select#channelSelector {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.top-section {
+  background-color: #a9a9a9; /* やや灰色い無彩色 */
+  padding: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+.bottom-section {
+  background-color: #ffebcd; /* とても淡い橙系の色 */
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.list button.playing {
+  background-color: #d0ebff;
+  font-weight: bold;
+  border-left: 4px solid #339af0;
+}
+
+.top-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+header#header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+select#channelSelector,
+audio#player {
+  width: 100%;
+  box-sizing: border-box;
+}

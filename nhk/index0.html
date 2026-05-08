@@ -3,142 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radio LIVE Premium</title>
+    <title>Radio LIVE + Link</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        :root {
+            --primary-color: #2a5298;
+            --accent-color: #ff9800;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #333;
+            background: #eef2f3;
         }
-        .top-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center;
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
         }
         header {
-            font-size: 1.8rem;
-            font-weight: 800;
+            font-size: 1.4rem;
+            font-weight: bold;
             margin-bottom: 1.5rem;
-            color: #1e3c72;
-            letter-spacing: 1px;
+            color: var(--primary-color);
         }
         select {
             width: 100%;
             padding: 12px;
-            margin-bottom: 1.5rem;
-            border-radius: 10px;
+            margin-bottom: 1rem;
             border: 2px solid #ddd;
-            font-size: 1rem;
-            background-color: white;
-            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.95rem;
         }
         audio {
             width: 100%;
-            height: 50px;
+            margin-bottom: 1rem;
+        }
+        /* リンクボタンのスタイル */
+        .external-link {
+            display: none; /* 初期状態は非表示 */
+            text-decoration: none;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+        .external-link:hover {
+            opacity: 0.8;
         }
         .status {
             margin-top: 15px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #555;
-            min-height: 1.2em;
-        }
-        .note {
-            margin-top: 10px;
-            font-size: 0.75rem;
-            color: #888;
+            font-size: 0.85rem;
+            color: #666;
         }
     </style>
 </head>
 <body>
 
-  <div class="top-section">
-    <header id="header">Radio 「LIVE」</header>
+<div class="container">
+    <header>Radio 「LIVE」</header>
     
     <select id="channelSelector">
-      <option value="">放送局を選択してください</option>
-      <optgroup label="Music Stations">
-        <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
-        <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
-        <option value="https://centova.svdns.com.br:19373/stream.mp3">Gold Instrumental</option>
-      </optgroup>
-      <optgroup label="NHK / Domestic">
-        <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">NHKラジオ AM（仙台）</option>
-        <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">NHKラジオ AM（東京）</option>
-        <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（東京）</option>
-      </optgroup>
-      <optgroup label="Community FM">
-        <option value="https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8">ラヂオもりおか</option>
-        <option value="https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8">カシオペアFM</option>
-        <option value="https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8">BeFM</option>
-      </optgroup>
-    </select>
-    
-    <audio id="player" controls></audio>
-    <div id="status" class="status">Waiting for selection...</div>
-    <div class="note">※一部の局は再生開始まで数秒かかります</div>
-  </div>
+        <option value="">放送局を選択してください</option>
+        
+        <optgroup label="Music (MP3)">
+            <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
+            <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
+            <option value="https://centova.svdns.com.br:19373/stream.mp3">Gold Instrumental</option>
+        </optgroup>
 
-  <script>
+        <optgroup label="NHK (HLS)">
+            <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">NHKラジオ AM（仙台）</option>
+            <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">NHKラジオ AM（東京）</option>
+            <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（東京）</option>
+        </optgroup>
+
+        <optgroup label="Community FM (CORS制限あり)">
+            <option value="https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8">ラヂオもりおか</option>
+            <option value="https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8">カシオペアFM</option>
+            <option value="https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8">BeFM</option>
+        </optgroup>
+    </select>
+
+    <audio id="player" controls></audio>
+
+    <div id="status" class="status">放送局を選んでください</div>
+    
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 1.5rem 0;">
+    
+    <a id="directLink" href="#" target="_blank" class="external-link">
+        直接リンクで再生（別タブ）
+    </a>
+</div>
+
+<script>
     const audio = document.getElementById('player');
     const selector = document.getElementById('channelSelector');
     const status = document.getElementById('status');
+    const directLink = document.getElementById('directLink');
     let hls = null;
 
     selector.addEventListener('change', function() {
-      const url = this.value;
-      if (!url) return;
-
-      status.textContent = "Connecting...";
-      
-      // 以前のHLSインスタンスをクリア
-      if (hls) {
-        hls.destroy();
-        hls = null;
-      }
-      audio.pause();
-      audio.src = "";
-
-      // URLが .m3u8 を含むかどうかで切り替え
-      if (url.includes('.m3u8')) {
-        if (Hls.isSupported()) {
-          hls = new Hls();
-          hls.loadSource(url);
-          hls.attachMedia(audio);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            audio.play().catch(e => console.error("Play error:", e));
-            status.textContent = "Playing: HLS Stream";
-          });
-          hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) status.textContent = "Error: Cannot load HLS";
-          });
-        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-          audio.src = url;
-          audio.play();
+        const url = this.value;
+        
+        if (!url) {
+            audio.pause();
+            directLink.style.display = "none";
+            status.textContent = "放送局を選んでください";
+            return;
         }
-      } else {
-        // 通常のMP3ストリーミングの場合
-        audio.src = url;
-        audio.play()
-          .then(() => {
-            status.textContent = "Playing: MP3 Stream";
-          })
-          .catch(e => {
-            status.textContent = "Error: Access Blocked (CORS)";
-            console.error("Audio error:", e);
-          });
-      }
+
+        // リンクボタンを更新して表示
+        directLink.href = url;
+        directLink.style.display = "inline-block";
+        status.textContent = "読み込み中...";
+
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        if (url.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(audio);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    audio.play().catch(e => {
+                        status.textContent = "再生エラー：下のボタンを試してください";
+                    });
+                    status.textContent = "HLS形式で再生中...";
+                });
+            }
+        } else {
+            audio.src = url;
+            audio.play().then(() => {
+                status.textContent = "MP3形式で再生中...";
+            }).catch(e => {
+                status.textContent = "再生がブロックされました";
+            });
+        }
     });
-  </script>
+
+    // エラー発生時にもステータスを更新
+    audio.onerror = () => {
+        status.textContent = "再生できません。ボタンから直接開いてください。";
+    };
+</script>
+
 </body>
 </html>

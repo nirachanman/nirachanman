@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Radio Player</title>
+    <!-- HLS.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00e5ff;
+            --text-color: #ffffff;
+            --error-color: #ff5252;
+            --timer-color: #4caf50;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .status-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-bottom: 4px solid var(--accent-color);
+        }
+
+        #current-station {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        #timer-display {
+            font-size: 1.2rem;
+            color: var(--timer-color);
+            font-weight: bold;
+            margin-top: 5px;
+            height: 1.5rem; /* 表示領域の確保 */
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+
+        .station-btn {
+            background: var(--card-bg);
+            border: 2px solid #333;
+            color: white;
+            padding: 20px 10px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        .station-btn:active, .station-btn.playing {
+            background: var(--accent-color);
+            color: #000;
+            transform: scale(0.95);
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button.control-btn {
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .stop-btn { background-color: var(--error-color); color: white; }
+        .timer-btn { background-color: #555; color: white; }
+        .timer-btn.active { background-color: var(--timer-color); }
+
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr 1fr; }
+            #current-station { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="status-panel">
+        <div id="status-label">再生停止中</div>
+        <div id="current-station">- 放送局を選択してください -</div>
+        <div id="timer-display"></div>
+    </div>
+
+    <div class="grid" id="station-grid">
+        <!-- JSで動的に生成 -->
+    </div>
+
+    <div class="controls">
+        <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
+        <button id="timer-30" class="control-btn timer-btn" onclick="setTimer(30)">30分</button>
+        <button id="timer-60" class="control-btn timer-btn" onclick="setTimer(60)">60分</button>
+    </div>
+</div>
+
+<audio id="audio-player"></audio>
+
+<script>
+    const stations = [
+        { name: "NHK第1（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
+        { name: "NHK第1（東京）", url: "https://simul.drdi.st.nhk/live/3/joined/master.m3u8" },
+        { name: "NHK FM（東京）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+        { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
+        { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
+        { name: "J1 GOLD 昭和", url: "https://jenny.torontocast.com:2000/stream/J1GOLD" },
+        { name: "Gold Instrumental", url: "https://centova.svdns.com.br:19373/stream.mp3" }
+    ];
+
+    const audio = document.getElementById('audio-player');
+    const stationGrid = document.getElementById('station-grid');
+    const currentStationLabel = document.getElementById('current-station');
+    const statusLabel = document.getElementById('status-label');
+    const timerDisplay = document.getElementById('timer-display');
+    
+    let hls = null;
+    let timerId = null;
+    let countdownIntervalId = null;
+    let fadeTimerId = null;
+    let remainingSeconds = 0;
+
+    // 初期化: 放送局ボタン生成
+    stations.forEach(station => {
+        const btn = document.createElement('button');
+        btn.className = 'station-btn';
+        btn.innerText = station.name;
+        btn.onclick = () => playAudio(station);
+        stationGrid.appendChild(btn);
+    });
+
+    function playAudio(station) {
+        resetAudioSystem();
+        currentStationLabel.innerText = station.name;
+        statusLabel.innerText = "接続中...";
+        
+        document.querySelectorAll('.station-btn').forEach(b => {
+            b.classList.toggle('playing', b.innerText === station.name);
+        });
+
+        const isHls = station.url.endsWith('.m3u8');
+
+        if (isHls) {
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(station.url);
+                hls.attachMedia(audio);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    audio.volume = 1.0;
+                    audio.play();
+                });
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) statusLabel.innerText = "再生エラー";
+                });
+            } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                audio.src = station.url;
+                audio.volume = 1.0;
+                audio.play();
+            }
+        } else {
+            audio.src = station.url;
+            audio.volume = 1.0;
+            audio.play().catch(() => { statusLabel.innerText = "再生エラー"; });
+        }
+
+        audio.onplaying = () => { statusLabel.innerText = "再生中"; };
+        audio.onerror = () => { statusLabel.innerText = "再生エラー"; };
+    }
+
+    function resetAudioSystem() {
+        audio.pause();
+        audio.src = "";
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+        statusLabel.innerText = "停止中";
+    }
+
+    function stopAudio() {
+        resetAudioSystem();
+        clearTimers();
+        currentStationLabel.innerText = "- 放送局を選択してください -";
+        document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
+    }
+
+    function clearTimers() {
+        clearTimeout(timerId);
+        clearTimeout(fadeTimerId);
+        clearInterval(countdownIntervalId);
+        timerId = null;
+        fadeTimerId = null;
+        countdownIntervalId = null;
+        remainingSeconds = 0;
+        timerDisplay.innerText = "";
+        document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function setTimer(minutes) {
+        clearTimers();
+        document.getElementById(`timer-${minutes}`).classList.add('active');
+
+        remainingSeconds = minutes * 60;
+        updateTimerDisplay();
+
+        // カウントダウン表示の更新
+        countdownIntervalId = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds <= 0) {
+                clearInterval(countdownIntervalId);
+            } else {
+                updateTimerDisplay();
+            }
+        }, 1000);
+
+        // 終了タイマー
+        timerId = setTimeout(() => {
+            stopAudio();
+        }, remainingSeconds * 1000);
+
+        // 10秒前からのフェードアウト予約
+        fadeTimerId = setTimeout(() => {
+            fadeOut();
+        }, (remainingSeconds - 10) * 1000);
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(remainingSeconds / 60);
+        const s = remainingSeconds % 60;
+        timerDisplay.innerText = `残り ${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function fadeOut() {
+        if (audio.volume > 0.1) {
+            audio.volume = Math.max(0, audio.volume - 0.1);
+            setTimeout(fadeOut, 1000);
+        }
+    }
+</script>
+
+</body>
+</html>

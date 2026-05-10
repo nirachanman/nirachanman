@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Echo Radio Player</title>
-    <!-- HLS.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -54,7 +53,7 @@
             color: var(--timer-color);
             font-weight: bold;
             margin-top: 5px;
-            height: 1.5rem; /* 表示領域の確保 */
+            height: 1.5rem;
         }
 
         .grid {
@@ -76,7 +75,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
+            min-height: 85px;
         }
 
         .station-btn:active, .station-btn.playing {
@@ -88,27 +87,35 @@
         .controls {
             margin-top: 25px;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timer-group {
+            display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         button.control-btn {
-            padding: 15px 25px;
+            padding: 12px 20px;
             border-radius: 30px;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            min-width: 80px;
         }
 
-        .stop-btn { background-color: var(--error-color); color: white; }
+        .stop-btn { background-color: var(--error-color); color: white; width: 100%; max-width: 250px; }
         .timer-btn { background-color: #555; color: white; }
         .timer-btn.active { background-color: var(--timer-color); }
 
         @media (max-width: 480px) {
             .grid { grid-template-columns: 1fr 1fr; }
-            #current-station { font-size: 1.2rem; }
+            #current-station { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -121,24 +128,39 @@
         <div id="timer-display"></div>
     </div>
 
-    <div class="grid" id="station-grid">
-        <!-- JSで動的に生成 -->
-    </div>
+    <div class="grid" id="station-grid"></div>
 
     <div class="controls">
         <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
-        <button id="timer-30" class="control-btn timer-btn" onclick="setTimer(30)">30分</button>
-        <button id="timer-60" class="control-btn timer-btn" onclick="setTimer(60)">60分</button>
+        <div class="timer-group">
+            <button id="timer-30" class="control-btn timer-btn" onclick="setTimer(30)">30分</button>
+            <button id="timer-60" class="control-btn timer-btn" onclick="setTimer(60)">60分</button>
+            <button id="timer-90" class="control-btn timer-btn" onclick="setTimer(90)">90分</button>
+            <button id="timer-120" class="control-btn timer-btn" onclick="setTimer(120)">120分</button>
+        </div>
     </div>
 </div>
 
-<audio id="audio-player"></audio>
+<audio id="audio-player" preload="none"></audio>
 
 <script>
+    /**
+     * 放送局リスト
+     * 非表示にしたい局の行の先頭に「//」を付けると、画面から消えます。
+     */
     const stations = [
+        // NHKは安定しているので残します
         { name: "NHK第1（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
         { name: "NHK第1（東京）", url: "https://simul.drdi.st.nhk/live/3/joined/master.m3u8" },
         { name: "NHK FM（東京）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+
+        // HLS系（CORSエラー等で再生できない場合は // でコメントアウトしてください）
+        // { name: "ラヂオもりおか", url: "https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8" },
+        // { name: "カシオペアFM", url: "https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8" },
+        // { name: "BeFM（八戸）", url: "https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8" },
+        // { name: "鹿角きりたんぽFM", url: "https://mtist.as.smartstream.ne.jp/30089/livestream/playlist.m3u8" },
+
+        // 直接再生可能なストリーム（安定しています）
         { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
         { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
         { name: "J1 GOLD 昭和", url: "https://jenny.torontocast.com:2000/stream/J1GOLD" },
@@ -157,7 +179,7 @@
     let fadeTimerId = null;
     let remainingSeconds = 0;
 
-    // 初期化: 放送局ボタン生成
+    // ボタン生成ロジック
     stations.forEach(station => {
         const btn = document.createElement('button');
         btn.className = 'station-btn';
@@ -175,39 +197,36 @@
             b.classList.toggle('playing', b.innerText === station.name);
         });
 
-        const isHls = station.url.endsWith('.m3u8');
+        const secureUrl = station.url.replace("http://", "https://");
+        const isHls = secureUrl.includes('.m3u8');
 
         if (isHls) {
             if (Hls.isSupported()) {
-                hls = new Hls();
-                hls.loadSource(station.url);
+                hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                hls.loadSource(secureUrl);
                 hls.attachMedia(audio);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    audio.volume = 1.0;
-                    audio.play();
-                });
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) statusLabel.innerText = "再生エラー";
-                });
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = 1.0; audio.play(); });
+                hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) statusLabel.innerText = "再生エラー"; });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-                audio.src = station.url;
-                audio.volume = 1.0;
+                audio.src = secureUrl;
                 audio.play();
             }
         } else {
-            audio.src = station.url;
+            audio.src = secureUrl;
             audio.volume = 1.0;
             audio.play().catch(() => { statusLabel.innerText = "再生エラー"; });
         }
 
         audio.onplaying = () => { statusLabel.innerText = "再生中"; };
-        audio.onerror = () => { statusLabel.innerText = "再生エラー"; };
+        audio.onwaiting = () => { statusLabel.innerText = "読込中..."; };
     }
 
     function resetAudioSystem() {
         audio.pause();
-        audio.src = "";
+        audio.removeAttribute('src');
+        audio.load();
         if (hls) {
+            hls.stopLoad();
             hls.destroy();
             hls = null;
         }
@@ -235,40 +254,43 @@
 
     function setTimer(minutes) {
         clearTimers();
-        document.getElementById(`timer-${minutes}`).classList.add('active');
+        const btn = document.getElementById(`timer-${minutes}`);
+        if(btn) btn.classList.add('active');
 
         remainingSeconds = minutes * 60;
         updateTimerDisplay();
 
-        // カウントダウン表示の更新
         countdownIntervalId = setInterval(() => {
             remainingSeconds--;
             if (remainingSeconds <= 0) {
                 clearInterval(countdownIntervalId);
+                updateTimerDisplay();
             } else {
                 updateTimerDisplay();
             }
         }, 1000);
 
-        // 終了タイマー
         timerId = setTimeout(() => {
             stopAudio();
         }, remainingSeconds * 1000);
 
-        // 10秒前からのフェードアウト予約
         fadeTimerId = setTimeout(() => {
             fadeOut();
-        }, (remainingSeconds - 10) * 1000);
+        }, Math.max(0, (remainingSeconds - 10) * 1000));
     }
 
     function updateTimerDisplay() {
+        if (remainingSeconds <= 0) {
+            timerDisplay.innerText = "";
+            return;
+        }
         const m = Math.floor(remainingSeconds / 60);
         const s = remainingSeconds % 60;
         timerDisplay.innerText = `残り ${m}:${s.toString().padStart(2, '0')}`;
     }
 
     function fadeOut() {
-        if (audio.volume > 0.1) {
+        if (audio.volume > 0.05) {
             audio.volume = Math.max(0, audio.volume - 0.1);
             setTimeout(fadeOut, 1000);
         }

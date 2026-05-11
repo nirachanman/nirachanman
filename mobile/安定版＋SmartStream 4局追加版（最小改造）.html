@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Radio Player</title>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+/* ヘッダーをコンパクトに */
+h1 {
+  text-align: center;
+  color: #0a4fa3;
+  margin: 6px 0 10px 0;   /* ← 上下の余白を大幅に縮小 */
+  font-size: 20px;        /* ← 少し小さくして高さを圧縮 */
+}
+
+/* オーディオカードをコンパクトに */
+#player {
+  background: white;
+  padding: 8px 12px;       /* ← 15px → 8px に圧縮 */
+  border-radius: 10px;     /* ← 少しだけ小さく */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 15px;     /* ← 20px → 15px に圧縮 */
+}
+
+/* audio コントロールの高さを縮める（Edge で有効） */
+audio {
+  height: 50px;            /* ← デフォルトより低くしてカードを薄く */
+}
+
+/* ステーションリスト */
+#stationList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                /* ← 10px → 8px に圧縮 */
+}
+
+/* ステーションカードを少し薄く */
+.station {
+  background: white;
+  padding: 10px;           /* ← 12px → 10px に圧縮 */
+  border-radius: 8px;      /* ← 少しだけ小さく */
+  border-left: 6px solid #0a4fa3;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#nowPlaying {
+  margin: 4px 0;      /* 上下の余白を大幅に圧縮 */
+  font-size: 16px;    /* 少し小さくして高さをさらに圧縮（任意） */
+}
+
+.station:hover {
+  background: #e8f0ff;
+}
+
+.active {
+  background: #dce9ff;
+  border-left-color: #003f8c;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>📻 Internet Radio Player</h1>
+
+<div id="player">
+  <h2 id="nowPlaying">再生していません</h2>
+  <audio id="audio" controls preload="none" style="width:100%;"></audio>
+</div>
+
+<div id="stationList"></div>
+
+<script>
+// --- ラジオ局リスト（SmartStream は chunklist に統一） ---
+const stations = [
+  { name: "NHK AM", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
+  { name: "NHK FM", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+  { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
+  { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
+  { name: "Gold Instrumental | RADIOS GOLD", url: "https://centova.svdns.com.br:19373/stream.mp3" },
+
+  { name: "ラヂオもりおか",       url: "https://mtist.as.smartstream.ne.jp/30017/livestream/chunklist.m3u8" },
+  { name: "カシオペアFM",         url: "https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8" },
+  { name: "BeFM",                 url: "https://mtist.as.smartstream.ne.jp/30079/livestream/chunklist.m3u8" },
+  { name: "鹿角きりたんぽFM",    url: "https://mtist.as.smartstream.ne.jp/30089/livestream/chunklist.m3u8" }
+];
+
+const list = document.getElementById("stationList");
+const audio = document.getElementById("audio");
+const nowPlaying = document.getElementById("nowPlaying");
+
+let hls = null;
+
+// --- UI生成 ---
+stations.forEach((st, i) => {
+  const div = document.createElement("div");
+  div.className = "station";
+  div.textContent = st.name;
+  div.onclick = () => playStation(i);
+  list.appendChild(div);
+});
+
+function ensurePlay(retry = 0) {
+  const p = audio.play();
+  if (p && p.catch) {
+    p.catch(() => {
+      if (retry < 5) {               // ← retry 回数を増やす（SmartStream 対策）
+        setTimeout(() => ensurePlay(retry + 1), 300);
+      }
+    });
+  }
+}
+
+// --- 再生処理（安定板＋Edge最適化） ---
+function playStation(index) {
+  const st = stations[index];
+  const url = st.url;
+  const isHls = url.endsWith(".m3u8");
+
+  nowPlaying.textContent = "▶ " + st.name;
+
+  // 既存 hls.js を破棄
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
+
+  // 一旦停止＆リセット
+  audio.pause();
+  audio.removeAttribute("src");
+  audio.load();
+
+// --- Edge ネイティブ HLS 最優先 ---
+if (isHls && audio.canPlayType("application/vnd.apple.mpegurl")) {
+    audio.src = url;
+    audio.load();        // ← 初期解析を即開始
+    ensurePlay();        // ← retry 付き再生（SmartStream 対策）
+}
+
+// --- ネイティブ不可 → hls.js（保険） ---
+else if (isHls && Hls.isSupported()) {
+    const hls = new Hls({
+      maxBufferLength: 5,
+      maxMaxBufferLength: 10,
+      liveSyncDuration: 1,
+      liveMaxLatencyDuration: 3
+    });
+    hls.loadSource(url);
+    hls.attachMedia(audio);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => ensurePlay());
+}
+
+// --- MP3など ---
+else {
+    audio.src = url;
+    ensurePlay();
+}
+
+  [...document.querySelectorAll(".station")].forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+  });
+}
+</script>
+
+</body>
+</html>

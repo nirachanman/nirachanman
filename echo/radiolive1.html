@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Blue Radio - Sleep Timer</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --midnight-blue: #0f172a;
+            --deep-navy: #1e293b;
+            --border-blue: #334155;
+            --soft-blue: #94a3b8;
+            --highlight-blue: #38bdf8;
+            --white-blue: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--midnight-blue);
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--white-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .player-card {
+            background: var(--deep-navy);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-blue);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.2rem;
+            margin-bottom: 25px;
+            color: var(--white-blue);
+            text-transform: uppercase;
+        }
+
+        .select-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--soft-blue);
+            margin-bottom: 8px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+
+        .select-container {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--midnight-blue);
+            border: 1px solid var(--border-blue);
+            border-radius: 14px;
+            color: var(--white-blue);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select:focus {
+            border-color: var(--highlight-blue);
+        }
+
+        .select-container::after {
+            content: '↓';
+            font-size: 0.8rem;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--soft-blue);
+            pointer-events: none;
+        }
+
+        .audio-wrapper {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        audio {
+            width: 100%;
+            height: 35px;
+            filter: invert(100%) hue-rotate(190deg) brightness(1.2);
+            opacity: 0.7;
+        }
+
+        .timer-display {
+            font-size: 0.85rem;
+            color: var(--highlight-blue);
+            min-height: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--soft-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--soft-blue);
+            border-radius: 50%;
+        }
+
+        .playing .dot {
+            background-color: var(--highlight-blue);
+            box-shadow: 0 0 8px var(--highlight-blue);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .footer-note {
+            font-size: 0.7rem;
+            color: var(--soft-blue);
+            margin-top: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="player-card" id="cardContainer">
+    <h1>📻 Radio 「LIVE」</h1>
+    
+    <div class="select-group">
+        <label>Station</label>
+        <div class="select-container">
+            <select id="channelSelector">
+                <option value="">放送局を選択してください</option>
+                <optgroup label="ニュース・公共放送 (HLS)">
+                    <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">NHKラジオ 第1（東京）</option>
+                    <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">NHKラジオ 第1（仙台）</option>
+                    <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（東京）</option>
+                </optgroup>
+                <optgroup label="音楽・リラックス (Direct MP3)">
+                    <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
+                    <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
+                    <option value="https://centova.svdns.com.br:19373/stream.mp3">Gold Instrumental</option>
+                    <option value="https://centova.svdns.com.br:19418/stream">Gold web radio</option>
+                </optgroup>
+                <optgroup label="リラクゼーション (Direct Stream)">
+                    <option value="https://streams.calmradio.com/api/161/128/stream">Solo Piano (ソロピアノ)</option>
+                    <option value="https://az1.mediacp.eu/listen/natureradiosleep/radio.mp3">nature radio sleep (自然音)</option> 
+                    <option value="https://relax-mora.vdfm.ru:8000/relax128.mp3">Relax FM - Soft & Calm</option>
+                    <option value="https://icecast.unitedradio.it/VirginChill.mp3">Virgin Radio Chill</option>
+                    <option value="https://jenny.torontocast.com:2000/stream/J1GOLD">J1 GOLD 昭和</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+    <div class="select-group">
+        <label>Sleep Timer</label>
+        <div class="select-container">
+            <select id="timerSelector">
+                <option value="0">OFF (タイマーなし)</option>
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="60">60 Minutes</option>
+                <option value="90">90 Minutes</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="audio-wrapper">
+        <audio id="player" controls></audio>
+    </div>
+
+    <div id="timerDisplay" class="timer-display"></div>
+
+    <div id="statusContainer" class="status-indicator">
+        <div class="dot"></div>
+        <span id="statusText">スタンバイ</span>
+    </div>
+    
+    <p class="footer-note">GitHub Pages 対応版</p>
+</div>
+
+<script>
+    const audio = document.getElementById('player');
+    const selector = document.getElementById('channelSelector');
+    const timerSelector = document.getElementById('timerSelector');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const statusText = document.getElementById('statusText');
+    const statusContainer = document.getElementById('statusContainer');
+    
+    let hls = null;
+    let sleepTimer = null;
+    let remainingTime = 0;
+
+    // 放送局切り替え処理
+    selector.addEventListener('change', function() {
+        const url = this.value;
+        if (hls) { hls.destroy(); hls = null; }
+        audio.pause();
+        audio.src = "";
+        statusContainer.classList.remove('playing');
+
+        if (!url) {
+            statusText.textContent = "スタンバイ";
+            return;
+        }
+
+        statusText.textContent = "接続中...";
+
+        if (url.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(audio);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    audio.play();
+                    onPlaySuccess("HLS");
+                });
+            } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                audio.src = url;
+                audio.play();
+                onPlaySuccess("HLS");
+            }
+        } else {
+            audio.src = url;
+            audio.play().then(() => onPlaySuccess("MP3")).catch(onPlayError);
+        }
+    });
+
+    // タイマー設定処理
+    timerSelector.addEventListener('change', function() {
+        const minutes = parseInt(this.value);
+        clearInterval(sleepTimer);
+        
+        if (minutes === 0) {
+            timerDisplay.textContent = "";
+            return;
+        }
+
+        remainingTime = minutes * 60;
+        updateTimerDisplay();
+
+        sleepTimer = setInterval(() => {
+            remainingTime--;
+            updateTimerDisplay();
+
+            if (remainingTime <= 0) {
+                clearInterval(sleepTimer);
+                audio.pause();
+                timerDisplay.textContent = "タイマー完了: 停止しました";
+                statusContainer.classList.remove('playing');
+                timerSelector.value = "0";
+            }
+        }, 1000);
+    });
+
+    function updateTimerDisplay() {
+        const m = Math.floor(remainingTime / 60);
+        const s = remainingTime % 60;
+        timerDisplay.textContent = `Sleep Timer: ${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function onPlaySuccess(type) {
+        statusText.textContent = `再生中 (${type})`;
+        statusContainer.classList.add('playing');
+    }
+
+    function onPlayError() {
+        statusText.textContent = "エラー: 再生できません";
+        statusContainer.classList.remove('playing');
+    }
+
+    audio.addEventListener('error', onPlayError);
+</script>
+
+</body>
+</html>

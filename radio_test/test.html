@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Radio & News</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+  :root {
+    --primary-color: #2563eb;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--primary-color);
+  }
+
+  /* タブメニュー */
+  nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  nav button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #e2e8f0;
+    color: var(--text-sub);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  nav button.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  /* プレイヤーセクション */
+  #player-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+  }
+
+  #now-playing {
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  audio {
+    width: 100%;
+    height: 40px;
+  }
+
+  /* リスト表示 */
+  .list-container {
+    display: none; /* 初期は非表示 */
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .list-container.active {
+    display: flex;
+  }
+
+  .item {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+  }
+
+  .item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+  }
+
+  .item.active {
+    background: #eff6ff;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--text-sub);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Radio & News</h1>
+  </header>
+
+  <div id="player-card">
+    <span id="now-playing">選択してください</span>
+    <audio id="audio" controls></audio>
+  </div>
+
+  <nav>
+    <button id="tab-live" class="active" onclick="switchTab('live')">ライブ放送</button>
+    <button id="tab-news" onclick="switchTab('news')">定時ニュース</button>
+  </nav>
+
+  <!-- ライブ放送リスト -->
+  <div id="live-list" class="list-container active"></div>
+
+  <!-- ニュースリスト -->
+  <div id="news-list" class="list-container"></div>
+</div>
+
+<script>
+// --- データ設定 ---
+const stations = [
+  { name: "NHK R1", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
+  { name: "NHK FM", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+  { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
+  { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
+  { name: "Gold Instrumental", url: "https://centova.svdns.com.br:19373/stream.mp3" },
+  { name: "ラヂオもりおか", url: "https://mtist.as.smartstream.ne.jp/30017/livestream/playlist.m3u8" },
+  { name: "カシオペアFM", url: "https://mtist.as.smartstream.ne.jp/30050/livestream/chunklist.m3u8" },
+  { name: "BeFM", url: "https://mtist.as.smartstream.ne.jp/30079/livestream/playlist.m3u8" },
+  { name: "鹿角きりたんぽFM", url: "http://mtist.as.smartstream.ne.jp/30089/livestream/playlist.m3u8" }
+];
+const newsItems = [
+  { name: "NHK けさのニュース", url: "https://nhk.or.jp", time: "7:00" },
+  { name: "NHK 正午のニュース", url: "https://nhk.or.jp", time: "12:00" },
+  { name: "NHK きょうのニュース", url: "https://nhk.or.jp", time: "19:00" }
+];
+
+const audio = document.getElementById('audio');
+const nowPlaying = document.getElementById('now-playing');
+let hls = null;
+
+// --- タブ切り替え ---
+function switchTab(tab) {
+  document.querySelectorAll('.list-container').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+  
+  document.getElementById(tab + '-list').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// --- リスト生成関数 ---
+function createList(data, containerId, isLive) {
+  const container = document.getElementById(containerId);
+  data.forEach((item) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `<span>${item.name}</span><span class="tag">${isLive ? 'LIVE' : item.time}</span>`;
+    div.onclick = () => playMedia(item, div);
+    container.appendChild(div);
+  });
+}
+
+createList(stations, 'live-list', true);
+createList(newsItems, 'news-list', false);
+
+// --- 再生処理 ---
+function playMedia(item, el) {
+  nowPlaying.textContent = "▶ 再生中: " + item.name;
+  document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
+
+  // URL判定と再生
+  const url = item.url.includes('.xml') ? item.url.replace('.xml', '.mp3') : item.url;
+
+  if (url.includes("m3u8")) {
+    if (Hls.isSupported()) {
+      hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(audio);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => audio.play());
+    } else {
+      audio.src = url;
+      audio.play();
+    }
+  } else {
+    audio.src = url;
+    audio.play();
+  }
+}
+</script>
+
+</body>
+</html>

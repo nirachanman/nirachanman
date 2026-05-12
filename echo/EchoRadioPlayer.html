@@ -6,6 +6,7 @@
     <title>Echo Radio Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+
 :root {
             --bg-color: #1a1c1e;
             --card-bg: #282a2d;
@@ -19,35 +20,6 @@
             
             --error-color: #cf6679;
             --timer-color: #7da87b; 
-        }
-
-        /* --- 中略 --- */
-
-        .station-btn {
-            background: var(--card-bg);
-            /* 境界線も少し暗くして馴染ませます */
-            border: 2px solid #3a3c40;
-            /* 文字色をさらに暗いトーンに */
-            color: var(--off-white);
-            padding: 20px 10px;
-            border-radius: 12px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 85px;
-        }
-
-        /* 再生中ボタンのスタイル */
-        .station-btn:active, .station-btn.playing {
-            background: var(--accent-color);
-            /* 再生中の文字は、背景色とのコントラストを考え、
-               読みやすさを維持したソフトホワイトに */
-            color: #e0e0e0; 
-            transform: scale(0.95);
-            border-color: var(--accent-color);
         }
 
         body {
@@ -98,10 +70,11 @@
             width: 100%;
         }
 
-        .station-btn {
+.station-btn {
             background: var(--card-bg);
-            border: 2px solid #333;
-            color: white;
+            border: 2px solid #3a3c40;
+            /* 文字色をオフホワイトに変更 */
+            color: var(--off-white);
             padding: 20px 10px;
             border-radius: 12px;
             font-size: 1rem;
@@ -115,8 +88,10 @@
 
         .station-btn:active, .station-btn.playing {
             background: var(--accent-color);
-            color: #000;
+            /* 再生中の文字色も、眩しすぎない白に設定 */
+            color: #e0e0e0;
             transform: scale(0.95);
+            border-color: var(--accent-color);
         }
 
         .controls {

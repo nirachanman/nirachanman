@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHK LIVE Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #00e5ff;
+            --text-color: #b8c5cf;
+            --error-color: #ff5252;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        header {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .station-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .station-tile {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .station-tile:active, .station-tile.playing {
+            border-color: var(--accent-color);
+            background-color: #454444;
+            transform: scale(0.98);
+        }
+
+        .status-area {
+            margin: 20px 0;
+            min-height: 24px;
+            font-size: 1.2rem;
+        }
+
+        .playing-name {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* カスタムコントロール */
+        .controls-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #volumeSlider {
+            flex-grow: 1;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .btn-stop {
+            background-color: var(--error-color);
+            font-weight: bold;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .timer-section {
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 15px;
+        }
+
+        .timer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #444; }
+
+        #error-overlay {
+            display: none;
+            margin-bottom: 20px;
+            color: var(--error-color);
+        }
+
+        .reconnect-btn { background: var(--error-color); }
+
+        @media (min-aspect-ratio: 16/9) {
+            .station-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* audioタグは非表示（自作UIで操作するため） */
+        audio { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header id="header">NHK「LIVE」Player</header>
+
+    <div class="status-area" id="statusArea">放送局を選択してください</div>
+
+    <div id="error-overlay">
+        <p>再生エラーが発生しました。</p>
+        <button class="btn reconnect-btn" onclick="retryConnection()">再接続する</button>
+    </div>
+
+    <div class="station-grid" id="stationGrid"></div>
+
+    <!-- 音量・停止コントロール -->
+    <div class="controls-section">
+        <div class="volume-container">
+            <span>Vol</span>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+            <span id="volumeValue">100%</span>
+        </div>
+        <button class="btn btn-stop" onclick="stopPlayback()">停止ボタン</button>
+    </div>
+
+    <audio id="player"></audio>
+
+    <div class="timer-section">
+        <div>OFFタイマー <span id="timerDisplay"></span></div>
+        <div class="timer-buttons">
+            <button class="btn" onclick="setTimer(15)">15分</button>
+            <button class="btn" onclick="setTimer(30)">30分</button>
+            <button class="btn" onclick="setTimer(60)">60分</button>
+            <button class="btn" onclick="clearTimer()">解除</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const stations = [
+        { name: "NHK AM（札幌）", url: "https://simul.drdi.st.nhk/live/6/joined/master.m3u8" },
+        { name: "NHK FM（札幌）", url: "https://simul.drdi.st.nhk/live/7/joined/master.m3u8" },
+        { name: "NHK AM（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
+        { name: "NHK FM（仙台）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
+        { name: "NHK AM（東京）", url: "https://simul.drdi.st.nhk/live/3/joined/master.m3u8" },
+        { name: "NHK FM（東京）", url: "https://simul.drdi.st.nhk/live/5/joined/master.m3u8" },
+        { name: "NHK AM（名古屋）", url: "https://simul.drdi.st.nhk/live/10/joined/master.m3u8" },
+        { name: "NHK FM（名古屋）", url: "https://simul.drdi.st.nhk/live/11/joined/master.m3u8" },
+        { name: "NHK AM（大阪）", url: "https://simul.drdi.st.nhk/live/12/joined/master.m3u8" },
+        { name: "NHK FM（大阪）", url: "https://simul.drdi.st.nhk/live/13/joined/master.m3u8" },
+        { name: "NHK AM（広島）", url: "https://simul.drdi.st.nhk/live/14/joined/master.m3u8" },
+        { name: "NHK FM（広島）", url: "https://simul.drdi.st.nhk/live/15/joined/master.m3u8" },
+        { name: "NHK AM（松山）", url: "https://simul.drdi.st.nhk/live/16/joined/master.m3u8" },
+        { name: "NHK FM（松山）", url: "https://simul.drdi.st.nhk/live/17/joined/master.m3u8" },
+        { name: "NHK AM（福岡）", url: "https://simul.drdi.st.nhk/live/18/joined/master.m3u8" },
+        { name: "NHK FM（福岡）", url: "https://simul.drdi.st.nhk/live/19/joined/master.m3u8" }
+    ];
+
+    const player = document.getElementById('player');
+    const statusArea = document.getElementById('statusArea');
+    const stationGrid = document.getElementById('stationGrid');
+    const errorOverlay = document.getElementById('error-overlay');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+
+    let hls = new Hls();
+    let timerId = null;
+    let fadeOutId = null;
+    let currentUrl = "";
+
+    // 放送局タイルの生成
+    stations.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'station-tile';
+        div.innerText = s.name;
+        div.onclick = () => playStation(s.url, s.name, div);
+        stationGrid.appendChild(div);
+    });
+
+    // 音量スライダーのイベント
+    volumeSlider.oninput = (e) => {
+        const val = e.target.value;
+        player.volume = val;
+        volumeValue.innerText = Math.round(val * 100) + "%";
+    };
+
+    function playStation(url, name, element) {
+        currentUrl = url;
+        errorOverlay.style.display = 'none';
+        
+        document.querySelectorAll('.station-tile').forEach(t => t.classList.remove('playing'));
+        if(element) element.classList.add('playing');
+
+        statusArea.innerHTML = `再生中: <span class="playing-name">${name}</span>`;
+
+        if (Hls.isSupported()) {
+            hls.destroy();
+            hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(player);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                player.play();
+            });
+            
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                if (data.fatal) showError();
+            });
+        } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+            player.src = url;
+            player.addEventListener('loadedmetadata', () => {
+                player.play();
+            });
+        }
+    }
+
+    function showError() {
+        errorOverlay.style.display = 'block';
+        statusArea.innerText = "エラー：接続が中断されました";
+    }
+
+    function retryConnection() {
+        if(currentUrl) playStation(currentUrl, "再接続中...");
+    }
+
+    function setTimer(minutes) {
+        clearTimer();
+        let seconds = minutes * 60;
+        
+        timerId = setInterval(() => {
+            seconds--;
+            let m = Math.floor(seconds / 60);
+            let s = seconds % 60;
+            timerDisplay.innerText = `（あと ${m}:${s.toString().padStart(2, '0')}）`;
+
+            if (seconds === 10) startFadeOut();
+            if (seconds <= 0) stopPlayback("タイマーにより停止しました");
+        }, 1000);
+    }
+
+    function clearTimer() {
+        clearInterval(timerId);
+        clearInterval(fadeOutId);
+        timerDisplay.innerText = "";
+        player.volume = volumeSlider.value; // 元の音量に戻す
+    }
+
+    function startFadeOut() {
+        const currentVol = player.volume;
+        const step = currentVol / 10; 
+        fadeOutId = setInterval(() => {
+            if (player.volume > step) {
+                player.volume -= step;
+            } else {
+                player.volume = 0;
+                clearInterval(fadeOutId);
+            }
+        }, 1000);
+    }
+
+    function stopPlayback(msg = "停止しました") {
+        player.pause();
+        player.src = ""; // ストリーム接続を完全に切る
+        if(hls) hls.stopLoad();
+        
+        clearTimer();
+        statusArea.innerText = msg;
+        document.querySelectorAll('.station-tile').forEach(t => t.classList.remove('playing'));
+    }
+</script>
+
+</body>
+</html>

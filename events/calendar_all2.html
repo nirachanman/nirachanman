@@ -293,15 +293,27 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   font-weight: 500;
 }
 
-.new-badge {
+.badge-新着 {
   display: inline-block;
   margin-left: 4px;
-  padding: 1px 5px;
-  background: #ff4d4d; /* 元の赤を維持 */
+  padding: 1px 6px;
+  background: #ff4d4d;
   color: #fff;
-  font-size: 9px;      /* 小さく */
+  font-size: 9px;
   font-weight: 400;
-  border-radius: 10px; /* 丸く */
+  border-radius: 10px;
+  line-height: 1.2;
+}
+
+.badge-更新 {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: #ffe08a;   /* 柔らかい黄色 */
+  color: #8a6d00;        /* 落ち着いた茶色 */
+  font-size: 9px;
+  font-weight: 400;
+  border-radius: 10px;
   line-height: 1.2;
 }
 
@@ -1122,24 +1134,37 @@ function shortenGoogleLocation(loc) {
 let oldEvents = JSON.parse(localStorage.getItem("oldEvents") || "[]");
 
 /* --------------------------------------------------
-   NEW バッジ：追加から N 日以内だけ表示
+   新着・更新バッジ：追加/更新から N 日以内だけ表示
 -------------------------------------------------- */
-const NEW_DAYS = 3;  // ← NEW を表示する日数（自由に変更可）
+const BADGE_DAYS = 3;  // ← 表示期間（日数）
 
 function markNewEvents(events) {
   const now = Date.now();
 
   events.forEach(ev => {
-    const updated = ev.updated || ev.created;
-    if (!updated) return;
+    const created = ev.created ? new Date(ev.created).getTime() : null;
+    const updated = ev.updated ? new Date(ev.updated).getTime() : null;
 
-    const updatedTime = new Date(updated).getTime();
-    const diffDays = (now - updatedTime) / (1000 * 60 * 60 * 24);
-
-    // ★ NEW 条件：追加（更新）されてから NEW_DAYS 日以内
-    if (diffDays <= NEW_DAYS) {
-      ev._isNew = true;
+    // 追加されたイベント（created が存在）
+    if (created) {
+      const diffCreated = (now - created) / (1000 * 60 * 60 * 24);
+      if (diffCreated <= BADGE_DAYS) {
+        ev._badge = "新着";
+        return;
+      }
     }
+
+    // 更新されたイベント（updated が created より新しい）
+    if (created && updated && updated > created) {
+      const diffUpdated = (now - updated) / (1000 * 60 * 60 * 24);
+      if (diffUpdated <= BADGE_DAYS) {
+        ev._badge = "更新";
+        return;
+      }
+    }
+
+    // どちらでもない
+    ev._badge = "";
   });
 }
 
@@ -1151,7 +1176,9 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  const newBadge = ev._isNew ? '<span class="new-badge">新着</span>' : '';
+const badge = ev._badge
+  ? `<span class="badge-${ev._badge}">${ev._badge}</span>`
+  : '';
 
   let printLocation = resolvePlace(ev, description);
   printLocation = normalizeGymLocation(printLocation);
@@ -1193,7 +1220,7 @@ function createEventHTML(ev, baseColor) {
       <div class="event-time">${timeLabel}</div>
 
       <div class="event-title facility-${facilityClass}">
-        ${title}${newBadge}
+        ${title}${badge}
         <span class="print-only-location" data-print-location="${printLocation}"></span>
         <div class="tooltip">${detailLines}</div>
       </div>

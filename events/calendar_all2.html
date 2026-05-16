@@ -293,6 +293,18 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   font-weight: 500;
 }
 
+.new-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  background: #ff4d4d; /* 元の赤を維持 */
+  color: #fff;
+  font-size: 9px;      /* 小さく */
+  font-weight: 400;
+  border-radius: 10px; /* 丸く */
+  line-height: 1.2;
+}
+
 /* PC レイアウト */
 @media (min-width: 769px) {
   .event {
@@ -902,7 +914,7 @@ function updatePrintHeader() {
   }
 }
 
-/* キーワード色（場所も含めて判定する最終版） */
+/* キーワード色（場所も含めて判定） */
 function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
     { keywords: ["／", "選挙", "特定", "検診"], color: "#8b5cf6" },
@@ -1034,17 +1046,13 @@ const PLACE_PATTERNS = [
   /全館[^\s、。]*/,
 ];
 
-/* --------------------------------------------------
-   場所が「場所っぽい」か判定する
--------------------------------------------------- */
+/* 場所が「場所っぽい」か判定する */
 function isPlaceLike(text) {
   if (!text) return false;
   return PLACE_PATTERNS.some(p => p.test(text));
 }
 
-/* --------------------------------------------------
-   長文から場所語だけ抽出
--------------------------------------------------- */
+/* 長文から場所語だけ抽出 */
 function extractPlaceFromLongText(text) {
   if (!text) return "";
 
@@ -1056,57 +1064,39 @@ function extractPlaceFromLongText(text) {
   return "";
 }
 
-/* --------------------------------------------------
-   タイトルの（〇〇）から場所を抽出
--------------------------------------------------- */
+/* タイトルの（〇〇）から場所を抽出 */
 function extractPlaceFromTitle(title) {
   const m = title.match(/（(.+?)）/);
   return m ? m[1].trim() : "";
 }
 
-/* --------------------------------------------------
-   場所抽出ロジック（①→②→③→④）
-   ※ Google location は完全に無視（印刷用）
--------------------------------------------------- */
+/* 場所抽出ロジック（①→②→③→④） */
 function resolvePlace(ev, description) {
-
   const firstLine = description.split("\n")[0].trim();
 
-  // ① 長文から場所語だけ抽出
   const extracted = extractPlaceFromLongText(firstLine);
   if (extracted) return extracted;
 
-  // ② 行全体が場所っぽい
   if (isPlaceLike(firstLine)) return firstLine;
 
-  // ③ タイトルの（〇〇）
   const fromTitle = extractPlaceFromTitle(ev.summary || "");
   if (fromTitle) return fromTitle;
 
-  // ④ どれも無い
   return "";
 }
 
-/* --------------------------------------------------
-   体育館の場所を正規化（印刷用）
-   体育館全アリーナ → 全アリーナ
-   体育館南フロア → 南フロア
-   体育館北フロア → 北フロア
--------------------------------------------------- */
+/* 体育館の場所を正規化（印刷用） */
 function normalizeGymLocation(text) {
   if (!text) return "";
 
-  // 体育館全アリーナ / 体育館全フロア
   if (/^体育館全.*(アリーナ|フロア)/.test(text)) {
     return "全アリーナ";
   }
 
-  // 体育館南アリーナ / 体育館南フロア
   if (/^体育館南.*(アリーナ|フロア)/.test(text)) {
     return "南フロア";
   }
 
-  // 体育館北アリーナ / 体育館北フロア
   if (/^体育館北.*(アリーナ|フロア)/.test(text)) {
     return "北フロア";
   }
@@ -1114,11 +1104,9 @@ function normalizeGymLocation(text) {
   return text;
 }
 
-/* --------------------------------------------------
-   Google location の短縮処理（モーダル用）
--------------------------------------------------- */
+/* Google location の短縮処理（モーダル用） */
 function shortenGoogleLocation(loc) {
-  if (!loc) return ""; // 空白ならそのまま空白
+  if (!loc) return "";
 
   return loc
     .replace(/^岩手県岩手郡/, "")
@@ -1130,9 +1118,32 @@ function shortenGoogleLocation(loc) {
     .trim();
 }
 
+/* NEW バッジ判定用：前回のイベント一覧を取得 */
+let oldEvents = JSON.parse(localStorage.getItem("oldEvents") || "[]");
+
 /* --------------------------------------------------
-   イベント HTML（右クリック編集対応版）
+   NEW バッジ：追加から N 日以内だけ表示
 -------------------------------------------------- */
+const NEW_DAYS = 3;  // ← NEW を表示する日数（自由に変更可）
+
+function markNewEvents(events) {
+  const now = Date.now();
+
+  events.forEach(ev => {
+    const updated = ev.updated || ev.created;
+    if (!updated) return;
+
+    const updatedTime = new Date(updated).getTime();
+    const diffDays = (now - updatedTime) / (1000 * 60 * 60 * 24);
+
+    // ★ NEW 条件：追加（更新）されてから NEW_DAYS 日以内
+    if (diffDays <= NEW_DAYS) {
+      ev._isNew = true;
+    }
+  });
+}
+
+/* イベント HTML（右クリック編集対応版 + NEWバッジ対応） */
 function createEventHTML(ev, baseColor) {
   ev._facility = ev._facility || detectFacility(ev);
 
@@ -1140,18 +1151,15 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  // ★ 印刷用：説明1行目から抽出
-  let printLocation = resolvePlace(ev, description);
+  const newBadge = ev._isNew ? '<span class="new-badge">新着</span>' : '';
 
-  // ★ 体育館の場所を正規化（あなたの要望）
+  let printLocation = resolvePlace(ev, description);
   printLocation = normalizeGymLocation(printLocation);
 
-  // ★ モーダル用：Google location を優先し、短縮する
   let modalLocation = "";
   if (ev.location) {
     modalLocation = shortenGoogleLocation(ev.location);
   }
-  // Google location が空なら空白のまま（printLocation に fallback しない）
 
   const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;
@@ -1185,7 +1193,7 @@ function createEventHTML(ev, baseColor) {
       <div class="event-time">${timeLabel}</div>
 
       <div class="event-title facility-${facilityClass}">
-        ${title}
+        ${title}${newBadge}
         <span class="print-only-location" data-print-location="${printLocation}"></span>
         <div class="tooltip">${detailLines}</div>
       </div>
@@ -1278,6 +1286,10 @@ function getRowClass(dateObj, holidayMap, dateStr) {
 
 /* テーブル描画 */
 function renderTable(events, holidayMap, year, month, title, themeColor) {
+
+  // NEW バッジ判定
+  markNewEvents(events);
+
   const box = document.createElement("div");
   box.className = "calendar-box";
 
@@ -1648,17 +1660,14 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
-/* -------------------------
-   場所（resolvePlace の結果をそのまま使う）
-------------------------- */
-let place = eventEl.dataset.modalLocation;
+  /* 場所（modalLocation をそのまま使う） */
+  let place = eventEl.dataset.modalLocation;
 
-// undefined / null のときだけ "(場所なし)"
-if (place == null) {
-  place = "(場所なし)";
-}
-
-// 空文字 "" はそのまま表示（＝場所なし扱いしない）
+  // undefined / null のときだけ "(場所なし)"
+  if (place == null) {
+    place = "(場所なし)";
+  }
+  // 空文字 "" はそのまま表示
 
   const tooltip = eventEl.querySelector(".tooltip");
   let description = "(説明なし)";

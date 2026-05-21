@@ -16,10 +16,9 @@ body {
   color: #000080;
   padding: 6px;
   font-size: 14px;
-  height: auto;
-  overflow-y: auto;
+  height: 100vh;
+  overflow-y: hidden;
   box-sizing: border-box;
-  min-height: 100vh;  /* ← 代わりにこれでOK */
 }
 
 /* -------------------------
@@ -92,6 +91,44 @@ button:hover {
   background: #00BCD4;
 }
 
+.summary-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ondemand-button {
+  background: #9575CD;      /* 紫系で差別化 */
+  color: #FFFFFF;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ondemand-button:hover {
+  background: #7E57C2;
+}
+
+/* 3つのボタンを完全に揃える共通スタイル */
+.summary-buttons button,
+.summary-buttons .ondemand-button {
+  display: inline-flex;        /* ★ 高さを揃える最重要ポイント */
+  align-items: center;         /* ★ テキストを縦中央に */
+  justify-content: center;
+
+  padding: 6px 10px;           /* ボタン高さを統一 */
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  min-width: 60px;
+  height: 32px;                /* ★ 高さを完全固定して揃える */
+  box-sizing: border-box;
+}
+
 /* -------------------------
    プレイヤーカード（audio）
 ------------------------- */
@@ -158,7 +195,7 @@ button:hover {
 .list {
   overflow-y: auto;
   scrollbar-gutter: stable;
-  max-height: calc(100vh - 220px); /* 一体型に最適化 */
+  max-height: calc(100vh - 200px); /* 一体型に最適化 */
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   margin-top: 4px;
@@ -247,11 +284,17 @@ button:hover {
   </div>
 
   <details open class="news-block">
-    <summary>
-      <span>📻 ニュース一覧</span>
-      <button id="refreshList">🔄 更新</button>
-      <button id="liveButton">📡 らじる☆らじる</button>
-    </summary>
+<summary>
+  <span>📻 ニュース一覧</span>
+
+  <div class="summary-buttons">
+    <button id="refreshList">🔄 更新</button>
+    <button id="liveButton">📡 らじる☆らじる</button>
+    <a href="https://www.nhk.or.jp/radio/ondemand/" 
+       target="_blank" 
+       class="ondemand-button">▶️ 聴き逃し</a>
+  </div>
+</summary>
 
     <div id="list" class="list"></div>
   </details>

@@ -91,6 +91,44 @@ button:hover {
   background: #00BCD4;
 }
 
+.summary-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ondemand-button {
+  background: #9575CD;      /* 紫系で差別化 */
+  color: #FFFFFF;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ondemand-button:hover {
+  background: #7E57C2;
+}
+
+/* 3つのボタンを完全に揃える共通スタイル */
+.summary-buttons button,
+.summary-buttons .ondemand-button {
+  display: inline-flex;        /* ★ 高さを揃える最重要ポイント */
+  align-items: center;         /* ★ テキストを縦中央に */
+  justify-content: center;
+
+  padding: 6px 10px;           /* ボタン高さを統一 */
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  min-width: 60px;
+  height: 32px;                /* ★ 高さを完全固定して揃える */
+  box-sizing: border-box;
+}
+
 /* -------------------------
    プレイヤーカード（audio）
 ------------------------- */
@@ -246,11 +284,17 @@ button:hover {
   </div>
 
   <details open class="news-block">
-    <summary>
-      <span>📻 ニュース一覧</span>
-      <button id="refreshList">🔄 更新</button>
-      <button id="liveButton">📡 らじる☆らじる</button>
-    </summary>
+<summary>
+  <span>📻 ニュース一覧</span>
+
+  <div class="summary-buttons">
+    <button id="refreshList">🔄 更新</button>
+    <button id="liveButton">📡 らじる☆らじる</button>
+    <a href="https://www.nhk.or.jp/radio/ondemand/" 
+       target="_blank" 
+       class="ondemand-button">▶️ 聴き逃し</a>
+  </div>
+</summary>
 
     <div id="list" class="list"></div>
   </details>

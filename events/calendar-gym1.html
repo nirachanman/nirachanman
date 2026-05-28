@@ -641,7 +641,7 @@ body {
 
   <!-- 固定タイトルバー -->
   <div class="title">
-    <div class="title-text">社会体育館 予定表（月タイトル）をクリックで開閉</div>
+    <div class="title-text">社会体育館 予定表（当月から6か月先まで）</div>
   </div>
 
   <!-- カレンダー本体 -->
@@ -926,14 +926,14 @@ function updatePrintHeader() {
   if (pm) pm.textContent = `${year}年 ${names[monthIndex]}`;
 }
 
-/* ===== カレンダー描画（当月から15か月先まで） ===== */
+/* ===== カレンダー描画（当月から6か月先まで） ===== */
 async function renderCalendar() {
   const now = new Date();
   const startYear  = now.getFullYear();
   const startMonth = now.getMonth();
 
   const start = new Date(startYear, startMonth, 1);
-  const end   = new Date(startYear, startMonth + 16, 1);
+  const end   = new Date(startYear, startMonth + 7, 1); // ★ 16 → 7（当月 + 6か月先）
 
   const [events, holidayMap] = await Promise.all([
     loadEvents(start, end),
@@ -943,7 +943,7 @@ async function renderCalendar() {
   const eventsByDate = groupEventsByDate(events);
 
   let html = "";
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 7; i++) {  // ★ 16 → 7（合計7か月分）
     const y = startYear + Math.floor((startMonth + i) / 12);
     const m = (startMonth + i) % 12;
     html += renderMonthList(y, m, eventsByDate, holidayMap);

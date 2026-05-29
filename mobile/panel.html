@@ -105,11 +105,25 @@ button:hover { background: #00BCD4; }
   margin: 0;
 }
 
-/* ボタン群も1行固定 */
-.summary-buttons {
+/* summary 内を横スクロール可能にする */
+.summary-scroll {
   display: flex;
-  flex-wrap: nowrap;       /* ← ボタンが折り返されない */
-  gap: 6px;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 4px 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.summary-scroll::-webkit-scrollbar {
+  display: none; /* スクロールバー非表示でスマホ向け */
+}
+
+/* 各ボタンの高さを揃える（任意） */
+.summary-scroll button,
+.summary-scroll .ondemand-button,
+.summary-scroll span {
+  flex: 0 0 auto; /* ← 横スクロールで必須 */
 }
 
 .ondemand-button {
@@ -279,13 +293,13 @@ button:hover { background: #00BCD4; }
 
   <details open class="news-block">
 <summary>
-  <span>📻 ニュース一覧</span>
+  <div class="summary-scroll">
+    <span>📻 ニュース一覧</span>
 
-  <div class="summary-buttons">
     <button id="refreshList">🔄 更新</button>
-    <button id="liveButton">📡 らじる☆らじる</button>
-    <a href="https://www.nhk.or.jp/radio/ondemand/" 
-       target="_blank" 
+    <button id="liveButton">📡 らじる☆らじじる</button>
+    <a href="https://www.nhk.or.jp/radio/ondemand/"
+       target="_blank"
        class="ondemand-button">▶️ 聴き逃し</a>
   </div>
 </summary>

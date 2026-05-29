@@ -124,6 +124,14 @@ button:hover { background: #00BCD4; }
 .summary-scroll .ondemand-button,
 .summary-scroll span {
   flex: 0 0 auto; /* ← 横スクロールで必須 */
+  font-size: 13px !important;     /* ← ボタンと完全一致 */
+  line-height: 1.2 !important;    /* ← 高さの見え方を揃える */
+}
+.summary-scroll .ondemand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
 }
 
 .ondemand-button {
@@ -291,25 +299,22 @@ button:hover { background: #00BCD4; }
     <audio id="audio" controls></audio>
   </div>
 
-  <details open class="news-block">
-<summary>
-  <div class="summary-scroll">
-    <span>📻 ニュース一覧</span>
+<div class="news-block">
 
+  <!-- ★ summary 削除 → ボタンを直接配置 -->
+  <div class="summary-scroll">
     <button id="refreshList">🔄 更新</button>
-    <button id="liveButton">📡 らじる☆らじじる</button>
+    <button id="liveButton">📡 らじる☆らじる</button>
     <a href="https://www.nhk.or.jp/radio/ondemand/"
        target="_blank"
        class="ondemand-button">▶️ 聴き逃し</a>
   </div>
-</summary>
 
-    <!-- ★ 日付フィルタ -->
-    <div id="dateFilter" class="date-filter"></div>
+  <!-- 日付フィルタ -->
+  <div id="dateFilter" class="date-filter"></div>
 
-    <!-- ★ 日付ごとのニュース一覧 -->
-    <div id="list" class="list"></div>
-  </details>
+  <!-- ニュース一覧 -->
+  <div id="list" class="list"></div>
 
 </div>
 

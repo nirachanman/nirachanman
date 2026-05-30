@@ -119,19 +119,27 @@ button:hover { background: #00BCD4; }
   display: none; /* スクロールバー非表示でスマホ向け */
 }
 
-/* 各ボタンの高さを揃える（任意） */
+/* すべてのタブ（summary + 日付タブ）を Echo Show 向けにコンパクト化 */
 .summary-scroll button,
 .summary-scroll .ondemand-button,
-.summary-scroll span {
-  flex: 0 0 auto; /* ← 横スクロールで必須 */
-  font-size: 13px !important;     /* ← ボタンと完全一致 */
-  line-height: 1.2 !important;    /* ← 高さの見え方を揃える */
-}
-.summary-scroll .ondemand-button {
+.date-btn {
+  padding: 2px 8px;        /* ← 上下2px・左右8px に統一 */
+  height: 26px;            /* ← Echo Show でも見やすい最適値 */
+  font-size: 13px;
+  border-radius: 18px;     /* ← 少し小さめの pill 形状 */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 選択中の日付タブ（色はそのまま） */
+.date-btn[aria-selected="true"] {
+  background: #1E88E5;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30,136,229,0.18);
 }
 
 .ondemand-button {
@@ -166,7 +174,7 @@ button:hover { background: #00BCD4; }
 .player-card {
   background: #FFFFFF;
   border-radius: 10px;
-  padding: 6px 8px;
+  padding: 4px 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .player-card audio {

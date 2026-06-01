@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Googleカレンダーby川口公民館</title>
+  <title>日程・川口公民館＆社会体育館＆別館</title>
 
 <style>
 /* --------------------------------------------------
@@ -73,7 +73,6 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  margin-left: auto;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -90,7 +89,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   margin-left: 10px;
 }
 .calendar-buttons button {
-  padding: 4px 14px;
+  padding: 4px 10px;
   flex-shrink: 0;
   border-radius: 9999px;
   border: 2px solid rgba(255,255,255,0.7);
@@ -102,7 +101,7 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 140px;
+  min-width: 100px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.15);
   transition: all 0.25s ease;
   position: relative;
@@ -139,6 +138,26 @@ body.bg-all       { background: linear-gradient(135deg, #f2f2f2, #e0e0e0); }
   transform: scale(1.15);
   box-shadow: 0 0 12px rgba(66,133,244,0.7);
   border-color: rgba(255,255,255,1);
+}
+
+/* PC専用：コンパクトリンクボタン */
+.link-btn {
+  display: inline-block;
+  padding: 4px 6px;        /* ← 小さめの余白 */
+  margin-left: 6px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;         /* ← 小さめの文字 */
+  color: #333;
+  text-decoration: none;
+  line-height: 1.2;
+  white-space: nowrap;     /* ← 改行させない */
+  transition: background 0.2s ease;
+}
+
+.link-btn:hover {
+  background: #e5e5e5;
 }
 
 /* 施設別カラー */
@@ -273,6 +292,30 @@ th:nth-child(3), td:nth-child(3) { width: 48% !important; }
   font-weight: 500;
 }
 
+.badge-新着 {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 4px;
+  background: #ff4d4d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: 10px;
+  line-height: 1.2;
+}
+
+.badge-更新 {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 4px;
+  background: #fffd8a;   /* 黄色 */
+  color: #704904;        /* 茶色 */
+  font-size: 9px;
+  font-weight: 400;
+  border-radius: 10px;
+  line-height: 1.2;
+}
+ 
 /* PC レイアウト */
 @media (min-width: 769px) {
   .event {
@@ -710,7 +753,74 @@ tr.row-holiday td { background: #fff7ed !important; }
     font-size: 10px !important;
     line-height: 1.2 !important;
   }
+
+  .badge-新着,
+  .badge-更新 {
+    display: none !important;
+  }
 }
+/* --------------------------------------------------
+   設定パネル（バッジ ON/OFF）
+-------------------------------------------------- */
+.settings-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  background: #eee;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  width: 200px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 9999;
+}
+
+.setting-item {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* バッジ非表示モード */
+.hide-badges .badge-新着,
+.hide-badges .badge-更新 {
+  display: none !important;
+}
+/* top-bar 内に置く設定ボタン（高さ・雰囲気を揃える） */
+.settings-btn-inline {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: background 0.2s ease;
+}
+
+.settings-btn-inline:hover {
+  background: #e5e5e5;
+}
+
 /* --------------------------------------------------
    ⑩ 補助スタイル
 -------------------------------------------------- */
@@ -781,8 +891,19 @@ tr.row-holiday td { background: #fff7ed !important; }
   <span id="print-date"></span>
 </div>
 
+<!-- 設定パネル（位置はこのままでOK） -->
+<div id="settings-panel" class="settings-panel">
+  <h3>表示設定</h3>
+
+  <label class="setting-item">
+    <input type="checkbox" id="toggle-badges">
+    新着・更新バッジを表示する
+  </label>
+</div>
+
 <div class="header-fixed">
   <div class="top-bar">
+
     <div class="calendar-buttons">
       <button id="btn-kouminkan" data-cal="1" class="active">🏬 公民館</button>
       <button id="btn-gym" data-cal="2">🏃 体育館</button>
@@ -792,14 +913,32 @@ tr.row-holiday td { background: #fff7ed !important; }
 
     <button id="reload-btn" class="sp-only reload-btn">🔄</button>
 
-    <!-- ★ 印刷ボタン（Googleで編集の左側） -->
-    <button id="print-btn" class="print-btn pc-only">🖨 印刷</button>
+    <!-- 印刷ボタン -->
+    <button id="print-btn" class="print-btn pc-only">🖨</button>
 
+    <!-- 公民館カレンダー -->
+    <a href="https://nirachanman.github.io/nirachanman/events/calendar_kouminkan.html" 
+       target="_blank" class="pc-only link-btn">
+      🏬公民館カレンダー
+    </a>
+
+    <!-- 体育館カレンダー -->
+    <a href="https://nirachanman.github.io/nirachanman/events/calendar_taiikukan.html" 
+       target="_blank" class="pc-only link-btn">
+      🏃体育館カレンダー
+    </a>
+
+    <!-- Googleで編集 -->
     <a href="https://calendar.google.com/" target="_blank" class="google-cal-btn">
       <span class="google-cal-icon">📅</span>
       <span class="google-cal-label">Googleで編集</span>
     </a>
+
+    <!-- ★ 設定ボタン（top-bar 内に移動） -->
+    <button id="settings-toggle" class="settings-btn-inline">⚙ 設定</button>
+
   </div>
+</div>
 
   <div class="tabs" id="monthTabs"></div>
 </div>
@@ -870,10 +1009,10 @@ function updatePrintHeader() {
   }
 }
 
-/* キーワード色（場所も含めて判定する最終版） */
+/* キーワード色（場所も含めて判定） */
 function getKeywordColor(title, description, location) {
   const KEYWORD_COLORS = [
-    { keywords: ["／", "選挙", "検診"], color: "#8b5cf6" },
+    { keywords: ["／", "選挙", "特定", "検診"], color: "#8b5cf6" },
     { keywords: ["＆", "＆", "全館", "全室"], color: "#4169e1" },
 
     { keywords: ["仮）", "仮予約"], color: "#a9a9a9" },
@@ -1002,17 +1141,13 @@ const PLACE_PATTERNS = [
   /全館[^\s、。]*/,
 ];
 
-/* --------------------------------------------------
-   場所が「場所っぽい」か判定する
--------------------------------------------------- */
+/* 場所が「場所っぽい」か判定する */
 function isPlaceLike(text) {
   if (!text) return false;
   return PLACE_PATTERNS.some(p => p.test(text));
 }
 
-/* --------------------------------------------------
-   長文から場所語だけ抽出
--------------------------------------------------- */
+/* 長文から場所語だけ抽出 */
 function extractPlaceFromLongText(text) {
   if (!text) return "";
 
@@ -1024,57 +1159,39 @@ function extractPlaceFromLongText(text) {
   return "";
 }
 
-/* --------------------------------------------------
-   タイトルの（〇〇）から場所を抽出
--------------------------------------------------- */
+/* タイトルの（〇〇）から場所を抽出 */
 function extractPlaceFromTitle(title) {
   const m = title.match(/（(.+?)）/);
   return m ? m[1].trim() : "";
 }
 
-/* --------------------------------------------------
-   場所抽出ロジック（①→②→③→④）
-   ※ Google location は完全に無視（印刷用）
--------------------------------------------------- */
+/* 場所抽出ロジック（①→②→③→④） */
 function resolvePlace(ev, description) {
-
   const firstLine = description.split("\n")[0].trim();
 
-  // ① 長文から場所語だけ抽出
   const extracted = extractPlaceFromLongText(firstLine);
   if (extracted) return extracted;
 
-  // ② 行全体が場所っぽい
   if (isPlaceLike(firstLine)) return firstLine;
 
-  // ③ タイトルの（〇〇）
   const fromTitle = extractPlaceFromTitle(ev.summary || "");
   if (fromTitle) return fromTitle;
 
-  // ④ どれも無い
   return "";
 }
 
-/* --------------------------------------------------
-   体育館の場所を正規化（印刷用）
-   体育館全アリーナ → 全アリーナ
-   体育館南フロア → 南フロア
-   体育館北フロア → 北フロア
--------------------------------------------------- */
+/* 体育館の場所を正規化（印刷用） */
 function normalizeGymLocation(text) {
   if (!text) return "";
 
-  // 体育館全アリーナ / 体育館全フロア
   if (/^体育館全.*(アリーナ|フロア)/.test(text)) {
     return "全アリーナ";
   }
 
-  // 体育館南アリーナ / 体育館南フロア
   if (/^体育館南.*(アリーナ|フロア)/.test(text)) {
     return "南フロア";
   }
 
-  // 体育館北アリーナ / 体育館北フロア
   if (/^体育館北.*(アリーナ|フロア)/.test(text)) {
     return "北フロア";
   }
@@ -1082,11 +1199,9 @@ function normalizeGymLocation(text) {
   return text;
 }
 
-/* --------------------------------------------------
-   Google location の短縮処理（モーダル用）
--------------------------------------------------- */
+/* Google location の短縮処理（モーダル用） */
 function shortenGoogleLocation(loc) {
-  if (!loc) return ""; // 空白ならそのまま空白
+  if (!loc) return "";
 
   return loc
     .replace(/^岩手県岩手郡/, "")
@@ -1098,9 +1213,45 @@ function shortenGoogleLocation(loc) {
     .trim();
 }
 
+/* NEW バッジ判定用：前回のイベント一覧を取得 */
+let oldEvents = JSON.parse(localStorage.getItem("oldEvents") || "[]");
+
 /* --------------------------------------------------
-   イベント HTML（右クリック編集対応版）
+   新着・更新バッジ：追加/更新から N 日以内だけ表示
 -------------------------------------------------- */
+const BADGE_DAYS = 3;  // ← 表示期間（日数）
+
+function markNewEvents(events) {
+  const now = Date.now();
+
+  events.forEach(ev => {
+    const created = ev.created ? new Date(ev.created).getTime() : null;
+    const updated = ev.updated ? new Date(ev.updated).getTime() : null;
+
+    // 追加されたイベント（created が存在）
+    if (created) {
+      const diffCreated = (now - created) / (1000 * 60 * 60 * 24);
+      if (diffCreated <= BADGE_DAYS) {
+        ev._badge = "新着";
+        return;
+      }
+    }
+
+    // 更新されたイベント（updated が created より新しい）
+    if (created && updated && updated > created) {
+      const diffUpdated = (now - updated) / (1000 * 60 * 60 * 24);
+      if (diffUpdated <= BADGE_DAYS) {
+        ev._badge = "更新";
+        return;
+      }
+    }
+
+    // どちらでもない
+    ev._badge = "";
+  });
+}
+
+/* イベント HTML（右クリック編集対応版 + NEWバッジ対応） */
 function createEventHTML(ev, baseColor) {
   ev._facility = ev._facility || detectFacility(ev);
 
@@ -1108,18 +1259,17 @@ function createEventHTML(ev, baseColor) {
   const rawDescription = ev.description || "";
   const description = stripHTML(rawDescription);
 
-  // ★ 印刷用：説明1行目から抽出
-  let printLocation = resolvePlace(ev, description);
+const badge = ev._badge
+  ? `<span class="badge-${ev._badge}">${ev._badge}</span>`
+  : '';
 
-  // ★ 体育館の場所を正規化（あなたの要望）
+  let printLocation = resolvePlace(ev, description);
   printLocation = normalizeGymLocation(printLocation);
 
-  // ★ モーダル用：Google location を優先し、短縮する
   let modalLocation = "";
   if (ev.location) {
     modalLocation = shortenGoogleLocation(ev.location);
   }
-  // Google location が空なら空白のまま（printLocation に fallback しない）
 
   const keywordColor = getKeywordColor(title, description, printLocation);
   const color = keywordColor || baseColor;
@@ -1153,7 +1303,7 @@ function createEventHTML(ev, baseColor) {
       <div class="event-time">${timeLabel}</div>
 
       <div class="event-title facility-${facilityClass}">
-        ${title}
+        ${title}${badge}
         <span class="print-only-location" data-print-location="${printLocation}"></span>
         <div class="tooltip">${detailLines}</div>
       </div>
@@ -1246,6 +1396,10 @@ function getRowClass(dateObj, holidayMap, dateStr) {
 
 /* テーブル描画 */
 function renderTable(events, holidayMap, year, month, title, themeColor) {
+
+  // NEW バッジ判定
+  markNewEvents(events);
+
   const box = document.createElement("div");
   box.className = "calendar-box";
 
@@ -1616,17 +1770,14 @@ document.addEventListener("click", function(e) {
     time = dateStr ? `${dateStr} ${jpTime}` : jpTime;
   }
 
-/* -------------------------
-   場所（resolvePlace の結果をそのまま使う）
-------------------------- */
-let place = eventEl.dataset.modalLocation;
+  /* 場所（modalLocation をそのまま使う） */
+  let place = eventEl.dataset.modalLocation;
 
-// undefined / null のときだけ "(場所なし)"
-if (place == null) {
-  place = "(場所なし)";
-}
-
-// 空文字 "" はそのまま表示（＝場所なし扱いしない）
+  // undefined / null のときだけ "(場所なし)"
+  if (place == null) {
+    place = "(場所なし)";
+  }
+  // 空文字 "" はそのまま表示
 
   const tooltip = eventEl.querySelector(".tooltip");
   let description = "(説明なし)";
@@ -1748,6 +1899,56 @@ document.addEventListener("DOMContentLoaded", () => {
     printDateEl.textContent = `印刷日：${y}/${m}/${d}`;
   }
 });
+// -------------------------------
+// 設定パネルの開閉
+// -------------------------------
+document.getElementById("settings-toggle").addEventListener("click", () => {
+  const panel = document.getElementById("settings-panel");
+  panel.style.display = (panel.style.display === "block") ? "none" : "block";
+});
+
+// パネル外クリックで閉じる
+document.addEventListener("click", function(e) {
+  const panel = document.getElementById("settings-panel");
+  const btn = document.getElementById("settings-toggle");
+
+  // パネルが開いていて、クリックがパネルでもボタンでもない場合
+  if (panel.style.display === "block" &&
+      !panel.contains(e.target) &&
+      !btn.contains(e.target)) {
+    panel.style.display = "none";
+  }
+});
+
+// -------------------------------
+// バッジ表示設定の読み込み
+// -------------------------------
+(function() {
+  const showBadges = localStorage.getItem("showBadges");
+
+  if (showBadges === "0") {
+    document.body.classList.add("hide-badges");
+  }
+
+  const badgeToggle = document.getElementById("toggle-badges");
+  if (badgeToggle) {
+    badgeToggle.checked = showBadges !== "0";
+  }
+})();
+
+// -------------------------------
+// バッジ表示 ON/OFF の保存
+// -------------------------------
+document.getElementById("toggle-badges")?.addEventListener("change", function() {
+  if (this.checked) {
+    document.body.classList.remove("hide-badges");
+    localStorage.setItem("showBadges", "1");
+  } else {
+    document.body.classList.add("hide-badges");
+    localStorage.setItem("showBadges", "0");
+  }
+});
+
 </script>
 
 </body>

@@ -1150,7 +1150,7 @@ let oldEvents = JSON.parse(localStorage.getItem("oldEvents") || "[]");
 /* --------------------------------------------------
    新着・更新バッジ：追加/更新から N 日以内だけ表示
 -------------------------------------------------- */
-const BADGE_DAYS = 1;  // ← 表示期間（日数）
+const BADGE_DAYS = 3;  // ← 表示期間（日数）
 
 function markNewEvents(events) {
   const now = Date.now();

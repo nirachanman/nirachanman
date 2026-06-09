@@ -8,7 +8,7 @@
         :root {
             --bg-color: #121212;
             --text-color: #e0e0e0;
-            --accent-color: #ff4d4d;
+            --accent-color: #ff4d4d; /* 速報感のある赤 */
             --card-bg: #1e1e1e;
             --card-active: #2d2d2d;
         }
@@ -43,6 +43,7 @@
             flex-direction: column;
             gap: 12px;
         }
+        /* タップできるニュースカード */
         .news-item {
             display: block;
             text-decoration: none;
@@ -53,11 +54,13 @@
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: background-color 0.1s ease;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* タップ時のデフォルト枠線を消す */
         }
+        /* 画面をタッチした瞬間のフィードバック */
         .news-item:active {
             background-color: var(--card-active);
         }
+        /* 1番最新のニュースを目立たせる */
         .news-item:first-child {
             border-left-color: var(--accent-color);
             background-color: #2a1b1b;
@@ -90,8 +93,12 @@
     </main>
 
     <script>
+        // NHKの主要・全国ニュースRSS
         const RSS_URL = 'https://www.nhk.or.jp/rss/news/cat0.xml';
+        // CORS制限を回避するパブリックプロキシ
         const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
+        
+        // 更新間隔：1分（60000ミリ秒）
         const INTERVAL = 60000; 
 
         async function fetchNews() {
@@ -114,6 +121,7 @@
                 }
 
                 let htmlContent = '';
+                // 上位10件を抽出
                 const maxItems = Math.min(items.length, 10);
                 
                 for (let i = 0; i < maxItems; i++) {
@@ -121,19 +129,16 @@
                     const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
                     const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
                     
-                    // 日付と時間のフォーマット処理を変更 (例: "10/25 14:05")
+                    // 時間のパース (例: 14:05)
                     let displayTime = '';
                     if (pubDateStr) {
                         const date = new Date(pubDateStr);
                         if (!isNaN(date)) {
-                            const month = date.getMonth() + 1;
-                            const day = date.getDate();
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            displayTime = `${month}/${day} ${hours}:${minutes}`;
+                            displayTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
                         }
                     }
 
+                    // 全体をリンク(<a>タグ)にしてタップ可能に
                     htmlContent += `
                         <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
                             <div class="news-title">${title}</div>
@@ -152,8 +157,33 @@
             }
         }
 
+        // 起動時実行と、1分ごとの定期リフレッシュ
         fetchNews();
         setInterval(fetchNews, INTERVAL);
+
+// --- ここから追加：スリープ防止（Wake Lock）処理 ---
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        // ブラウザがWake Lockに対応しているか確認して要求
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen Wake Lock is active');
+        }
+    } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+    }
+}
+
+// ページ表示時と、画面が復帰した時に再度要求する
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+        requestWakeLock();
+    }
+});
+// --- ここまで追加 ---
     </script>
 </body>
 </html>

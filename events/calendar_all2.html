@@ -910,10 +910,10 @@ tr.row-holiday td { background: #fff7ed !important; }
   <div class="top-bar">
 
     <div class="calendar-buttons">
-      <button id="btn-kouminkan" data-cal="1" class="active">🏬 公民館</button>
-      <button id="btn-gym" data-cal="2">🏃 体育館</button>
-      <button id="btn-bekkan" data-cal="3">📚 別館</button>
-      <button id="btn-all" data-cal="all">🔘 全施設</button>
+     <button id="btn-kouminkan" data-cal="1">🏬 公民館</button>
+     <button id="btn-gym" data-cal="2">🏃 体育館</button>
+     <button id="btn-bekkan" data-cal="3">📚 別館</button>
+     <button id="btn-all" data-cal="all" class="active">🔘 全施設</button>
     </div>
 
     <button id="reload-btn" class="sp-only reload-btn">🔄</button>
@@ -963,7 +963,7 @@ tr.row-holiday td { background: #fff7ed !important; }
 <script>
 console.log("JS動いてるよ");
 
-let CURRENT_CALENDAR = 1;
+let CURRENT_CALENDAR = "all";
 
 const CALENDAR_IDS = {
   1: "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com",

@@ -11,6 +11,8 @@
             --accent-color: #ff4d4d; /* 速報感のある赤 */
             --card-bg: #1e1e1e;
             --card-active: #2d2d2d;
+            --btn-bg: #333333;
+            --btn-active: #444444;
         }
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -21,12 +23,16 @@
             overflow-x: hidden;
         }
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 10px;
             margin-bottom: 15px;
+        }
+        /* ヘッダー上部（タイトルとボタン）を横並びに */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
         }
         h1 {
             font-size: 1.6rem;
@@ -34,9 +40,28 @@
             color: #fff;
             font-weight: bold;
         }
+        /* 追加したリンクボタンのスタイル */
+        .link-btn {
+            display: inline-block;
+            background-color: var(--btn-bg);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            transition: background-color 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .link-btn:active {
+            background-color: var(--btn-active);
+        }
+        /* ステータス表示（更新時刻） */
         #status {
             font-size: 0.85rem;
             color: #aaa;
+            text-align: right;
         }
         #news-container {
             display: flex;
@@ -54,13 +79,11 @@
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: background-color 0.1s ease;
-            -webkit-tap-highlight-color: transparent; /* タップ時のデフォルト枠線を消す */
+            -webkit-tap-highlight-color: transparent;
         }
-        /* 画面をタッチした瞬間のフィードバック */
         .news-item:active {
             background-color: var(--card-active);
         }
-        /* 1番最新のニュースを目立たせる */
         .news-item:first-child {
             border-left-color: var(--accent-color);
             background-color: #2a1b1b;
@@ -84,7 +107,10 @@
 <body>
 
     <header>
-        <h1>NHK 全国新着ニュース</h1>
+        <div class="header-top">
+            <h1>NHK 全国新着ニュース</h1>
+            <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="link-btn">元のページへ</a>
+        </div>
         <div id="status">接続中...</div>
     </header>
 
@@ -93,12 +119,8 @@
     </main>
 
     <script>
-        // ご指定いただいた新しいRSS URL（https:// を自動補完しています）
         const RSS_URL = 'https://news.web.nhk/n-data/conf/na/rss/cat0.xml';
-        // CORS制限を回避するパブリックプロキシ
         const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
-        
-        // 更新間隔：1分（60000ミリ秒）
         const INTERVAL = 60000; 
 
         async function fetchNews() {
@@ -121,7 +143,6 @@
                 }
 
                 let htmlContent = '';
-                // 上位10件を抽出
                 const maxItems = Math.min(items.length, 10);
                 
                 for (let i = 0; i < maxItems; i++) {
@@ -129,7 +150,6 @@
                     const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
                     const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
                     
-                    // 日付と時間のフォーマット処理 (例: "10/25 14:05")
                     let displayTime = '';
                     if (pubDateStr) {
                         const date = new Date(pubDateStr);
@@ -142,7 +162,6 @@
                         }
                     }
 
-                    // 全体をリンク(<a>タグ)にしてタップ可能に
                     htmlContent += `
                         <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
                             <div class="news-title">${title}</div>
@@ -175,11 +194,9 @@
             }
         }
 
-        // 初回実行と、1分ごとの定期リフレッシュ
         fetchNews();
         setInterval(fetchNews, INTERVAL);
 
-        // ページ表示時と、画面が復帰した時に再度Wake Lockを要求する
         requestWakeLock();
         document.addEventListener('visibilitychange', () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {

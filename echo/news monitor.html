@@ -10,6 +10,7 @@
             --text-color: #e0e0e0;
             --accent-color: #ff4d4d; /* 速報感を出す赤 */
             --card-bg: #1e1e1e;
+            --card-hover: #252525;
         }
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -42,17 +43,30 @@
             flex-direction: column;
             gap: 12px;
         }
+        /* ニュース項目をリンク付きのカードに変更 */
         .news-item {
+            display: block;
+            text-decoration: none;
+            color: inherit;
             background-color: var(--card-bg);
             border-left: 5px solid #555;
             padding: 15px;
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: background-color 0.2s;
+            -webkit-tap-highlight-color: transparent; /* タップ時のハイライトをスマートに */
+        }
+        /* タップ/ホバー時の視覚フィードバック */
+        .news-item:active {
+            background-color: var(--card-hover);
         }
         /* 最新のトップニュース（1番上）を目立たせる */
         .news-item:first-child {
             border-left-color: var(--accent-color);
             background-color: #2a1b1b;
+        }
+        .news-item:first-child:active {
+            background-color: #352222;
         }
         .news-title {
             font-size: 1.4rem;
@@ -75,17 +89,15 @@
     </header>
 
     <main id="news-container">
-        <!-- ここにニュースが動的に挿入されます -->
         <p style="text-align:center; color:#888;">読み込み中...</p>
     </main>
 
     <script>
-        // NHK主要ニュースのRSS（CORSプロキシ経由）
         const RSS_URL = 'https://www.nhk.or.jp/rss/news/cat0.xml';
         const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
         
-        // 更新間隔（Echo Showの負担を考慮し、3分＝180000ミリ秒に設定）
-        const INTERVAL = 180000; 
+        // 更新間隔を1分（60000ミリ秒）に変更
+        const INTERVAL = 60000; 
 
         async function fetchNews() {
             const statusEl = document.getElementById('status');
@@ -107,14 +119,14 @@
                 }
 
                 let htmlContent = '';
-                // 上位10件を表示
                 const maxItems = Math.min(items.length, 10);
                 
                 for (let i = 0; i < maxItems; i++) {
                     const title = items[i].getElementsByTagName('title')[0]?.textContent || 'タイトルなし';
+                    const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
                     const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
                     
-                    // 日付フォーマットの簡易調整 (例: "Tue, 09 Jun 2026 09:00:00 +0900" -> "09:00")
+                    // 時刻フォーマット
                     let displayTime = pubDateStr;
                     if (pubDateStr) {
                         const date = new Date(pubDateStr);
@@ -123,17 +135,18 @@
                         }
                     }
 
+                    // <a>タグで囲み、タップで該当記事（別タブ）に遷移できるように変更
                     htmlContent += `
-                        <div class="news-item">
+                        <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
                             <div class="news-title">${title}</div>
                             <div class="news-time">${displayTime}</div>
-                        </div>
+                        </a>
                     `;
                 }
 
                 container.innerHTML = htmlContent;
                 const now = new Date();
-                statusEl.textContent = `動中 (${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新)`;
+                statusEl.textContent = `稼働中 (${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新)`;
 
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -141,7 +154,7 @@
             }
         }
 
-        // 初回実行と定期実行の設定
+        // 初回実行と定期実行
         fetchNews();
         setInterval(fetchNews, INTERVAL);
     </script>

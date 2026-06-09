@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHK News Monitor</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #ff4d4d; /* 速報感を出す赤 */
+            --card-bg: #1e1e1e;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #fff;
+            font-weight: bold;
+        }
+        #status {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        #news-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .news-item {
+            background-color: var(--card-bg);
+            border-left: 5px solid #555;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        /* 最新のトップニュース（1番上）を目立たせる */
+        .news-item:first-child {
+            border-left-color: var(--accent-color);
+            background-color: #2a1b1b;
+        }
+        .news-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            line-height: 1.4;
+            margin: 0 0 8px 0;
+        }
+        .news-time {
+            font-size: 0.85rem;
+            color: #aaa;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NHK ニュース速報監視</h1>
+        <div id="status">更新中...</div>
+    </header>
+
+    <main id="news-container">
+        <!-- ここにニュースが動的に挿入されます -->
+        <p style="text-align:center; color:#888;">読み込み中...</p>
+    </main>
+
+    <script>
+        // NHK主要ニュースのRSS（CORSプロキシ経由）
+        const RSS_URL = 'https://www.nhk.or.jp/rss/news/cat0.xml';
+        const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
+        
+        // 更新間隔（Echo Showの負担を考慮し、3分＝180000ミリ秒に設定）
+        const INTERVAL = 180000; 
+
+        async function fetchNews() {
+            const statusEl = document.getElementById('status');
+            const container = document.getElementById('news-container');
+            
+            try {
+                statusEl.textContent = '更新中...';
+                const response = await fetch(PROXY_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, 'text/xml');
+                const items = xmlDoc.getElementsByTagName('item');
+                
+                if (items.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#888;">ニュースがありません。</p>';
+                    return;
+                }
+
+                let htmlContent = '';
+                // 上位10件を表示
+                const maxItems = Math.min(items.length, 10);
+                
+                for (let i = 0; i < maxItems; i++) {
+                    const title = items[i].getElementsByTagName('title')[0]?.textContent || 'タイトルなし';
+                    const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
+                    
+                    // 日付フォーマットの簡易調整 (例: "Tue, 09 Jun 2026 09:00:00 +0900" -> "09:00")
+                    let displayTime = pubDateStr;
+                    if (pubDateStr) {
+                        const date = new Date(pubDateStr);
+                        if (!isNaN(date)) {
+                            displayTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                        }
+                    }
+
+                    htmlContent += `
+                        <div class="news-item">
+                            <div class="news-title">${title}</div>
+                            <div class="news-time">${displayTime}</div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = htmlContent;
+                const now = new Date();
+                statusEl.textContent = `動中 (${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新)`;
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                statusEl.textContent = 'エラー発生（自動再試行します）';
+            }
+        }
+
+        // 初回実行と定期実行の設定
+        fetchNews();
+        setInterval(fetchNews, INTERVAL);
+    </script>
+</body>
+</html>

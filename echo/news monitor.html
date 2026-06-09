@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK News Monitor</title>
+    <title>NHK 新着ニュースモニター</title>
     <style>
         :root {
             --bg-color: #121212;
             --text-color: #e0e0e0;
-            --accent-color: #ff4d4d; /* 速報感を出す赤 */
+            --accent-color: #ff4d4d; /* 速報感のある赤 */
             --card-bg: #1e1e1e;
-            --card-hover: #252525;
+            --card-active: #2d2d2d;
         }
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -29,21 +29,21 @@
             margin-bottom: 15px;
         }
         h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             margin: 0;
             color: #fff;
             font-weight: bold;
         }
         #status {
-            font-size: 0.9rem;
-            color: #888;
+            font-size: 0.85rem;
+            color: #aaa;
         }
         #news-container {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        /* ニュース項目をリンク付きのカードに変更 */
+        /* タップできるニュースカード */
         .news-item {
             display: block;
             text-decoration: none;
@@ -53,23 +53,23 @@
             padding: 15px;
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: background-color 0.2s;
-            -webkit-tap-highlight-color: transparent; /* タップ時のハイライトをスマートに */
+            transition: background-color 0.1s ease;
+            -webkit-tap-highlight-color: transparent; /* タップ時のデフォルト枠線を消す */
         }
-        /* タップ/ホバー時の視覚フィードバック */
+        /* 画面をタッチした瞬間のフィードバック */
         .news-item:active {
-            background-color: var(--card-hover);
+            background-color: var(--card-active);
         }
-        /* 最新のトップニュース（1番上）を目立たせる */
+        /* 1番最新のニュースを目立たせる */
         .news-item:first-child {
             border-left-color: var(--accent-color);
             background-color: #2a1b1b;
         }
         .news-item:first-child:active {
-            background-color: #352222;
+            background-color: #3d2323;
         }
         .news-title {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: bold;
             line-height: 1.4;
             margin: 0 0 8px 0;
@@ -84,19 +84,21 @@
 <body>
 
     <header>
-        <h1>NHK ニュース速報監視</h1>
-        <div id="status">更新中...</div>
+        <h1>NHK 全国新着ニュース</h1>
+        <div id="status">接続中...</div>
     </header>
 
     <main id="news-container">
-        <p style="text-align:center; color:#888;">読み込み中...</p>
+        <p style="text-align:center; color:#888;">ニュースを取得しています...</p>
     </main>
 
     <script>
-        const RSS_URL = 'https://news.web.nhk/n-data/conf/na/rss/cat0.xml';
+        // NHKの主要・全国ニュースRSS
+        const RSS_URL = 'https://www.nhk.or.jp/rss/news/cat0.xml';
+        // CORS制限を回避するパブリックプロキシ
         const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
         
-        // 更新間隔を1分（60000ミリ秒）に変更
+        // 更新間隔：1分（60000ミリ秒）
         const INTERVAL = 60000; 
 
         async function fetchNews() {
@@ -114,20 +116,21 @@
                 const items = xmlDoc.getElementsByTagName('item');
                 
                 if (items.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:#888;">ニュースがありません。</p>';
+                    container.innerHTML = '<p style="text-align:center; color:#888;">現在表示できるニュースがありません。</p>';
                     return;
                 }
 
                 let htmlContent = '';
+                // 上位10件を抽出
                 const maxItems = Math.min(items.length, 10);
                 
                 for (let i = 0; i < maxItems; i++) {
-                    const title = items[i].getElementsByTagName('title')[0]?.textContent || 'タイトルなし';
+                    const title = items[i].getElementsByTagName('title')[0]?.textContent || '無題のニュース';
                     const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
                     const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
                     
-                    // 時刻フォーマット
-                    let displayTime = pubDateStr;
+                    // 時間のパース (例: 14:05)
+                    let displayTime = '';
                     if (pubDateStr) {
                         const date = new Date(pubDateStr);
                         if (!isNaN(date)) {
@@ -135,7 +138,7 @@
                         }
                     }
 
-                    // <a>タグで囲み、タップで該当記事（別タブ）に遷移できるように変更
+                    // 全体をリンク(<a>タグ)にしてタップ可能に
                     htmlContent += `
                         <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
                             <div class="news-title">${title}</div>
@@ -146,15 +149,15 @@
 
                 container.innerHTML = htmlContent;
                 const now = new Date();
-                statusEl.textContent = `稼働中 (${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新)`;
+                statusEl.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新`;
 
             } catch (error) {
-                console.error('Fetch error:', error);
-                statusEl.textContent = 'エラー発生（自動再試行します）';
+                console.error('Error fetching news:', error);
+                statusEl.textContent = '再試行中...';
             }
         }
 
-        // 初回実行と定期実行
+        // 起動時実行と、1分ごとの定期リフレッシュ
         fetchNews();
         setInterval(fetchNews, INTERVAL);
     </script>

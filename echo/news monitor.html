@@ -183,6 +183,9 @@
                 requestWakeLock();
             }
         });
+
+        // 5分（300000ms）ごとにページそのものを再読み込みする場合（最終手段）
+        setTimeout(() => { location.reload(); }, 300000);
     </script>
 </body>
 </html>

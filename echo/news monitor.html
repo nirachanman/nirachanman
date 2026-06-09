@@ -11,8 +11,6 @@
             --accent-color: #ff4d4d; /* 速報感のある赤 */
             --card-bg: #1e1e1e;
             --card-active: #2d2d2d;
-            --btn-bg: #333333;
-            --btn-active: #444444;
         }
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -27,41 +25,28 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        /* ヘッダー上部（タイトルとボタン）を横並びに */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
+        /* タイトルリンクのスタイル */
+        .header-link {
+            text-decoration: none;
+            display: inline-block;
+            -webkit-tap-highlight-color: transparent;
         }
         h1 {
             font-size: 1.6rem;
             margin: 0;
             color: #fff;
             font-weight: bold;
+            transition: opacity 0.1s;
         }
-        /* 追加したリンクボタンのスタイル */
-        .link-btn {
-            display: inline-block;
-            background-color: var(--btn-bg);
-            color: #fff;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: bold;
-            padding: 8px 14px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            transition: background-color 0.1s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .link-btn:active {
-            background-color: var(--btn-active);
+        /* タイトルをタップしたときに少し薄くしてフィードバックを返す */
+        .header-link:active h1 {
+            opacity: 0.6;
         }
         /* ステータス表示（更新時刻） */
         #status {
             font-size: 0.85rem;
             color: #aaa;
-            text-align: right;
+            margin-top: 5px;
         }
         #news-container {
             display: flex;
@@ -107,10 +92,9 @@
 <body>
 
     <header>
-        <div class="header-top">
+        <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
             <h1>NHK 全国新着ニュース</h1>
-            <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="link-btn">元のページへ</a>
-        </div>
+        </a>
         <div id="status">接続中...</div>
     </header>
 

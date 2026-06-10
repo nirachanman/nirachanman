@@ -28,55 +28,45 @@
             padding-bottom: 8px;
             margin-bottom: 10px;
         }
-        .header-link {
-            text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin: 0;
-            color: #fff;
-            font-weight: bold;
-        }
-        /* 更新時刻 */
-        #status {
-            font-size: 1.0rem; 
-            color: #ccc;
-            white-space: nowrap;
-            padding-left: 10px;
-        }
-        #news-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .news-item {
+        .header-link { text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        h1 { font-size: 1.5rem; margin: 0; color: #fff; font-weight: bold; }
+        #status { font-size: 1.0rem; color: #ccc; white-space: nowrap; padding-left: 10px; }
+
+        /* スクロールエリア */
+        .scroll-container {
             display: block;
-            text-decoration: none;
-            color: inherit;
-            background-color: var(--card-bg);
-            border-left: 5px solid #555;
-            padding: 10px 12px;
+            background-color: #331a1a;
+            border-left: 5px solid var(--accent-color);
+            padding: 12px 10px;
             border-radius: 4px;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.3);
-            transition: background-color 0.1s ease;
+            overflow: hidden;
+            white-space: nowrap;
+            text-decoration: none;
+            color: #fff;
+            margin-bottom: 12px;
         }
-        .news-item:active {
-            background-color: var(--card-active);
-        }
-        .news-title {
-            font-size: 1.3rem; /* タイトル */
-            font-weight: bold;
-            line-height: 1.3;
-            margin: 0 0 6px 0;
-        }
-        /* ニュースの日付・時刻を拡大 */
-        .news-time {
-            font-size: 1.0rem; 
-            color: #bbb;
-            text-align: right;
+        .scroll-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 20s linear infinite;
+            font-size: 1.3rem;
             font-weight: bold;
         }
+        @keyframes scroll-left {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        #news-container { display: flex; flex-direction: column; gap: 8px; }
+        .news-item {
+            display: block; text-decoration: none; color: inherit;
+            background-color: var(--card-bg); border-left: 5px solid #555;
+            padding: 10px 12px; border-radius: 4px;
+            transition: background-color 0.1s;
+        }
+        .news-item:active { background-color: var(--card-active); }
+        .news-title { font-size: 1.2rem; font-weight: bold; line-height: 1.3; margin-bottom: 4px; }
+        .news-time { font-size: 1.0rem; color: #bbb; text-align: right; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -89,7 +79,7 @@
     </header>
 
     <main id="news-container">
-        <p style="text-align:center; color:#888;">ニュースを取得しています...</p>
+        <p style="text-align:center; color:#888;">取得中...</p>
     </main>
 
     <script>
@@ -102,73 +92,39 @@
             const container = document.getElementById('news-container');
             
             try {
-                statusEl.textContent = '更新中...';
                 const response = await fetch(PROXY_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                
                 const text = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, 'text/xml');
-                const items = xmlDoc.getElementsByTagName('item');
+                const items = new DOMParser().parseFromString(text, 'text/xml').getElementsByTagName('item');
                 
-                if (items.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:#888;">ニュースがありません。</p>';
-                    return;
-                }
+                // 1. 最新ニュースのスクロール枠作成
+                const latest = items[0];
+                let htmlContent = `
+                    <a href="${latest.getElementsByTagName('link')[0].textContent}" target="_blank" class="scroll-container">
+                        <div class="scroll-text">【最新速報】${latest.getElementsByTagName('title')[0].textContent}</div>
+                    </a>
+                `;
 
-                let htmlContent = '';
-                const maxItems = Math.min(items.length, 12);
-                
-                for (let i = 0; i < maxItems; i++) {
-                    const title = items[i].getElementsByTagName('title')[0]?.textContent || '無題';
-                    const link = items[i].getElementsByTagName('link')[0]?.textContent || '#';
-                    const pubDateStr = items[i].getElementsByTagName('pubDate')[0]?.textContent || '';
-                    
-                    let displayTime = '';
-                    if (pubDateStr) {
-                        const date = new Date(pubDateStr);
-                        if (!isNaN(date)) {
-                            const month = date.getMonth() + 1;
-                            const day = date.getDate();
-                            const hours = String(date.getHours()).padStart(2, '0');
-                            const minutes = String(date.getMinutes()).padStart(2, '0');
-                            displayTime = `${month}/${day} ${hours}:${minutes}`;
-                        }
-                    }
+                // 2. その他のニュース一覧（11件）
+                for (let i = 1; i < Math.min(items.length, 12); i++) {
+                    const title = items[i].getElementsByTagName('title')[0].textContent;
+                    const link = items[i].getElementsByTagName('link')[0].textContent;
+                    const pubDate = new Date(items[i].getElementsByTagName('pubDate')[0].textContent);
+                    const timeStr = `${pubDate.getMonth()+1}/${pubDate.getDate()} ${String(pubDate.getHours()).padStart(2,'0')}:${String(pubDate.getMinutes()).padStart(2,'0')}`;
 
                     htmlContent += `
-                        <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-item">
+                        <a href="${link}" target="_blank" class="news-item">
                             <div class="news-title">${title}</div>
-                            <div class="news-time">${displayTime}</div>
+                            <div class="news-time">${timeStr}</div>
                         </a>
                     `;
                 }
-
                 container.innerHTML = htmlContent;
-                const now = new Date();
-                statusEl.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 更新`;
-
-            } catch (error) {
-                console.error('Error:', error);
-                statusEl.textContent = 'エラー';
-            }
-        }
-
-        // スリープ防止
-        let wakeLock = null;
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) {}
+                statusEl.textContent = `${new Date().getHours().toString().padStart(2,'0')}:${new Date().getMinutes().toString().padStart(2,'0')} 更新`;
+            } catch (e) { statusEl.textContent = 'エラー'; }
         }
 
         fetchNews();
         setInterval(fetchNews, INTERVAL);
-        requestWakeLock();
-        
-        // 5分ごとの再読み込み
         setTimeout(() => { location.reload(); }, 300000);
     </script>
 </body>

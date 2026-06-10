@@ -3,128 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK 新着ニュースモニター</title>
+    <title>NHK 全カテゴリニュースモニター</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --accent-color: #ff4d4d;
-            --card-bg: #1e1e1e;
-            --card-active: #2d2d2d;
-        }
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 10px;
-            overflow-x: hidden;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-        }
-        .header-link { text-decoration: none; -webkit-tap-highlight-color: transparent; }
-        h1 { font-size: 1.5rem; margin: 0; color: #fff; font-weight: bold; }
-        #status { font-size: 1.0rem; color: #ccc; white-space: nowrap; padding-left: 10px; }
-
-        /* スクロールエリア */
-        .scroll-container {
-            display: block;
-            background-color: #331a1a;
-            border-left: 5px solid var(--accent-color);
-            padding: 12px 10px;
-            border-radius: 4px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-decoration: none;
-            color: #fff;
-            margin-bottom: 12px;
-        }
-        .scroll-text {
-            display: inline-block;
-            padding-left: 100%;
-            animation: scroll-left 20s linear infinite;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-        @keyframes scroll-left {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
-
-        #news-container { display: flex; flex-direction: column; gap: 8px; }
-        .news-item {
-            display: block; text-decoration: none; color: inherit;
-            background-color: var(--card-bg); border-left: 5px solid #555;
-            padding: 10px 12px; border-radius: 4px;
-            transition: background-color 0.1s;
-        }
+        :root { --bg-color: #121212; --text-color: #e0e0e0; --accent-color: #ff4d4d; --card-bg: #1e1e1e; --card-active: #2d2d2d; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; }
+        header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; }
+        h1 { font-size: 1.5rem; margin: 0; color: #fff; }
+        #status { font-size: 1.0rem; color: #aaa; }
+        .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); border-left: 5px solid #555; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px; transition: background-color 0.1s; }
         .news-item:active { background-color: var(--card-active); }
-        .news-title { font-size: 1.2rem; font-weight: bold; line-height: 1.3; margin-bottom: 4px; }
+        .news-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 4px; }
         .news-time { font-size: 1.0rem; color: #bbb; text-align: right; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <header>
-        <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-            <h1>NHK 全国新着ニュース</h1>
-        </a>
-        <div id="status">接続中...</div>
+        <h1>NHK ニュース全カテゴリ</h1>
+        <div id="status">取得中...</div>
     </header>
-
-    <main id="news-container">
-        <p style="text-align:center; color:#888;">取得中...</p>
-    </main>
+    <main id="news-container"></main>
 
     <script>
-        const RSS_URL = 'https://news.web.nhk/n-data/conf/na/rss/cat0.xml';
-        const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(RSS_URL);
-        const INTERVAL = 60000; 
+        // cat0(主要) ～ cat7(科学・文化) の配列
+        const RSS_URLS = [
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', // 主要
+            'https://news.web.nhk/n-data/conf/na/rss/cat1.xml', // 政治
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', // 経済
+            'https://news.web.nhk/n-data/conf/na/rss/cat3.xml', // 国際
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', // 社会
+            'https://news.web.nhk/n-data/conf/na/rss/cat5.xml', // スポーツ
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', // 地域
+            'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'  // 科学・文化
+        ];
 
-        async function fetchNews() {
-            const statusEl = document.getElementById('status');
+        async function fetchAllNews() {
             const container = document.getElementById('news-container');
+            let allItems = [];
+
+            for (const url of RSS_URLS) {
+                try {
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    const response = await fetch(proxyUrl);
+                    const text = await response.text();
+                    const xml = new DOMParser().parseFromString(text, 'text/xml');
+                    const items = xml.getElementsByTagName('item');
+                    
+                    for (let item of items) {
+                        allItems.push({
+                            title: item.getElementsByTagName('title')[0].textContent,
+                            link: item.getElementsByTagName('link')[0].textContent,
+                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
+                        });
+                    }
+                } catch (e) { console.error("Error:", e); }
+            }
+
+            // 新しい順にソートして重複を除去（タイトルで判断）
+            allItems.sort((a, b) => b.pubDate - a.pubDate);
+            const uniqueItems = Array.from(new Map(allItems.map(item => [item.title, item])).values());
+
+            container.innerHTML = uniqueItems.slice(0, 20).map(item => `
+                <a href="${item.link}" target="_blank" class="news-item">
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                </a>
+            `).join('');
             
-            try {
-                const response = await fetch(PROXY_URL);
-                const text = await response.text();
-                const items = new DOMParser().parseFromString(text, 'text/xml').getElementsByTagName('item');
-                
-                // 1. 最新ニュースのスクロール枠作成
-                const latest = items[0];
-                let htmlContent = `
-                    <a href="${latest.getElementsByTagName('link')[0].textContent}" target="_blank" class="scroll-container">
-                        <div class="scroll-text">【最新速報】${latest.getElementsByTagName('title')[0].textContent}</div>
-                    </a>
-                `;
-
-                // 2. その他のニュース一覧（11件）
-                for (let i = 1; i < Math.min(items.length, 12); i++) {
-                    const title = items[i].getElementsByTagName('title')[0].textContent;
-                    const link = items[i].getElementsByTagName('link')[0].textContent;
-                    const pubDate = new Date(items[i].getElementsByTagName('pubDate')[0].textContent);
-                    const timeStr = `${pubDate.getMonth()+1}/${pubDate.getDate()} ${String(pubDate.getHours()).padStart(2,'0')}:${String(pubDate.getMinutes()).padStart(2,'0')}`;
-
-                    htmlContent += `
-                        <a href="${link}" target="_blank" class="news-item">
-                            <div class="news-title">${title}</div>
-                            <div class="news-time">${timeStr}</div>
-                        </a>
-                    `;
-                }
-                container.innerHTML = htmlContent;
-                statusEl.textContent = `${new Date().getHours().toString().padStart(2,'0')}:${new Date().getMinutes().toString().padStart(2,'0')} 更新`;
-            } catch (e) { statusEl.textContent = 'エラー'; }
+            document.getElementById('status').textContent = new Date().toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'}) + ' 更新';
         }
 
-        fetchNews();
-        setInterval(fetchNews, INTERVAL);
+        fetchAllNews();
+        setInterval(fetchAllNews, 60000);
         setTimeout(() => { location.reload(); }, 300000);
     </script>
 </body>

@@ -12,7 +12,11 @@
         #status { font-size: 1.0rem; color: #aaa; }
         .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); border-left: 5px solid #555; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px; transition: background-color 0.1s; }
         .news-item:active { background-color: var(--card-active); }
-        .news-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 4px; }
+        
+        /* タイトルの太字設定を解除 (font-weight: normal;) */
+        .news-title { font-size: 1.2rem; font-weight: normal; margin-bottom: 4px; }
+        
+        /* 日付は強調のため太字を維持するか、こちらもノーマルにする場合は調整してください */
         .news-time { font-size: 1.0rem; color: #bbb; text-align: right; font-weight: bold; }
     </style>
 </head>
@@ -24,16 +28,15 @@
     <main id="news-container"></main>
 
     <script>
-        // cat0(主要) ～ cat7(科学・文化) の配列
         const RSS_URLS = [
-            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', // 主要
-            'https://news.web.nhk/n-data/conf/na/rss/cat1.xml', // 政治
-            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', // 経済
-            'https://news.web.nhk/n-data/conf/na/rss/cat3.xml', // 国際
-            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', // 社会
-            'https://news.web.nhk/n-data/conf/na/rss/cat5.xml', // スポーツ
-            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', // 地域
-            'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'  // 科学・文化
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
         async function fetchAllNews() {
@@ -58,7 +61,6 @@
                 } catch (e) { console.error("Error:", e); }
             }
 
-            // 新しい順にソートして重複を除去（タイトルで判断）
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const uniqueItems = Array.from(new Map(allItems.map(item => [item.title, item])).values());
 

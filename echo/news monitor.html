@@ -3,79 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK 全カテゴリニュースモニター</title>
+    <title>NHK ニュース・ティッカー</title>
     <style>
-        :root { --bg-color: #121212; --text-color: #e0e0e0; --accent-color: #ff4d4d; --card-bg: #1e1e1e; --card-active: #2d2d2d; }
-        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; }
-        header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; }
-        h1 { font-size: 1.5rem; margin: 0; color: #fff; }
-        #status { font-size: 1.0rem; color: #aaa; }
-        .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); border-left: 5px solid #555; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px; transition: background-color 0.1s; }
-        .news-item:active { background-color: var(--card-active); }
+        :root { --bg-color: #000; --text-color: #fff; --accent-color: #ff4d4d; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; overflow: hidden; height: 100vh; }
         
-        /* タイトルの太字設定を解除 (font-weight: normal;) */
-        .news-title { font-size: 1.2rem; font-weight: normal; margin-bottom: 4px; }
+        /* ヘッダー */
+        header { border-bottom: 2px solid var(--accent-color); padding: 10px; display: flex; align-items: center; }
+        h1 { font-size: 1.5rem; margin: 0 20px 0 0; white-space: nowrap; color: var(--accent-color); }
         
-        /* 日付は強調のため太字を維持するか、こちらもノーマルにする場合は調整してください */
-        .news-time { font-size: 1.0rem; color: #bbb; text-align: right; font-weight: bold; }
+        /* 全件スクロールエリア */
+        .marquee-wrapper { flex-grow: 1; overflow: hidden; position: relative; height: 50px; display: flex; align-items: center; }
+        .marquee-content { 
+            position: absolute; 
+            white-space: nowrap; 
+            display: inline-block; 
+            animation: ticker 60s linear infinite; /* 速度調整 */
+            font-size: 1.5rem;
+        }
+        @keyframes ticker {
+            0% { transform: translate(100%, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>NHK ニュース全カテゴリ</h1>
-        <div id="status">取得中...</div>
+        <h1>NHK ニュース速報</h1>
+        <div class="marquee-wrapper">
+            <div class="marquee-content" id="ticker">ニュースを取得しています...</div>
+        </div>
     </header>
-    <main id="news-container"></main>
 
     <script>
         const RSS_URLS = [
-            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml',
-            'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        async function fetchAllNews() {
-            const container = document.getElementById('news-container');
-            let allItems = [];
-
+        async function updateTicker() {
+            let titles = [];
             for (const url of RSS_URLS) {
                 try {
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                    const response = await fetch(proxyUrl);
-                    const text = await response.text();
-                    const xml = new DOMParser().parseFromString(text, 'text/xml');
-                    const items = xml.getElementsByTagName('item');
-                    
-                    for (let item of items) {
-                        allItems.push({
-                            title: item.getElementsByTagName('title')[0].textContent,
-                            link: item.getElementsByTagName('link')[0].textContent,
-                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
-                        });
+                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+                    for (let item of xml.getElementsByTagName('item')) {
+                        titles.push(" ● " + item.getElementsByTagName('title')[0].textContent);
                     }
-                } catch (e) { console.error("Error:", e); }
+                } catch (e) {}
             }
-
-            allItems.sort((a, b) => b.pubDate - a.pubDate);
-            const uniqueItems = Array.from(new Map(allItems.map(item => [item.title, item])).values());
-
-            container.innerHTML = uniqueItems.slice(0, 20).map(item => `
-                <a href="${item.link}" target="_blank" class="news-item">
-                    <div class="news-title">${item.title}</div>
-                    <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
-                </a>
-            `).join('');
-            
-            document.getElementById('status').textContent = new Date().toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'}) + ' 更新';
+            // 重複削除して連結
+            const uniqueTitles = [...new Set(titles)].join("  ");
+            document.getElementById('ticker').textContent = uniqueTitles;
         }
 
-        fetchAllNews();
-        setInterval(fetchAllNews, 60000);
+        updateTicker();
+        setInterval(updateTicker, 60000); // 1分ごとに更新
         setTimeout(() => { location.reload(); }, 300000);
     </script>
 </body>

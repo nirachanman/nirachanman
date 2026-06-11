@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHK ニュースモニター</title>
+    <style>
+        :root { --bg-color: #121212; --text-color: #e0e0e0; --accent-color: #ff4d4d; --card-bg: #1e1e1e; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; }
+        
+        /* ヘッダー構成 */
+        header { border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; }
+        .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
+        
+        /* 最新ニュースの横流しエリア */
+        .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
+        .marquee-text { display: inline-block; animation: scroll 15s linear infinite; font-size: 1.1rem; }
+        @keyframes scroll { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+
+        #news-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); padding: 8px 12px; border-radius: 4px; border-left: 5px solid #555; }
+        .news-title { font-size: 1.1rem; margin-bottom: 2px; }
+        .news-time { font-size: 0.9rem; color: #aaa; text-align: right; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <h1>NHK ニュース</h1>
+            <div class="marquee-container" id="marquee">
+                </div>
+        </div>
+    </header>
+    <main id="news-container"></main>
+
+    <script>
+        const RSS_URLS = [
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
+        ];
+
+        async function updateNews() {
+            let allItems = [];
+            for (const url of RSS_URLS) {
+                try {
+                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+                    for (let item of xml.getElementsByTagName('item')) {
+                        allItems.push({
+                            title: item.getElementsByTagName('title')[0].textContent,
+                            link: item.getElementsByTagName('link')[0].textContent,
+                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
+                        });
+                    }
+                } catch (e) {}
+            }
+            allItems.sort((a, b) => b.pubDate - a.pubDate);
+            const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+
+            // 1. 最新ニュースをヘッダーの横にセット
+            document.getElementById('marquee').innerHTML = `
+                <a href="${unique[0].link}" target="_blank" style="text-decoration:none; color:#fff;">
+                    <span class="marquee-text">${unique[0].title}</span>
+                </a>
+            `;
+
+            // 2. 残りをリスト表示
+            document.getElementById('news-container').innerHTML = unique.slice(1, 15).map(item => `
+                <a href="${item.link}" target="_blank" class="news-item">
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                </a>
+            `).join('');
+        }
+
+        updateNews();
+        setInterval(updateNews, 60000);
+    </script>
+</body>
+</html>

@@ -78,7 +78,7 @@
             `;
 
             // 2. 残りをリスト表示
-            document.getElementById('news-container').innerHTML = unique.slice(1, 30).map(item => `
+            document.getElementById('news-container').innerHTML = unique.slice(1, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-title">${item.title}</div>
                     <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>

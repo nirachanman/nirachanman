@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（概要表示版）</title>
+    <title>NHK ニュースモニター（概要全文・3件スクロール版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -36,20 +36,18 @@
             display: none;
         }
         
-        /* ニュースアイテム全体のレイアウト（縦並びにして概要を下に入れる） */
         .news-item { 
             display: flex; 
-            flex-direction: column; /* 縦並びに変更 */
+            flex-direction: column; 
             text-decoration: none; 
             color: inherit; 
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
             border-left: 4px solid #555; 
-            gap: 6px;
+            gap: 8px;
         }
         
-        /* タイトルと時間を横並びにする一行目のスタイル */
         .news-header-row {
             display: flex;
             justify-content: space-between;
@@ -73,14 +71,15 @@
             flex-shrink: 0;
         }
 
-        /* 追記：ニュース概要（description）のスタイル */
+        /* 概要（description）を全文表示するためのスタイル */
         .news-desc {
-            font-size: 1.05rem;
-            color: #b0b0b0;
-            line-height: 1.4;
-            white-space: nowrap;      /* 横一行に収める */
-            overflow: hidden;         /* はみ出た分を隠す */
-            text-overflow: ellipsis;  /* 長い場合は「...」にする */
+            font-size: 1.1rem;
+            color: #c0c0c0;
+            line-height: 1.5;
+            white-space: normal;       /* 枠線の端で自動改行する（全文表示） */
+            word-wrap: break-word;     /* 長い単語があっても強制改行 */
+            text-overflow: clip;       /* 「...」による省略を解除 */
+            overflow: visible;         /* はみ出しを隠さずすべて表示 */
         }
     </style>
 </head>
@@ -124,14 +123,13 @@
                     const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
-                        // description（概要）の安全な取得
                         const descEl = item.getElementsByTagName('description')[0];
                         const description = descEl ? descEl.textContent : '';
 
                         allItems.push({
                             title: item.getElementsByTagName('title')[0].textContent,
                             link: item.getElementsByTagName('link')[0].textContent,
-                            description: description, // データを追加
+                            description: description,
                             pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
                         });
                     }
@@ -144,7 +142,6 @@
 
             document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none; color:#fff;"><span class="marquee-text">${unique[0].title}</span></a>`;
             
-            // HTML生成部分にdescriptionを追加
             document.getElementById('news-container').innerHTML = unique.slice(1, 51).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -183,7 +180,8 @@
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 location.reload();
             } else {
-                container.scrollTop += (itemHeight * 7); 
+                // 3件分スクロールに変更 (itemHeight * 3)
+                container.scrollTop += (itemHeight * 3); 
             }
         }
 

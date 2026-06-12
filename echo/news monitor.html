@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（スリープ防止版）</title>
+    <title>NHK ニュースモニター（ホーム戻り対策版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -57,15 +57,14 @@
         let isPaused = false;
         let wakeLock = null;
 
-        // スリープ防止（Wake Lock）の有効化リクエスト
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock is active.');
+                    console.log('Wake Lock active.');
                 }
             } catch (err) {
-                console.error(`${err.name}, ${err.message}`);
+                console.error(err);
             }
         }
 
@@ -84,7 +83,7 @@
                     }
                 } catch (e) {}
             }
-            if (allItems.length === 0) return; // 取得失敗時はリセットしない
+            if (allItems.length === 0) return;
 
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
@@ -113,22 +112,29 @@
             const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100;
 
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
-                await updateNews();
+                // 最下部まで来たらニュースを新しくするのではなく、
+                // Silkの無操作タイマーをリセットするためにページごと強制リロードする
+                location.reload();
             } else {
                 container.scrollTop += (itemHeight * 5);
             }
         }
 
-        // ページ読み込み時の初期化
         async function init() {
             await updateNews();
             await requestWakeLock();
         }
 
         init();
+        
+        // 20秒ごとに5件ずつスクロール
         setInterval(autoScroll, 20000);
 
-        // 画面のタブ切り替えや、万が一ホームに戻って再開した際の復帰ロジック
+        // 万が一最下部に届かなくても、4分30秒（270000ms）経過したら強制リロードしてホーム戻りを阻止
+        setTimeout(() => {
+            location.reload();
+        }, 270000);
+
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 await requestWakeLock();

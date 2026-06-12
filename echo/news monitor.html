@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（1行表示版）</title>
+    <title>NHK ニュースモニター（7件スクロール版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -142,8 +142,8 @@
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 location.reload();
             } else {
-                // 10件分スクロール (itemHeight * 10)
-                container.scrollTop += (itemHeight * 10);
+                // 7件分スクロール (itemHeight * 7)
+                container.scrollTop += (itemHeight * 7);
             }
         }
 
@@ -154,8 +154,8 @@
 
         init();
         
-        // 40秒（40000ms）ごとに10件ずつスクロール
-        setInterval(autoScroll, 40000);
+        // 30秒（30000ms）ごとに7件ずつスクロール
+        setInterval(autoScroll, 30000);
 
         // スクリプト停止や下端の未到達対策として、4分30秒で念のためリロード
         setTimeout(() => {

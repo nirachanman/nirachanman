@@ -106,12 +106,12 @@
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 await updateNews();
             } else {
-                container.scrollTop += 120;
+                container.scrollTop += 360;
             }
         }
 
         updateNews();
-        setInterval(autoScroll, 7000);
+        setInterval(autoScroll, 10000);
     </script>
 </body>
 </html>

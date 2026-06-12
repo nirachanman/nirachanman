@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター</title>
+    <title>NHK ニュースモニター（自動スクロール）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="refresh" content="3600">
+    <meta http-equiv="refresh" content="300">
 
     <style>
         :root { --bg-color: #121212; --text-color: #e0e0e0; --accent-color: #ff4d4d; --card-bg: #1e1e1e; }
-        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; }
+        /* ヘッダー */
+        header { border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; flex-shrink: 0; }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
-        
         .header-link { text-decoration: none; display: flex; align-items: center; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
-        .header-link:active h1 { opacity: 0.7; }
         
+        /* 横スクロール（速報） */
         .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll 15s linear infinite; font-size: 1.1rem; }
-        @keyframes scroll { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; }
+        @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
-        #news-container { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-        .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); padding: 6px 10px; border-radius: 4px; border-left: 4px solid #555; }
-        .news-title { font-size: 1.05rem; margin-bottom: 1px; }
-        .news-time { font-size: 0.85rem; color: #aaa; text-align: right; }
+        /* 縦スクロールリスト */
+        #news-container { 
+            flex-grow: 1; 
+            overflow-y: hidden; 
+            scroll-behavior: smooth; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        }
+        .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); padding: 8px 10px; border-radius: 4px; border-left: 4px solid #555; }
+        .news-title { font-size: 1.1rem; margin-bottom: 2px; }
+        .news-time { font-size: 0.9rem; color: #aaa; text-align: right; }
     </style>
 </head>
 <body>
@@ -74,7 +82,6 @@
                 </a>
             `;
 
-            // 表示件数を50件に拡大
             document.getElementById('news-container').innerHTML = unique.slice(1, 51).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-title">${item.title}</div>
@@ -83,8 +90,22 @@
             `).join('');
         }
 
+        // 自動スクロールロジック
+        function autoScroll() {
+            const container = document.getElementById('news-container');
+            if (!container) return;
+            
+            // 下まで行ったらトップへ戻る（バグ回避のため少し余裕を持たせる）
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+                container.scrollTop = 0;
+            } else {
+                container.scrollTop += 120; // 120pxずつスクロール
+            }
+        }
+
         updateNews();
-        setInterval(updateNews, 60000);
+        setInterval(updateNews, 60000); // 1分ごとにデータ更新
+        setInterval(autoScroll, 4000);  // 4秒ごとに縦スクロール
     </script>
 </body>
 </html>

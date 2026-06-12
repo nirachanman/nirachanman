@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（ヘッダー固定版）</title>
+    <title>NHK ニュースモニター（手動スクロール対応・30秒版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -11,30 +11,9 @@
 
     <style>
         :root { --bg-color: #121212; --text-color: #e0e0e0; --accent-color: #ff4d4d; --card-bg: #1e1e1e; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        body { 
-            font-family: sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            margin: 0; 
-            padding: 10px; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        
-        /* ヘッダーを最上部に固定配置（スクロールしても残る設定） */
-        header { 
-            position: sticky;
-            top: 0;
-            background-color: var(--bg-color); /* 後ろのニュースが透けないように背景色を指定 */
-            z-index: 1000; /* ニュースリストより手前に表示 */
-            border-bottom: 2px solid var(--accent-color); 
-            padding-bottom: 8px; 
-            margin-bottom: 10px; 
-            flex-shrink: 0; 
-        }
-        
+        header { border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; flex-shrink: 0; }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
@@ -44,9 +23,18 @@
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
         #news-container { 
+            flex-grow: 1; 
+            overflow-y: auto;          /* 指スクロールを許可 */
+            scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        /* シルクブラウザのスクロールバーを非表示にする */
+        #news-container::-webkit-scrollbar {
+            display: none;
         }
         
         .news-item { 
@@ -139,37 +127,38 @@
                 </a>
             `).join('');
             
-            window.scrollTo({ top: 0 });
+            document.getElementById('news-container').scrollTop = 0;
         }
 
+        const container = document.getElementById('news-container');
+
+        // タッチ操作やスクロールが発生した時のタイマー制御
         function pauseAutoScroll() {
             isPaused = true;
             clearTimeout(resumeTimeout);
+            // 指を離すかスクロールが止まってから5秒後に自動スクロールを再開させる
             resumeTimeout = setTimeout(() => {
                 isPaused = false;
             }, 5000);
         }
 
-        window.addEventListener('touchstart', pauseAutoScroll);
-        window.addEventListener('touchmove', pauseAutoScroll);
-        window.addEventListener('scroll', pauseAutoScroll);
-        window.addEventListener('mousedown', () => isPaused = true);
-        window.addEventListener('mouseup', () => { isPaused = false; });
+        // 各種操作イベントで自動スクロールを一時停止
+        container.addEventListener('touchstart', pauseAutoScroll);
+        container.addEventListener('touchmove', pauseAutoScroll);
+        container.addEventListener('scroll', pauseAutoScroll);
+        container.addEventListener('mousedown', () => isPaused = true);
+        container.addEventListener('mouseup', () => { isPaused = false; });
 
         async function autoScroll() {
             if (isPaused) return;
 
-            const container = document.getElementById('news-container');
             const firstItem = container.querySelector('.news-item');
             const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100;
 
-            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40) {
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 location.reload();
             } else {
-                window.scrollBy({
-                    top: itemHeight * 7,
-                    behavior: 'smooth'
-                });
+                container.scrollTop += (itemHeight * 7); // 7件ずつスクロール
             }
         }
 
@@ -180,7 +169,8 @@
 
         init();
         
-        setInterval(autoScroll, 40000);
+        // オートスクロールの間隔を30秒（30000ms）に変更
+        setInterval(autoScroll, 30000);
 
         setTimeout(() => {
             location.reload();

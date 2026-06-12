@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（タッチ停止対応）</title>
+    <title>NHK ニュースモニター（5件スクロール）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -29,15 +29,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
-            /* タッチ時にアニメーション/挙動を停止するためのフラグ */
-            transition: transform 0.3s;
         }
-        
-        /* タッチ（押下）中にスクロール処理を一時停止する */
-        #news-container:active {
-            filter: brightness(1.2); /* 押していることがわかるように少し明るくする */
-        }
-
         .news-item { display: block; text-decoration: none; color: inherit; background-color: var(--card-bg); padding: 8px 10px; border-radius: 4px; border-left: 4px solid #555; }
         .news-title { font-size: 1.3rem; margin-bottom: 2px; }
         .news-time { font-size: 1.1rem; color: #aaa; text-align: right; }
@@ -62,7 +54,7 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        let isPaused = false; // 一時停止フラグ
+        let isPaused = false;
 
         async function updateNews() {
             let allItems = [];
@@ -93,7 +85,6 @@
             document.getElementById('news-container').scrollTop = 0;
         }
 
-        // 押下状態を監視してフラグを切り替え
         const container = document.getElementById('news-container');
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => isPaused = false);
@@ -101,12 +92,18 @@
         container.addEventListener('touchend', () => isPaused = false);
 
         async function autoScroll() {
-            if (isPaused) return; // 押されている間は処理をスキップ
+            if (isPaused) return;
 
+            // 1件あたりの高さを取得
+            const firstItem = container.querySelector('.news-item');
+            const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100; // 6はgap分
+
+            // スクロール判定と実行
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 await updateNews();
             } else {
-                container.scrollTop += 360;
+                // 5件分スクロール (itemHeight * 5)
+                container.scrollTop += (itemHeight * 5);
             }
         }
 

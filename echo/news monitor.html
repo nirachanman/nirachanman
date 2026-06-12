@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（7件スクロール版）</title>
+    <title>NHK ニュースモニター（手動スクロール対応版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -24,14 +24,19 @@
 
         #news-container { 
             flex-grow: 1; 
-            overflow-y: hidden; 
+            overflow-y: auto;          /* hidden から auto に変更（指スクロールを許可） */
             scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
+            -webkit-overflow-scrolling: touch; /* iOS/FireOS系で滑らかにスクロールさせるための設定 */
         }
         
-        /* ニュースアイテム内を横並びに配置 */
+        /* シルクブラウザの邪魔なスクロールバーを非表示にする（任意） */
+        #news-container::-webkit-scrollbar {
+            display: none;
+        }
+        
         .news-item { 
             display: flex; 
             justify-content: space-between; 
@@ -45,7 +50,6 @@
             gap: 15px;
         }
         
-        /* タイトルが長すぎる場合は自動で「...」にする */
         .news-title { 
             font-size: 1.3rem; 
             white-space: nowrap;
@@ -54,7 +58,6 @@
             flex-grow: 1;
         }
         
-        /* 時間を右側に固定 */
         .news-time { 
             font-size: 1.1rem; 
             color: #aaa; 
@@ -84,12 +87,12 @@
 
         let isPaused = false;
         let wakeLock = null;
+        let resumeTimeout = null;
 
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock active.');
                 }
             } catch (err) {
                 console.error(err);
@@ -128,21 +131,33 @@
         }
 
         const container = document.getElementById('news-container');
+
+        // タッチ操作やスクロールが発生した時のタイマー制御
+        function pauseAutoScroll() {
+            isPaused = true;
+            clearTimeout(resumeTimeout);
+            // 指を離すかスクロールが止まってから5秒後に自動スクロールを再開させる
+            resumeTimeout = setTimeout(() => {
+                isPaused = false;
+            }, 5000);
+        }
+
+        // 各種操作イベントで自動スクロールを一時停止
+        container.addEventListener('touchstart', pauseAutoScroll);
+        container.addEventListener('touchmove', pauseAutoScroll);
+        container.addEventListener('scroll', pauseAutoScroll);
         container.addEventListener('mousedown', () => isPaused = true);
-        container.addEventListener('mouseup', () => isPaused = false);
-        container.addEventListener('touchstart', () => isPaused = true);
-        container.addEventListener('touchend', () => isPaused = false);
+        container.addEventListener('mouseup', () => { isPaused = false; });
 
         async function autoScroll() {
             if (isPaused) return;
 
             const firstItem = container.querySelector('.news-item');
-            const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100; // 6はgap分
+            const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100;
 
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
                 location.reload();
             } else {
-                // 7件分スクロール (itemHeight * 7)
                 container.scrollTop += (itemHeight * 7);
             }
         }
@@ -154,10 +169,8 @@
 
         init();
         
-        // 30秒（30000ms）ごとに7件ずつスクロール
-        setInterval(autoScroll, 30000);
+        setInterval(autoScroll, 40000);
 
-        // スクリプト停止や下端の未到達対策として、4分30秒で念のためリロード
         setTimeout(() => {
             location.reload();
         }, 270000);

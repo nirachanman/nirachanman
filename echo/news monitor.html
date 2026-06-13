@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（ヘッダー固定修正版）</title>
+    <title>NHK ニュースモニター（カフェ・ナチュラル版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-:root { 
+    <style>
+        :root { 
+            /* 1. 珈琲（カフェ）＆ 生成り（リネン）「カフェ・ナチュラル」の配色定義 */
             --bg-color: #f7f3ee;        /* 眩しさを抑えた温かみのある生成り色 */
             --accent-color: #8d6e63;    /* ヘッダー線：落ち着いたブラウン */
             --card-bg: #ffffff;         /* カード背景：クッキリ見せる白 */
@@ -49,13 +51,16 @@
         }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
-/* 1. ヘッダーの文字色を黒に */
+        
+        /* 修正箇所1: ヘッダーの文字色を明るい背景に合わせて濃いグレー（#333333）に変更 */
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #333333; }
         
         .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        /* 2. 流れるニュース（マーキー）の文字色を黒に */
+        
+        /* 修正箇所2: 流れるニュース（マーキー）の文字色を濃いグレー（#333333）に変更 */
         .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #333333; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -72,7 +77,7 @@
             display: none;
         }
         
-        /* 3. ニュースカードに「薄い影」をつけて、背景と見分けやすくする */
+        /* 修正箇所3: ニュースカードに薄い影（box-shadow）をつけ、左線を馴染む色に調整 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -80,10 +85,10 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #b0bec5; /* 左線の色をライトモード用の薄いグレーに */
+            border-left: 4px solid #b0bec5; 
             gap: 8px;
             flex-shrink: 0; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 変更：カードが立体的に見やすくなる影 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
         }
         
         .news-header-row {
@@ -102,10 +107,10 @@
             font-weight: 400; 
         }
         
-        /* 4. 時間表示の文字色を、明るい背景でも読める濃さに */
+        /* 修正箇所4: 時間表示の文字色を、明るい背景でも読める適切な濃さ（#78909c）に変更 */
         .news-time { 
             font-size: 1.1rem; 
-            color: #78909c; /* 変更：視認性の高いグレーに */
+            color: #78909c; 
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -233,7 +238,6 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
-        // 【修正】画面全体を巻き込まない、コンテナ内完結型の相対スクロール処理
         async function autoScroll() {
             if (isPaused) return;
 
@@ -249,11 +253,9 @@
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                // コンテナの最上部から、ターゲット要素までの正確な距離（差分）を計算
                 const containerTop = container.getBoundingClientRect().top;
                 const targetTop = targetItem.getBoundingClientRect().top;
                 
-                // 現在のスクロール位置に差分を足すことで、ブラウザ全体（ヘッダー）を引っ張らずに、中身だけを移動させる
                 container.scrollTo({
                     top: container.scrollTop + (targetTop - containerTop),
                     behavior: 'smooth'

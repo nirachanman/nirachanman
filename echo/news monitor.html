@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（表示位置修正版）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NHK ニュースモニター（Echo Show完全対応版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -11,37 +11,44 @@
 
     <style>
         :root { 
-            --bg-color: #0b0f14;        /* 深海のような深いネイビー */
-            --accent-color: #00bcd4;    /* ヘッダー線：鮮やかなシアン */
-            --card-bg: #161c24;         /* 落ち着いたネイビーグレー */
+            --bg-color: #0b0f14;        
+            --accent-color: #00bcd4;    
+            --card-bg: #161c24;         
             
-            /* タイトルと概要文のカラー定義 */
-            --text-gray-title: #90caf9; /* 奇数タイトル：眩しさを抑えたライトブルー */
-            --text-gray-desc: #b0bec5;  /* 奇数概要：透明感のあるブルーグレー */
+            --text-gray-title: #90caf9; 
+            --text-gray-desc: #b0bec5;  
             
-            --text-mint-title: #80cbc4; /* 偶数タイトル：やわらかなペールアクア */
-            --text-mint-desc: #b0bec5;  /* 偶数概要：共通のブルーグレー */
+            --text-mint-title: #80cbc4; 
+            --text-mint-desc: #b0bec5;  
         }
         
-        /* 画面全体の縦並び配置を厳格化 */
-        body { 
-            font-family: sans-serif; 
-            background-color: var(--bg-color); 
-            margin: 0; 
-            padding: 10px; 
-            height: 100vh; 
-            box-sizing: border-box; /* パディングによるサイズ破綻を防ぐ */
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
+        /* 画面全体のスクロールを完全に禁止し、グリッド制御をかける */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: sans-serif;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
-        /* ヘッダーが絶対にニュース側に潰されないように固定 */
+        /* 【重要】Echo Showの潜り込みを防ぐため、Gridで二層に完全分離 */
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr; /* ヘッダーの高さ分、残りをニュースエリアに自動分配 */
+            padding: 10px;
+        }
+        
+        /* ヘッダー：潜り込みを防ぐため、位置固定（absolute）を廃止 */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
-            margin-bottom: 10px; 
-            flex-shrink: 0; /* 絶対に縮まないように固定 */
+            margin-bottom: 10px;
+            background-color: var(--bg-color);
+            width: 100%;
+            box-sizing: border-box;
         }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
@@ -51,15 +58,15 @@
         .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #fff; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* ニュースコンテナ：上部に安全マージンを付与 */
+        /* ニュースコンテナ：Gridの2段目にピッタリ収め、この中だけでスクロールさせる */
         #news-container { 
-            flex-grow: 1; 
             overflow-y: auto;          
             scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
-            padding-top: 4px; /* 隠れ防止：上部に少しだけクッション余白を設ける */
+            width: 100%;
+            height: 100%; /* 親要素（Gridの2段目）の高さに100%追従 */
             box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
         }
@@ -77,6 +84,7 @@
             border-radius: 4px; 
             border-left: 4px solid #37474f; 
             gap: 8px;
+            flex-shrink: 0; 
         }
         
         .news-header-row {

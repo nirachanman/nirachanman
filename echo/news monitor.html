@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（ヘッダー固定修正版）</title>
+    <title>NHK ニュースモニター（Fire TV / Echo Show 両対応版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -11,15 +11,16 @@
 
     <style>
         :root { 
-            --bg-color: #0b0f14;        
-            --accent-color: #00bcd4;    
-            --card-bg: #161c24;         
+            --bg-color: #f7f3ee;        /* 眩しさを抑えた温かみのある生成り色 */
+            --accent-color: #8d6e63;    /* ヘッダー線：落ち着いたブラウン */
+            --card-bg: #ffffff;         /* カード背景：クッキリ見せる白 */
             
-            --text-gray-title: #90caf9; 
-            --text-gray-desc: #b0bec5;  
+            /* タイトルと概要文のカラー定義 */
+            --text-gray-title: #5d4037; /* 奇数タイトル：深みのあるコーヒーブラウン */
+            --text-gray-desc: #6d4c41;  /* 奇数概要：マイルドなココアブラウン */
             
-            --text-mint-title: #90caf9; 
-            --text-mint-desc: #b0bec5;  
+            --text-mint-title: #ad1457; /* 偶数タイトル：アクセントになる上品なボルドー */
+            --text-mint-desc: #6d4c41;  /* 偶数概要：共通のココアブラウン */
         }
         
         html, body {
@@ -49,10 +50,10 @@
         }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
-        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #333333; }
         
         .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #fff; }
+        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #333333; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
         #news-container { 
@@ -78,9 +79,10 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #37474f; 
+            border-left: 4px solid #b0bec5; 
             gap: 8px;
             flex-shrink: 0; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
         }
         
         .news-header-row {
@@ -101,7 +103,7 @@
         
         .news-time { 
             font-size: 1.1rem; 
-            color: #607d8b; 
+            color: #78909c; 
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -229,7 +231,6 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
-        // 【修正】画面全体を巻き込まない、コンテナ内完結型の相対スクロール処理
         async function autoScroll() {
             if (isPaused) return;
 
@@ -245,11 +246,9 @@
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                // コンテナの最上部から、ターゲット要素までの正確な距離（差分）を計算
                 const containerTop = container.getBoundingClientRect().top;
                 const targetTop = targetItem.getBoundingClientRect().top;
                 
-                // 現在のスクロール位置に差分を足すことで、ブラウザ全体（ヘッダー）を引っ張らずに、中身だけを移動させる
                 container.scrollTo({
                     top: container.scrollTop + (targetTop - containerTop),
                     behavior: 'smooth'
@@ -258,8 +257,19 @@
         }
 
         async function init() {
+            // 【Fire TV Stick対策1】ブラウザ自身が前回のスクロール位置を勝手に復元するのを禁止
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+
             await updateNews();
             await requestWakeLock();
+
+            // 【Fire TV Stick対策2】ロード完了直後に画面全体・コンテナ両方のスクロールを強制的に最上部に固定
+            window.scrollTo(0, 0);
+            if (container) {
+                container.scrollTop = 0;
+            }
         }
 
         init();

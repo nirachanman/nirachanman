@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（Fire TV / Echo Show 両対応版）</title>
+    <title>NHK ニュースモニター（ダークモード・ヘッダー白文字版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -49,10 +49,14 @@
         }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
-        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #333333; }
+        
+        /* 変更箇所1: ヘッダータイトルの文字色を「白」に指定 */
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
         .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #333333; }
+        
+        /* 変更箇所2: 流れるニュース（マーキー）の文字色を「白」に指定 */
+        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #ffffff; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
         #news-container { 
@@ -78,10 +82,9 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #b0bec5; 
+            border-left: 4px solid #37474f; 
             gap: 8px;
             flex-shrink: 0; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
         }
         
         .news-header-row {
@@ -102,7 +105,7 @@
         
         .news-time { 
             font-size: 1.1rem; 
-            color: #78909c; 
+            color: #607d8b; 
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -199,6 +202,7 @@
 
         const container = document.getElementById('news-container');
 
+        // 手動操作時の位置同期処理
         function syncAndPauseScroll() {
             isPaused = true;
             clearTimeout(resumeTimeout);
@@ -230,6 +234,7 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
+        // 精密3件スクロールロジック
         async function autoScroll() {
             if (isPaused) return;
 
@@ -256,7 +261,7 @@
         }
 
         async function init() {
-            // 【Fire TV Stick対策1】ブラウザ自身が前回のスクロール位置を勝手に復元するのを禁止
+            // Fire TV Stick用：スクロール位置自動復元をキャンセル
             if ('scrollRestoration' in history) {
                 history.scrollRestoration = 'manual';
             }
@@ -264,7 +269,7 @@
             await updateNews();
             await requestWakeLock();
 
-            // 【Fire TV Stick対策2】ロード完了直後に画面全体・コンテナ両方のスクロールを強制的に最上部に固定
+            // ロード直後の位置ズレ（ヘッダー隠れ）を強制リセット
             window.scrollTo(0, 0);
             if (container) {
                 container.scrollTop = 0;

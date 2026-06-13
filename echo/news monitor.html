@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（Echo Show完全対応版）</title>
+    <title>NHK ニュースモニター（ヘッダー固定修正版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,7 +22,6 @@
             --text-mint-desc: #b0bec5;  
         }
         
-        /* 画面全体のスクロールを完全に禁止し、グリッド制御をかける */
         html, body {
             margin: 0;
             padding: 0;
@@ -34,14 +33,12 @@
             box-sizing: border-box;
         }
         
-        /* 【重要】Echo Showの潜り込みを防ぐため、Gridで二層に完全分離 */
         body {
             display: grid;
-            grid-template-rows: auto 1fr; /* ヘッダーの高さ分、残りをニュースエリアに自動分配 */
+            grid-template-rows: auto 1fr; 
             padding: 10px;
         }
         
-        /* ヘッダー：潜り込みを防ぐため、位置固定（absolute）を廃止 */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
@@ -58,7 +55,6 @@
         .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #fff; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* ニュースコンテナ：Gridの2段目にピッタリ収め、この中だけでスクロールさせる */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -66,7 +62,7 @@
             flex-direction: column; 
             gap: 6px; 
             width: 100%;
-            height: 100%; /* 親要素（Gridの2段目）の高さに100%追従 */
+            height: 100%; 
             box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
         }
@@ -233,6 +229,7 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
+        // 【修正】画面全体を巻き込まない、コンテナ内完結型の相対スクロール処理
         async function autoScroll() {
             if (isPaused) return;
 
@@ -248,9 +245,14 @@
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                targetItem.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+                // コンテナの最上部から、ターゲット要素までの正確な距離（差分）を計算
+                const containerTop = container.getBoundingClientRect().top;
+                const targetTop = targetItem.getBoundingClientRect().top;
+                
+                // 現在のスクロール位置に差分を足すことで、ブラウザ全体（ヘッダー）を引っ張らずに、中身だけを移動させる
+                container.scrollTo({
+                    top: container.scrollTop + (targetTop - containerTop),
+                    behavior: 'smooth'
                 });
             }
         }

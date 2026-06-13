@@ -9,17 +9,17 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <style>
-        :root { 
-            --bg-color: #0b0f14;        
-            --accent-color: #00bcd4;    
-            --card-bg: #161c24;         
+:root { 
+            --bg-color: #f7f3ee;        /* 眩しさを抑えた温かみのある生成り色 */
+            --accent-color: #8d6e63;    /* ヘッダー線：落ち着いたブラウン */
+            --card-bg: #ffffff;         /* カード背景：クッキリ見せる白 */
             
-            --text-gray-title: #90caf9; 
-            --text-gray-desc: #b0bec5;  
+            /* タイトルと概要文のカラー定義 */
+            --text-gray-title: #5d4037; /* 奇数タイトル：深みのあるコーヒーブラウン */
+            --text-gray-desc: #6d4c41;  /* 奇数概要：マイルドなココアブラウン */
             
-            --text-mint-title: #80cbc4; 
-            --text-mint-desc: #b0bec5;  
+            --text-mint-title: #ad1457; /* 偶数タイトル：アクセントになる上品なボルドー（ワイン色） */
+            --text-mint-desc: #6d4c41;  /* 偶数概要：共通のココアブラウン */
         }
         
         html, body {
@@ -49,12 +49,13 @@
         }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
-        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
+/* 1. ヘッダーの文字色を黒に */
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #333333; }
         
         .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #fff; }
+        /* 2. 流れるニュース（マーキー）の文字色を黒に */
+        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #333333; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
-
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -71,6 +72,7 @@
             display: none;
         }
         
+        /* 3. ニュースカードに「薄い影」をつけて、背景と見分けやすくする */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -78,9 +80,10 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #37474f; 
+            border-left: 4px solid #b0bec5; /* 左線の色をライトモード用の薄いグレーに */
             gap: 8px;
             flex-shrink: 0; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 変更：カードが立体的に見やすくなる影 */
         }
         
         .news-header-row {
@@ -99,9 +102,10 @@
             font-weight: 400; 
         }
         
+        /* 4. 時間表示の文字色を、明るい背景でも読める濃さに */
         .news-time { 
             font-size: 1.1rem; 
-            color: #607d8b; 
+            color: #78909c; /* 変更：視認性の高いグレーに */
             white-space: nowrap;
             flex-shrink: 0;
         }

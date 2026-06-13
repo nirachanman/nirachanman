@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（クール・ミニマル版）</title>
+    <title>NHK ニュースモニター（表示位置修正版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -23,9 +23,26 @@
             --text-mint-desc: #b0bec5;  /* 偶数概要：共通のブルーグレー */
         }
         
-        body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* 画面全体の縦並び配置を厳格化 */
+        body { 
+            font-family: sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: 10px; 
+            height: 100vh; 
+            box-sizing: border-box; /* パディングによるサイズ破綻を防ぐ */
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
         
-        header { border-bottom: 2px solid var(--accent-color); padding-bottom: 8px; margin-bottom: 10px; flex-shrink: 0; }
+        /* ヘッダーが絶対にニュース側に潰されないように固定 */
+        header { 
+            border-bottom: 2px solid var(--accent-color); 
+            padding-bottom: 8px; 
+            margin-bottom: 10px; 
+            flex-shrink: 0; /* 絶対に縮まないように固定 */
+        }
         .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
         .header-link { text-decoration: none; display: flex; align-items: center; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #fff; }
@@ -34,6 +51,7 @@
         .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #fff; }
         @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
 
+        /* ニュースコンテナ：上部に安全マージンを付与 */
         #news-container { 
             flex-grow: 1; 
             overflow-y: auto;          
@@ -41,6 +59,8 @@
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
+            padding-top: 4px; /* 隠れ防止：上部に少しだけクッション余白を設ける */
+            box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
         }
         
@@ -55,7 +75,7 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #37474f; /* 変更：背景に馴染む青みがかった左線 */
+            border-left: 4px solid #37474f; 
             gap: 8px;
         }
         
@@ -77,7 +97,7 @@
         
         .news-time { 
             font-size: 1.1rem; 
-            color: #607d8b; /* 変更：少し青みを持たせた時間表示 */
+            color: #607d8b; 
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -120,7 +140,7 @@
         let isPaused = false;
         let wakeLock = null;
         let resumeTimeout = null;
-        let currentItemIndex = 0; // 現在最上部付近に表示されているニュースのインデックス
+        let currentItemIndex = 0; 
 
         async function requestWakeLock() {
             try {
@@ -174,12 +194,10 @@
 
         const container = document.getElementById('news-container');
 
-        // 手動操作やスクロール時にインデックスを正しく同期・一時停止する処理
         function syncAndPauseScroll() {
             isPaused = true;
             clearTimeout(resumeTimeout);
 
-            // 現在画面の一番上に一番近いニュース要素を割り出す（手動追従）
             const items = container.querySelectorAll('.news-item');
             const containerTop = container.getBoundingClientRect().top;
             
@@ -207,20 +225,17 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
-        // 精密な3アイテム要素ターゲティング式スクロール
         async function autoScroll() {
             if (isPaused) return;
 
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // スクロールが一番下、もしくは次の3件が存在しない場合はリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
             }
 
-            // きっちり3つ先のタイルを指名して移動
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
 

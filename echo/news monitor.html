@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NHK ニュースモニター（目に優しいデザイン版）</title>
+    <title>NHK ニュースモニター（クール・ミニマル版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -11,16 +11,16 @@
 
     <style>
         :root { 
-            --bg-color: #121212; 
-            --accent-color: #ff4d4d; 
-            --card-bg: #1e1e1e; 
+            --bg-color: #0b0f14;        /* 深海のような深いネイビー */
+            --accent-color: #00bcd4;    /* ヘッダー線：鮮やかなシアン */
+            --card-bg: #161c24;         /* 落ち着いたネイビーグレー */
             
-            /* 目に優しい色合いの定義 */
-            --text-gray-title: #cfd8dc;    /* 落ち着いた薄いグレー（タイトル用） */
-            --text-gray-desc: #b0bec5;     /* やや暗めのグレー（概要用） */
+            /* タイトルと概要文のカラー定義 */
+            --text-gray-title: #90caf9; /* 奇数タイトル：眩しさを抑えたライトブルー */
+            --text-gray-desc: #b0bec5;  /* 奇数概要：透明感のあるブルーグレー */
             
-            --text-mint-title: #b2dfdb;    /* 目を刺激しない淡いミントブルー（タイトル用） */
-            --text-mint-desc: #80cbc4;     /* 馴染みの良いセージグリーン（概要用） */
+            --text-mint-title: #80cbc4; /* 偶数タイトル：やわらかなペールアクア */
+            --text-mint-desc: #b0bec5;  /* 偶数概要：共通のブルーグレー */
         }
         
         body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -55,7 +55,7 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #555; 
+            border-left: 4px solid #37474f; /* 変更：背景に馴染む青みがかった左線 */
             gap: 8px;
         }
         
@@ -66,19 +66,18 @@
             gap: 15px;
         }
         
-        /* タイトルのフォントを少し細く(300〜400相当)設定 */
         .news-title { 
             font-size: 1.3rem; 
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             flex-grow: 1;
-            font-weight: 400; /* bold(太字)から通常〜やや細めに変更 */
+            font-weight: 400; 
         }
         
         .news-time { 
             font-size: 1.1rem; 
-            color: #888; /* 時間も少しトーンを落として眩しさを軽減 */
+            color: #607d8b; /* 変更：少し青みを持たせた時間表示 */
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -92,11 +91,9 @@
             overflow: visible;         
         }
 
-        /* 奇数番目（1, 3, 5回目...）のニュース：薄いグレー基調 */
         .news-item:nth-child(odd) .news-title { color: var(--text-gray-title); }
         .news-item:nth-child(odd) .news-desc { color: var(--text-gray-desc); }
 
-        /* 偶数番目（2, 4, 6回目...）のニュース：淡いミント・セージ基調 */
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
     </style>
@@ -123,6 +120,7 @@
         let isPaused = false;
         let wakeLock = null;
         let resumeTimeout = null;
+        let currentItemIndex = 0; // 現在最上部付近に表示されているニュースのインデックス
 
         async function requestWakeLock() {
             try {
@@ -171,34 +169,66 @@
             `).join('');
             
             document.getElementById('news-container').scrollTop = 0;
+            currentItemIndex = 0;
         }
 
         const container = document.getElementById('news-container');
 
-        function pauseAutoScroll() {
+        // 手動操作やスクロール時にインデックスを正しく同期・一時停止する処理
+        function syncAndPauseScroll() {
             isPaused = true;
             clearTimeout(resumeTimeout);
+
+            // 現在画面の一番上に一番近いニュース要素を割り出す（手動追従）
+            const items = container.querySelectorAll('.news-item');
+            const containerTop = container.getBoundingClientRect().top;
+            
+            let closestIndex = 0;
+            let minDistance = Infinity;
+
+            items.forEach((item, index) => {
+                const rect = item.getBoundingClientRect();
+                const distance = Math.abs(rect.top - containerTop);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            currentItemIndex = closestIndex;
+
             resumeTimeout = setTimeout(() => {
                 isPaused = false;
             }, 5000);
         }
 
-        container.addEventListener('touchstart', pauseAutoScroll);
-        container.addEventListener('touchmove', pauseAutoScroll);
-        container.addEventListener('scroll', pauseAutoScroll);
+        container.addEventListener('touchstart', syncAndPauseScroll, { passive: true });
+        container.addEventListener('touchmove', syncAndPauseScroll, { passive: true });
+        container.addEventListener('scroll', syncAndPauseScroll);
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { isPaused = false; });
 
+        // 精密な3アイテム要素ターゲティング式スクロール
         async function autoScroll() {
             if (isPaused) return;
 
-            const firstItem = container.querySelector('.news-item');
-            const itemHeight = firstItem ? firstItem.offsetHeight + 6 : 100;
+            const items = container.querySelectorAll('.news-item');
+            if (items.length === 0) return;
 
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
+            // スクロールが一番下、もしくは次の3件が存在しない場合はリロード
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
-            } else {
-                container.scrollTop += (itemHeight * 3); 
+                return;
+            }
+
+            // きっちり3つ先のタイルを指名して移動
+            currentItemIndex += 3;
+            const targetItem = items[currentItemIndex];
+
+            if (targetItem) {
+                targetItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }
         }
 

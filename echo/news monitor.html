@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（横幅突き抜けバグ修正版）</title>
+    <title>NHK ニュースモニター（横幅完全固定版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,10 +22,12 @@
             --text-mint-desc: #b0bec5;  
         }
         
+        /* 🎨 修正箇所①: 画面外枠（最上位）を物理画面幅（100vw）に絶対固定 */
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
+            width: 100vw;
+            max-width: 100vw;
             height: 100vh;
             background-color: var(--bg-color);
             font-family: sans-serif;
@@ -37,38 +39,50 @@
             display: grid;
             grid-template-rows: auto 1fr; 
             padding: 10px;
-            width: 100%; /* 横幅を画面に固定 */
-            box-sizing: border-box;
         }
         
+        /* 🎨 修正箇所②: ヘッダーも画面幅を超えないよう厳格にロック */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
             margin-bottom: 10px;
             background-color: var(--bg-color);
             width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
+            overflow: hidden;
         }
+        
         .header-top { 
             display: flex; 
             align-items: center; 
             gap: 15px; 
-            width: 100%;         /* ヘッダー内も100%幅に制限 */
+            width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
+            overflow: hidden;
         }
+        
         .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        /* 🎨 修正箇所: 長大な15連マーキーが画面幅を右側へ引っ張るのを絶対に防ぐ設定 */
+        /* 🎨 修正箇所③: マーキーコンテナの高さ（Height）を固定し、中身を「絶対配置」にする土台にする */
         .marquee-container { 
             flex-grow: 1; 
-            min-width: 0;        /* 💥超重要：これがないと文字の長さに引っ張られて右に突き抜けます */
+            height: 1.5rem;      /* 文字の高さ分の通り道を確保 */
             overflow: hidden; 
             white-space: nowrap; 
-            position: relative;
+            position: relative;  /* 中身をabsoluteにするための基準線 */
         }
         
+        /* 🎨 修正箇所④: position: absolute を指定。
+           これにより、この長大な文字塊は「画面の横幅を押し広げる力」を完全に失い、
+           コンテナの枠内だけで大人しく流れるようになります（バグの根本原因を解消）。
+        */
         .marquee-text { 
+            position: absolute;
+            left: 0;
+            top: 0;
             display: inline-block; 
             padding-left: 100%;                  
             animation: scroll-x 120s linear infinite; 
@@ -80,13 +94,15 @@
             100% { transform: translate(-100%, 0); } 
         }
 
+        /* 🎨 修正箇所⑤: ニュースリストの横幅も画面幅から1pxもハミ出さないよう厳守 */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
-            width: 100%;               /* ニュースリストの横幅を画面幅に強制固定 */
+            width: 100%;
+            max-width: 100%;
             height: 100%; 
             box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
@@ -108,7 +124,7 @@
             gap: 8px;
             flex-shrink: 0; 
             box-sizing: border-box;         
-            width: 100%;               /* リスト内のカードも横幅100%に固定 */
+            width: 100%;               
         }
         
         .news-header-row {

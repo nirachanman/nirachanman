@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（読了時リロード版）</title>
+    <title>NHK ニュースモニター（一覧にも最新表示版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -180,9 +180,13 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
+            // 1番最新のニュース（インデックス0）をマーキーにセット
             document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
             
-            document.getElementById('news-container').innerHTML = unique.slice(1, 51).map(item => `
+            // 【変更箇所】
+            // ニュース一覧（#news-container）の切り出しを「unique.slice(1, 51)」から「unique.slice(0, 50)」に変更。
+            // これにより、マーキーと同じ1番最新のニュースがニュース一覧の最上部（1件目）にも出現します。
+            document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
                         <div class="news-title">${item.title}</div>
@@ -235,9 +239,6 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 【変更箇所①】
-            // スクロールが一番下（最底面）に到達した、または全50件のインデックスの末尾（次がない状態）まで進んだ場合、
-            // その場で即座に最新化（リロード）をかけます。
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
@@ -273,11 +274,7 @@
 
         init();
         
-        // 30秒ごとの自動スクロール（この処理の内部で、末尾に達した瞬間のリロードが監視されます）
         setInterval(autoScroll, 30000); 
-
-        // 【変更箇所②】
-        // 以前コードの下部にあった「setTimeout(() => { location.reload(); }, 270000);」（4分半の強制リロードタイマー）を完全に撤去しました。
         
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {

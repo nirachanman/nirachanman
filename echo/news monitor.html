@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（一覧にも最新表示版）</title>
+    <title>NHK ニュースモニター（全体リロード・一覧先頭最新版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -156,11 +156,14 @@
             }
         }
 
+        // 基本となるニュース読み込み関数
         async function updateNews() {
             let allItems = [];
             for (const url of RSS_URLS) {
                 try {
-                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+                    // キャッシュを回避するためにURLの末尾にタイムスタンプを強制付与
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
+                    const res = await fetch(targetUrl);
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
@@ -183,9 +186,7 @@
             // 1番最新のニュース（インデックス0）をマーキーにセット
             document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
             
-            // 【変更箇所】
-            // ニュース一覧（#news-container）の切り出しを「unique.slice(1, 51)」から「unique.slice(0, 50)」に変更。
-            // これにより、マーキーと同じ1番最新のニュースがニュース一覧の最上部（1件目）にも出現します。
+            // ニュース一覧の先頭にもマーキーと同じ最新ニュース（インデックス0から50件）を表示
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -239,6 +240,9 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // 【リロード復活】
+            // ニュースを最後まで読み切った瞬間（スクロールが底についた、または次の要素がない時）に、
+            // 画面全体を完全にリロードして真っ新な状態で初期化します。
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
@@ -266,6 +270,7 @@
             await updateNews();
             await requestWakeLock();
 
+            // リロード時にFire TV Stick等でヘッダーが隠れてしまわないよう、最上部に完全強制固定
             window.scrollTo(0, 0);
             if (container) {
                 container.scrollTop = 0;
@@ -274,6 +279,7 @@
 
         init();
         
+        // 30秒ごとに自動巡回チェック
         setInterval(autoScroll, 30000); 
         
         document.addEventListener('visibilitychange', async () => {

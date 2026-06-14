@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（全体リロード・一覧先頭最新版）</title>
+    <title>NHK ニュースモニター（カード枠線追加版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -71,6 +71,7 @@
             display: none;
         }
         
+        /* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -78,9 +79,11 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border-left: 4px solid #37474f; 
+            border: 1px solid #263238;     /* 四方に1pxの細い枠線を追加 */
+            border-left: 4px solid #37474f; /* 左側の太線アクセントは維持 */
             gap: 8px;
             flex-shrink: 0; 
+            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
         }
         
         .news-header-row {
@@ -156,12 +159,10 @@
             }
         }
 
-        // 基本となるニュース読み込み関数
         async function updateNews() {
             let allItems = [];
             for (const url of RSS_URLS) {
                 try {
-                    // キャッシュを回避するためにURLの末尾にタイムスタンプを強制付与
                     const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
                     const res = await fetch(targetUrl);
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
@@ -183,10 +184,8 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            // 1番最新のニュース（インデックス0）をマーキーにセット
             document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
             
-            // ニュース一覧の先頭にもマーキーと同じ最新ニュース（インデックス0から50件）を表示
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -240,9 +239,6 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 【リロード復活】
-            // ニュースを最後まで読み切った瞬間（スクロールが底についた、または次の要素がない時）に、
-            // 画面全体を完全にリロードして真っ新な状態で初期化します。
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
@@ -270,7 +266,6 @@
             await updateNews();
             await requestWakeLock();
 
-            // リロード時にFire TV Stick等でヘッダーが隠れてしまわないよう、最上部に完全強制固定
             window.scrollTo(0, 0);
             if (container) {
                 container.scrollTop = 0;
@@ -279,7 +274,6 @@
 
         init();
         
-        // 30秒ごとに自動巡回チェック
         setInterval(autoScroll, 30000); 
         
         document.addEventListener('visibilitychange', async () => {

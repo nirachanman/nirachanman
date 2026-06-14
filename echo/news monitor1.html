@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（データのみ非同期更新版）</title>
+    <title>NHK ニュースモニター（非同期・横幅完全固定版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,10 +22,12 @@
             --text-mint-desc: #b0bec5;  
         }
         
+        /* 🎨 改善: 外枠（最上位）を物理画面幅（100vw）に絶対固定し突き抜けを完全防止 */
         html, body {
             margin: 0;
             padding: 0;
-            width: 100%;
+            width: 100vw;
+            max-width: 100vw;
             height: 100vh;
             background-color: var(--bg-color);
             font-family: sans-serif;
@@ -39,22 +41,58 @@
             padding: 10px;
         }
         
+        /* 🎨 改善: ヘッダーも画面幅を超えないよう厳格にロック */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
             margin-bottom: 10px;
             background-color: var(--bg-color);
             width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
+            overflow: hidden;
         }
-        .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
-        .header-link { text-decoration: none; display: flex; align-items: center; }
+        
+        .header-top { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #ffffff; }
-        @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+        /* 🎨 改善: マーキーコンテナの仕様を絶対配置の土台として最適化 */
+        .marquee-container { 
+            flex-grow: 1; 
+            height: 1.5rem;      
+            overflow: hidden; 
+            white-space: nowrap; 
+            position: relative;  
+        }
+        
+        /* 🎨 改善: position: absolute を指定。
+           どれだけ文字が長くても、画面を押し広げる力を完全にニュートラル化します */
+        .marquee-text { 
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: inline-block; 
+            padding-left: 100%;                  
+            animation: scroll-x 120s linear infinite; 
+            font-size: 1.1rem; 
+            color: #ffffff; 
+        }
+        @keyframes scroll-x { 
+            0% { transform: translate(0, 0); } 
+            100% { transform: translate(-100%, 0); } 
+        }
 
+        /* 🎨 改善: ニュースリストの横幅を100%に強制固定 */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -62,6 +100,7 @@
             flex-direction: column; 
             gap: 6px; 
             width: 100%;
+            max-width: 100%;
             height: 100%; 
             box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
@@ -71,7 +110,6 @@
             display: none;
         }
         
-/* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -79,11 +117,12 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #b87644;     /* 四方に1pxの細い枠線を追加 */
-            border-left: 4px solid #b87644; /* 左側の太線アクセントは維持 */
+            border: 1px solid #b87644;     
+            border-left: 4px solid #b87644; 
             gap: 8px;
             flex-shrink: 0; 
-            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
+            box-sizing: border-box;         
+            width: 100%; /* 幅を確実に親要素に合わせる */
         }
         
         .news-header-row {
@@ -91,6 +130,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 15px;
+            width: 100%;
         }
         
         .news-title { 
@@ -159,13 +199,9 @@
             }
         }
 
-        // 【機能変更】データだけを裏で取得して中身をゴソッと入れ替える関数
+        // 裏側でデータだけを更新する関数
         async function updateNewsOnly() {
             let allItems = [];
-            
-            // キャッシュを強制回避するためのタイムスタンプを付与
-            const cacheBuster = `&_cb=${Date.now()}`;
-
             for (const url of RSS_URLS) {
                 try {
                     const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
@@ -189,10 +225,19 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            // ヘッダーのマーキーを最新情報に更新
-            document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
+            // 🛠️ 【非同期版に統合】15件のタイトルをスマートに連結してマーキーを生成
+            const marqueeCount = Math.min(unique.length, 15); 
+            let marqueeHtml = '<span class="marquee-text">';
+            for(let i = 0; i < marqueeCount; i++) {
+                marqueeHtml += `<a href="${unique[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${unique[i].title}</a>`;
+                if(i < marqueeCount - 1) {
+                    marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
+                }
+            }
+            marqueeHtml += '</span>';
+            document.getElementById('marquee').innerHTML = marqueeHtml;
             
-            // ニュースコンテナの中身（DOM）だけを再生成して差し替え
+            // 下部ニュースリストの描画（インデックス0〜50を表示）
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -203,7 +248,6 @@
                 </a>
             `).join('');
             
-            // スクロール位置とインデックスを一番上（最初）にリセット
             document.getElementById('news-container').scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -247,10 +291,8 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 【変更の主軸】最後のニュースまで読み切ったら、location.reload() を呼ぶのをやめ、
-            // 「updateNewsOnly()」を呼び出して裏側でデータだけをリフレッシュして先頭に戻す
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNewsOnly();
+                await updateNewsOnly(); // リロードせず裏側で新データへ差し替えてトップに戻る
                 return;
             }
 
@@ -273,7 +315,6 @@
                 history.scrollRestoration = 'manual';
             }
 
-            // 初回読み込み
             await updateNewsOnly();
             await requestWakeLock();
 
@@ -285,7 +326,6 @@
 
         init();
         
-        // 30秒ごとにオートスクロールチェック
         setInterval(autoScroll, 30000); 
         
         document.addEventListener('visibilitychange', async () => {

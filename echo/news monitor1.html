@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NHK ニュースモニター（データのみ非同期更新版）</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        :root { 
+            --bg-color: #0b0f14;        
+            --accent-color: #00bcd4;    
+            --card-bg: #161c24;         
+            
+            --text-gray-title: #90caf9; 
+            --text-gray-desc: #b0bec5;  
+            
+            --text-mint-title: #90caf9; 
+            --text-mint-desc: #b0bec5;  
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: sans-serif;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: grid;
+            grid-template-rows: auto 1fr; 
+            padding: 10px;
+        }
+        
+        header { 
+            border-bottom: 2px solid var(--accent-color); 
+            padding-bottom: 8px; 
+            margin-bottom: 10px;
+            background-color: var(--bg-color);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .header-top { display: flex; align-items: center; gap: 15px; overflow: hidden; }
+        .header-link { text-decoration: none; display: flex; align-items: center; }
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
+        
+        .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
+        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #ffffff; }
+        @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+
+        #news-container { 
+            overflow-y: auto;          
+            scroll-behavior: smooth; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            width: 100%;
+            height: 100%; 
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        #news-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .news-item { 
+            display: flex; 
+            flex-direction: column; 
+            text-decoration: none; 
+            background-color: var(--card-bg); 
+            padding: 12px; 
+            border-radius: 4px; 
+            border-left: 4px solid #37474f; 
+            gap: 8px;
+            flex-shrink: 0; 
+        }
+        
+        .news-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .news-title { 
+            font-size: 1.3rem; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            font-weight: 400; 
+        }
+        
+        .news-time { 
+            font-size: 1.1rem; 
+            color: #607d8b; 
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .news-desc {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            white-space: normal;       
+            word-wrap: break-word;     
+            text-overflow: clip;       
+            overflow: visible;         
+        }
+
+        .news-item:nth-child(odd) .news-title { color: var(--text-gray-title); }
+        .news-item:nth-child(odd) .news-desc { color: var(--text-gray-desc); }
+
+        .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
+        .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
+                <h1>NHK 全国新着ニュース</h1>
+            </a>
+            <div class="marquee-container" id="marquee"></div>
+        </div>
+    </header>
+    <main id="news-container"></main>
+
+    <script>
+        const RSS_URLS = [
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
+        ];
+
+        let isPaused = false;
+        let wakeLock = null;
+        let resumeTimeout = null;
+        let currentItemIndex = 0; 
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 【機能変更】データだけを裏で取得して中身をゴソッと入れ替える関数
+        async function updateNewsOnly() {
+            let allItems = [];
+            
+            // キャッシュを強制回避するためのタイムスタンプを付与
+            const cacheBuster = `&_cb=${Date.now()}`;
+
+            for (const url of RSS_URLS) {
+                try {
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
+                    const res = await fetch(targetUrl);
+                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+                    for (let item of xml.getElementsByTagName('item')) {
+                        const descEl = item.getElementsByTagName('description')[0];
+                        const description = descEl ? descEl.textContent : '';
+
+                        allItems.push({
+                            title: item.getElementsByTagName('title')[0].textContent,
+                            link: item.getElementsByTagName('link')[0].textContent,
+                            description: description,
+                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
+                        });
+                    }
+                } catch (e) {}
+            }
+            if (allItems.length === 0) return;
+
+            allItems.sort((a, b) => b.pubDate - a.pubDate);
+            const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+
+            // ヘッダーのマーキーを最新情報に更新
+            document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
+            
+            // ニュースコンテナの中身（DOM）だけを再生成して差し替え
+            document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
+                <a href="${item.link}" target="_blank" class="news-item">
+                    <div class="news-header-row">
+                        <div class="news-title">${item.title}</div>
+                        <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                    </div>
+                    <div class="news-desc">${item.description}</div>
+                </a>
+            `).join('');
+            
+            // スクロール位置とインデックスを一番上（最初）にリセット
+            document.getElementById('news-container').scrollTop = 0;
+            currentItemIndex = 0;
+        }
+
+        const container = document.getElementById('news-container');
+
+        function syncAndPauseScroll() {
+            isPaused = true;
+            clearTimeout(resumeTimeout);
+
+            const items = container.querySelectorAll('.news-item');
+            const containerTop = container.getBoundingClientRect().top;
+            
+            let closestIndex = 0;
+            let minDistance = Infinity;
+
+            items.forEach((item, index) => {
+                const rect = item.getBoundingClientRect();
+                const distance = Math.abs(rect.top - containerTop);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            currentItemIndex = closestIndex;
+
+            resumeTimeout = setTimeout(() => {
+                isPaused = false;
+            }, 5000);
+        }
+
+        container.addEventListener('touchstart', syncAndPauseScroll, { passive: true });
+        container.addEventListener('touchmove', syncAndPauseScroll, { passive: true });
+        container.addEventListener('scroll', syncAndPauseScroll);
+        container.addEventListener('mousedown', () => isPaused = true);
+        container.addEventListener('mouseup', () => { isPaused = false; });
+
+        async function autoScroll() {
+            if (isPaused) return;
+
+            const items = container.querySelectorAll('.news-item');
+            if (items.length === 0) return;
+
+            // 【変更の主軸】最後のニュースまで読み切ったら、location.reload() を呼ぶのをやめ、
+            // 「updateNewsOnly()」を呼び出して裏側でデータだけをリフレッシュして先頭に戻す
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
+                await updateNewsOnly();
+                return;
+            }
+
+            currentItemIndex += 3;
+            const targetItem = items[currentItemIndex];
+
+            if (targetItem) {
+                const containerTop = container.getBoundingClientRect().top;
+                const targetTop = targetItem.getBoundingClientRect().top;
+                
+                container.scrollTo({
+                    top: container.scrollTop + (targetTop - containerTop),
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        async function init() {
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+
+            // 初回読み込み
+            await updateNewsOnly();
+            await requestWakeLock();
+
+            window.scrollTo(0, 0);
+            if (container) {
+                container.scrollTop = 0;
+            }
+        }
+
+        init();
+        
+        // 30秒ごとにオートスクロールチェック
+        setInterval(autoScroll, 30000); 
+        
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>

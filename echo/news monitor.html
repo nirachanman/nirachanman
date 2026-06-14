@@ -112,6 +112,7 @@
             display: none;
         }
         
+        /* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -119,11 +120,11 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #263238;     
-            border-left: 4px solid #37474f; 
+            border: 1px solid #dda0dd;     /* 四方に1pxの細い枠線を追加 */
+            border-left: 4px solid #dda0dd; /* 左側の太線アクセントは維持 */
             gap: 8px;
             flex-shrink: 0; 
-            box-sizing: border-box;         
+            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
             width: 100%;               
         }
         

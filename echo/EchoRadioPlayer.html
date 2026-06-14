@@ -35,7 +35,7 @@
             text-align: center;
         }
 
-        /* --- 【大幅更新】ステータスパネルの固定化 --- */
+        /* --- ステータスパネル --- */
         .status-panel {
             background: var(--card-bg);
             padding: 14px;
@@ -46,11 +46,10 @@
             flex-direction: column;
             gap: 10px;
             
-            /* 固定配置のための設定 */
             position: sticky;
-            top: 10px; /* 画面最上部から少しだけ隙間を空けて綺麗に見せる */
-            z-index: 100; /* 放送局ボタンより常に手前に表示 */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* スクロール時に浮いて見えるよう影を追加 */
+            top: 10px; 
+            z-index: 100; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
         }
 
         .panel-row {
@@ -155,7 +154,7 @@
             background: var(--card-bg);
             border: 2px solid #3a3c40;
             color: var(--off-white);
-            padding: 10px 6px;
+            padding: 6px 8px; /* 左右に少し余裕を持たせ、上下を微調整 */
             border-radius: 10px;
             font-size: 0.9rem;
             cursor: pointer;
@@ -163,9 +162,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 50px;
+            
+            /* 【大幅更新】高さを2行分（58px）に完全統一 */
+            height: 58px; 
             box-sizing: border-box;
-            line-height: 1.2;
+            line-height: 1.25;
+            word-break: break-all; /* 必要に応じて単語の途中でも改行 */
         }
 
         .station-btn:active, .station-btn.playing {
@@ -195,13 +197,13 @@
         @media (max-width: 350px) {
             .grid { grid-template-columns: 1fr; }
             #current-station { font-size: 1.1rem; }
+            .station-btn { height: auto; min-height: 50px; } /* 極端に狭い画面では自動改行に対応 */
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- スクロールしても上部に留まるパネル -->
     <div class="status-panel">
         <div class="panel-row top-row">
             <div id="status-label">再生停止中</div>
@@ -224,13 +226,13 @@
         </div>
     </div>
 
-    <!-- ここから下のボタン群がパネルの裏に潜り込むようにスクロールします -->
     <div class="grid" id="station-grid"></div>
 </div>
 
 <audio id="audio-player" preload="none"></audio>
 
 <script>
+    // 【更新】新しい放送局リスト（NHK仙台、東京などの最新版URL）
     const stations = [
         { name: "NHK AM（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
         { name: "NHK FM（仙台）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },

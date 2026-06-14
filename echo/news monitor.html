@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（カード枠線追加版）</title>
+    <title>NHK ニュースモニター（15連マーキー版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -51,9 +51,28 @@
         .header-link { text-decoration: none; display: flex; align-items: center; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        .marquee-container { flex-grow: 1; overflow: hidden; white-space: nowrap; }
-        .marquee-text { display: inline-block; animation: scroll-x 15s linear infinite; font-size: 1.1rem; color: #ffffff; }
-        @keyframes scroll-x { 0% { transform: translate(100%, 0); } 100% { transform: translate(-100%, 0); } }
+        /* 🎨 変更箇所: 長大なテキストが自然に無限ループするようにマーキーエリアを最適化 */
+        .marquee-container { 
+            flex-grow: 1; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            position: relative;
+        }
+        
+        /* 15件分で非常に長くなるため、アニメーション時間を「15s（1件用）」から「120s（2分かけて1周）」に緩め、
+           文字が早すぎて読めなくなるのを防いでいます。
+        */
+        .marquee-text { 
+            display: inline-block; 
+            padding-left: 100%;                  /* 開始時に画面右端から出すための余白 */
+            animation: scroll-x 120s linear infinite; 
+            font-size: 1.1rem; 
+            color: #ffffff; 
+        }
+        @keyframes scroll-x { 
+            0% { transform: translate(0, 0); } 
+            100% { transform: translate(-100%, 0); } /* 全テキストが左にハケきったら最初に戻る */
+        }
 
         #news-container { 
             overflow-y: auto;          
@@ -71,7 +90,6 @@
             display: none;
         }
         
-        /* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -79,11 +97,11 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #dda0dd;     /* 四方に1pxの細い枠線を追加 */
-            border-left: 4px solid #dda0dd; /* 左側の太線アクセントは維持 */
+            border: 1px solid #263238;     
+            border-left: 4px solid #37474f; 
             gap: 8px;
             flex-shrink: 0; 
-            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
+            box-sizing: border-box;         
         }
         
         .news-header-row {
@@ -184,8 +202,20 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            document.getElementById('marquee').innerHTML = `<a href="${unique[0].link}" target="_blank" style="text-decoration:none;"><span class="marquee-text">${unique[0].title}</span></a>`;
+            // 🛠️ 【変更箇所】15件のタイトルを連結して、超ロングマーキーを作成
+            // ニュースの境界線が分かりやすいよう、タイトルの前後に「   /   」を挟んでいます。
+            const marqueeCount = Math.min(unique.length, 15); // 万が一全体が15件未満の場合の安全策
+            let marqueeHtml = '<span class="marquee-text">';
+            for(let i = 0; i < marqueeCount; i++) {
+                marqueeHtml += `<a href="${unique[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${unique[i].title}</a>`;
+                if(i < marqueeCount - 1) {
+                    marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; // ニュース間の区切り線
+                }
+            }
+            marqueeHtml += '</span>';
+            document.getElementById('marquee').innerHTML = marqueeHtml;
             
+            // 下部のリストは、これまで通り最新（0）から50件を表示
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">

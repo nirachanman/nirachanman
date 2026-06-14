@@ -10,19 +10,14 @@
             --bg-color: #1a1c1e;
             --card-bg: #282a2d;
             --accent-color: #013c82; 
-            
-            /* 基本の文字色（ステータス表示など） */
             --text-color: #e0e0a4; 
-            
-            /* ボタン内の文字色 (オフグレー) */
             --off-white: #8e9297;
-            
             --error-color: #cf6679;
             --timer-color: #7da87b; 
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -34,76 +29,98 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
-            padding: 20px;
+            max-width: 600px; /* スマホ・タブレットで見やすい幅に調整 */
+            padding: 15px;
             box-sizing: border-box;
             text-align: center;
         }
 
-        /* --- ステータスパネル --- */
+        /* --- ステータスパネル（スマホ対応強化） --- */
         .status-panel {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 16px;
             border-radius: 15px;
             margin-bottom: 20px;
             border-bottom: 4px solid var(--accent-color);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
-        /* 上段・下段の横並び用共通スタイル */
+        /* 横並びのレイアウトベース */
         .panel-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* 【更新】ステータス表示をボタンと共通デザイン化 */
+        /* ステータスと停止ボタンを50%ずつ綺麗に分ける */
+        .top-row #status-label,
+        .top-row .stop-btn {
+            flex: 1;
+            min-width: 0; /* 文字溢れ防止 */
+            text-align: center;
+        }
+
         #status-label {
-            padding: 10px 20px;
+            padding: 12px 10px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.9rem;
-            /* 停止ボタンと対になる枠線と配色 */
             border: 2px solid var(--error-color);
             background-color: transparent;
             color: var(--error-color);
-            min-width: 80px;
-            display: inline-block;
-            cursor: default; /* クリック不可のカーソル */
+            cursor: default;
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
         
-        /* 再生中や接続中のときは、色をアクティブ（タイマー色と同等の緑系）に変えて目立たせる */
         #status-label.active {
             border-color: var(--timer-color);
             color: var(--timer-color);
         }
 
         #current-station {
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* スマホ用に少しだけコンパクトに */
             font-weight: bold;
             margin: 5px 0;
             width: 100%;
+            word-break: break-all; /* 長い名前の局でも折り返す */
+        }
+
+        /* 下段：タイマーと残り時間 */
+        .bottom-row {
+            justify-content: space-between; /* 両端に配置 */
+            border-top: 1px solid #3a3c40;
+            padding-top: 12px;
+        }
+
+        /* タイマーボタンを2×2のコンパクトなグリッドに */
+        .timer-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            flex: 1;
+            max-width: 180px; /* 大きくなりすぎないよう制限 */
         }
 
         #timer-display {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--timer-color);
             font-weight: bold;
-            min-width: 90px;
-            text-align: left;
+            text-align: right;
+            flex: 1;
+            padding-left: 10px;
         }
 
         /* --- グリッド（放送局ボタン） --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr); /* スマホは基本2列 */
+            gap: 10px;
             width: 100%;
         }
 
@@ -111,34 +128,28 @@
             background: var(--card-bg);
             border: 2px solid #3a3c40;
             color: var(--off-white);
-            padding: 20px 10px;
+            padding: 15px 8px;
             border-radius: 12px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 85px;
+            min-height: 70px; /* スマホで押しやすく、かつ高すぎない絶妙なサイズ */
+            box-sizing: border-box;
         }
 
         .station-btn:active, .station-btn.playing {
             background: var(--accent-color);
             color: #e0e0e0;
-            transform: scale(0.95);
+            transform: scale(0.96);
             border-color: var(--accent-color);
         }
 
         /* --- コントロールボタン群 --- */
-        .timer-group {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
         button.control-btn {
-            padding: 10px 16px;
+            padding: 12px 10px;
             border-radius: 20px;
             border: none;
             font-weight: bold;
@@ -149,18 +160,23 @@
 
         .stop-btn { 
             background-color: var(--error-color); 
-            color: #1a1c1e; /* 背景色と同じにして文字を読みやすく */
-            padding: 10px 20px !important;
+            color: #1a1c1e;
             border: 2px solid var(--error-color);
-            min-width: 124px;
         }
-        .timer-btn { background-color: #444; color: #bbb; }
+        
+        .timer-btn { 
+            background-color: #3a3c40; 
+            color: #bbb; 
+            padding: 6px 10px;
+            border-radius: 8px; /* タイマーは四角形に近い角丸でコンパクトに */
+            font-size: 0.85rem;
+        }
         .timer-btn.active { background-color: var(--timer-color); color: #1a1c1e; }
 
-        @media (max-width: 480px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-            #current-station { font-size: 1.2rem; }
-            .panel-row { gap: 10px; }
+        /* 超小型スマホ（画面幅350px以下）用微調整 */
+        @media (max-width: 350px) {
+            .grid { grid-template-columns: 1fr; } /* 1列にする */
+            #current-station { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -168,14 +184,14 @@
 
 <div class="container">
     <div class="status-panel">
-        <div class="panel-row">
+        <div class="panel-row top-row">
             <div id="status-label">再生停止中</div>
             <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
         </div>
 
         <div id="current-station">- 放送局を選択してください -</div>
 
-        <div class="panel-row">
+        <div class="panel-row bottom-row">
             <div class="timer-group">
                 <button id="timer-30" class="control-btn timer-btn" onclick="setTimer(30)">30分</button>
                 <button id="timer-60" class="control-btn timer-btn" onclick="setTimer(60)">60分</button>
@@ -194,9 +210,8 @@
 <script>
     const stations = [
         { name: "NHK AM（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
-        { name: "NHK FM（仙台）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
         { name: "NHK AM（東京）", url: "https://simul.drdi.st.nhk/live/3/joined/master.m3u8" },
-        { name: "NHK FM（東京）", url: "https://simul.drdi.st.nhk/live/5/joined/master.m3u8" },
+        { name: "NHK FM（東京）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
         { name: "smoothjazz.com.pl", url: "https://bcast.vigormultimedia.com:48888/sjcompl192aac" },        
         { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
         { name: "smooth-jazz-247", url: "https://ais-edge89-dal02.cdnstream.com/2124_128.mp3" },
@@ -231,7 +246,6 @@
         stationGrid.appendChild(btn);
     });
 
-    // ステータス文字の更新と同時にデザイン（クラス）を切り替える関数
     function updateStatus(text, isActive = false) {
         statusLabel.innerText = text;
         if (isActive) {

@@ -94,6 +94,66 @@
             word-break: break-all;
         }
 
+        /* 【新設】ボリュームコントロール領域 */
+        .volume-row {
+            padding: 2px 5px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 6px 12px;
+            border-radius: 30px;
+            box-sizing: border-box;
+        }
+
+        .volume-icon {
+            font-size: 0.9rem;
+            color: var(--off-white);
+            user-select: none;
+        }
+
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #444;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* スライダーのツマミ（iOS/Chrome用） */
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--timer-color);
+            transition: transform 0.1s;
+        }
+        .volume-slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        /* スライダーのツマミ（Firefox用） */
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border: none;
+            border-radius: 50%;
+            background: var(--timer-color);
+            transition: transform 0.1s;
+        }
+        .volume-slider::-moz-range-thumb:active {
+            transform: scale(1.2);
+        }
+
         .bottom-row {
             justify-content: space-between;
             border-top: 1px solid #3a3c40;
@@ -154,7 +214,7 @@
             background: var(--card-bg);
             border: 2px solid #3a3c40;
             color: var(--off-white);
-            padding: 6px 8px; /* 左右に少し余裕を持たせ、上下を微調整 */
+            padding: 6px 8px;
             border-radius: 10px;
             font-size: 0.9rem;
             cursor: pointer;
@@ -162,12 +222,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
-            /* 【大幅更新】高さを2行分（58px）に完全統一 */
             height: 58px; 
             box-sizing: border-box;
             line-height: 1.25;
-            word-break: break-all; /* 必要に応じて単語の途中でも改行 */
+            word-break: break-all;
         }
 
         .station-btn:active, .station-btn.playing {
@@ -197,7 +255,7 @@
         @media (max-width: 350px) {
             .grid { grid-template-columns: 1fr; }
             #current-station { font-size: 1.1rem; }
-            .station-btn { height: auto; min-height: 50px; } /* 極端に狭い画面では自動改行に対応 */
+            .station-btn { height: auto; min-height: 50px; }
         }
     </style>
 </head>
@@ -211,6 +269,14 @@
         </div>
 
         <div id="current-station">- 放送局を選択してください -</div>
+
+        <div class="panel-row volume-row">
+            <div class="volume-container">
+                <span class="volume-icon">🔈</span>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1" oninput="changeVolume(this.value)">
+                <span class="volume-icon">🔊</span>
+            </div>
+        </div>
 
         <div class="panel-row bottom-row">
             <div class="timer-select-wrapper">
@@ -232,7 +298,6 @@
 <audio id="audio-player" preload="none"></audio>
 
 <script>
-    // 【更新】新しい放送局リスト（NHK仙台、東京などの最新版URL）
     const stations = [
         { name: "NHK AM（仙台）", url: "https://simul.drdi.st.nhk/live/8/joined/master.m3u8" },
         { name: "NHK FM（仙台）", url: "https://simul.drdi.st.nhk/live/9/joined/master.m3u8" },
@@ -258,6 +323,7 @@
     const statusLabel = document.getElementById('status-label');
     const timerDisplay = document.getElementById('timer-display');
     const timerSelect = document.getElementById('sleep-timer-select');
+    const volumeSlider = document.getElementById('volume-slider');
     
     let hls = null;
     let timerId = null;
@@ -282,6 +348,11 @@
         }
     }
 
+    // ボリューム変更処理
+    function changeVolume(val) {
+        audio.volume = parseFloat(val);
+    }
+
     function playAudio(station) {
         resetAudioSystem();
         currentStationLabel.innerText = station.name;
@@ -294,20 +365,24 @@
         const secureUrl = station.url.replace("http://", "https://");
         const isHls = secureUrl.includes('.m3u8');
 
+        // 現在のスライダーの値を適用
+        const currentVol = parseFloat(volumeSlider.value);
+
         if (isHls) {
             if (Hls.isSupported()) {
                 hls = new Hls({ enableWorker: true, lowLatencyMode: true });
                 hls.loadSource(secureUrl);
                 hls.attachMedia(audio);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = 1.0; audio.play(); });
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = currentVol; audio.play(); });
                 hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) updateStatus("再生エラー"); });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = secureUrl;
+                audio.volume = currentVol;
                 audio.play();
             }
         } else {
             audio.src = secureUrl;
-            audio.volume = 1.0;
+            audio.volume = currentVol;
             audio.play().catch(() => { updateStatus("再生エラー"); });
         }
 
@@ -345,6 +420,9 @@
         timerDisplay.innerText = "";
         timerSelect.value = "0";
         timerSelect.classList.remove('active');
+        
+        // タイマー解除時はボリュームをスライダーの位置に強制復帰
+        audio.volume = parseFloat(volumeSlider.value);
     }
 
     function handleTimerChange(minutes) {
@@ -395,9 +473,12 @@
         timerDisplay.innerText = `残り ${m}:${s.toString().padStart(2, '0')}`;
     }
 
+    // フェードアウト処理（スライダーの現在の値から徐々に下げるように連動）
     function fadeOut() {
         if (audio.volume > 0.05) {
             audio.volume = Math.max(0, audio.volume - 0.1);
+            // フェードアウト中もスライダーの見た目を追従させたい場合は以下を有効化
+            // volumeSlider.value = audio.volume; 
             setTimeout(fadeOut, 1000);
         }
     }

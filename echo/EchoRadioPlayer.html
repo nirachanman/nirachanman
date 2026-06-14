@@ -29,25 +29,24 @@
 
         .container {
             width: 100%;
-            max-width: 600px; /* スマホ・タブレットで見やすい幅に調整 */
-            padding: 15px;
+            max-width: 600px;
+            padding: 12px;
             box-sizing: border-box;
             text-align: center;
         }
 
-        /* --- ステータスパネル（スマホ対応強化） --- */
+        /* --- ステータスパネル --- */
         .status-panel {
             background: var(--card-bg);
-            padding: 16px;
+            padding: 14px;
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 4px solid var(--accent-color);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
-        /* 横並びのレイアウトベース */
         .panel-row {
             display: flex;
             justify-content: center;
@@ -57,19 +56,18 @@
             box-sizing: border-box;
         }
 
-        /* ステータスと停止ボタンを50%ずつ綺麗に分ける */
         .top-row #status-label,
         .top-row .stop-btn {
             flex: 1;
-            min-width: 0; /* 文字溢れ防止 */
+            min-width: 0;
             text-align: center;
         }
 
         #status-label {
-            padding: 12px 10px;
+            padding: 10px 10px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             border: 2px solid var(--error-color);
             background-color: transparent;
             color: var(--error-color);
@@ -84,31 +82,57 @@
         }
 
         #current-station {
-            font-size: 1.3rem; /* スマホ用に少しだけコンパクトに */
+            font-size: 1.25rem;
             font-weight: bold;
-            margin: 5px 0;
+            margin: 2px 0;
             width: 100%;
-            word-break: break-all; /* 長い名前の局でも折り返す */
+            word-break: break-all;
         }
 
-        /* 下段：タイマーと残り時間 */
         .bottom-row {
-            justify-content: space-between; /* 両端に配置 */
+            justify-content: space-between;
             border-top: 1px solid #3a3c40;
-            padding-top: 12px;
+            padding-top: 10px;
         }
 
-        /* タイマーボタンを2×2のコンパクトなグリッドに */
-        .timer-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
+        /* 【更新】セレクトボックスのデザイン（低輝度・低コントラスト） */
+        .timer-select-wrapper {
             flex: 1;
-            max-width: 180px; /* 大きくなりすぎないよう制限 */
+            max-width: 140px;
+            text-align: left;
+        }
+
+        .timer-select {
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 6px;
+            background-color: #3a3c40;
+            color: #bbb;
+            border: 1px solid #555;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            /* デフォルトの矢印を少しモダンにするための設定 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+
+        /* タイマー作動中のセレクトボックスの見た目 */
+        .timer-select.active {
+            border-color: var(--timer-color);
+            color: var(--timer-color);
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237da87b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
         }
 
         #timer-display {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: var(--timer-color);
             font-weight: bold;
             text-align: right;
@@ -119,8 +143,8 @@
         /* --- グリッド（放送局ボタン） --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* スマホは基本2列 */
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
             width: 100%;
         }
 
@@ -128,33 +152,34 @@
             background: var(--card-bg);
             border: 2px solid #3a3c40;
             color: var(--off-white);
-            padding: 15px 8px;
-            border-radius: 12px;
-            font-size: 0.95rem;
+            padding: 10px 6px;
+            border-radius: 10px;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 70px; /* スマホで押しやすく、かつ高すぎない絶妙なサイズ */
+            min-height: 50px;
             box-sizing: border-box;
+            line-height: 1.2;
         }
 
         .station-btn:active, .station-btn.playing {
             background: var(--accent-color);
             color: #e0e0e0;
-            transform: scale(0.96);
+            transform: scale(0.97);
             border-color: var(--accent-color);
         }
 
         /* --- コントロールボタン群 --- */
         button.control-btn {
-            padding: 12px 10px;
+            padding: 10px 10px;
             border-radius: 20px;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             box-sizing: border-box;
         }
 
@@ -163,19 +188,9 @@
             color: #1a1c1e;
             border: 2px solid var(--error-color);
         }
-        
-        .timer-btn { 
-            background-color: #3a3c40; 
-            color: #bbb; 
-            padding: 6px 10px;
-            border-radius: 8px; /* タイマーは四角形に近い角丸でコンパクトに */
-            font-size: 0.85rem;
-        }
-        .timer-btn.active { background-color: var(--timer-color); color: #1a1c1e; }
 
-        /* 超小型スマホ（画面幅350px以下）用微調整 */
         @media (max-width: 350px) {
-            .grid { grid-template-columns: 1fr; } /* 1列にする */
+            .grid { grid-template-columns: 1fr; }
             #current-station { font-size: 1.1rem; }
         }
     </style>
@@ -192,11 +207,14 @@
         <div id="current-station">- 放送局を選択してください -</div>
 
         <div class="panel-row bottom-row">
-            <div class="timer-group">
-                <button id="timer-30" class="control-btn timer-btn" onclick="setTimer(30)">30分</button>
-                <button id="timer-60" class="control-btn timer-btn" onclick="setTimer(60)">60分</button>
-                <button id="timer-90" class="control-btn timer-btn" onclick="setTimer(90)">90分</button>
-                <button id="timer-120" class="control-btn timer-btn" onclick="setTimer(120)">120分</button>
+            <div class="timer-select-wrapper">
+                <select id="sleep-timer-select" class="timer-select" onchange="handleTimerChange(this.value)">
+                    <option value="0">OFFタイマー</option>
+                    <option value="30">30分</option>
+                    <option value="60">60分</option>
+                    <option value="90">90分</option>
+                    <option value="120">120分</option>
+                </select>
             </div>
             <div id="timer-display"></div>
         </div>
@@ -231,6 +249,7 @@
     const currentStationLabel = document.getElementById('current-station');
     const statusLabel = document.getElementById('status-label');
     const timerDisplay = document.getElementById('timer-display');
+    const timerSelect = document.getElementById('sleep-timer-select');
     
     let hls = null;
     let timerId = null;
@@ -316,13 +335,27 @@
         countdownIntervalId = null;
         remainingSeconds = 0;
         timerDisplay.innerText = "";
-        document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('active'));
+        timerSelect.value = "0";
+        timerSelect.classList.remove('active');
+    }
+
+    // セレクトボックスが変更されたときの処理
+    function handleTimerChange(minutes) {
+        const min = parseInt(minutes, 10);
+        if (min === 0) {
+            clearTimers();
+        } else {
+            setTimer(min);
+        }
     }
 
     function setTimer(minutes) {
-        clearTimers();
-        const btn = document.getElementById(`timer-${minutes}`);
-        if(btn) btn.classList.add('active');
+        // 一度タイマー系をクリア（選択値をキープするため内部ロジックのみクリア）
+        clearTimeout(timerId);
+        clearTimeout(fadeTimerId);
+        clearInterval(countdownIntervalId);
+        
+        timerSelect.classList.add('active');
 
         remainingSeconds = minutes * 60;
         updateTimerDisplay();

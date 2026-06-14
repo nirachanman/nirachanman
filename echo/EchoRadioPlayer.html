@@ -35,7 +35,7 @@
             text-align: center;
         }
 
-        /* --- ステータスパネル --- */
+        /* --- 【大幅更新】ステータスパネルの固定化 --- */
         .status-panel {
             background: var(--card-bg);
             padding: 14px;
@@ -45,6 +45,12 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            
+            /* 固定配置のための設定 */
+            position: sticky;
+            top: 10px; /* 画面最上部から少しだけ隙間を空けて綺麗に見せる */
+            z-index: 100; /* 放送局ボタンより常に手前に表示 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* スクロール時に浮いて見えるよう影を追加 */
         }
 
         .panel-row {
@@ -95,7 +101,6 @@
             padding-top: 10px;
         }
 
-        /* 【更新】セレクトボックスのデザイン（低輝度・低コントラスト） */
         .timer-select-wrapper {
             flex: 1;
             max-width: 140px;
@@ -114,7 +119,6 @@
             outline: none;
             box-sizing: border-box;
             transition: all 0.3s ease;
-            /* デフォルトの矢印を少しモダンにするための設定 */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -124,7 +128,6 @@
             padding-right: 24px;
         }
 
-        /* タイマー作動中のセレクトボックスの見た目 */
         .timer-select.active {
             border-color: var(--timer-color);
             color: var(--timer-color);
@@ -198,6 +201,7 @@
 <body>
 
 <div class="container">
+    <!-- スクロールしても上部に留まるパネル -->
     <div class="status-panel">
         <div class="panel-row top-row">
             <div id="status-label">再生停止中</div>
@@ -220,6 +224,7 @@
         </div>
     </div>
 
+    <!-- ここから下のボタン群がパネルの裏に潜り込むようにスクロールします -->
     <div class="grid" id="station-grid"></div>
 </div>
 
@@ -339,7 +344,6 @@
         timerSelect.classList.remove('active');
     }
 
-    // セレクトボックスが変更されたときの処理
     function handleTimerChange(minutes) {
         const min = parseInt(minutes, 10);
         if (min === 0) {
@@ -350,7 +354,6 @@
     }
 
     function setTimer(minutes) {
-        // 一度タイマー系をクリア（選択値をキープするため内部ロジックのみクリア）
         clearTimeout(timerId);
         clearTimeout(fadeTimerId);
         clearInterval(countdownIntervalId);

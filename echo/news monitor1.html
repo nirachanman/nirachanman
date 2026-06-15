@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（非同期・横幅完全固定版）</title>
+    <title>NHK ニュースモニター（ポッドキャスト統合版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,7 +22,6 @@
             --text-mint-desc: #b0bec5;  
         }
         
-        /* 🎨 改善: 外枠（最上位）を物理画面幅（100vw）に絶対固定し突き抜けを完全防止 */
         html, body {
             margin: 0;
             padding: 0;
@@ -41,7 +40,6 @@
             padding: 10px;
         }
         
-        /* 🎨 改善: ヘッダーも画面幅を超えないよう厳格にロック */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
@@ -66,7 +64,6 @@
         .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        /* 🎨 改善: マーキーコンテナの仕様を絶対配置の土台として最適化 */
         .marquee-container { 
             flex-grow: 1; 
             height: 1.5rem;      
@@ -75,8 +72,6 @@
             position: relative;  
         }
         
-        /* 🎨 改善: position: absolute を指定。
-           どれだけ文字が長くても、画面を押し広げる力を完全にニュートラル化します */
         .marquee-text { 
             position: absolute;
             left: 0;
@@ -92,7 +87,6 @@
             100% { transform: translate(-100%, 0); } 
         }
 
-        /* 🎨 改善: ニュースリストの横幅を100%に強制固定 */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -122,7 +116,7 @@
             gap: 8px;
             flex-shrink: 0; 
             box-sizing: border-box;         
-            width: 100%; /* 幅を確実に親要素に合わせる */
+            width: 100%; 
         }
         
         .news-header-row {
@@ -177,7 +171,9 @@
     <main id="news-container"></main>
 
     <script>
+        // 🛠️ ポッドキャスト用のURLを配列の最初に追加しました
         const RSS_URLS = [
+            'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
@@ -199,7 +195,6 @@
             }
         }
 
-        // 裏側でデータだけを更新する関数
         async function updateNewsOnly() {
             let allItems = [];
             for (const url of RSS_URLS) {
@@ -210,22 +205,31 @@
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
                         const description = descEl ? descEl.textContent : '';
+                        
+                        // タイトルと時間の取得（万が一データが空でもエラーにならないよう保護）
+                        const titleEl = item.getElementsByTagName('title')[0];
+                        const linkEl = item.getElementsByTagName('link')[0];
+                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
 
-                        allItems.push({
-                            title: item.getElementsByTagName('title')[0].textContent,
-                            link: item.getElementsByTagName('link')[0].textContent,
-                            description: description,
-                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
-                        });
+                        if (titleEl && linkEl && pubDateEl) {
+                            allItems.push({
+                                title: titleEl.textContent,
+                                link: linkEl.textContent,
+                                description: description,
+                                pubDate: new Date(pubDateEl.textContent)
+                            });
+                        }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log("読み込みスキップ:", url);
+                }
             }
             if (allItems.length === 0) return;
 
+            // すべての日付を混ぜ合わせて、最新順にソート
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            // 🛠️ 【非同期版に統合】15件のタイトルをスマートに連結してマーキーを生成
             const marqueeCount = Math.min(unique.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
@@ -237,7 +241,6 @@
             marqueeHtml += '</span>';
             document.getElementById('marquee').innerHTML = marqueeHtml;
             
-            // 下部ニュースリストの描画（インデックス0〜50を表示）
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -292,7 +295,7 @@
             if (items.length === 0) return;
 
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNewsOnly(); // リロードせず裏側で新データへ差し替えてトップに戻る
+                await updateNewsOnly(); 
                 return;
             }
 

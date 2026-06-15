@@ -86,12 +86,19 @@
             color: var(--timer-color);
         }
 
+        /* 【大幅更新】放送局名表示行の高さ・挙動を完全固定 */
         #current-station {
             font-size: 1.25rem;
             font-weight: bold;
             margin: 2px 0;
             width: 100%;
-            word-break: break-all;
+            
+            height: 1.5rem;          /* 高さを1行分に固定 */
+            line-height: 1.5rem;     /* 文字の縦位置を中央に安定させる */
+            white-space: nowrap;     /* 絶対に2行に改行させない */
+            overflow: hidden;        /* 枠からはみ出た文字は非表示にする */
+            text-overflow: ellipsis; /* 文字が入り切らない場合は末尾を「...」にする */
+            box-sizing: border-box;
         }
 
         /* ボリュームコントロール領域 */
@@ -266,7 +273,7 @@
             <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
         </div>
 
-        <div id="current-station">- 放送局を選択してください -</div>
+        <div id="current-station">放送局を選択してください</div>
 
         <div class="panel-row volume-row">
             <div class="volume-container">
@@ -329,8 +336,7 @@
     let fadeTimerId = null;
     let remainingSeconds = 0;
 
-    // 【新設】iOS環境（iPhone / iPad / iPod）判定
-    // iOS環境であれば、ボリューム調整行（.volume-row）の要素を非表示にします。
+    // iOS環境（iPhone / iPad / iPod）判定
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIOS) {
         const volumeRow = document.querySelector('.volume-row');
@@ -411,7 +417,7 @@
     function stopAudio() {
         resetAudioSystem();
         clearTimers();
-        currentStationLabel.innerText = "- 放送局を選択してください -";
+        currentStationLabel.innerText = "放送局を選択してください";
         document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
     }
 

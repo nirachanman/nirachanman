@@ -94,7 +94,7 @@
             word-break: break-all;
         }
 
-        /* 【新設】ボリュームコントロール領域 */
+        /* ボリュームコントロール領域 */
         .volume-row {
             padding: 2px 5px;
         }
@@ -127,7 +127,6 @@
             cursor: pointer;
         }
 
-        /* スライダーのツマミ（iOS/Chrome用） */
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -141,7 +140,6 @@
             transform: scale(1.2);
         }
 
-        /* スライダーのツマミ（Firefox用） */
         .volume-slider::-moz-range-thumb {
             width: 16px;
             height: 16px;
@@ -331,6 +329,16 @@
     let fadeTimerId = null;
     let remainingSeconds = 0;
 
+    // 【新設】iOS環境（iPhone / iPad / iPod）判定
+    // iOS環境であれば、ボリューム調整行（.volume-row）の要素を非表示にします。
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS) {
+        const volumeRow = document.querySelector('.volume-row');
+        if (volumeRow) {
+            volumeRow.style.display = 'none';
+        }
+    }
+
     stations.forEach(station => {
         const btn = document.createElement('button');
         btn.className = 'station-btn';
@@ -348,7 +356,6 @@
         }
     }
 
-    // ボリューム変更処理
     function changeVolume(val) {
         audio.volume = parseFloat(val);
     }
@@ -365,7 +372,6 @@
         const secureUrl = station.url.replace("http://", "https://");
         const isHls = secureUrl.includes('.m3u8');
 
-        // 現在のスライダーの値を適用
         const currentVol = parseFloat(volumeSlider.value);
 
         if (isHls) {
@@ -421,7 +427,6 @@
         timerSelect.value = "0";
         timerSelect.classList.remove('active');
         
-        // タイマー解除時はボリュームをスライダーの位置に強制復帰
         audio.volume = parseFloat(volumeSlider.value);
     }
 
@@ -473,12 +478,9 @@
         timerDisplay.innerText = `残り ${m}:${s.toString().padStart(2, '0')}`;
     }
 
-    // フェードアウト処理（スライダーの現在の値から徐々に下げるように連動）
     function fadeOut() {
         if (audio.volume > 0.05) {
             audio.volume = Math.max(0, audio.volume - 0.1);
-            // フェードアウト中もスライダーの見た目を追従させたい場合は以下を有効化
-            // volumeSlider.value = audio.volume; 
             setTimeout(fadeOut, 1000);
         }
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（ポッドキャスト修正版）</title>
+    <title>NHK ニュースモニター（ニュース専用・横幅完全固定版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,6 +22,7 @@
             --text-mint-desc: #b0bec5;  
         }
         
+        /* 🛡️ 横幅が右に突き抜けるのを絶対に防ぐための最外枠ロック */
         html, body {
             margin: 0;
             padding: 0;
@@ -64,6 +65,7 @@
         .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
+        /* 🛡️ マーキーコンテナの基準位置と高さ固定 */
         .marquee-container { 
             flex-grow: 1; 
             height: 1.5rem;      
@@ -72,6 +74,7 @@
             position: relative;  
         }
         
+        /* 🛡️ position: absolute により、文字の長さが画面レイアウトを破壊するのを完全防止 */
         .marquee-text { 
             position: absolute;
             left: 0;
@@ -171,9 +174,8 @@
     <main id="news-container"></main>
 
     <script>
-        // ポッドキャストURLと通常のニュースURLを定義
-        const PODCAST_URL = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
-        const NEWS_URLS = [
+        // 通常のテキストニュースの配信URLのみに統一
+        const RSS_URLS = [
             'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
@@ -195,47 +197,12 @@
             }
         }
 
+        // 裏側でニュースデータだけを非同期に更新する関数
         async function updateNewsOnly() {
             let allItems = [];
             const timestamp = Date.now();
 
-            // 🛠️ 【対策①】ポッドキャスト専用のプロキシ処理（ブロックを突破）
-            try {
-                const podcastTarget = `${PODCAST_URL}?t=${timestamp}`;
-                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(podcastTarget);
-                const res = await fetch(proxyUrl);
-                const json = await res.json();
-                
-                if (json.contents) {
-                    const xml = new DOMParser().parseFromString(json.contents, 'text/xml');
-                    const items = xml.getElementsByTagName('item');
-                    
-                    for (let item of items) {
-                        const titleEl = item.getElementsByTagName('title')[0];
-                        const linkEl = item.getElementsByTagName('link')[0];
-                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
-                        const descEl = item.getElementsByTagName('description')[0];
-
-                        if (titleEl && pubDateEl) {
-                            // 🛠️ 【対策②】ポッドキャスト特有のタグ構造に対応
-                            const link = linkEl ? linkEl.textContent : 'https://www.nhk.or.jp/podcast/';
-                            const description = descEl ? descEl.textContent.replace(/<[^>]*>/g, '') : ''; // HTMLタグ除去
-
-                            allItems.push({
-                                title: `【音声】${titleEl.textContent}`, // ニュースと区別しやすいようマーク付与
-                                link: link,
-                                description: description,
-                                pubDate: new Date(pubDateEl.textContent)
-                            });
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error("ポッドキャスト読み込み失敗:", e);
-            }
-
-            // 通常のニュースを取得
-            for (const url of NEWS_URLS) {
+            for (const url of RSS_URLS) {
                 try {
                     const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + timestamp);
                     const res = await fetch(targetUrl);
@@ -259,14 +226,13 @@
                     }
                 } catch (e) {}
             }
-
             if (allItems.length === 0) return;
 
-            // ポッドキャストと通常のニュースをすべてまとめて時間順にソート
+            // 最新順に並び替え
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            // 15連マーキーの生成
+            // 1番目〜15番目のタイトルを連結してヘッダー用の超ロングマーキーを作成
             const marqueeCount = Math.min(unique.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
@@ -278,7 +244,7 @@
             marqueeHtml += '</span>';
             document.getElementById('marquee').innerHTML = marqueeHtml;
             
-            // リスト表示
+            // 下部のニュースリスト表示（最新50件分）
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
@@ -332,6 +298,7 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // スクロールが最後まで到達したら、画面はリロードせずデータだけを裏で最新にしてトップに戻る
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 await updateNewsOnly(); 
                 return;

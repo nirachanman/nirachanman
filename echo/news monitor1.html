@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（ポッドキャスト統合版）</title>
+    <title>NHK ニュースモニター（ポッドキャスト修正版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -171,9 +171,9 @@
     <main id="news-container"></main>
 
     <script>
-        // 🛠️ ポッドキャスト用のURLを配列の最初に追加しました
-        const RSS_URLS = [
-            'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml',
+        // ポッドキャストURLと通常のニュースURLを定義
+        const PODCAST_URL = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
+        const NEWS_URLS = [
             'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
@@ -197,16 +197,53 @@
 
         async function updateNewsOnly() {
             let allItems = [];
-            for (const url of RSS_URLS) {
+            const timestamp = Date.now();
+
+            // 🛠️ 【対策①】ポッドキャスト専用のプロキシ処理（ブロックを突破）
+            try {
+                const podcastTarget = `${PODCAST_URL}?t=${timestamp}`;
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(podcastTarget);
+                const res = await fetch(proxyUrl);
+                const json = await res.json();
+                
+                if (json.contents) {
+                    const xml = new DOMParser().parseFromString(json.contents, 'text/xml');
+                    const items = xml.getElementsByTagName('item');
+                    
+                    for (let item of items) {
+                        const titleEl = item.getElementsByTagName('title')[0];
+                        const linkEl = item.getElementsByTagName('link')[0];
+                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
+                        const descEl = item.getElementsByTagName('description')[0];
+
+                        if (titleEl && pubDateEl) {
+                            // 🛠️ 【対策②】ポッドキャスト特有のタグ構造に対応
+                            const link = linkEl ? linkEl.textContent : 'https://www.nhk.or.jp/podcast/';
+                            const description = descEl ? descEl.textContent.replace(/<[^>]*>/g, '') : ''; // HTMLタグ除去
+
+                            allItems.push({
+                                title: `【音声】${titleEl.textContent}`, // ニュースと区別しやすいようマーク付与
+                                link: link,
+                                description: description,
+                                pubDate: new Date(pubDateEl.textContent)
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("ポッドキャスト読み込み失敗:", e);
+            }
+
+            // 通常のニュースを取得
+            for (const url of NEWS_URLS) {
                 try {
-                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + timestamp);
                     const res = await fetch(targetUrl);
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
                         const description = descEl ? descEl.textContent : '';
                         
-                        // タイトルと時間の取得（万が一データが空でもエラーにならないよう保護）
                         const titleEl = item.getElementsByTagName('title')[0];
                         const linkEl = item.getElementsByTagName('link')[0];
                         const pubDateEl = item.getElementsByTagName('pubDate')[0];
@@ -220,16 +257,16 @@
                             });
                         }
                     }
-                } catch (e) {
-                    console.log("読み込みスキップ:", url);
-                }
+                } catch (e) {}
             }
+
             if (allItems.length === 0) return;
 
-            // すべての日付を混ぜ合わせて、最新順にソート
+            // ポッドキャストと通常のニュースをすべてまとめて時間順にソート
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
+            // 15連マーキーの生成
             const marqueeCount = Math.min(unique.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
@@ -241,6 +278,7 @@
             marqueeHtml += '</span>';
             document.getElementById('marquee').innerHTML = marqueeHtml;
             
+            // リスト表示
             document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">

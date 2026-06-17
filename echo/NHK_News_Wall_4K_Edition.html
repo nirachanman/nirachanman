@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NHK News Wall 4K Edition</title>
+<style>
+body{margin:0;background:#050b12;color:#fff;font-family:system-ui,sans-serif;overflow:hidden}
+#top{display:flex;justify-content:space-between;align-items:center;padding:20px 32px;background:#0d1b2acc}
+#weather{font-size:2rem}
+#clock{font-size:4rem;font-weight:bold;font-family:monospace}
+#alert{display:none;background:#b00020;color:#fff;font-size:2rem;padding:12px 24px;font-weight:bold}
+#slide{padding:40px;height:calc(100vh - 170px);display:flex;flex-direction:column;justify-content:center}
+.cat{display:inline-block;padding:.3em .8em;border-radius:999px;font-size:1.4rem}
+.title{font-size:3rem;font-weight:700;margin:20px 0}
+.desc{font-size:2rem;line-height:1.7;color:#d9e2ec}
+.time{font-size:1.5rem;color:#9fb3c8}
+</style>
+</head>
+<body>
+<div id="top">
+<div id="weather">🌤️ 天気: API設定待ち / 気温: --℃</div>
+<div id="clock"></div>
+</div>
+<div id="alert"></div>
+<div id="slide">
+<div class="cat" id="cat"></div>
+<div class="title" id="title">読み込み中…</div>
+<div class="desc" id="desc"></div>
+<div class="time" id="time"></div>
+</div>
+<script>
+const RSS=[0,1,2,3,4,5,6,7].map(i=>`https://news.web.nhk/n-data/conf/na/rss/cat${i}.xml`);
+let items=[],idx=0;
+function classify(t){
+ if(/地震|津波|警報|避難|災害/.test(t))return["災害","#d32f2f"];
+ if(/政治|首相|国会/.test(t))return["政治","#1565c0"];
+ if(/経済|株|円|日銀/.test(t))return["経済","#2e7d32"];
+ return["一般","#6a1b9a"];
+}
+async function load(){
+ let arr=[];
+ for(const u of RSS){
+  try{
+   const r=await fetch("https://corsproxy.io/?"+encodeURIComponent(u));
+   const x=new DOMParser().parseFromString(await r.text(),"text/xml");
+   x.querySelectorAll("item").forEach(it=>arr.push({
+    title:it.querySelector("title")?.textContent||"",
+    desc:it.querySelector("description")?.textContent||"",
+    date:new Date(it.querySelector("pubDate")?.textContent||0)
+   }));
+  }catch(e){}
+ }
+ arr.sort((a,b)=>b.date-a.date);
+ items=[...new Map(arr.map(v=>[v.title,v])).values()];
+ show();
+}
+function show(){
+ if(!items.length)return;
+ const n=items[idx%items.length];
+ const [c,color]=classify(n.title);
+ cat.textContent=c;cat.style.background=color;
+ title.textContent=n.title;
+ desc.textContent=n.desc;
+ time.textContent=n.date.toLocaleString("ja-JP");
+ if(/地震|津波|警報/.test(n.title)){
+   alert.style.display="block";
+   alert.textContent="⚠ 緊急情報: "+n.title;
+ }else{
+   alert.style.display="none";
+ }
+ idx++;
+}
+setInterval(show,10000);
+setInterval(load,300000);
+setInterval(()=>clock.textContent=new Date().toLocaleTimeString("ja-JP"),1000);
+clock.textContent=new Date().toLocaleTimeString("ja-JP");
+load();
+</script>
+</body>
+</html>

@@ -503,14 +503,41 @@ document.getElementById('next').onclick = () => {
 };
 
 /* -------------------------
-   再生終了時
+   再生終了時（6件ループ仕様）
 ------------------------- */
 document.getElementById('audio').onended = () => {
   if (disabled) return;
-  if (index > 0) {
-    index--;
+
+  // 最新ニュース（index=0）を再生し終わったら 6件前へジャンプ
+  if (index === 0) {
+    if (items.length > 6) {
+      index = 6;
+      playCurrent();
+    } else {
+      // ニュースが6件未満の場合は最後へ
+      index = items.length - 1;
+      playCurrent();
+    }
+    return;
+  }
+
+  // 通常の逆再生（index--）
+  index--;
+
+  // 6件目まで戻ったら次は最新へ戻す
+  if (index === 6) {
     playCurrent();
-  } else alert('最新ニュースまで再生しました');
+    return;
+  }
+
+  // 6件目より前に行ったら最新へ戻す
+  if (index < 6) {
+    index = 0;
+    playCurrent();
+    return;
+  }
+
+  playCurrent();
 };
 
 /* -------------------------

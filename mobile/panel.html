@@ -503,42 +503,33 @@ document.getElementById('next').onclick = () => {
 };
 
 /* -------------------------
-   再生終了時（6件ループ仕様）
+   再生終了時（6件ループ仕様・6→5→4→3→2→1→0）
 ------------------------- */
 document.getElementById('audio').onended = () => {
   if (disabled) return;
 
-  // 最新ニュース（index=0）を再生し終わったら 6件前へジャンプ
+  // 最新ニュース（index=0）を再生し終わったら 6件目へジャンプ
   if (index === 0) {
     if (items.length > 6) {
-      index = 6;
-      playCurrent();
+      index = 6;   // 6件目へ
     } else {
-      // ニュースが6件未満の場合は最後へ
-      index = items.length - 1;
-      playCurrent();
+      index = items.length - 1; // 6件未満なら最後へ
     }
+    playCurrent();
     return;
   }
 
   // 通常の逆再生（index--）
   index--;
 
-  // 6件目まで戻ったら次は最新へ戻す
-  if (index === 6) {
-    playCurrent();
-    return;
-  }
-
-  // 6件目より前に行ったら最新へ戻す
-  if (index < 6) {
+  // 6件目より前に行ったら 0 まで順番に戻る
+  if (index < 0) {
     index = 0;
-    playCurrent();
-    return;
   }
 
   playCurrent();
 };
+
 
 /* -------------------------
    更新

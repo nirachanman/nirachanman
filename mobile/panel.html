@@ -290,6 +290,7 @@ button:hover { background: #00BCD4; }
 
 /* -------------------------
    📱 スマホレイアウト（幅 600px 以下）
+   Echo Show 用の強い CSS をすべて上書きする
 ------------------------- */
 @media (max-width: 600px) {
 
@@ -298,49 +299,59 @@ button:hover { background: #00BCD4; }
     font-size: 13px;
   }
 
+  /* ボタンをスマホサイズに強制 */
+  button {
+    padding: 2px 4px !important;
+    min-width: 48px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+  }
+
   .controls {
     gap: 4px;
   }
 
-  button {
-    padding: 2px 4px;
-    min-width: 48px;
-    font-size: 12px;
-  }
-
   .title {
-    font-size: 13px;
+    font-size: 13px !important;
+    padding: 0 !important;
   }
 
+  /* 🔄 更新 / らじる / 聴き逃し の余白を詰める */
   .summary-scroll {
-    padding: 2px 2px 0 2px;
+    padding: 2px 2px 0 2px !important;
+    gap: 4px !important;
   }
 
+  /* 日付タブの余白を詰める */
   .date-filter {
-    margin-top: 0;
-    gap: 4px;
+    margin-top: 0 !important;
+    gap: 4px !important;
+    padding: 2px 0 !important;
   }
 
   .date-btn {
-    padding: 1px 6px;
-    height: 22px;
-    font-size: 10px;
+    padding: 1px 6px !important;
+    height: 22px !important;
+    font-size: 10px !important;
+    border-radius: 14px !important;
   }
 
+  /* ニュース一覧をスマホ向けに圧縮 */
   .list {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 200px) !important;
   }
 
   .list div {
-    padding: 6px 8px;
-    font-size: 12px;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+    margin: 3px !important;
   }
 
+  /* プレイヤーの高さをスマホ向けに */
   .player-card audio {
-    height: 24px;
+    height: 24px !important;
   }
 }
-
 </style>
 </head>
 

@@ -111,7 +111,7 @@ button:hover { background: #00BCD4; }
   gap: 8px;
   overflow-x: auto;
   white-space: nowrap;
-  padding: 4px 2px;
+  padding: 4px 2px 0 2px;   /* 下の余白を 0 に */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -203,7 +203,7 @@ button:hover { background: #00BCD4; }
   gap: 8px;
   overflow-x: auto;
   padding: 6px 2px;
-  margin-top: 6px;
+  margin-top: 2px;          /* 上の余白を 6px → 2px に */
   -webkit-overflow-scrolling: touch;
 }
 .date-filter::-webkit-scrollbar { display: none; }
@@ -287,6 +287,60 @@ button:hover { background: #00BCD4; }
   .player-card audio { height: 60px; }
   .list div { padding: 16px 18px; font-size: 18px; }
 }
+
+/* -------------------------
+   📱 スマホレイアウト（幅 600px 以下）
+------------------------- */
+@media (max-width: 600px) {
+
+  body {
+    padding: 4px;
+    font-size: 13px;
+  }
+
+  .controls {
+    gap: 4px;
+  }
+
+  button {
+    padding: 2px 4px;
+    min-width: 48px;
+    font-size: 12px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .summary-scroll {
+    padding: 2px 2px 0 2px;
+  }
+
+  .date-filter {
+    margin-top: 0;
+    gap: 4px;
+  }
+
+  .date-btn {
+    padding: 1px 6px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .list {
+    max-height: calc(100vh - 200px);
+  }
+
+  .list div {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .player-card audio {
+    height: 24px;
+  }
+}
+
 </style>
 </head>
 

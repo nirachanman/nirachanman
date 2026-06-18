@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>NHKラジオニュースを連続再生</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NHKラジオニュースを連続再生</title>
 
-<style>
+  <style>
 /* -------------------------
    基本レイアウト
 ------------------------- */
@@ -28,6 +29,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 2px;
+  background: #;
   color: #004D40;
   padding: 2px;
   font-weight: bold;
@@ -86,20 +88,39 @@ button {
 }
 button:hover { background: #00BCD4; }
 
-/* -------------------------
-   summary（更新/らじる/聴き逃し）
-------------------------- */
+/* summary を横並び1行にする */
+.news-block summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 2px 6px;
+  min-height: 32px;
+}
+
+.news-block summary span {
+  white-space: nowrap;
+  line-height: 1.2;
+  padding: 0;
+  margin: 0;
+}
+
+/* summary 内を横スクロール可能にする */
 .summary-scroll {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   white-space: nowrap;
-  padding: 2px 2px 0 2px; /* ←余白を詰めた */
+  padding: 4px 2px;
   -webkit-overflow-scrolling: touch;
 }
-.summary-scroll::-webkit-scrollbar { display: none; }
 
-/* summary 内のボタン */
+.summary-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* すべてのタブ（summary + 日付タブ）を Echo Show 向けにコンパクト化 */
 .summary-scroll button,
 .summary-scroll .ondemand-button,
 .date-btn {
@@ -114,7 +135,14 @@ button:hover { background: #00BCD4; }
   white-space: nowrap;
 }
 
-/* 聴き逃し */
+/* 選択中の日付タブ（色はそのまま） */
+.date-btn[aria-selected="true"] {
+  background: #1E88E5;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30,136,229,0.18);
+}
+
 .ondemand-button {
   background: #9575CD;
   color: #FFFFFF;
@@ -127,59 +155,36 @@ button:hover { background: #00BCD4; }
 }
 .ondemand-button:hover { background: #7E57C2; }
 
-/* -------------------------
-   日付フィルタ
-------------------------- */
-.date-filter {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 2px 2px; /* ←余白を詰めた */
-  margin-top: 0;    /* ←余白を詰めた */
-  -webkit-overflow-scrolling: touch;
-}
-.date-filter::-webkit-scrollbar { display: none; }
-
-.date-btn {
-  flex: 0 0 auto;
-  background: rgba(0,0,0,0.04);
-  color: #0b2540;
-  border: none;
-  padding: 1px 8px;
-  height: 24px;
-  line-height: 1.2;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background .18s, transform .12s;
-}
-
-.date-btn[aria-selected="true"] {
-  background: #1E88E5;
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(30,136,229,0.18);
-  transform: translateY(-2px);
+.summary-buttons button,
+.summary-buttons .ondemand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  min-width: 60px;
+  height: 28px;
+  box-sizing: border-box;
 }
 
 /* -------------------------
    プレイヤーカード
 ------------------------- */
 .player-card {
-  width: 100%;
-  box-sizing: border-box; /* ← これが重要！ */
   background: #FFFFFF;
   border-radius: 10px;
   padding: 4px 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
-
 .player-card audio {
   width: 100%;
   height: 18px;
   border-radius: 6px;
   display: block;
+  line-height: 0;
+  vertical-align: middle;
   margin: 0;
   padding: 0;
 }
@@ -194,10 +199,47 @@ button:hover { background: #00BCD4; }
 /* -------------------------
    ニュース一覧
 ------------------------- */
+.news-block summary {
+  cursor: pointer;
+  padding: 4px 6px; /* コンパクト */
+  background: #B2EBF2;
+  color: #004D40;
+  border: 2px solid #4DD0E1;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+#refreshList, #liveButton {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+#refreshList {
+  background: #4DD0E1;
+  color: #004D40;
+}
+#refreshList:hover {
+  background: #00BCD4;
+}
+
+#liveButton {
+  background: #FFB74D;
+  color: #4E342E;
+}
+#liveButton:hover {
+  background: #FF9800;
+}
+
+/* ニュース一覧スクロール領域 */
 .list {
   overflow-y: auto;
   scrollbar-gutter: stable;
-  max-height: calc(100vh - 240px);
+  max-height: calc(100vh - 200px); /* 一体型に最適化 */
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   margin-top: 4px;
@@ -248,58 +290,7 @@ button:hover { background: #00BCD4; }
   .player-card audio { height: 60px; }
   .list div { padding: 16px 18px; font-size: 18px; }
 }
-
-/* -------------------------
-   📱 スマホレイアウト（完全版）
-------------------------- */
-@media (max-width: 600px) {
-
-  button {
-    padding: 2px 4px !important;
-    min-width: 48px !important;
-    font-size: 12px !important;
-  }
-
-  .summary-scroll {
-    padding: 2px 2px 0 2px !important;
-    gap: 4px !important;
-  }
-
-  .date-filter {
-    margin-top: 0 !important;
-    gap: 4px !important;
-    padding: 2px 0 !important;
-  }
-
-  .date-btn {
-    padding: 1px 6px !important;
-    height: 22px !important;
-    font-size: 10px !important;
-    border-radius: 14px !important;
-  }
-
-  .list {
-    max-height: calc(100vh - 200px) !important;
-  }
-
-  .list div {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-    margin: 3px !important;
-  }
-
-  .player-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 4px !important;
-  }
-
-  .player-card audio {
-    width: 100% !important;
-    height: 24px !important;
-  }
-}
-</style>
+  </style>
 </head>
 
 <body>

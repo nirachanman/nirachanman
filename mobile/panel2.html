@@ -231,52 +231,23 @@ button:hover { background: #00BCD4; }
 /* -------------------------
    📱 スマホレイアウト（完全版）
 ------------------------- */
-@media (max-width: 600px) {
-
+@media (min-width: 600px) {
+  .controls {
+    padding: 6px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
   button {
-    padding: 2px 4px !important;
-    min-width: 48px !important;
-    font-size: 12px !important;
+    font-size: 20px;
+    padding: 10px 10px;
+    border-radius: 50px;
+    min-width: 90px;
   }
-
-  .summary-scroll {
-    padding: 2px 2px 0 2px !important;
-    gap: 4px !important;
-  }
-
-  .date-filter {
-    margin-top: 0 !important;
-    gap: 4px !important;
-    padding: 2px 0 !important;
-  }
-
-  .date-btn {
-    padding: 1px 6px !important;
-    height: 22px !important;
-    font-size: 10px !important;
-    border-radius: 14px !important;
-  }
-
-  .list {
-    max-height: calc(100vh - 200px) !important;
-  }
-
-  .list div {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-    margin: 3px !important;
-  }
-
-  .player-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 4px !important;
-  }
-
-  .player-card audio {
-    width: 100% !important;
-    height: 24px !important;
-  }
+  .title { font-size: 20px; padding: 8px 0; }
+  .player-card audio { height: 60px; }
+  .list div { padding: 16px 18px; font-size: 18px; }
+}
 }
 </style>
 </head>

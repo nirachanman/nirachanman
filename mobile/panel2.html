@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NHKラジオニュースを連続再生</title>
+
+<style>
+/* -------------------------
+   基本レイアウト
+------------------------- */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #80ABA9;
+  color: #000080;
+  padding: 6px;
+  font-size: 14px;
+  height: 100vh;
+  overflow-y: hidden;
+  box-sizing: border-box;
+}
+
+/* -------------------------
+   ヘッダー
+------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #004D40;
+  padding: 2px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* -------------------------
+   一体型プレイヤーコンテナ
+------------------------- */
+.player-container {
+  background: #FFF0F0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* -------------------------
+   コントロールボタン
+------------------------- */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  gap: 6px;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  padding: 0;
+  font-size: 14px;
+  color: #0000CE;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+button {
+  background: #00AA55;
+  color: #000080;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+  min-width: 60px;
+}
+button:hover { background: #00BCD4; }
+
+/* -------------------------
+   summary（更新/らじる/聴き逃し）
+------------------------- */
+.summary-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 2px 2px 0 2px; /* ←余白を詰めた */
+  -webkit-overflow-scrolling: touch;
+}
+.summary-scroll::-webkit-scrollbar { display: none; }
+
+/* summary 内のボタン */
+.summary-scroll button,
+.summary-scroll .ondemand-button,
+.date-btn {
+  padding: 2px 8px;
+  height: 26px;
+  font-size: 13px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* 聴き逃し */
+.ondemand-button {
+  background: #9575CD;
+  color: #FFFFFF;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+.ondemand-button:hover { background: #7E57C2; }
+
+/* -------------------------
+   日付フィルタ
+------------------------- */
+.date-filter {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 2px; /* ←余白を詰めた */
+  margin-top: 0;    /* ←余白を詰めた */
+  -webkit-overflow-scrolling: touch;
+}
+.date-filter::-webkit-scrollbar { display: none; }
+
+.date-btn {
+  flex: 0 0 auto;
+  background: rgba(0,0,0,0.04);
+  color: #0b2540;
+  border: none;
+  padding: 1px 8px;
+  height: 24px;
+  line-height: 1.2;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s, transform .12s;
+}
+
+.date-btn[aria-selected="true"] {
+  background: #1E88E5;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(30,136,229,0.18);
+  transform: translateY(-2px);
+}
+
+/* -------------------------
+   プレイヤーカード
+------------------------- */
+.player-card {
+  width: 100%;
+  box-sizing: border-box; /* ← これが重要！ */
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 4px 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.player-card audio {
+  width: 100%;
+  height: 18px;
+  border-radius: 6px;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.player-card.active {
+  border-left: 6px solid #0000CE;
+  background: #E6F0FF;
+  box-shadow: 0 0 8px rgba(0,0,128,0.3);
+  transition: 0.2s ease;
+}
+
+/* -------------------------
+   ニュース一覧
+------------------------- */
+.list {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  max-height: calc(100vh - 240px);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  margin-top: 4px;
+  background: #B2EBF2;
+  border-radius: 6px;
+}
+
+.list div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin: 4px;
+  background: #FFFAF0;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.list .active {
+  border: 2px solid #0000CE;
+  background: #87CEFA;
+  font-weight: bold;
+  color: #0000CE;
+  border-left: 6px solid #0000CE;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
+/* -------------------------
+   📱 スマホレイアウト（完全版）
+------------------------- */
+@media (max-width: 600px) {
+
+  button {
+    padding: 2px 4px !important;
+    min-width: 48px !important;
+    font-size: 12px !important;
+  }
+
+  .summary-scroll {
+    padding: 2px 2px 0 2px !important;
+    gap: 4px !important;
+  }
+
+  .date-filter {
+    margin-top: 0 !important;
+    gap: 4px !important;
+    padding: 2px 0 !important;
+  }
+
+  .date-btn {
+    padding: 1px 6px !important;
+    height: 22px !important;
+    font-size: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .list {
+    max-height: calc(100vh - 200px) !important;
+  }
+
+  .list div {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+    margin: 3px !important;
+  }
+
+  .player-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 4px !important;
+  }
+
+  .player-card audio {
+    width: 100% !important;
+    height: 24px !important;
+  }
+}
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <img src="podcast.png" alt="podcast" class="header-icon">
+    NHKラジオニュースを連続再生
+  </div>
+
+  <div class="player-container">
+    <div class="controls">
+      <button id="next">戻る ⬇️</button>
+      <div id="title" class="title">ニュースを選択してください</div>
+      <button id="prev">⬆️ 進む</button>
+    </div>
+
+    <div class="player-card">
+      <audio id="audio" controls></audio>
+    </div>
+
+    <div class="summary-scroll">
+      <button id="refreshList">🔄 更新</button>
+      <button id="liveButton">📡 らじる☆らじる</button>
+      <a href="https://www.nhk.or.jp/radio/ondemand/" target="_blank" class="ondemand-button">▶️ 聴き逃し</a>
+    </div>
+
+    <div id="dateFilter" class="date-filter"></div>
+    <div id="list" class="list"></div>
+  </div>
+
+<script>
+let items = [];
+let index = -1;
+let firstLoad = true;
+let disabled = false;
+let liveWindow = null;
+
+/* -------------------------
+   日付キー生成
+------------------------- */
+function toDateKey(pubDateStr) {
+  const d = new Date(pubDateStr);
+  if (isNaN(d)) return null;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* -------------------------
+   RSS取得
+------------------------- */
+async function fetchFeed() {
+  const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
+  try {
+    const res = await fetch(feedUrl);
+    const xml = await res.text();
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const entries = [...doc.querySelectorAll('item')];
+
+    items = entries.map(e => {
+      const title = e.querySelector('title').textContent;
+      const url = e.querySelector('enclosure').getAttribute('url');
+      const pub = e.querySelector('pubDate').textContent;
+      return {
+        title,
+        url,
+        pubDate: pub,
+        dateKey: toDateKey(pub)
+      };
+    });
+
+    document.getElementById('title').textContent = 'ニュースを選択してください';
+
+    buildDateFilter();
+    const firstBtn = document.querySelector('.date-btn');
+    if (firstBtn) firstBtn.click();
+
+  } catch (e) {
+    alert('NHKラジオニュースの取得に失敗しました');
+  }
+}
+
+/* -------------------------
+   日付フィルタ生成
+------------------------- */
+function buildDateFilter() {
+  const df = document.getElementById('dateFilter');
+  df.innerHTML = '';
+
+  const keys = [...new Set(items.map(it => it.dateKey))].sort((a,b)=>b.localeCompare(a));
+
+  keys.forEach((k, i) => {
+    const d = new Date(k);
+    const label = `${d.getMonth()+1}月${d.getDate()}日(${['日','月','火','水','木','金','土'][d.getDay()]})`;
+
+    const btn = document.createElement('button');
+    btn.className = 'date-btn';
+    btn.dataset.date = k;
+    btn.textContent = label;
+    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+
+    btn.onclick = () => {
+      document.querySelectorAll('.date-btn').forEach(b => b.setAttribute('aria-selected','false'));
+      btn.setAttribute('aria-selected','true');
+      renderListForDate(k);
+    };
+
+    df.appendChild(btn);
+  });
+}
+
+/* -------------------------
+   日付別ニュース一覧
+------------------------- */
+function renderListForDate(dateKey) {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  const filtered = items.filter(it => it.dateKey === dateKey);
+
+  filtered.forEach(item => {
+    const div = document.createElement('div');
+
+    const icon = document.createElement('span');
+    icon.style.display = 'inline-flex';
+    icon.style.alignItems = 'center';
+    icon.style.justifyContent = 'center';
+    icon.style.width = '32px';
+    icon.style.height = '32px';
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '32');
+    svg.setAttribute('height', '32');
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', 'M8 5v14l11-7z');
+    path.setAttribute('fill', '#600080');
+
+    svg.appendChild(path);
+    icon.appendChild(svg);
+
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = item.title;
+
+    div.appendChild(icon);
+    div.appendChild(titleSpan);
+
+    div.className = (items.indexOf(item) === index) ? 'active' : '';
+
+    div.onclick = () => {
+      if (disabled) return;
+      firstLoad = false;
+      index = items.indexOf(item);
+      playCurrent();
+    };
+
+    list.appendChild(div);
+  });
+}
+
+/* -------------------------
+   再生処理
+------------------------- */
+function playCurrent() {
+  const audio = document.getElementById('audio');
+  const title = document.getElementById('title');
+
+  audio.src = items[index].url;
+  title.textContent = items[index].title;
+
+  document.querySelector('.player-card').classList.add('active');
+
+  if (!firstLoad) audio.play();
+
+  updateListHighlight();
+}
+
+/* -------------------------
+   再生中ハイライト
+------------------------- */
+function updateListHighlight() {
+  document.querySelectorAll('.list div').forEach(div => div.classList.remove('active'));
+
+  if (index >= 0 && items[index]) {
+    const node = [...document.querySelectorAll('.list div')]
+      .find(div => div.textContent.includes(items[index].title));
+    if (node) node.classList.add('active');
+  }
+}
+
+/* -------------------------
+   前後ボタン
+------------------------- */
+document.getElementById('prev').onclick = () => {
+  if (disabled) return;
+  if (index > 0) {
+    index--;
+    playCurrent();
+  } else alert('最初のニュースです');
+};
+
+document.getElementById('next').onclick = () => {
+  if (disabled) return;
+  if (index < items.length - 1) {
+    index++;
+    playCurrent();
+  } else alert('最後のニュースです');
+};
+
+/* -------------------------
+   再生終了時（6件ループ）
+------------------------- */
+document.getElementById('audio').onended = () => {
+  if (disabled) return;
+
+  // 最新ニュース（index=0）を再生し終わったら 6件目へジャンプ
+  if (index === 0) {
+    if (items.length > 6) {
+      index = 6;
+    } else {
+      index = items.length - 1;
+    }
+    playCurrent();
+    return;
+  }
+
+  // 通常の逆再生
+  index--;
+
+  if (index < 0) index = 0;
+
+  playCurrent();
+};
+
+/* -------------------------
+   更新ボタン
+------------------------- */
+document.getElementById('refreshList').onclick = fetchFeed;
+
+/* -------------------------
+   らじる☆らじる
+------------------------- */
+document.getElementById('liveButton').onclick = () => {
+  const audio = document.getElementById('audio');
+  audio.pause();
+
+  disabled = true;
+  document.getElementById('title').textContent = '停止中';
+
+  index = -1;
+  updateListHighlight();
+  document.querySelector('.player-card').classList.remove('active');
+
+  liveWindow = window.open('https://www.nhk.or.jp/radio/player/?ch=1', '_blank');
+
+  const timer = setInterval(() => {
+    if (liveWindow && liveWindow.closed) {
+      disabled = false;
+      document.getElementById('title').textContent = 'ニュースを選択してください';
+      clearInterval(timer);
+    }
+  }, 1000);
+};
+
+/* ---------------------------------------------------
+   自動更新：再生順を変えず、現在のループの最後で新着を再生
+--------------------------------------------------- */
+async function autoRefreshFeed() {
+  const currentIndex = index;
+
+  await fetchFeed();
+
+  // 再生中ニュースがまだ存在するなら index を復元
+  if (currentIndex >= 0 && items[currentIndex]) {
+    index = currentIndex;
+    updateListHighlight();
+  }
+}
+
+/* ★ 5分ごとに自動更新 */
+setInterval(() => {
+  autoRefreshFeed();
+}, 300000);
+
+/* 初回ロード */
+fetchFeed();
+</script>
+
+</body>
+</html>

@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>NHKラジオニュースを連続再生</title>
+
 <style>
+/* ここはあなたの CSS をそのまま使用（省略なし） */
 /* -------------------------
    基本レイアウト
 ------------------------- */
@@ -287,6 +289,7 @@ button:hover { background: #00BCD4; }
 }
 </style>
 </head>
+
 <body>
   <div class="header">
     <img src="podcast.png" alt="podcast" class="header-icon">
@@ -324,7 +327,6 @@ let index = -1;
 let firstLoad = true;
 let disabled = false;
 let liveWindow = null;
-let nextPlayIndex = null; // 次に再生する index の予約
 
 /* -------------------------
    日付キー生成
@@ -487,9 +489,7 @@ document.getElementById('prev').onclick = () => {
   if (index > 0) {
     index--;
     playCurrent();
-  } else {
-    alert('最初のニュースです');
-  }
+  } else alert('最初のニュースです');
 };
 
 document.getElementById('next').onclick = () => {
@@ -497,26 +497,16 @@ document.getElementById('next').onclick = () => {
   if (index < items.length - 1) {
     index++;
     playCurrent();
-  } else {
-    alert('最後のニュースです');
-  }
+  } else alert('最後のニュースです');
 };
 
 /* -------------------------
-   再生終了時（6件ループ＋予約反映）
+   再生終了時（6件ループ仕様）
 ------------------------- */
 document.getElementById('audio').onended = () => {
   if (disabled) return;
 
-  // 予約があれば最優先で再生
-  if (nextPlayIndex !== null) {
-    index = nextPlayIndex;
-    nextPlayIndex = null;
-    playCurrent();
-    return;
-  }
-
-  // 最新ニュースを再生し終わったら 6件目へジャンプ
+  // 最新ニュース（index=0）を再生し終わったら 6件目へジャンプ
   if (index === 0) {
     if (items.length > 6) {
       index = 6;
@@ -529,6 +519,7 @@ document.getElementById('audio').onended = () => {
 
   // 通常の逆再生
   index--;
+
   if (index < 0) index = 0;
 
   playCurrent();
@@ -565,24 +556,18 @@ document.getElementById('liveButton').onclick = () => {
 };
 
 /* ---------------------------------------------------
-   自動更新：再生中を維持しつつ、最新再生中なら
-   「次に再生する最新」を予約
+   ★ 自動更新：再生中ニュースを維持するだけ
+      → 新着が来ても再生順は変えない
+      → 新着ニュースは “現在のループの最後” に再生される
 --------------------------------------------------- */
 async function autoRefreshFeed() {
-  const wasLatest = (index === 0);
-  const oldLatestTitle = items[0]?.title;
+  const currentIndex = index;  // 再生中の index を保存
 
-  await fetchFeed();
+  await fetchFeed();           // RSS を更新（新着があれば items[0] が変わる）
 
-  const newLatestTitle = items[0]?.title;
-  const isNewAdded = oldLatestTitle && newLatestTitle && oldLatestTitle !== newLatestTitle;
-
-  if (wasLatest && isNewAdded) {
-    // 今は割り込まず、次に再生する最新ニュースを予約
-    nextPlayIndex = 0;
-  }
-
-  if (index >= 0 && items[index]) {
+  // 再生中ニュースがまだ存在するなら index を復元
+  if (currentIndex >= 0 && items[currentIndex]) {
+    index = currentIndex;
     updateListHighlight();
   }
 }
@@ -592,7 +577,9 @@ setInterval(() => {
   autoRefreshFeed();
 }, 300000);
 
+/* 初回ロード */
 fetchFeed();
 </script>
+
 </body>
 </html>

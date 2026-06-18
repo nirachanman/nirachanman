@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>NHKラジオニュースを連続再生</title>
-
 <style>
-/* ここはあなたの CSS をそのまま使用（省略なし） */
 /* -------------------------
    基本レイアウト
 ------------------------- */
@@ -111,7 +109,7 @@ button:hover { background: #00BCD4; }
   gap: 8px;
   overflow-x: auto;
   white-space: nowrap;
-  padding: 4px 2px 0 2px;   /* 下の余白を 0 に */
+  padding: 4px 2px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -203,7 +201,7 @@ button:hover { background: #00BCD4; }
   gap: 8px;
   overflow-x: auto;
   padding: 6px 2px;
-  margin-top: 2px;          /* 上の余白を 6px → 2px に */
+  margin-top: 6px;
   -webkit-overflow-scrolling: touch;
 }
 .date-filter::-webkit-scrollbar { display: none; }
@@ -287,74 +285,8 @@ button:hover { background: #00BCD4; }
   .player-card audio { height: 60px; }
   .list div { padding: 16px 18px; font-size: 18px; }
 }
-
-/* -------------------------
-   📱 スマホレイアウト（幅 600px 以下）
-   Echo Show 用の強い CSS をすべて上書きする
-------------------------- */
-@media (max-width: 600px) {
-
-  body {
-    padding: 4px;
-    font-size: 13px;
-  }
-
-  /* ボタンをスマホサイズに強制 */
-  button {
-    padding: 2px 4px !important;
-    min-width: 48px !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
-  }
-
-  .controls {
-    gap: 4px;
-  }
-
-  .title {
-    font-size: 13px !important;
-    padding: 0 !important;
-  }
-
-  /* 🔄 更新 / らじる / 聴き逃し の余白を詰める */
-  .summary-scroll {
-    padding: 2px 2px 0 2px !important;
-    gap: 4px !important;
-  }
-
-  /* 日付タブの余白を詰める */
-  .date-filter {
-    margin-top: 0 !important;
-    gap: 4px !important;
-    padding: 2px 0 !important;
-  }
-
-  .date-btn {
-    padding: 1px 6px !important;
-    height: 22px !important;
-    font-size: 10px !important;
-    border-radius: 14px !important;
-  }
-
-  /* ニュース一覧をスマホ向けに圧縮 */
-  .list {
-    max-height: calc(100vh - 200px) !important;
-  }
-
-  .list div {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-    margin: 3px !important;
-  }
-
-  /* プレイヤーの高さをスマホ向けに */
-  .player-card audio {
-    height: 24px !important;
-  }
-}
 </style>
 </head>
-
 <body>
   <div class="header">
     <img src="podcast.png" alt="podcast" class="header-icon">
@@ -392,6 +324,7 @@ let index = -1;
 let firstLoad = true;
 let disabled = false;
 let liveWindow = null;
+let nextPlayIndex = null; // 次に再生する index の予約
 
 /* -------------------------
    日付キー生成
@@ -554,7 +487,9 @@ document.getElementById('prev').onclick = () => {
   if (index > 0) {
     index--;
     playCurrent();
-  } else alert('最初のニュースです');
+  } else {
+    alert('最初のニュースです');
+  }
 };
 
 document.getElementById('next').onclick = () => {
@@ -562,16 +497,26 @@ document.getElementById('next').onclick = () => {
   if (index < items.length - 1) {
     index++;
     playCurrent();
-  } else alert('最後のニュースです');
+  } else {
+    alert('最後のニュースです');
+  }
 };
 
 /* -------------------------
-   再生終了時（6件ループ仕様）
+   再生終了時（6件ループ＋予約反映）
 ------------------------- */
 document.getElementById('audio').onended = () => {
   if (disabled) return;
 
-  // 最新ニュース（index=0）を再生し終わったら 6件目へジャンプ
+  // 予約があれば最優先で再生
+  if (nextPlayIndex !== null) {
+    index = nextPlayIndex;
+    nextPlayIndex = null;
+    playCurrent();
+    return;
+  }
+
+  // 最新ニュースを再生し終わったら 6件目へジャンプ
   if (index === 0) {
     if (items.length > 6) {
       index = 6;
@@ -584,7 +529,6 @@ document.getElementById('audio').onended = () => {
 
   // 通常の逆再生
   index--;
-
   if (index < 0) index = 0;
 
   playCurrent();
@@ -621,18 +565,24 @@ document.getElementById('liveButton').onclick = () => {
 };
 
 /* ---------------------------------------------------
-   ★ 自動更新：再生中ニュースを維持するだけ
-      → 新着が来ても再生順は変えない
-      → 新着ニュースは “現在のループの最後” に再生される
+   自動更新：再生中を維持しつつ、最新再生中なら
+   「次に再生する最新」を予約
 --------------------------------------------------- */
 async function autoRefreshFeed() {
-  const currentIndex = index;  // 再生中の index を保存
+  const wasLatest = (index === 0);
+  const oldLatestTitle = items[0]?.title;
 
-  await fetchFeed();           // RSS を更新（新着があれば items[0] が変わる）
+  await fetchFeed();
 
-  // 再生中ニュースがまだ存在するなら index を復元
-  if (currentIndex >= 0 && items[currentIndex]) {
-    index = currentIndex;
+  const newLatestTitle = items[0]?.title;
+  const isNewAdded = oldLatestTitle && newLatestTitle && oldLatestTitle !== newLatestTitle;
+
+  if (wasLatest && isNewAdded) {
+    // 今は割り込まず、次に再生する最新ニュースを予約
+    nextPlayIndex = 0;
+  }
+
+  if (index >= 0 && items[index]) {
     updateListHighlight();
   }
 }
@@ -642,9 +592,7 @@ setInterval(() => {
   autoRefreshFeed();
 }, 300000);
 
-/* 初回ロード */
 fetchFeed();
 </script>
-
 </body>
 </html>

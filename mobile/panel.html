@@ -55,6 +55,19 @@ body {
   gap: 2px;
 }
 
+.player-inline {
+  flex: 1;                     /* ボタン以外の中央領域をすべて使う */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player-inline audio {
+  width: 100%;                 /* 横幅いっぱい */
+  max-width: 600px;            /* PCでは広すぎないように上限を設定 */
+  height: 28px;                /* スマホでも見やすい高さ */
+}
+
 /* -------------------------
    コントロールボタン
 ------------------------- */
@@ -299,16 +312,19 @@ button:hover { background: #00BCD4; }
     NHKラジオニュースを連続再生
   </div>
 
-  <div class="player-container">
-    <div class="controls">
-      <button id="next">戻る ⬇️</button>
-      <div id="title" class="title">ニュースを選択してください</div>
-      <button id="prev">⬆️ 進む</button>
-    </div>
+<div class="controls">
+  <button id="next">戻る ⬇️</button>
 
-    <div class="player-card">
-      <audio id="audio" controls></audio>
-    </div>
+  <!-- ★ audio を中央に移動 -->
+  <div class="player-inline">
+    <audio id="audio" controls></audio>
+  </div>
+
+  <button id="prev">⬆️ 進む</button>
+</div>
+
+<!-- ★ タイトルは audio の下に移動（任意） -->
+<div id="title" class="title">ニュースを選択してください</div>
 
     <div class="summary-scroll">
       <button id="refreshList">🔄 更新</button>

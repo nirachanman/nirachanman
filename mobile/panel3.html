@@ -310,18 +310,14 @@ button:hover { background: #00BCD4; }
       <audio id="audio" controls></audio>
     </div>
 
-    <div class="news-block">
-      <div class="summary-scroll">
-        <button id="refreshList">🔄 更新</button>
-        <button id="liveButton">📡 らじる☆らじる</button>
-        <a href="https://www.nhk.or.jp/radio/ondemand/"
-           target="_blank"
-           class="ondemand-button">▶️ 聴き逃し</a>
-      </div>
-
-      <div id="dateFilter" class="date-filter"></div>
-      <div id="list" class="list"></div>
+    <div class="summary-scroll">
+      <button id="refreshList">🔄 更新</button>
+      <button id="liveButton">📡 らじる☆らじる</button>
+      <a href="https://www.nhk.or.jp/radio/ondemand/" target="_blank" class="ondemand-button">▶️ 聴き逃し</a>
     </div>
+
+    <div id="dateFilter" class="date-filter"></div>
+    <div id="list" class="list"></div>
   </div>
 
 <script>
@@ -330,7 +326,6 @@ let index = -1;
 let firstLoad = true;
 let disabled = false;
 let liveWindow = null;
-let nextPlayIndex = null; // 次に再生する index の予約
 
 /* -------------------------
    日付キー生成
@@ -493,9 +488,7 @@ document.getElementById('prev').onclick = () => {
   if (index > 0) {
     index--;
     playCurrent();
-  } else {
-    alert('最初のニュースです');
-  }
+  } else alert('最初のニュースです');
 };
 
 document.getElementById('next').onclick = () => {
@@ -503,26 +496,16 @@ document.getElementById('next').onclick = () => {
   if (index < items.length - 1) {
     index++;
     playCurrent();
-  } else {
-    alert('最後のニュースです');
-  }
+  } else alert('最後のニュースです');
 };
 
 /* -------------------------
-   再生終了時（6件ループ＋予約反映）
+   再生終了時（6件ループ）
 ------------------------- */
 document.getElementById('audio').onended = () => {
   if (disabled) return;
 
-  // 予約があれば最優先で再生
-  if (nextPlayIndex !== null) {
-    index = nextPlayIndex;
-    nextPlayIndex = null;
-    playCurrent();
-    return;
-  }
-
-  // 最新ニュースを再生し終わったら 6件目へジャンプ
+  // 最新ニュース（index=0）を再生し終わったら 6件目へジャンプ
   if (index === 0) {
     if (items.length > 6) {
       index = 6;
@@ -535,6 +518,7 @@ document.getElementById('audio').onended = () => {
 
   // 通常の逆再生
   index--;
+
   if (index < 0) index = 0;
 
   playCurrent();
@@ -571,25 +555,21 @@ document.getElementById('liveButton').onclick = () => {
 };
 
 /* ---------------------------------------------------
-   自動更新：再生中を維持しつつ、最新再生中なら
-   「次に再生する最新」を予約
+   自動更新：再生順を変えず、現在のループの最後で新着を再生
 --------------------------------------------------- */
 async function autoRefreshFeed() {
-  const wasLatest = (index === 0);
-  const oldLatestTitle = items[0]?.title;
+  // 今再生しているニュースの URL を記録
+  const currentUrl = (index >= 0 && items[index]) ? items[index].url : null;
 
   await fetchFeed();
 
-  const newLatestTitle = items[0]?.title;
-  const isNewAdded = oldLatestTitle && newLatestTitle && oldLatestTitle !== newLatestTitle;
-
-  if (wasLatest && isNewAdded) {
-    // 今は割り込まず、次に再生する最新ニュースを予約
-    nextPlayIndex = 0;
-  }
-
-  if (index >= 0 && items[index]) {
-    updateListHighlight();
+  // URL が一致するニュースを探して index を復元
+  if (currentUrl) {
+    const newIndex = items.findIndex(it => it.url === currentUrl);
+    if (newIndex !== -1) {
+      index = newIndex;
+      updateListHighlight();
+    }
   }
 }
 
@@ -598,7 +578,9 @@ setInterval(() => {
   autoRefreshFeed();
 }, 300000);
 
+/* 初回ロード */
 fetchFeed();
 </script>
+
 </body>
 </html>

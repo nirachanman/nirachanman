@@ -558,14 +558,18 @@ document.getElementById('liveButton').onclick = () => {
    自動更新：再生順を変えず、現在のループの最後で新着を再生
 --------------------------------------------------- */
 async function autoRefreshFeed() {
-  const currentIndex = index;
+  // 今再生しているニュースの URL を記録
+  const currentUrl = (index >= 0 && items[index]) ? items[index].url : null;
 
   await fetchFeed();
 
-  // 再生中ニュースがまだ存在するなら index を復元
-  if (currentIndex >= 0 && items[currentIndex]) {
-    index = currentIndex;
-    updateListHighlight();
+  // URL が一致するニュースを探して index を復元
+  if (currentUrl) {
+    const newIndex = items.findIndex(it => it.url === currentUrl);
+    if (newIndex !== -1) {
+      index = newIndex;
+      updateListHighlight();
+    }
   }
 }
 

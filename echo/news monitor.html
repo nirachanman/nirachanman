@@ -404,7 +404,7 @@
             if (items.length === 0) return;
 
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNewsOnly(); 
+                location.reload();
                 return;
             }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（緊急地震速報・横幅完全固定版）</title>
+    <title>NHK ニュースモニター（緊急地震速報・リロード版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -22,7 +22,6 @@
             --text-mint-desc: #b0bec5;  
         }
         
-        /* 🎨 修正箇所①: 画面外枠（最上位）を物理画面幅（100vw）に絶対固定 */
         html, body {
             margin: 0;
             padding: 0;
@@ -39,9 +38,9 @@
             display: grid;
             grid-template-rows: auto 1fr; 
             padding: 10px;
+            position: relative;
         }
         
-        /* 🎨 修正箇所②: ヘッダーも画面幅を超えないよう厳格にロック */
         header { 
             border-bottom: 2px solid var(--accent-color); 
             padding-bottom: 8px; 
@@ -66,19 +65,14 @@
         .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        /* 🎨 修正箇所③: マーキーコンテナの高さ（Height）を固定し、中身を「絶対配置」にする土台にする */
         .marquee-container { 
             flex-grow: 1; 
-            height: 1.5rem;      /* 文字の高さ分の通り道を確保 */
+            height: 1.5rem;      
             overflow: hidden; 
             white-space: nowrap; 
-            position: relative;  /* 中身をabsoluteにするための基準線 */
+            position: relative;  
         }
         
-        /* 🎨 修正箇所④: position: absolute を指定。
-           これにより、この長大な文字塊は「画面の横幅を押し広げる力」を完全に失い、
-           コンテナの枠内だけで大人しく流れるようになります（バグの根本原因を解消）。
-        */
         .marquee-text { 
             position: absolute;
             left: 0;
@@ -94,7 +88,6 @@
             100% { transform: translate(-100%, 0); } 
         }
 
-        /* 🎨 修正箇所⑤: ニュースリストの横幅も画面幅から1pxもハミ出さないよう厳守 */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -112,7 +105,6 @@
             display: none;
         }
         
-        /* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -120,12 +112,12 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #2f4f4f;     /* 四方に1pxの細い枠線を追加 */
-            border-left: 4px solid #2f4f4f; /* 左側の太線アクセントは維持 */
+            border: 1px solid #2f4f4f;     
+            border-left: 4px solid #2f4f4f; 
             gap: 8px;
             flex-shrink: 0; 
-            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
-            width: 100%;               
+            box-sizing: border-box;         
+            width: 100%; 
         }
         
         .news-header-row {
@@ -167,12 +159,12 @@
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
 
-        /* 🚨 追加: 緊急地震速報（EEW）用画面最前面ポップアップCSS */
+        /* 🚨 緊急地震速報（EEW）画面最前面ポップアップCSS */
         #eew-alert-overlay {
-            display: none; /* 普段は隠蔽 */
+            display: none; 
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(186, 12, 47, 0.98); /* 警戒を高める緊迫した赤 */
+            background-color: rgba(186, 12, 47, 0.98); 
             z-index: 99999;
             color: #ffffff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -189,7 +181,7 @@
             font-weight: bold;
             letter-spacing: 4px;
             margin-bottom: 20px;
-            color: #fffb00; /* 注意を引く黄色 */
+            color: #fffb00; 
         }
         .eew-box {
             background-color: #000000;
@@ -248,9 +240,7 @@
         let wakeLock = null;
         let resumeTimeout = null;
         let currentItemIndex = 0; 
-        
-        // EEW制御フラグ
-        let lastEewId = "";
+        let lastEewId = ""; // EEW重複検知防止用
 
         async function requestWakeLock() {
             try {
@@ -262,10 +252,9 @@
             }
         }
 
-        // 🚨 追加: リアルタイム緊急地震速報（EEW）監視スクリプト
+        // 🚨 リアルタイム緊急地震速報（EEW）監視関数（5秒おきに独立して動作）
         async function checkEmergencyEarthquakeAlert() {
             try {
-                // Project DM-V.A.S等のオープンデータAPIを介してリアルタイム強震速報データをフェッチ
                 const response = await fetch('https://api.p2pquake.net/v2/jma/eeew?limit=1&t=' + Date.now());
                 const data = await response.json();
                 
@@ -273,61 +262,50 @@
                 
                 const alert = data[0];
                 
-                // 新しい速報ID（またはキャンセルされていない最新報）かつ「取消」でない場合のみ発火
+                // 新しいIDであり、かつキャンセル報ではない有効な地震速報の場合のみ表示
                 if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
                     lastEewId = alert.id;
                     
                     const epicenter = alert.earthquake.hypocenter.name || "調査中";
                     const maxShindo = alert.earthquake.maxScaleString || "不明";
                     
-                    // ポップアップへのデータ流し込み
                     document.getElementById('eew-epicenter').innerText = `震源地: ${epicenter}`;
                     document.getElementById('eew-max-shindo').innerText = `最大震度 ${maxShindo}`;
                     
-                    // オートスクロールの一時強制完全ロック
+                    // 速報発生時は通常のオートスクロール・リロードを完全ロック
                     isPaused = true;
                     
-                    // オーバーレイの表示
                     const overlay = document.getElementById('eew-alert-overlay');
                     overlay.style.display = 'flex';
                     
-                    // 180秒（3分）後に自動でポップアップを消去して巡回復帰するセーフティタイマー
+                    // 180秒（3分）後にポップアップを自動クローズして復帰させるセーフティ
                     setTimeout(() => {
                         overlay.style.display = 'none';
                         isPaused = false;
                     }, 180000);
                 }
             } catch (e) {
-                // バックグラウンド処理のため、コンソールエラーのみに留めメイン画面の動作を阻害させない
                 console.error("EEW監視エラー:", e);
             }
         }
 
-        async function updateNewsOnly() {
+        async function updateNews() {
             let allItems = [];
-            const timestamp = Date.now();
-
             for (const url of RSS_URLS) {
                 try {
-                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + timestamp);
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
                     const res = await fetch(targetUrl);
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
                         const description = descEl ? descEl.textContent : '';
-                        
-                        const titleEl = item.getElementsByTagName('title')[0];
-                        const linkEl = item.getElementsByTagName('link')[0];
-                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
 
-                        if (titleEl && linkEl && pubDateEl) {
-                            allItems.push({
-                                title: titleEl.textContent,
-                                link: linkEl.textContent,
-                                description: description,
-                                pubDate: new Date(pubDateEl.textContent)
-                            });
-                        }
+                        allItems.push({
+                            title: item.getElementsByTagName('title')[0].textContent,
+                            link: item.getElementsByTagName('link')[0].textContent,
+                            description: description,
+                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
+                        });
                     }
                 } catch (e) {}
             }
@@ -364,7 +342,7 @@
         const container = document.getElementById('news-container');
 
         function syncAndPauseScroll() {
-            // EEW画面が出ている時は手動操作によるタイマー復帰を防止
+            // 🚨 EEW表示中はユーザー操作によるタイマースクロール復帰を防ぐ
             if(document.getElementById('eew-alert-overlay').style.display === 'flex') return;
 
             isPaused = true;
@@ -403,6 +381,7 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // 🔄 ご希望の仕様：ニュースを読み切ったら画面全体を完全にリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
@@ -427,8 +406,8 @@
                 history.scrollRestoration = 'manual';
             }
 
-            await updateNewsOnly();
-            await checkEmergencyEarthquakeAlert(); // 初回EEWチェック
+            await updateNews();
+            await checkEmergencyEarthquakeAlert(); // 初回起動時チェック
             await requestWakeLock();
 
             window.scrollTo(0, 0);
@@ -441,7 +420,7 @@
         
         setInterval(autoScroll, 30000); 
         
-        // 🚨 緊急地震速報用の5秒ポーリングタイマーを始動
+        // 🚨 5秒ごとに緊急地震速報APIをポーリング
         setInterval(checkEmergencyEarthquakeAlert, 5000);
         
         document.addEventListener('visibilitychange', async () => {

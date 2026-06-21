@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（緊急地震速報・リロード版）</title>
+    <title>NHK ニュースモニター（岩手県防災・災害特化版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -12,7 +12,7 @@
     <style>
         :root { 
             --bg-color: #0b0f14;        
-            --accent-color: #696969;    
+            --accent-color: #696969; /* 警報状況によってJSで動的に変化 */   
             --card-bg: #161c24;         
             
             --text-gray-title: #90caf9; 
@@ -42,7 +42,7 @@
         }
         
         header { 
-            border-bottom: 2px solid var(--accent-color); 
+            border-bottom: 3px solid var(--accent-color); /* 太さを3pxにして視認性をアップ */
             padding-bottom: 8px; 
             margin-bottom: 10px;
             background-color: var(--bg-color);
@@ -50,6 +50,7 @@
             max-width: 100%;
             box-sizing: border-box;
             overflow: hidden;
+            transition: border-color 0.5s ease; /* 色変化を滑らかに */
         }
         
         .header-top { 
@@ -105,6 +106,46 @@
             display: none;
         }
         
+        /* 🚨 岩手県 危険度・気象警報ピン留め特大カード */
+        .weather-alert-card {
+            background-color: #2a1215;
+            border: 2px solid #ff3333;
+            border-left: 8px solid #ff3333;
+            padding: 15px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            width: 100%;
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: #ff3333; }
+            50% { border-color: #ffaa00; }
+        }
+        .weather-alert-card.special {
+            background-color: #24122a;
+            border: 2px solid #da70d6;
+            border-left: 8px solid #da70d6;
+            animation: pulse-special 1.5s infinite;
+        }
+        @keyframes pulse-special {
+            0%, 100% { border-color: #da70d6; }
+            50% { border-color: #ffffff; }
+        }
+        .weather-alert-title {
+            font-weight: bold;
+            color: #ff5555;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .weather-alert-card.special .weather-alert-title {
+            color: #ff77ff;
+        }
+
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -159,8 +200,8 @@
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
 
-        /* 🚨 緊急地震速報（EEW）画面最前面ポップアップCSS */
-        #eew-alert-overlay {
+        /* 🚨 災害速報（EEW・津波）共通オーバーレイCSS */
+        #emergency-alert-overlay {
             display: none; 
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -175,7 +216,7 @@
             align-items: center;
             text-align: center;
         }
-        .eew-flash {
+        .alert-flash {
             animation: blink 1s ease infinite;
             font-size: 3.5rem;
             font-weight: bold;
@@ -183,24 +224,28 @@
             margin-bottom: 20px;
             color: #fffb00; 
         }
-        .eew-box {
+        .alert-box {
             background-color: #000000;
             border: 4px solid #fffb00;
             border-radius: 12px;
             padding: 30px 60px;
             display: inline-block;
-            max-width: 80%;
+            max-width: 85%;
         }
-        .eew-shindo {
-            font-size: 5rem;
+        .alert-main-info {
+            font-size: 4.5rem;
             font-weight: 900;
             color: #ff3333;
             margin: 15px 0;
         }
-        .eew-info {
-            font-size: 2rem;
+        .alert-sub-info {
+            font-size: 1.8rem;
             line-height: 1.8;
             margin-bottom: 10px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
         @keyframes blink {
             0%, 100% { opacity: 1; }
@@ -209,12 +254,13 @@
     </style>
 </head>
 <body>
-    <div id="eew-alert-overlay">
-        <div class="eew-flash">🚨 緊急地震速報 (EEW) 🚨</div>
-        <div class="eew-box">
-            <div id="eew-epicenter" class="eew-info" style="font-weight: bold; font-size: 2.5rem;">震源地: 解析中...</div>
-            <div id="eew-max-shindo" class="eew-shindo">最大震度 --</div>
-            <div id="eew-detail" class="eew-info">強い揺れに警戒してください。</div>
+    <!-- 🚨 災害速報共通ポップアップ構造（地震・津波用） -->
+    <div id="emergency-alert-overlay">
+        <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
+        <div class="alert-box">
+            <div id="alert-header" style="font-weight: bold; font-size: 2.5rem; color: #ffffff;">情報を解析中...</div>
+            <div id="alert-main" class="alert-main-info">⚠️ 警戒してください</div>
+            <div id="alert-detail" class="alert-sub-info">海岸や川の近くからすぐに離れてください。</div>
         </div>
     </div>
 
@@ -240,7 +286,16 @@
         let wakeLock = null;
         let resumeTimeout = null;
         let currentItemIndex = 0; 
-        let lastEewId = ""; // EEW重複検知防止用
+        
+        // 災害・気象ステータス
+        let lastEewId = "";
+        let lastTsunamiId = "";
+        let isTsunamiActive = false;
+        
+        // 岩手県防災ステータス管理
+        let iwateAlertLevel = 0; // 0:なし, 1:注意報, 2:警報, 3:特別警報
+        let iwateActiveAlertsText = ""; // テロップ用
+        let iwateKikikuText = ""; // キキクル・土砂災害情報カード用HTML
 
         async function requestWakeLock() {
             try {
@@ -252,40 +307,218 @@
             }
         }
 
-        // 🚨 リアルタイム緊急地震速報（EEW）監視関数（5秒おきに独立して動作）
+        // 🚨 1. 緊急地震速報（EEW）監視
         async function checkEmergencyEarthquakeAlert() {
+            if (isTsunamiActive) return;
             try {
                 const response = await fetch('https://api.p2pquake.net/v2/jma/eeew?limit=1&t=' + Date.now());
                 const data = await response.json();
-                
                 if (!data || data.length === 0) return;
                 
                 const alert = data[0];
-                
-                // 新しいIDであり、かつキャンセル報ではない有効な地震速報の場合のみ表示
                 if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
                     lastEewId = alert.id;
-                    
                     const epicenter = alert.earthquake.hypocenter.name || "調査中";
                     const maxShindo = alert.earthquake.maxScaleString || "不明";
                     
-                    document.getElementById('eew-epicenter').innerText = `震源地: ${epicenter}`;
-                    document.getElementById('eew-max-shindo').innerText = `最大震度 ${maxShindo}`;
+                    document.getElementById('alert-title').innerText = "🚨 緊急地震速報 (EEW) 🚨";
+                    document.getElementById('alert-header').innerText = `震源地: ${epicenter}`;
+                    document.getElementById('alert-main').innerText = `最大震度 ${maxShindo}`;
+                    document.getElementById('alert-detail').innerText = "強い揺れに警戒してください。倒れやすい家具から離れてください。";
                     
-                    // 速報発生時は通常のオートスクロール・リロードを完全ロック
-                    isPaused = true;
-                    
-                    const overlay = document.getElementById('eew-alert-overlay');
-                    overlay.style.display = 'flex';
-                    
-                    // 180秒（3分）後にポップアップを自動クローズして復帰させるセーフティ
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        isPaused = false;
-                    }, 180000);
+                    showAlertOverlay(180000); 
                 }
-            } catch (e) {
-                console.error("EEW監視エラー:", e);
+            } catch (e) { console.error(e); }
+        }
+
+        // 🌊 2. 津波警報・注意報監視
+        async function checkTsunamiAlert() {
+            try {
+                const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami?limit=1&t=' + Date.now());
+                const data = await response.json();
+                if (!data || data.length === 0) return;
+
+                const alert = data[0];
+                if (alert.id !== lastTsunamiId) {
+                    lastTsunamiId = alert.id;
+                    if (alert.areas && alert.areas.length > 0) {
+                        isTsunamiActive = true;
+                        let infoText = "";
+                        alert.areas.forEach(area => { infoText += `■${area.name} ： 【${area.grade}】\n`; });
+
+                        document.getElementById('alert-title').innerText = "🌊 津波警報・注意報発表 🌊";
+                        document.getElementById('alert-header').innerText = "海岸や川の近くから今すぐ離れてください！";
+                        document.getElementById('alert-main').innerText = "津波警報 発表中";
+                        document.getElementById('alert-detail').style.whiteSpace = "pre-wrap";
+                        document.getElementById('alert-detail').innerText = infoText;
+
+                        showAlertOverlay(0); 
+                    } else {
+                        if (isTsunamiActive) {
+                            isTsunamiActive = false;
+                            hideAlertOverlay();
+                        }
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // ⛈️ 3. 新規追加: 岩手県の気象警報・特別警報および危険度分布（キキクル要素）の解析
+        async function checkIwateWeatherAlerts() {
+            try {
+                const response = await fetch('https://api.p2pquake.net/v2/jma/warning?limit=3&t=' + Date.now());
+                const data = await response.json();
+                if (!data || data.length === 0) return;
+
+                // 岩手県(コード: 030000 または表記検索)のデータを探索
+                let iwateData = null;
+                for (let report of data) {
+                    if (report.prefixes && report.prefixes.includes("岩手県")) {
+                        iwateData = report;
+                        break;
+                    }
+                }
+
+                if (!iwateData) return;
+
+                let highestLevel = 0; 
+                let collectedAlerts = new Set();
+                let dangerousCities = {}; // 土砂災害や大雨警戒判定用市町村
+
+                if (iwateData.items) {
+                    for (let item of iwateData.items) {
+                        const cityName = item.area.name;
+                        if (item.warnings) {
+                            for (let w of item.warnings) {
+                                // 状態判定 (解除等はスキップ)
+                                if (w.status !== "発表" && w.status !== "継続") continue;
+
+                                const name = w.name;
+                                collectedAlerts.add(name);
+
+                                // レベル判定
+                                if (name.includes("特別警報")) {
+                                    highestLevel = Math.max(highestLevel, 3);
+                                } else if (name.includes("警報")) {
+                                    highestLevel = Math.max(highestLevel, 2);
+                                } else if (name.includes("注意報")) {
+                                    highestLevel = Math.max(highestLevel, 1);
+                                }
+
+                                // 3. キキクル連動（大雨・洪水・土砂災害など命の危険に関わる警報）の市町村別抽出
+                                if (name.includes("大雨") || name.includes("洪水") || name.includes("土砂災害")) {
+                                    if (!dangerousCities[cityName]) dangerousCities[cityName] = [];
+                                    dangerousCities[cityName].push(name);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                iwateAlertLevel = highestLevel;
+
+                // ① ヘッダー線の色変化ロジック
+                const root = document.documentElement;
+                if (highestLevel === 3) root.style.setProperty('--accent-color', '#da70d6'); // 特別警報 (紫)
+                else if (highestLevel === 2) root.style.setProperty('--accent-color', '#ff3333'); // 警報 (赤)
+                else if (highestLevel === 1) root.style.setProperty('--accent-color', '#ffd700'); // 注意報 (黄)
+                else root.style.setProperty('--accent-color', '#696969'); // 通常 (グレー)
+
+                // ② テロップ用テキストの構築
+                if (collectedAlerts.size > 0) {
+                    iwateActiveAlertsText = `【⚠️岩手県情報：${Array.from(collectedAlerts).join('・')}発表中】`;
+                } else {
+                    iwateActiveAlertsText = "";
+                }
+
+                // ③ キキクル（危険度分布）・土砂災害警戒情報の特大カード構築
+                let citiesListText = "";
+                for (let city in dangerousCities) {
+                    citiesListText += `<div><strong>${city}</strong>: ${dangerousCities[city].join(', ')}</div>`;
+                }
+
+                if (citiesListText !== "") {
+                    const cardClass = highestLevel === 3 ? "weather-alert-card special" : "weather-alert-card";
+                    const titleText = highestLevel === 3 ? "🚨 岩手県：大雨特別警報・キキクル最大危険度" : "⚠️ 岩手県：大雨・土砂災害警戒情報 (危険度分布連動)";
+                    
+                    iwateKikikuText = `
+                        <div class="${cardClass}">
+                            <div class="weather-alert-title">${titleText}</div>
+                            <div style="font-size:1.1rem; margin-bottom:8px;">以下の地域で土砂災害や浸水の危険度が非常に高まっています。厳重に警戒してください。</div>
+                            <div style="font-size:1.05rem; background:rgba(0,0,0,0.3); padding:8px; border-radius:4px;">${citiesListText}</div>
+                        </div>
+                    `;
+                } else {
+                    iwateKikikuText = ""; // 該当する危険がなければ非表示
+                }
+
+                // 画面をリロードせずにテロップとピン留めカードを部分即時更新
+                refreshMarqueeAndCards();
+
+            } catch (e) { console.error("気象情報取得エラー:", e); }
+        }
+
+        function showAlertOverlay(duration) {
+            isPaused = true;
+            const overlay = document.getElementById('emergency-alert-overlay');
+            overlay.style.display = 'flex';
+            if (duration > 0) {
+                setTimeout(() => { if (!isTsunamiActive) hideAlertOverlay(); }, duration);
+            }
+        }
+
+        function hideAlertOverlay() {
+            document.getElementById('emergency-alert-overlay').style.display = 'none';
+            isPaused = false;
+        }
+
+        // グローバルに保持しているニュースデータ
+        let currentNewsUniqueItems = [];
+
+        // 気象警報が変わった際に、ニュース内容を壊さずピン留めとマーキーだけを再合成する関数
+        function refreshMarqueeAndCards() {
+            if (currentNewsUniqueItems.length === 0) return;
+
+            // ① マーキー（流れる文字）の再構築
+            const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
+            let marqueeHtml = '<span class="marquee-text">';
+            
+            // 岩手県警報テロップがあれば最先頭にインサート（赤色で強調）
+            if (iwateActiveAlertsText !== "") {
+                marqueeHtml += `<span style="color:#ff5555; font-weight:bold; margin-right:30px;">${iwateActiveAlertsText}</span>`;
+            }
+
+            for(let i = 0; i < marqueeCount; i++) {
+                marqueeHtml += `<a href="${currentNewsUniqueItems[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${currentNewsUniqueItems[i].title}</a>`;
+                if(i < marqueeCount - 1) marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
+            }
+            marqueeHtml += '</span>';
+            document.getElementById('marquee').innerHTML = marqueeHtml;
+
+            // ② ニュースコンテナの再構築（スクロール位置を維持するため、現在のスクロール位置を退避）
+            const currentScroll = container.scrollTop;
+
+            let newsListHtml = "";
+            // 岩手県キキクル・土砂災害カードがあれば最上部に常時ピン留め
+            if (iwateKikikuText !== "") {
+                newsListHtml += iwateKikikuText;
+            }
+
+            newsListHtml += currentNewsUniqueItems.slice(0, 50).map(item => `
+                <a href="${item.link}" target="_blank" class="news-item">
+                    <div class="news-header-row">
+                        <div class="news-title">${item.title}</div>
+                        <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                    </div>
+                    <div class="news-desc">${item.description}</div>
+                </a>
+            `).join('');
+
+            container.innerHTML = newsListHtml;
+            
+            // 初回読み込み時以外はスクロール位置を復元
+            if (currentScroll > 0) {
+                container.scrollTop = currentScroll;
             }
         }
 
@@ -298,12 +531,10 @@
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
-                        const description = descEl ? descEl.textContent : '';
-
                         allItems.push({
                             title: item.getElementsByTagName('title')[0].textContent,
                             link: item.getElementsByTagName('link')[0].textContent,
-                            description: description,
+                            description: descEl ? descEl.textContent : '',
                             pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
                         });
                     }
@@ -312,38 +543,18 @@
             if (allItems.length === 0) return;
 
             allItems.sort((a, b) => b.pubDate - a.pubDate);
-            const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+            currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            const marqueeCount = Math.min(unique.length, 15); 
-            let marqueeHtml = '<span class="marquee-text">';
-            for(let i = 0; i < marqueeCount; i++) {
-                marqueeHtml += `<a href="${unique[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${unique[i].title}</a>`;
-                if(i < marqueeCount - 1) {
-                    marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
-                }
-            }
-            marqueeHtml += '</span>';
-            document.getElementById('marquee').innerHTML = marqueeHtml;
-            
-            document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
-                <a href="${item.link}" target="_blank" class="news-item">
-                    <div class="news-header-row">
-                        <div class="news-title">${item.title}</div>
-                        <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
-                    </div>
-                    <div class="news-desc">${item.description}</div>
-                </a>
-            `).join('');
-            
-            document.getElementById('news-container').scrollTop = 0;
+            // 合成処理を実行
+            refreshMarqueeAndCards();
+            container.scrollTop = 0;
             currentItemIndex = 0;
         }
 
         const container = document.getElementById('news-container');
 
         function syncAndPauseScroll() {
-            // 🚨 EEW表示中はユーザー操作によるタイマースクロール復帰を防ぐ
-            if(document.getElementById('eew-alert-overlay').style.display === 'flex') return;
+            if(document.getElementById('emergency-alert-overlay').style.display === 'flex') return;
 
             isPaused = true;
             clearTimeout(resumeTimeout);
@@ -364,16 +575,14 @@
             });
             currentItemIndex = closestIndex;
 
-            resumeTimeout = setTimeout(() => {
-                isPaused = false;
-            }, 5000);
+            resumeTimeout = setTimeout(() => { isPaused = false; }, 5000);
         }
 
         container.addEventListener('touchstart', syncAndPauseScroll, { passive: true });
         container.addEventListener('touchmove', syncAndPauseScroll, { passive: true });
         container.addEventListener('scroll', syncAndPauseScroll);
         container.addEventListener('mousedown', () => isPaused = true);
-        container.addEventListener('mouseup', () => { if(document.getElementById('eew-alert-overlay').style.display !== 'flex') isPaused = false; });
+        container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
         async function autoScroll() {
             if (isPaused) return;
@@ -381,7 +590,6 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 🔄 ご希望の仕様：ニュースを読み切ったら画面全体を完全にリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 location.reload();
                 return;
@@ -393,7 +601,6 @@
             if (targetItem) {
                 const containerTop = container.getBoundingClientRect().top;
                 const targetTop = targetItem.getBoundingClientRect().top;
-                
                 container.scrollTo({
                     top: container.scrollTop + (targetTop - containerTop),
                     behavior: 'smooth'
@@ -407,21 +614,29 @@
             }
 
             await updateNews();
-            await checkEmergencyEarthquakeAlert(); // 初回起動時チェック
+            await checkTsunamiAlert(); 
+            await checkEmergencyEarthquakeAlert(); 
+            await checkIwateWeatherAlerts(); // 岩手県気象情報の初期取得
             await requestWakeLock();
 
             window.scrollTo(0, 0);
-            if (container) {
-                container.scrollTop = 0;
-            }
+            if (container) container.scrollTop = 0;
         }
 
         init();
         
         setInterval(autoScroll, 30000); 
         
-        // 🚨 5秒ごとに緊急地震速報APIをポーリング
-        setInterval(checkEmergencyEarthquakeAlert, 5000);
+        // 🚨 5秒おきの超高速ポーリング（地震・津波用）
+        setInterval(async () => {
+            await checkTsunamiAlert();
+            await checkEmergencyEarthquakeAlert();
+        }, 5000);
+
+        // ⛈️ 1分おきの気象情報ポーリング（岩手県専用・API負荷軽減のため1分間隔）
+        setInterval(async () => {
+            await checkIwateWeatherAlerts();
+        }, 60000);
         
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {

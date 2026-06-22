@@ -597,35 +597,30 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-async function autoScroll() {
-    if (isPaused) return;
+        async function autoScroll() {
+            if (isPaused) return;
 
-    const items = container.querySelectorAll('.news-item');
-    if (items.length === 0) return;
+            const items = container.querySelectorAll('.news-item');
+            if (items.length === 0) return;
 
-    // ★ Echo Show で確実に発動する「最後に到達したらリロード」
-    const reachedEnd =
-        container.scrollTop + container.clientHeight >= container.scrollHeight - 5 ||
-        currentItemIndex + 3 >= items.length;
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
+                const cleanUrl = window.location.href.split('?')[0];
+                window.location.href = cleanUrl + '?t=' + Date.now();
+                return;
+            }
 
-    if (reachedEnd) {
-        window.location.reload(); // ← ページ全体を完全リロード
-        return;
-    }
+            currentItemIndex += 3;
+            const targetItem = items[currentItemIndex];
 
-    // ★ 通常スクロール
-    currentItemIndex += 3;
-    const targetItem = items[currentItemIndex];
-
-    if (targetItem) {
-        const containerTop = container.getBoundingClientRect().top;
-        const targetTop = targetItem.getBoundingClientRect().top;
-        container.scrollTo({
-            top: container.scrollTop + (targetTop - containerTop),
-            behavior: 'smooth'
-        });
-    }
-}
+            if (targetItem) {
+                const containerTop = container.getBoundingClientRect().top;
+                const targetTop = targetItem.getBoundingClientRect().top;
+                container.scrollTo({
+                    top: container.scrollTop + (targetTop - containerTop),
+                    behavior: 'smooth'
+                });
+            }
+        }
 
         async function init() {
             if ('scrollRestoration' in history) {

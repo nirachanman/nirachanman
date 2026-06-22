@@ -302,7 +302,6 @@
 
 async function checkTsunamiAlert() {
     try {
-        // ✔ 正しい津波 API
         const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami');
         if (!response.ok) return;
 
@@ -311,11 +310,9 @@ async function checkTsunamiAlert() {
 
         const alert = data[0];
 
-        // 新しい津波情報が来たときだけ処理
         if (alert.id !== lastTsunamiId) {
             lastTsunamiId = alert.id;
 
-            // 津波警報・注意報がある場合
             if (alert.areas && alert.areas.length > 0) {
                 isTsunamiActive = true;
 
@@ -330,11 +327,9 @@ async function checkTsunamiAlert() {
                 document.getElementById('alert-detail').style.whiteSpace = "pre-wrap";
                 document.getElementById('alert-detail').innerText = infoText;
 
-                // 津波は解除されるまで表示し続ける
                 showAlertOverlay(0);
 
             } else {
-                // 津波情報が解除された場合
                 if (isTsunamiActive) {
                     isTsunamiActive = false;
                     hideAlertOverlay();

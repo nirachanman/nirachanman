@@ -300,73 +300,34 @@
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) { console.error("WakeLock取得失敗:", err); }
+async function checkEmergencyEarthquakeAlert() {
+    if (isTsunamiActive) return;
+    try {
+        // ✔ 正しい EEW API に修正
+        const response = await fetch('https://api.p2pquake.net/v2/jma/quake?type=eew');
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0 || !data[0]) return;
+
+        const alert = data[0];
+        if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
+            lastEewId = alert.id;
+            const epicenter = alert.earthquake.hypocenter.name || "調査中";
+            const maxShindo = alert.earthquake.maxScaleString || "不明";
+
+            document.getElementById('alert-title').innerText = "🚨 緊急地震速報 (EEW) 🚨";
+            document.getElementById('alert-header').innerText = `震源地: ${epicenter}`;
+            document.getElementById('alert-main').innerText = `最大震度 ${maxShindo}`;
+            document.getElementById('alert-detail').innerText =
+                "強い揺れに警戒してください。倒れやすい家具から離れてください。";
+
+            showAlertOverlay(180000);
         }
-
-        async function checkEmergencyEarthquakeAlert() {
-            if (isTsunamiActive) return;
-            try {
-                // 💡 [修正点] v2の歴史・配信共通エンドポイントからコード556(EEW)の最新1件を取得
-                const response = await fetch('https://api.p2pquake.net/v2/history?codes=556&limit=1');
-                if (!response.ok) return;
-
-                const data = await response.json();
-                if (!Array.isArray(data) || data.length === 0 || !data[0]) return;
-                
-                const alert = data[0];
-                if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
-                    lastEewId = alert.id;
-                    const epicenter = alert.earthquake.hypocenter.name || "調査中";
-                    const maxShindo = alert.earthquake.maxScaleString || "不明";
-                    
-                    document.getElementById('alert-title').innerText = "🚨 緊急地震速報 (EEW) 🚨";
-                    document.getElementById('alert-header').innerText = `震源地: ${epicenter}`;
-                    document.getElementById('alert-main').innerText = `最大震度 ${maxShindo}`;
-                    document.getElementById('alert-detail').innerText = "強い揺れに警戒してください。倒れやすい家具から離れてください。";
-                    
-                    showAlertOverlay(180000); 
-                }
-            } catch (e) { console.error("EEW取得エラー:", e); }
-        }
-
-        async function checkTsunamiAlert() {
-            try {
-                // 💡 [修正点] v2の歴史・配信共通エンドポイントからコード552(津波予報)の最新1件を取得
-                const response = await fetch('https://api.p2pquake.net/v2/history?codes=552&limit=1');
-                if (!response.ok) return;
-
-                const data = await response.json();
-                if (!Array.isArray(data) || data.length === 0 || !data[0]) return;
-
-                const alert = data[0];
-                if (alert.id !== lastTsunamiId) {
-                    lastTsunamiId = alert.id;
-                    if (alert.areas && alert.areas.length > 0) {
-                        isTsunamiActive = true;
-                        let infoText = "";
-                        alert.areas.forEach(area => { infoText += `■${area.name} ： 【${area.grade}】\n`; });
-
-                        document.getElementById('alert-title').innerText = "🌊 津波警報・注意報発表 🌊";
-                        document.getElementById('alert-header').innerText = "海岸や川の近くから今すぐ離れてください！";
-                        document.getElementById('alert-main').innerText = "津波警報 発表中";
-                        document.getElementById('alert-detail').style.whiteSpace = "pre-wrap";
-                        document.getElementById('alert-detail').innerText = infoText;
-
-                        showAlertOverlay(0); 
-                    } else {
-                        if (isTsunamiActive) {
-                            isTsunamiActive = false;
-                            hideAlertOverlay();
-                        }
-                    }
-                }
-            } catch (e) { console.error("津波情報取得エラー:", e); }
-        }
+    } catch (e) {
+        console.error("EEW取得エラー:", e);
+    }
+}
 
         async function checkIwateWeatherAlerts() {
             try {

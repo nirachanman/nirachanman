@@ -8,6 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <link rel="icon" href="data:,">
 
     <style>
         :root { 
@@ -310,8 +311,8 @@
         async function checkEmergencyEarthquakeAlert() {
             if (isTsunamiActive) return;
             try {
-                // 💡 [修正点] 400エラーを防ぐため「?t=」のキャッシュパラメータを完全に削除
-                const response = await fetch('https://api.p2pquake.net/v2/jma/eeew?limit=1');
+                // 💡 [修正点] タイポ（eeew → eew）を正しく修正しました
+                const response = await fetch('https://api.p2pquake.net/v2/jma/eew?limit=1');
                 if (!response.ok) return;
 
                 const data = await response.json();
@@ -335,7 +336,6 @@
 
         async function checkTsunamiAlert() {
             try {
-                // 💡 [修正点] 400エラーを防ぐため「?t=」のキャッシュパラメータを完全に削除
                 const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami?limit=1');
                 if (!response.ok) return;
 

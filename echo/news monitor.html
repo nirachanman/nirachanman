@@ -366,8 +366,8 @@
         // ⛈️ 3. 新規追加: 岩手県の気象警報・特別警報および危険度分布（キキクル要素）の解析
 async function checkIwateWeatherAlerts() {
     try {
-        // 🌟 limitを3から10に増やし、他県の発表に埋もれないようにする
-        const response = await fetch('https://api.p2pquake.net/v2/jma/warning?limit=10&t=' + Date.now());
+        // 🌟 limitを100に増やし、日本全国の大量の注意報・警報の中に岩手県が埋もれないようにする
+        const response = await fetch('https://api.p2pquake.net/v2/jma/warning?limit=100&t=' + Date.now());
         const data = await response.json();
         if (!data || data.length === 0) return;
 
@@ -375,36 +375,58 @@ async function checkIwateWeatherAlerts() {
         let collectedAlerts = new Set();
         let dangerousCities = {}; 
 
-        // 🌟 すべての発表レポートから岩手県のデータを漏れなく探す
+        // 過去の同一エリア・同一警報の重複処理を防ぐためのキー管理
+        let processedKeys = new Set();
+
+        // 🌟 レポートを全スキャン
         for (let report of data) {
-            if (report.prefixes && report.prefixes.includes("岩手県")) {
-                if (report.items) {
-                    for (let item of report.items) {
-                        const cityName = item.area.name;
-                        if (item.warnings) {
-                            for (let w of item.warnings) {
-                                // 解除や「なし」はスキップ
-                                if (w.status !== "発表" && w.status !== "継続") continue;
+            if (!report.items) continue;
 
-                                const name = w.name;
-                                collectedAlerts.add(name);
+            for (let item of report.items) {
+                const cityName = item.area.name;
+                
+                // 🌟 市町村名（area.name）から、岩手県の市区町村であるかを確実に判定する
+                // （APIのコード体系依存を避けるため、岩手県独特の市町村名やコード、あるいは大元の判定を活用）
+                // 確実を期すため、reportに岩手県が含まれるか、または自治体名等でフィルタリング
+                const isIwate = (report.prefixes && report.prefixes.includes("岩手県")) || 
+                                cityName.includes("盛岡") || cityName.includes("宮古") || cityName.includes("大船渡") || 
+                                cityName.includes("花巻") || cityName.includes("北上") || cityName.includes("久慈") || 
+                                cityName.includes("遠野") || cityName.includes("一関") || cityName.includes("陸前高田") || 
+                                cityName.includes("釜石") || cityName.includes("二戸") || cityName.includes("八幡平") || 
+                                cityName.includes("奥州") || cityName.includes("滝沢") || item.area.code.startsWith("03"); // 岩手県の地域コードは03から始まる
 
-                                // 🌟 新しい気象庁のレベル表記（レベル3警報等）にも柔軟に対応
-                                if (name.includes("特別警報") || name.includes("レベル5")) {
-                                    highestLevel = Math.max(highestLevel, 3);
-                                } else if (name.includes("危険警報") || name.includes("レベル4")) {
-                                    highestLevel = Math.max(highestLevel, 2); // 危険警報時も赤
-                                } else if (name.includes("警報") || name.includes("レベル3")) {
-                                    highestLevel = Math.max(highestLevel, 2); // 通常の警報・レベル3も赤
-                                } else if (name.includes("注意報") || name.includes("レベル2")) {
-                                    highestLevel = Math.max(highestLevel, 1);
-                                }
+                if (!isIwate) continue;
 
-                                // キキクル（危険度分布）要素の連動判定
-                                if (name.includes("大雨") || name.includes("洪水") || name.includes("土砂") || name.includes("レベル3") || name.includes("レベル4")) {
-                                    if (!dangerousCities[cityName]) dangerousCities[cityName] = [];
-                                    dangerousCities[cityName].push(name);
-                                }
+                if (item.warnings) {
+                    for (let w of item.warnings) {
+                        // 🌟 バグ修正：解除（"解除" や statusが解除を示すもの）だけをスキップするロジックに変更
+                        if (w.status === "解除" || w.name.includes("解除")) continue;
+
+                        const name = w.name;
+                        
+                        // 重複カウント防止（最新のレポートの状態を優先）
+                        const uniqueKey = `${cityName}_${name}`;
+                        if (processedKeys.has(uniqueKey)) continue;
+                        processedKeys.add(uniqueKey);
+
+                        collectedAlerts.add(name);
+
+                        // 🌟 最新の気象庁防災レベル表記（レベル3等）および従来の警報名で判定
+                        if (name.includes("特別警報") || name.includes("レベル5")) {
+                            highestLevel = Math.max(highestLevel, 3);
+                        } else if (name.includes("危険警報") || name.includes("レベル4")) {
+                            highestLevel = Math.max(highestLevel, 2); 
+                        } else if (name.includes("警報") || name.includes("レベル3")) {
+                            highestLevel = Math.max(highestLevel, 2); // 大雨警報（レベル3）はここを通過し、赤（レベル2）になります
+                        } else if (name.includes("注意報") || name.includes("レベル2")) {
+                            highestLevel = Math.max(highestLevel, 1);
+                        }
+
+                        // キキクル連動要素（カードに表示する対象）
+                        if (name.includes("大雨") || name.includes("洪水") || name.includes("土砂") || name.includes("レベル3") || name.includes("レベル4")) {
+                            if (!dangerousCities[cityName]) dangerousCities[cityName] = [];
+                            if (!dangerousCities[cityName].includes(name)) {
+                                dangerousCities[cityName].push(name);
                             }
                         }
                     }
@@ -431,7 +453,9 @@ async function checkIwateWeatherAlerts() {
         // 特大カード構築
         let citiesListText = "";
         for (let city in dangerousCities) {
-            citiesListText += `<div><strong>${city}</strong>: ${dangerousCities[city].join(', ')}</div>`;
+            if (dangerousCities[city].length > 0) {
+                citiesListText += `<div><strong>${city}</strong>: ${dangerousCities[city].join(', ')}</div>`;
+            }
         }
 
         if (citiesListText !== "") {
@@ -453,7 +477,6 @@ async function checkIwateWeatherAlerts() {
 
     } catch (e) { console.error("気象情報取得エラー:", e); }
 }
-
         function showAlertOverlay(duration) {
             isPaused = true;
             const overlay = document.getElementById('emergency-alert-overlay');

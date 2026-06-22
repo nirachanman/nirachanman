@@ -481,22 +481,21 @@ async function loadNHKNews(){
 
 try{
 
-const response =
-await fetch(
-RSS_PROXY + NHK_RSS,
-{
-cache:"no-cache"
-}
+const parser = new DOMParser();
+
+let allItems = [];
+
+for(const rssUrl of RSS_URLS){
+
+try{
+
+const response = await fetch(
+RSS_PROXY + encodeURIComponent(rssUrl)
 );
 
-const xmlText =
-await response.text();
+const xmlText = await response.text();
 
-const parser =
-new DOMParser();
-
-const xml =
-parser.parseFromString(
+const xml = parser.parseFromString(
 xmlText,
 "text/xml"
 );
@@ -506,33 +505,72 @@ const items =
 ...xml.querySelectorAll("item")
 ];
 
-newsItems =
-items.slice(0,12).map(item=>{
+items.forEach(item=>{
 
-const title =
+allItems.push({
+
+title:
 item.querySelector("title")
-?.textContent || "";
+?.textContent || "",
 
-const link =
+link:
 item.querySelector("link")
-?.textContent || "";
+?.textContent || "",
 
-const pubDate =
+pubDate:
 item.querySelector("pubDate")
-?.textContent || "";
+?.textContent || "",
 
-const desc =
+description:
 item.querySelector("description")
-?.textContent || "";
-
-return{
-title,
-link,
-pubDate,
-desc
-};
+?.textContent || ""
 
 });
+
+});
+
+}catch(err){
+
+console.warn(
+"RSS取得失敗",
+rssUrl,
+err
+);
+
+}
+
+}
+
+allItems.sort(
+
+(a,b)=>
+
+new Date(b.pubDate)
+-
+new Date(a.pubDate)
+
+);
+
+const uniqueMap = new Map();
+
+allItems.forEach(item=>{
+
+if(!uniqueMap.has(item.link)){
+
+uniqueMap.set(
+item.link,
+item
+);
+
+}
+
+});
+
+newsItems =
+[
+...uniqueMap.values()
+]
+.slice(0,100);
 
 renderNews();
 updateTicker();
@@ -540,14 +578,13 @@ updateTicker();
 }catch(error){
 
 console.error(
-"NHK RSS ERROR",
+"ニュース取得失敗",
 error
 );
 
 }
 
 }
-
 /* =====================================================
    ニュース描画
 ===================================================== */
@@ -1421,46 +1458,31 @@ panel.scrollTop = 0;
    タッチ停止
 ===================================================== */
 
-function togglePause(){
+function pauseTemporarily(){
 
-signagePaused =
-!signagePaused;
+isPaused = true;
 
-const status =
+clearTimeout(
+resumeTimeout
+);
+
 document.getElementById(
 "statusBar"
-);
+).textContent =
+"操作中（30秒後に自動再開）";
 
-if(signagePaused){
+resumeTimeout = setTimeout(()=>{
 
-status.textContent =
-"一時停止中（タップで再開）";
+isPaused = false;
 
-}else{
-
-status.textContent =
+document.getElementById(
+"statusBar"
+).textContent =
 "防災情報を監視しています";
 
-}
+},30000);
 
 }
-
-document.body.addEventListener(
-
-"click",
-
-togglePause
-
-);
-
-document.body.addEventListener(
-
-"touchstart",
-
-togglePause
-
-);
-
 /* =====================================================
    ニュース自動ページ送り
 ===================================================== */

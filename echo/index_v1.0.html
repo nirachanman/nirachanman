@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>防災強化版モニター v1.0</title>
+
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Pragma" content="no-cache">
+
+<style>
+
+:root{
+ --bg:#0b0f14;
+ --card:#161c24;
+ --normal:#696969;
+ --warning:#ffd700;
+ --alert:#ff3333;
+ --special:#da70d6;
+}
+
+*{
+ box-sizing:border-box;
+}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ background:var(--bg);
+ color:#fff;
+ font-family:sans-serif;
+ overflow:hidden;
+}
+
+body{
+ display:grid;
+ grid-template-rows:auto auto 1fr;
+}
+
+header{
+ padding:10px;
+ border-bottom:4px solid var(--normal);
+ background:#000;
+}
+
+#header-title{
+ font-size:1.5rem;
+ font-weight:bold;
+}
+
+#status-bar{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:6px 10px;
+ background:#111;
+ font-size:0.9rem;
+}
+
+#offline-banner{
+ display:none;
+ background:#8b0000;
+ color:#fff;
+ font-weight:bold;
+ padding:10px;
+ text-align:center;
+}
+
+#ticker{
+ overflow:hidden;
+ white-space:nowrap;
+ background:#111;
+ padding:8px;
+}
+
+#ticker span{
+ display:inline-block;
+ padding-left:100%;
+ animation:ticker 60s linear infinite;
+}
+
+@keyframes ticker{
+ from{
+  transform:translateX(0);
+ }
+ to{
+  transform:translateX(-100%);
+ }
+}
+
+main{
+ display:grid;
+ grid-template-columns:350px 1fr;
+ overflow:hidden;
+}
+
+#left-panel{
+ overflow-y:auto;
+ background:#111;
+ border-right:2px solid #222;
+}
+
+#right-panel{
+ overflow-y:auto;
+}
+
+.panel-title{
+ padding:10px;
+ font-weight:bold;
+ background:#222;
+}
+
+.card{
+ margin:8px;
+ padding:10px;
+ background:var(--card);
+ border-radius:6px;
+}
+
+.alert-card{
+ border-left:6px solid var(--alert);
+}
+
+.special-card{
+ border-left:6px solid var(--special);
+}
+
+#history-list{
+ max-height:300px;
+ overflow-y:auto;
+}
+
+.news-item{
+ margin:8px;
+ padding:12px;
+ background:var(--card);
+ border-left:4px solid #607d8b;
+}
+
+.news-title{
+ font-size:1.2rem;
+ margin-bottom:6px;
+}
+
+.news-desc{
+ color:#b0bec5;
+ line-height:1.5;
+}
+
+#eew-overlay{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:999999;
+ background:#b00000;
+ color:white;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ animation:eewFlash .5s infinite;
+}
+
+@keyframes eewFlash{
+ 0%,100%{
+  background:#8b0000;
+ }
+ 50%{
+  background:#ff0000;
+ }
+}
+
+#eew-title{
+ font-size:4rem;
+ font-weight:bold;
+ color:#ffff00;
+}
+
+#eew-scale{
+ font-size:8rem;
+ font-weight:900;
+ margin-top:20px;
+}
+
+#eew-epicenter{
+ font-size:2.5rem;
+ margin-top:20px;
+}
+
+#eew-time{
+ font-size:2rem;
+ margin-top:10px;
+}
+
+#tsunami-overlay{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:1000000;
+ background:#003366;
+ color:white;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ animation:tsunamiFlash .8s infinite;
+}
+
+@keyframes tsunamiFlash{
+ 0%,100%{
+  background:#003366;
+ }
+ 50%{
+  background:#0066cc;
+ }
+}
+
+#tsunami-title{
+ font-size:5rem;
+ font-weight:bold;
+}
+
+#tsunami-main{
+ font-size:3rem;
+ margin-top:20px;
+}
+
+#tsunami-detail{
+ font-size:1.6rem;
+ margin-top:20px;
+ max-width:80%;
+ white-space:pre-wrap;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="offline-banner">
+⚠ 通信が切断されています
+</div>
+
+<header>
+ <div id="header-title">
+ 防災強化版モニター v1.0
+ </div>
+</header>
+
+<div id="status-bar">
+ <div>
+ 最終更新:
+ <span id="last-update">---</span>
+ </div>
+
+ <div id="connection-status">
+ ONLINE
+ </div>
+</div>
+
+<div id="ticker">
+ <span id="ticker-text">
+ 防災情報を監視しています...
+ </span>
+</div>
+
+<main>
+
+<div id="left-panel">
+
+ <div class="panel-title">
+ 防災情報
+ </div>
+
+ <div id="weather-alerts"></div>
+
+ <div class="panel-title">
+ 履歴
+ </div>
+
+ <div id="history-list"></div>
+
+</div>
+
+<div id="right-panel">
+
+ <div class="panel-title">
+ NHKニュース
+ </div>
+
+ <div id="news-container"></div>
+
+</div>
+
+</main>
+
+<div id="eew-overlay">
+
+ <div id="eew-title">
+ 🚨 緊急地震速報 🚨
+ </div>
+
+ <div id="eew-scale">
+ ---
+ </div>
+
+ <div id="eew-epicenter">
+ ---
+ </div>
+
+ <div id="eew-time">
+ ---
+ </div>
+
+</div>
+
+<div id="tsunami-overlay">
+
+ <div id="tsunami-title">
+ 🌊 津波警報
+ </div>
+
+ <div id="tsunami-main">
+ 直ちに避難してください
+ </div>
+
+ <div id="tsunami-detail">
+ ---
+ </div>
+
+</div>
+<script>
+
+const RSS_URLS = [
+ 'https://news.web.nhk/n-data/conf/na/rss/cat0.xml',
+ 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+ 'https://news.web.nhk/n-data/conf/na/rss/cat2.xml',
+ 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml'
+];
+
+let wakeLock = null;
+let lastEewId = "";
+let lastTsunamiId = "";
+let tsunamiActive = false;
+
+async function requestWakeLock(){
+ try{
+  if("wakeLock" in navigator){
+   wakeLock = await navigator.wakeLock.request("screen");
+  }
+ }catch(e){
+  console.error(e);
+ }
+}
+
+function updateTimestamp(){
+ document.getElementById("last-update").textContent =
+ new Date().toLocaleString("ja-JP");
+}
+
+function speak(text){
+
+ try{
+
+  speechSynthesis.cancel();
+
+  for(let i=0;i<3;i++){
+
+   const utter =
+   new SpeechSynthesisUtterance(text);
+
+   utter.lang = "ja-JP";
+   utter.rate = 1.0;
+
+   speechSynthesis.speak(utter);
+
+  }
+
+ }catch(e){}
+}
+
+function addHistory(type,message){
+
+ let history =
+ JSON.parse(
+  localStorage.getItem("disasterHistory") || "[]"
+ );
+
+ history.unshift({
+  time:new Date().toLocaleString("ja-JP"),
+  type,
+  message
+ });
+
+ history = history.slice(0,100);
+
+ localStorage.setItem(
+  "disasterHistory",
+  JSON.stringify(history)
+ );
+
+ renderHistory();
+}
+
+function renderHistory(){
+
+ let history =
+ JSON.parse(
+  localStorage.getItem("disasterHistory") || "[]"
+ );
+
+ document.getElementById("history-list").innerHTML =
+ history.map(item=>`
+  <div class="card">
+   <div><strong>${item.type}</strong></div>
+   <div>${item.time}</div>
+   <div>${item.message}</div>
+  </div>
+ `).join('');
+}
+
+window.addEventListener("offline",()=>{
+
+ document.getElementById("offline-banner").style.display="block";
+ document.getElementById("connection-status").textContent="OFFLINE";
+
+});
+
+window.addEventListener("online",()=>{
+
+ document.getElementById("offline-banner").style.display="none";
+ document.getElementById("connection-status").textContent="ONLINE";
+
+});
+
+function showEEW(epicenter,maxScale){
+
+ document.getElementById("eew-scale").textContent =
+ `震度 ${maxScale}`;
+
+ document.getElementById("eew-epicenter").textContent =
+ `震源地: ${epicenter}`;
+
+ document.getElementById("eew-time").textContent =
+ new Date().toLocaleTimeString("ja-JP");
+
+ document.getElementById("eew-overlay").style.display =
+ "flex";
+
+ speak("緊急地震速報。強い揺れに警戒してください");
+
+ setTimeout(()=>{
+
+  if(!tsunamiActive){
+   document.getElementById("eew-overlay").style.display =
+   "none";
+  }
+
+ },180000);
+}
+
+function showTsunami(detail){
+
+ tsunamiActive = true;
+
+ document.getElementById("tsunami-detail").textContent =
+ detail;
+
+ document.getElementById("tsunami-overlay").style.display =
+ "flex";
+
+ speak("津波警報発表。直ちに高台へ避難してください");
+}
+
+function hideTsunami(){
+
+ tsunamiActive = false;
+
+ document.getElementById("tsunami-overlay").style.display =
+ "none";
+}
+
+async function checkEEW(){
+
+ try{
+
+  const res =
+  await fetch(
+   "https://api.p2pquake.net/v2/jma/eeew?limit=1&t="+Date.now()
+  );
+
+  const data = await res.json();
+
+  if(!data || data.length===0) return;
+
+  const eew = data[0];
+
+  if(
+   eew.id !== lastEewId &&
+   !eew.cancelled
+  ){
+
+   lastEewId = eew.id;
+
+   const epicenter =
+   eew.earthquake?.hypocenter?.name || "不明";
+
+   const scale =
+   eew.earthquake?.maxScaleString || "不明";
+
+   addHistory(
+    "EEW",
+    `${epicenter} 最大震度${scale}`
+   );
+
+   showEEW(
+    epicenter,
+    scale
+   );
+  }
+
+ }catch(e){
+  console.error(e);
+ }
+}
+
+async function checkTsunami(){
+
+ try{
+
+  const res =
+  await fetch(
+   "https://api.p2pquake.net/v2/jma/tsunami?limit=1&t="+Date.now()
+  );
+
+  const data = await res.json();
+
+  if(!data || data.length===0) return;
+
+  const tsunami = data[0];
+
+  if(tsunami.id !== lastTsunamiId){
+
+   lastTsunamiId = tsunami.id;
+
+   if(
+    tsunami.areas &&
+    tsunami.areas.length > 0
+   ){
+
+    let detail = "";
+
+    tsunami.areas.forEach(area=>{
+
+     detail +=
+      area.name +
+      "【" +
+      area.grade +
+      "】\n";
+
+    });
+
+    addHistory(
+     "津波",
+     detail
+    );
+
+    showTsunami(detail);
+
+   }else{
+
+    hideTsunami();
+
+   }
+  }
+
+ }catch(e){
+  console.error(e);
+ }
+}
+
+async function checkWeatherWarnings(){
+
+ try{
+
+  const res =
+  await fetch(
+   "https://api.p2pquake.net/v2/jma/warning?limit=100&t="+Date.now()
+  );
+
+  const data =
+  await res.json();
+
+  let warnings = [];
+
+  data.forEach(report=>{
+
+   if(!report.items) return;
+
+   report.items.forEach(item=>{
+
+    if(!item.warnings) return;
+
+    item.warnings.forEach(w=>{
+
+     if(w.status==="発表"){
+      warnings.push(w.name);
+     }
+
+    });
+
+   });
+
+  });
+
+  warnings =
+  [...new Set(warnings)];
+
+  const container =
+  document.getElementById("weather-alerts");
+
+  if(warnings.length){
+
+   container.innerHTML = `
+   <div class="card alert-card">
+    ⚠ 発表中<br>
+    ${warnings.join("<br>")}
+   </div>
+   `;
+
+   document.documentElement.style.setProperty(
+    "--normal",
+    "#ff3333"
+   );
+
+   document.getElementById("ticker-text").textContent =
+   warnings.join(" / ");
+
+  }else{
+
+   container.innerHTML = "";
+
+   document.documentElement.style.setProperty(
+    "--normal",
+    "#696969"
+   );
+  }
+
+ }catch(e){
+  console.error(e);
+ }
+}
+
+async function loadNews(){
+
+ let allNews = [];
+
+ for(const url of RSS_URLS){
+
+  try{
+
+   const target =
+   "https://corsproxy.io/?"+
+   encodeURIComponent(
+    url+"?t="+Date.now()
+   );
+
+   const res =
+   await fetch(target);
+
+   const xml =
+   new DOMParser()
+   .parseFromString(
+    await res.text(),
+    "text/xml"
+   );
+
+   const items =
+   xml.getElementsByTagName("item");
+
+   for(let item of items){
+
+    allNews.push({
+
+     title:
+     item.getElementsByTagName("title")[0]?.textContent || "",
+
+     desc:
+     item.getElementsByTagName("description")[0]?.textContent || ""
+
+    });
+
+   }
+
+  }catch(e){}
+ }
+
+ const unique =
+ Array.from(
+  new Map(
+   allNews.map(n=>[n.title,n])
+  ).values()
+ );
+
+ document.getElementById("news-container").innerHTML =
+ unique.slice(0,50).map(item=>`
+  <div class="news-item">
+   <div class="news-title">
+    ${item.title}
+   </div>
+   <div class="news-desc">
+    ${item.desc}
+   </div>
+  </div>
+ `).join('');
+
+ updateTimestamp();
+}
+
+function heartbeat(){
+
+ const now = Date.now();
+
+ const last =
+ Number(
+  localStorage.getItem("heartbeat") || now
+ );
+
+ if(now-last > 600000){
+
+  location.reload();
+
+ }
+
+ localStorage.setItem(
+  "heartbeat",
+  now
+ );
+}
+
+async function init(){
+
+ renderHistory();
+
+ await loadNews();
+
+ await checkEEW();
+
+ await checkTsunami();
+
+ await checkWeatherWarnings();
+
+ await requestWakeLock();
+
+}
+
+init();
+
+setInterval(loadNews,300000);
+
+setInterval(checkEEW,5000);
+
+setInterval(checkTsunami,5000);
+
+setInterval(checkWeatherWarnings,60000);
+
+setInterval(heartbeat,60000);
+
+document.addEventListener(
+ "visibilitychange",
+ async ()=>{
+
+  if(
+   wakeLock &&
+   document.visibilityState==="visible"
+  ){
+   await requestWakeLock();
+  }
+
+ });
+
+</script>
+
+</body>
+</html>

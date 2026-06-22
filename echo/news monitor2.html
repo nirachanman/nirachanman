@@ -311,8 +311,8 @@
         async function checkEmergencyEarthquakeAlert() {
             if (isTsunamiActive) return;
             try {
-                // 💡 [修正点] タイポ（eeew → eew）を正しく修正しました
-                const response = await fetch('https://api.p2pquake.net/v2/jma/eew?limit=1');
+                // 💡 [修正点] エンドポイントを正しい「eeew」に戻し、不具合の元となるパラメータを全削除
+                const response = await fetch('https://api.p2pquake.net/v2/jma/eeew');
                 if (!response.ok) return;
 
                 const data = await response.json();
@@ -336,7 +336,8 @@
 
         async function checkTsunamiAlert() {
             try {
-                const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami?limit=1');
+                // 💡 [修正点] 404/400回避のため、こちらも不要なパラメータを完全に排除した綺麗なURLに統一
+                const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami');
                 if (!response.ok) return;
 
                 const data = await response.json();

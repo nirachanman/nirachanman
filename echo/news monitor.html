@@ -42,7 +42,7 @@
         }
         
         header { 
-            border-bottom: 3px solid var(--accent-color); /* 太さを3pxにして視認性をアップ */
+            border-bottom: 3px solid var(--accent-color); 
             padding-bottom: 8px; 
             margin-bottom: 10px;
             background-color: var(--bg-color);
@@ -50,7 +50,7 @@
             max-width: 100%;
             box-sizing: border-box;
             overflow: hidden;
-            transition: border-color 0.5s ease; /* 色変化を滑らかに */
+            transition: border-color 0.5s ease; 
         }
         
         .header-top { 
@@ -286,27 +286,28 @@
         let resumeTimeout = null;
         let currentItemIndex = 0; 
         
-        // 災害・気象ステータス
         let lastEewId = "";
         let lastTsunamiId = "";
         let isTsunamiActive = false;
         
-        // 岩手県防災ステータス管理
-        let iwateAlertLevel = 0; // 0:なし, 1:注意報, 2:警報, 3:特別警報
-        let iwateActiveAlertsText = ""; // テロップ用
-        let iwateKikikuText = ""; // キキクル・土砂災害情報カード用HTML
+        let iwateAlertLevel = 0; 
+        let iwateActiveAlertsText = ""; 
+        let iwateKikikuText = ""; 
+
+        // 警報名のマッピング辞書（気象庁のコード番号から日本語表記へ変換用）
+        const JMA_CODES = {
+            "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
+            "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "19": "高潮警報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
+        };
 
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
                 }
-            } catch (err) {
-                console.error("WakeLock取得失敗:", err);
-            }
+            } catch (err) { console.error("WakeLock取得失敗:", err); }
         }
 
-        // 🚨 1. 緊急地震速報（EEW）監視
         async function checkEmergencyEarthquakeAlert() {
             if (isTsunamiActive) return;
             try {
@@ -330,7 +331,6 @@
             } catch (e) { console.error("EEW取得エラー:", e); }
         }
 
-        // 🌊 2. 津波警報・注意報監視
         async function checkTsunamiAlert() {
             try {
                 const response = await fetch('https://api.p2pquake.net/v2/jma/tsunami?limit=1&t=' + Date.now());
@@ -362,58 +362,49 @@
             } catch (e) { console.error("津波情報取得エラー:", e); }
         }
 
-        // ⛈️ 3. 岩手県の気象警報・特別警報および危険度分布（キキクル要素）の解析
+        // ⛈️ 修正版：気象庁公式データ（岩手県：030000）をCORSプロキシ経由で直接読み込み
         async function checkIwateWeatherAlerts() {
             try {
-                const response = await fetch('https://api.p2pquake.net/v2/jma/warning?limit=100&t=' + Date.now());
+                const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://www.jma.go.jp/bosai/warning/data/warning/030000.json?t=' + Date.now());
+                const response = await fetch(targetUrl);
+                if (!response.ok) return;
                 const data = await response.json();
-                if (!data || data.length === 0) return;
 
                 let highestLevel = 0; 
                 let collectedAlerts = new Set();
                 let dangerousCities = {}; 
-                let processedKeys = new Set();
 
-                for (let report of data) {
-                    if (!report.items) continue;
-
-                    for (let item of report.items) {
-                        const cityName = item.area.name || "不明な地域";
+                if (Array.isArray(data)) {
+                    for (let areaGroup of data) {
+                        if (!areaGroup.areaTypes) continue;
                         
-                        let isIwate = false;
-                        if (report.prefixes && Array.isArray(report.prefixes) && report.prefixes.includes("岩手県")) {
-                            isIwate = true;
-                        } else if (item.area.code) {
-                            const codeStr = String(item.area.code).padStart(6, '0');
-                            if (codeStr.startsWith("03")) {
-                                isIwate = true;
-                            }
-                        }
+                        // 市町村レベル(areaTypes[1])の発表状況を解析
+                        const cityAreas = areaGroup.areaTypes[1]?.areas;
+                        if (!cityAreas) continue;
 
-                        if (!isIwate) continue;
+                        for (let city of cityAreas) {
+                            const cityName = city.area.name;
+                            if (!city.warnings) continue;
 
-                        if (item.warnings) {
-                            for (let w of item.warnings) {
-                                if (w.status === "解除" || w.name.includes("解除")) continue;
+                            for (let w of city.warnings) {
+                                // state: "none"(なし), "add"(追加), "continue"(継続), "delete"(解除)
+                                if (w.state === "none" || w.state === "delete") continue;
 
-                                const name = w.name;
-                                const uniqueKey = `${cityName}_${name}`;
-                                if (processedKeys.has(uniqueKey)) continue;
-                                processedKeys.add(uniqueKey);
-
+                                const code = w.code;
+                                const name = JMA_CODES[code] || "気象注意報・警報";
                                 collectedAlerts.add(name);
 
-                                if (name.includes("特別警報") || name.includes("レベル5")) {
-                                    highestLevel = Math.max(highestLevel, 3);
-                                } else if (name.includes("危険警報") || name.includes("レベル4")) {
-                                    highestLevel = Math.max(highestLevel, 2); 
-                                } else if (name.includes("警報") || name.includes("レベル3")) {
-                                    highestLevel = Math.max(highestLevel, 2); 
-                                } else if (name.includes("注意報") || name.includes("レベル2")) {
-                                    highestLevel = Math.max(highestLevel, 1);
+                                // 危険度レベル判定
+                                if (code.startsWith("3")) {
+                                    highestLevel = Math.max(highestLevel, 3); // 特別警報 (Lv5相当)
+                                } else if (["02","03","04","05","06","08","19"].includes(code)) {
+                                    highestLevel = Math.max(highestLevel, 2); // 警報 (Lv3~4相当)
+                                } else {
+                                    highestLevel = Math.max(highestLevel, 1); // 注意報 (Lv2相当)
                                 }
 
-                                if (name.includes("大雨") || name.includes("洪水") || name.includes("土砂") || name.includes("レベル3") || name.includes("レベル4")) {
+                                // 避難や浸水リスクの高い「大雨・洪水・土砂災害・暴風・大雪」などをピックアップしてピン留め
+                                if (["02","03","04","05","06","10","12","14","18"].includes(code)) {
                                     if (!dangerousCities[cityName]) dangerousCities[cityName] = [];
                                     if (!dangerousCities[cityName].includes(name)) {
                                         dangerousCities[cityName].push(name);
@@ -433,7 +424,7 @@
                 else root.style.setProperty('--accent-color', '#696969'); 
 
                 if (collectedAlerts.size > 0) {
-                    iwateActiveAlertsText = `【⚠️岩手県情報：${Array.from(collectedAlerts).join('・')}発表中】`;
+                    iwateActiveAlertsText = `【⚠️岩手県警告：${Array.from(collectedAlerts).join('・')}発表中】`;
                 } else {
                     iwateActiveAlertsText = "";
                 }
@@ -447,12 +438,12 @@
 
                 if (citiesListText !== "") {
                     const cardClass = highestLevel === 3 ? "weather-alert-card special" : "weather-alert-card";
-                    const titleText = highestLevel === 3 ? "🚨 岩手県：特別警報・最大危険度発表中" : "⚠️ 岩手県：大雨・土砂災害警戒（気象情報連動）";
+                    const titleText = highestLevel === 3 ? "🚨 岩手県：特別警報発表中" : "⚠️ 岩手県：気象警報・注意報（警戒地域一覧）";
                     
                     iwateKikikuText = `
                         <div class="${cardClass}">
                             <div class="weather-alert-title">${titleText}</div>
-                            <div style="font-size:1.1rem; margin-bottom:8px;">以下の地域で大雨や土砂災害の危険度が高まっています。今後の情報に厳重に警戒してください。</div>
+                            <div style="font-size:1.1rem; margin-bottom:8px;">岩手県内の以下の地域に気象警報・注意報が発表されています。安全を確保してください。</div>
                             <div style="font-size:1.05rem; background:rgba(0,0,0,0.3); padding:8px; border-radius:4px;">${citiesListText}</div>
                         </div>
                     `;
@@ -462,7 +453,7 @@
 
                 refreshMarqueeAndCards();
 
-            } catch (e) { console.error("気象情報取得エラー:", e); }
+            } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
 
         function showAlertOverlay(duration) {
@@ -587,9 +578,7 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 🌟 修正: ページ下部への到達判定、またはインデックスが次のスクロール（+3）で配列を超える場合の安全なリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                // キャッシュを回避しつつ、強制的にスクロールトップで再読み込み
                 const cleanUrl = window.location.href.split('?')[0];
                 window.location.href = cleanUrl + '?t=' + Date.now();
                 return;
@@ -598,7 +587,6 @@
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
 
-            // 🌟 修正: targetItemの存在チェック（TypeErrorによるインターバル停止の脆弱性を修正）
             if (targetItem) {
                 const containerTop = container.getBoundingClientRect().top;
                 const targetTop = targetItem.getBoundingClientRect().top;
@@ -626,16 +614,13 @@
 
         init();
         
-        // 自動スクロール（30秒ごと）
         setInterval(autoScroll, 30000); 
         
-        // 🚨 5秒おきの超高速ポーリング（地震・津波用）
         setInterval(async () => {
             await checkTsunamiAlert();
             await checkEmergencyEarthquakeAlert();
         }, 5000);
 
-        // ⛈️ 1分おきの気象情報ポーリング
         setInterval(async () => {
             await checkIwateWeatherAlerts();
         }, 60000);

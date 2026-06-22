@@ -603,12 +603,17 @@ async function autoScroll() {
     const items = container.querySelectorAll('.news-item');
     if (items.length === 0) return;
 
-    // 🌟 ここで最後まで行ったらページ全体をリロードしている
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-        location.reload();
+    // ★ Echo Show で確実に発動する「最後に到達したらリロード」
+    const reachedEnd =
+        container.scrollTop + container.clientHeight >= container.scrollHeight - 5 ||
+        currentItemIndex + 3 >= items.length;
+
+    if (reachedEnd) {
+        window.location.reload(); // ← ページ全体を完全リロード
         return;
     }
 
+    // ★ 通常スクロール
     currentItemIndex += 3;
     const targetItem = items[currentItemIndex];
 

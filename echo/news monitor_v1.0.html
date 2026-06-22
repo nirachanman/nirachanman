@@ -604,8 +604,7 @@
             if (items.length === 0) return;
 
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                const cleanUrl = window.location.href.split('?')[0];
-                window.location.href = cleanUrl + '?t=' + Date.now();
+                location.reload();
                 return;
             }
 
@@ -615,6 +614,7 @@
             if (targetItem) {
                 const containerTop = container.getBoundingClientRect().top;
                 const targetTop = targetItem.getBoundingClientRect().top;
+                
                 container.scrollTo({
                     top: container.scrollTop + (targetTop - containerTop),
                     behavior: 'smooth'
@@ -628,27 +628,17 @@
             }
 
             await updateNews();
-            await checkTsunamiAlert(); 
-            await checkEmergencyEarthquakeAlert(); 
-            await checkIwateWeatherAlerts(); 
             await requestWakeLock();
 
             window.scrollTo(0, 0);
-            if (container) container.scrollTop = 0;
+            if (container) {
+                container.scrollTop = 0;
+            }
         }
 
         init();
         
         setInterval(autoScroll, 30000); 
-        
-        setInterval(async () => {
-            await checkTsunamiAlert();
-            await checkEmergencyEarthquakeAlert();
-        }, 5000);
-
-        setInterval(async () => {
-            await checkIwateWeatherAlerts();
-        }, 60000);
         
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {

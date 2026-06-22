@@ -526,7 +526,7 @@
             let allItems = [];
             for (const url of RSS_URLS) {
                 try {
-                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://www.jma.go.jp/bosai/warning/data/r8/030000.json?t=' + Date.now());
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
                     const res = await fetch(targetUrl);
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {

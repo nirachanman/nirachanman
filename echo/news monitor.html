@@ -577,20 +577,20 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-        async function autoScroll() {
-            if (isPaused) return;
+async function autoScroll() {
+    if (isPaused) return;
 
-            const items = container.querySelectorAll('.news-item');
-            if (items.length === 0) return;
+    const items = container.querySelectorAll('.news-item');
+    if (items.length === 0) return;
 
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                const cleanUrl = window.location.href.split('?')[0];
-                window.location.href = cleanUrl + '?t=' + Date.now();
-                return;
-            }
+    // 🌟 ここで最後まで行ったらページ全体をリロードしている
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
+        location.reload();
+        return;
+    }
 
-            currentItemIndex += 3;
-            const targetItem = items[currentItemIndex];
+    currentItemIndex += 3;
+    const targetItem = items[currentItemIndex];
 
             if (targetItem) {
                 const containerTop = container.getBoundingClientRect().top;

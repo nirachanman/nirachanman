@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>NHK News Wall Ultimate 4K Edition</title>
+
+<meta name="theme-color" content="#0b1220">
+
+<style>
+
+:root{
+--bg:#081018;
+--panel:#0f172a;
+--panel2:#111827;
+--text:#ffffff;
+--sub:#cbd5e1;
+--accent:#00d4ff;
+--danger:#ff0000;
+--ticker-h:60px;
+--header-h:100px;
+--footer-h:60px;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+background:var(--bg);
+color:var(--text);
+font-family:
+"Segoe UI",
+"Hiragino Sans",
+"Yu Gothic",
+sans-serif;
+}
+
+body.day{
+--bg:#eaf3ff;
+--panel:#ffffff;
+--panel2:#dbeafe;
+--text:#0f172a;
+--sub:#334155;
+}
+
+body.night{
+--bg:#081018;
+}
+
+#app{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+background:
+linear-gradient(
+180deg,
+#06111d,
+#091827,
+#07131e
+);
+}
+
+header{
+height:var(--header-h);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 30px;
+background:
+linear-gradient(
+90deg,
+#00172d,
+#002b4f,
+#00172d
+);
+border-bottom:2px solid #00d4ff;
+}
+
+.logo{
+font-size:42px;
+font-weight:900;
+letter-spacing:2px;
+}
+
+.logo span{
+color:var(--accent);
+}
+
+#clock{
+font-size:34px;
+font-weight:bold;
+}
+
+main{
+flex:1;
+display:grid;
+grid-template-columns:2.2fr 1fr;
+overflow:hidden;
+}
+
+#newsArea{
+padding:20px;
+overflow:hidden;
+position:relative;
+}
+
+#newsGrid{
+height:100%;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+grid-auto-rows:minmax(280px,1fr);
+gap:18px;
+}
+
+.news-card{
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:20px;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+backdrop-filter:blur(8px);
+transform:scale(1);
+transition:all .5s;
+}
+
+.news-card:hover{
+transform:scale(1.02);
+}
+
+.news-thumb{
+height:180px;
+background:#111;
+overflow:hidden;
+}
+
+.news-thumb img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.news-content{
+padding:18px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.news-title{
+font-size:28px;
+font-weight:700;
+line-height:1.4;
+}
+
+.news-time{
+font-size:18px;
+color:#94a3b8;
+}
+
+aside{
+display:flex;
+flex-direction:column;
+padding:20px;
+gap:20px;
+background:rgba(0,0,0,0.25);
+border-left:1px solid rgba(255,255,255,.08);
+}
+
+.panel{
+background:rgba(255,255,255,0.05);
+border-radius:20px;
+padding:20px;
+border:1px solid rgba(255,255,255,.08);
+}
+
+.panel-title{
+font-size:26px;
+font-weight:800;
+margin-bottom:15px;
+color:var(--accent);
+}
+
+#weather{
+min-height:260px;
+}
+
+#weatherTemp{
+font-size:72px;
+font-weight:900;
+}
+
+#weatherText{
+font-size:28px;
+margin-top:10px;
+}
+
+#weatherLocation{
+margin-top:15px;
+font-size:20px;
+color:#94a3b8;
+}
+
+#alertPanel{
+flex:1;
+overflow:auto;
+}
+
+.alert-item{
+padding:15px;
+margin-bottom:10px;
+border-radius:12px;
+background:#1e293b;
+font-size:20px;
+}
+
+.alert-item.earthquake{
+border-left:8px solid orange;
+}
+
+.alert-item.tsunami{
+border-left:8px solid red;
+}
+
+.alert-item.weather{
+border-left:8px solid yellow;
+}
+
+footer{
+height:var(--ticker-h);
+background:#000;
+display:flex;
+align-items:center;
+overflow:hidden;
+border-top:2px solid #00d4ff;
+}
+
+#tickerLabel{
+width:220px;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+font-size:24px;
+background:#003f73;
+}
+
+#ticker{
+white-space:nowrap;
+display:inline-block;
+padding-left:100%;
+font-size:28px;
+font-weight:700;
+animation:tickerMove 40s linear infinite;
+}
+
+@keyframes tickerMove{
+0%{
+transform:translateX(0);
+}
+100%{
+transform:translateX(-100%);
+}
+}
+
+#emergencyOverlay{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+background:
+rgba(180,0,0,.95);
+z-index:99999;
+animation:flash 1s infinite;
+}
+
+#emergencyTitle{
+font-size:120px;
+font-weight:900;
+}
+
+#emergencyMessage{
+font-size:48px;
+margin-top:30px;
+text-align:center;
+padding:0 50px;
+}
+
+@keyframes flash{
+0%{
+opacity:1;
+}
+50%{
+opacity:.75;
+}
+100%{
+opacity:1;
+}
+}
+
+.fade-in{
+animation:fadeIn .8s;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:none;
+}
+}
+
+.zoom{
+animation:zoomCard 20s infinite alternate;
+}
+
+@keyframes zoomCard{
+from{
+transform:scale(1);
+}
+to{
+transform:scale(1.04);
+}
+}
+
+#statusBar{
+position:absolute;
+bottom:10px;
+right:20px;
+font-size:18px;
+color:#94a3b8;
+}
+
+@media (max-width:1400px){
+
+.news-title{
+font-size:22px;
+}
+
+#weatherTemp{
+font-size:56px;
+}
+
+}
+
+</style>
+</head>
+
+<body class="night">
+
+<div id="app">
+
+<header>
+
+<div class="logo">
+NHK <span>NEWS WALL</span>
+ULTIMATE 4K
+</div>
+
+<div id="clock">
+--:--:--
+</div>
+
+</header>
+
+<main>
+
+<section id="newsArea">
+
+<div id="newsGrid">
+
+<!-- RSSニュースがここに入る -->
+
+</div>
+
+<div id="statusBar">
+防災情報を監視しています
+</div>
+
+</section>
+
+<aside>
+
+<div id="weather" class="panel">
+
+<div class="panel-title">
+現在の天気
+</div>
+
+<div id="weatherTemp">
+--
+</div>
+
+<div id="weatherText">
+取得中...
+</div>
+
+<div id="weatherLocation">
+Open-Meteo
+</div>
+
+</div>
+
+<div id="alertPanel" class="panel">
+
+<div class="panel-title">
+防災情報
+</div>
+
+<div id="alerts">
+
+<div class="alert-item">
+監視開始
+</div>
+
+</div>
+
+</div>
+
+</aside>
+
+</main>
+
+<footer>
+
+<div id="tickerLabel">
+最新ニュース
+</div>
+
+<div id="ticker">
+ニュースを取得しています...
+</div>
+
+</footer>
+
+</div>
+
+<div id="emergencyOverlay">
+
+<div id="emergencyTitle">
+緊急速報
+</div>
+
+<div id="emergencyMessage">
+防災情報を確認しています
+</div>
+
+</div>
+<script>
+
+/* =====================================================
+   NHK NEWS WALL ULTIMATE
+   PART2 : NEWS ENGINE
+===================================================== */
+
+const RSS_PROXY =
+"https://api.allorigins.win/raw?url=";
+
+const NHK_RSS =
+encodeURIComponent(
+"https://www.nhk.or.jp/rss/news/cat0.xml"
+);
+
+let newsItems = [];
+
+async function loadNHKNews(){
+
+try{
+
+const parser = new DOMParser();
+
+let allItems = [];
+
+for(const rssUrl of RSS_URLS){
+
+try{
+
+const response = await fetch(
+RSS_PROXY + encodeURIComponent(rssUrl)
+);
+
+const xmlText = await response.text();
+
+const xml = parser.parseFromString(
+xmlText,
+"text/xml"
+);
+
+const items =
+[
+...xml.querySelectorAll("item")
+];
+
+items.forEach(item=>{
+
+allItems.push({
+
+title:
+item.querySelector("title")
+?.textContent || "",
+
+link:
+item.querySelector("link")
+?.textContent || "",
+
+pubDate:
+item.querySelector("pubDate")
+?.textContent || "",
+
+description:
+item.querySelector("description")
+?.textContent || ""
+
+});
+
+});
+
+}catch(err){
+
+console.warn(
+"RSS取得失敗",
+rssUrl,
+err
+);
+
+}
+
+}
+
+allItems.sort(
+
+(a,b)=>
+
+new Date(b.pubDate)
+-
+new Date(a.pubDate)
+
+);
+
+const uniqueMap = new Map();
+
+allItems.forEach(item=>{
+
+if(!uniqueMap.has(item.link)){
+
+uniqueMap.set(
+item.link,
+item
+);
+
+}
+
+});
+
+newsItems =
+[
+...uniqueMap.values()
+]
+.slice(0,100);
+
+renderNews();
+updateTicker();
+
+}catch(error){
+
+console.error(
+"ニュース取得失敗",
+error
+);
+
+}
+
+}
+/* =====================================================
+   ニュース描画
+===================================================== */
+
+function renderNews(){
+
+const grid =
+document.getElementById(
+"newsGrid"
+);
+
+grid.innerHTML="";
+
+newsItems.forEach((item,index)=>{
+
+const card =
+document.createElement("div");
+
+card.className =
+"news-card fade-in zoom";
+
+let imageUrl =
+extractImage(item.desc);
+
+card.innerHTML =
+
+`
+<div class="news-thumb">
+<img
+src="${imageUrl}"
+loading="lazy"
+onerror="this.src='https://picsum.photos/800/450?random=${index}'">
+</div>
+
+<div class="news-content">
+
+<div class="news-title">
+${escapeHtml(item.title)}
+</div>
+
+<div class="news-time">
+${formatDate(item.pubDate)}
+</div>
+
+</div>
+`;
+
+card.onclick = ()=>{
+
+window.open(
+item.link,
+"_blank"
+);
+
+};
+
+grid.appendChild(card);
+
+});
+
+}
+
+/* =====================================================
+   サムネイル抽出
+===================================================== */
+
+function extractImage(html){
+
+try{
+
+const div =
+document.createElement("div");
+
+div.innerHTML = html;
+
+const img =
+div.querySelector("img");
+
+if(img){
+
+return img.src;
+
+}
+
+}catch(e){}
+
+return "https://picsum.photos/800/450";
+
+}
+
+/* =====================================================
+   ティッカー
+===================================================== */
+
+function updateTicker(){
+
+const ticker =
+document.getElementById(
+"ticker"
+);
+
+const text =
+newsItems
+.map(n=>n.title)
+.join("　◆　");
+
+ticker.textContent = text;
+
+}
+
+/* =====================================================
+   日付整形
+===================================================== */
+
+function formatDate(dateString){
+
+const d =
+new Date(dateString);
+
+if(
+isNaN(d.getTime())
+){
+
+return "";
+}
+
+return d.toLocaleString(
+"ja-JP",
+{
+month:"2-digit",
+day:"2-digit",
+hour:"2-digit",
+minute:"2-digit"
+}
+);
+
+}
+
+/* =====================================================
+   HTMLエスケープ
+===================================================== */
+
+function escapeHtml(str){
+
+return str
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;");
+
+}
+
+/* =====================================================
+   時計
+===================================================== */
+
+function updateClock(){
+
+const now =
+new Date();
+
+document.getElementById(
+"clock"
+).textContent =
+
+now.toLocaleTimeString(
+"ja-JP",
+{
+hour12:false
+}
+);
+
+}
+
+setInterval(
+updateClock,
+1000
+);
+
+updateClock();
+
+/* =====================================================
+   ニュース自動更新
+===================================================== */
+
+loadNHKNews();
+
+setInterval(
+loadNHKNews,
+300000
+);
+
+/* =====================================================
+   自動ページ切替用準備
+===================================================== */
+
+let currentPage = 0;
+
+function rotateNews(){
+
+const cards =
+[
+...document.querySelectorAll(
+".news-card"
+)
+];
+
+cards.forEach((card,i)=>{
+
+card.style.display =
+(
+i >= currentPage*4 &&
+i < currentPage*4+4
+)
+?
+"flex"
+:
+"none";
+
+});
+
+currentPage++;
+
+if(
+currentPage >
+Math.ceil(cards.length/4)-1
+){
+
+currentPage = 0;
+
+}
+
+}
+
+setInterval(
+rotateNews,
+15000
+);
+
+</script>
+<script>
+
+/* =====================================================
+   PART3 : WEATHER ENGINE
+===================================================== */
+
+let currentLatitude = 38.9;
+let currentLongitude = 141.1;
+
+/* =====================================================
+   現在地取得
+===================================================== */
+
+async function initializeLocation(){
+
+return new Promise(resolve=>{
+
+if(!navigator.geolocation){
+
+resolve();
+return;
+}
+
+navigator.geolocation.getCurrentPosition(
+
+position=>{
+
+currentLatitude =
+position.coords.latitude;
+
+currentLongitude =
+position.coords.longitude;
+
+resolve();
+
+},
+
+error=>{
+
+console.warn(
+"位置情報取得失敗",
+error
+);
+
+resolve();
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000,
+maximumAge:600000
+}
+
+);
+
+});
+
+}
+
+/* =====================================================
+   Open-Meteo
+===================================================== */
+
+async function loadWeather(){
+
+try{
+
+const url =
+
+`https://api.open-meteo.com/v1/forecast
+?latitude=${currentLatitude}
+&longitude=${currentLongitude}
+&current=temperature_2m,weather_code,wind_speed_10m,is_day
+&timezone=Asia%2FTokyo`
+.replace(/\s+/g,'');
+
+const response =
+await fetch(url);
+
+const data =
+await response.json();
+
+updateWeatherUI(data);
+
+}catch(error){
+
+console.error(
+"WEATHER ERROR",
+error
+);
+
+}
+
+}
+
+/* =====================================================
+   天気表示
+===================================================== */
+
+function updateWeatherUI(data){
+
+const current =
+data.current;
+
+const temp =
+Math.round(
+current.temperature_2m
+);
+
+const code =
+current.weather_code;
+
+const isDay =
+current.is_day === 1;
+
+document.getElementById(
+"weatherTemp"
+).textContent =
+temp + "°C";
+
+document.getElementById(
+"weatherText"
+).textContent =
+weatherCodeToText(code);
+
+document.getElementById(
+"weatherLocation"
+).textContent =
+`風速 ${Math.round(current.wind_speed_10m)} km/h`;
+
+applyTheme(isDay);
+
+}
+
+/* =====================================================
+   Open-Meteoコード変換
+===================================================== */
+
+function weatherCodeToText(code){
+
+const map = {
+
+0:"快晴",
+1:"晴れ",
+2:"薄曇り",
+3:"曇り",
+
+45:"霧",
+48:"濃霧",
+
+51:"弱い霧雨",
+53:"霧雨",
+55:"強い霧雨",
+
+61:"弱い雨",
+63:"雨",
+65:"強い雨",
+
+71:"弱い雪",
+73:"雪",
+75:"大雪",
+
+80:"にわか雨",
+81:"強いにわか雨",
+82:"激しい雨",
+
+95:"雷雨",
+96:"雷雨・雹",
+99:"激しい雷雨"
+
+};
+
+return map[code] || `Code ${code}`;
+
+}
+
+/* =====================================================
+   昼夜テーマ
+===================================================== */
+
+function applyTheme(isDay){
+
+if(isDay){
+
+document.body.classList.remove(
+"night"
+);
+
+document.body.classList.add(
+"day"
+);
+
+}else{
+
+document.body.classList.remove(
+"day"
+);
+
+document.body.classList.add(
+"night"
+);
+
+}
+
+}
+
+/* =====================================================
+   天気更新開始
+===================================================== */
+
+async function startWeather(){
+
+await initializeLocation();
+
+await loadWeather();
+
+setInterval(
+loadWeather,
+600000
+);
+
+}
+
+startWeather();
+
+</script>
+<script>
+
+/* =====================================================
+   PART4 : DISASTER MONITOR
+===================================================== */
+
+/*
+  実運用時は気象庁防災XML等へ変更推奨
+
+  監視対象例
+
+  地震
+  https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml
+
+  気象警報
+  https://www.data.jma.go.jp/developer/xml/feed/extra.xml
+
+*/
+
+const DISASTER_FEEDS = [
+
+{
+type:"earthquake",
+name:"地震情報",
+url:"https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml"
+},
+
+{
+type:"weather",
+name:"気象警報",
+url:"https://www.data.jma.go.jp/developer/xml/feed/extra.xml"
+}
+
+];
+
+const disasterCache = new Set();
+
+/* =====================================================
+   アラート追加
+===================================================== */
+
+function addAlert(type,title){
+
+const alerts =
+document.getElementById("alerts");
+
+const item =
+document.createElement("div");
+
+item.className =
+`alert-item ${type}`;
+
+item.innerHTML =
+
+`
+<div style="font-weight:bold">
+${escapeHtml(title)}
+</div>
+
+<div style="font-size:14px;margin-top:6px">
+${new Date().toLocaleString("ja-JP")}
+</div>
+`;
+
+alerts.prepend(item);
+
+while(alerts.children.length > 30){
+
+alerts.removeChild(
+alerts.lastChild
+);
+
+}
+
+}
+
+/* =====================================================
+   緊急モード
+===================================================== */
+
+function activateEmergencyMode(
+title,
+message
+){
+
+const overlay =
+document.getElementById(
+"emergencyOverlay"
+);
+
+document.getElementById(
+"emergencyTitle"
+).textContent = title;
+
+document.getElementById(
+"emergencyMessage"
+).textContent = message;
+
+overlay.style.display =
+"flex";
+
+try{
+
+navigator.vibrate?.(
+[500,300,500,300]
+);
+
+}catch(e){}
+
+setTimeout(()=>{
+
+overlay.style.display =
+"none";
+
+},60000);
+
+}
+
+/* =====================================================
+   緊急判定
+===================================================== */
+
+function isEmergency(text){
+
+const keywords = [
+
+"震度7",
+"震度６強",
+"震度６弱",
+
+"大津波警報",
+"津波警報",
+
+"特別警報",
+
+"緊急地震速報",
+
+"噴火警報"
+
+];
+
+return keywords.some(
+
+keyword=>
+text.includes(keyword)
+
+);
+
+}
+
+/* =====================================================
+   XML監視
+===================================================== */
+
+async function monitorFeed(feed){
+
+try{
+
+const proxy =
+"https://api.allorigins.win/raw?url=";
+
+const response =
+await fetch(
+proxy +
+encodeURIComponent(
+feed.url
+)
+);
+
+const xmlText =
+await response.text();
+
+const parser =
+new DOMParser();
+
+const xml =
+parser.parseFromString(
+xmlText,
+"text/xml"
+);
+
+const entries =
+
+[
+...xml.querySelectorAll(
+"entry"
+)
+];
+
+if(entries.length===0){
+
+return;
+
+}
+
+const latest =
+entries[0];
+
+const title =
+
+latest.querySelector(
+"title"
+)?.textContent ||
+
+feed.name;
+
+const id =
+
+latest.querySelector(
+"id"
+)?.textContent ||
+
+title;
+
+if(
+disasterCache.has(id)
+){
+
+return;
+
+}
+
+disasterCache.add(id);
+
+addAlert(
+feed.type,
+title
+);
+
+if(
+isEmergency(title)
+){
+
+activateEmergencyMode(
+
+"緊急速報",
+
+title
+
+);
+
+}
+
+}catch(error){
+
+console.warn(
+
+feed.name +
+"監視失敗",
+
+error
+
+);
+
+}
+
+}
+
+/* =====================================================
+   全監視
+===================================================== */
+
+async function monitorDisasters(){
+
+for(
+const feed
+of DISASTER_FEEDS
+){
+
+await monitorFeed(feed);
+
+}
+
+}
+
+/* =====================================================
+   起動
+===================================================== */
+
+monitorDisasters();
+
+setInterval(
+
+monitorDisasters,
+
+60000
+
+);
+
+</script>
+<script>
+
+/* =====================================================
+   PART5 : SIGNAGE ENGINE
+===================================================== */
+
+let wakeLock = null;
+let signagePaused = false;
+
+/* =====================================================
+   Wake Lock
+===================================================== */
+
+async function requestWakeLock(){
+
+try{
+
+if(!("wakeLock" in navigator)){
+
+console.warn(
+"Wake Lock 非対応"
+);
+
+return;
+}
+
+wakeLock =
+await navigator.wakeLock.request(
+"screen"
+);
+
+console.log(
+"Wake Lock ON"
+);
+
+wakeLock.addEventListener(
+"release",
+()=>{
+
+console.log(
+"Wake Lock Released"
+);
+
+}
+);
+
+}catch(error){
+
+console.warn(
+"Wake Lock Error",
+error
+);
+
+}
+
+}
+
+document.addEventListener(
+
+"visibilitychange",
+
+async()=>{
+
+if(
+document.visibilityState==="visible"
+){
+
+await requestWakeLock();
+
+}
+
+}
+
+);
+
+/* =====================================================
+   自動スクロール
+===================================================== */
+
+function startAutoScroll(){
+
+const panel =
+document.getElementById(
+"alertPanel"
+);
+
+setInterval(()=>{
+
+if(signagePaused){
+
+return;
+
+}
+
+panel.scrollTop += 1;
+
+if(
+
+panel.scrollTop >=
+panel.scrollHeight -
+panel.clientHeight
+
+){
+
+panel.scrollTop = 0;
+
+}
+
+},60);
+
+}
+
+/* =====================================================
+   タッチ停止
+===================================================== */
+
+function pauseTemporarily(){
+
+isPaused = true;
+
+clearTimeout(
+resumeTimeout
+);
+
+document.getElementById(
+"statusBar"
+).textContent =
+"操作中（30秒後に自動再開）";
+
+resumeTimeout = setTimeout(()=>{
+
+isPaused = false;
+
+document.getElementById(
+"statusBar"
+).textContent =
+"防災情報を監視しています";
+
+},30000);
+
+}
+/* =====================================================
+   ニュース自動ページ送り
+===================================================== */
+
+let pageIndex = 0;
+
+function rotateVisibleNews(){
+
+if(signagePaused){
+
+return;
+
+}
+
+const cards =
+
+[
+...document.querySelectorAll(
+".news-card"
+)
+];
+
+if(cards.length===0){
+
+return;
+
+}
+
+const pageSize = 4;
+
+cards.forEach(card=>{
+
+card.style.display =
+"none";
+
+});
+
+const start =
+pageIndex * pageSize;
+
+for(
+
+let i=start;
+
+i<start+pageSize;
+
+i++
+
+){
+
+if(cards[i]){
+
+cards[i].style.display =
+"flex";
+
+}
+
+}
+
+pageIndex++;
+
+if(
+
+pageIndex >
+Math.ceil(
+cards.length/pageSize
+)-1
+
+){
+
+pageIndex = 0;
+
+}
+
+}
+
+setInterval(
+
+rotateVisibleNews,
+
+15000
+
+);
+
+/* =====================================================
+   フェード演出
+===================================================== */
+
+function animateCards(){
+
+const cards =
+
+[
+...document.querySelectorAll(
+".news-card"
+)
+];
+
+cards.forEach(
+
+(card,index)=>{
+
+setTimeout(()=>{
+
+card.classList.remove(
+"fade-in"
+);
+
+void card.offsetWidth;
+
+card.classList.add(
+"fade-in"
+);
+
+},index*150);
+
+}
+
+);
+
+}
+
+setInterval(
+
+animateCards,
+
+30000
+
+);
+
+/* =====================================================
+   ズーム演出
+===================================================== */
+
+function applyZoomEffect(){
+
+document
+
+.querySelectorAll(
+".news-card"
+)
+
+.forEach(card=>{
+
+card.classList.add(
+"zoom"
+);
+
+});
+
+}
+
+setInterval(
+
+applyZoomEffect,
+
+60000
+
+);
+
+/* =====================================================
+   フルスクリーン
+===================================================== */
+
+async function enterFullscreen(){
+
+try{
+
+if(
+!document.fullscreenElement
+){
+
+await document
+.documentElement
+.requestFullscreen();
+
+}
+
+}catch(error){
+
+console.warn(
+error
+);
+
+}
+
+}
+
+/* =====================================================
+   キーボード操作
+===================================================== */
+
+document.addEventListener(
+
+"keydown",
+
+event=>{
+
+switch(event.key){
+
+case "f":
+
+case "F":
+
+enterFullscreen();
+
+break;
+
+case "p":
+
+case "P":
+
+togglePause();
+
+break;
+
+}
+
+}
+
+);
+
+/* =====================================================
+   サイネージ初期化
+===================================================== */
+
+async function startSignage(){
+
+await requestWakeLock();
+
+rotateVisibleNews();
+
+startAutoScroll();
+
+applyZoomEffect();
+
+}
+
+window.addEventListener(
+
+"load",
+
+startSignage
+
+);
+
+</script>
+<script>
+
+/* =====================================================
+   PART6 : FINAL INTEGRATION
+===================================================== */
+
+/* =====================================================
+   システム状態管理
+===================================================== */
+
+const SystemStatus = {
+
+rss:true,
+weather:true,
+disaster:true,
+
+lastNewsUpdate:null,
+lastWeatherUpdate:null,
+lastDisasterUpdate:null
+
+};
+
+/* =====================================================
+   ステータス表示
+===================================================== */
+
+function updateSystemStatus(){
+
+const status =
+document.getElementById(
+"statusBar"
+);
+
+let text =
+"防災情報を監視しています";
+
+if(signagePaused){
+
+text =
+"一時停止中（タップで再開）";
+
+}
+
+status.textContent = text;
+
+}
+
+setInterval(
+updateSystemStatus,
+5000
+);
+
+/* =====================================================
+   loadNHKNews 拡張
+===================================================== */
+
+const originalLoadNHKNews =
+loadNHKNews;
+
+loadNHKNews = async function(){
+
+try{
+
+await originalLoadNHKNews();
+
+SystemStatus.rss = true;
+
+SystemStatus.lastNewsUpdate =
+new Date();
+
+}catch(error){
+
+SystemStatus.rss = false;
+
+console.error(error);
+
+}
+
+};
+
+/* =====================================================
+   loadWeather 拡張
+===================================================== */
+
+const originalLoadWeather =
+loadWeather;
+
+loadWeather = async function(){
+
+try{
+
+await originalLoadWeather();
+
+SystemStatus.weather = true;
+
+SystemStatus.lastWeatherUpdate =
+new Date();
+
+}catch(error){
+
+SystemStatus.weather = false;
+
+console.error(error);
+
+}
+
+};
+
+/* =====================================================
+   monitorDisasters 拡張
+===================================================== */
+
+const originalMonitorDisasters =
+monitorDisasters;
+
+monitorDisasters = async function(){
+
+try{
+
+await originalMonitorDisasters();
+
+SystemStatus.disaster = true;
+
+SystemStatus.lastDisasterUpdate =
+new Date();
+
+}catch(error){
+
+SystemStatus.disaster = false;
+
+console.error(error);
+
+}
+
+};
+
+/* =====================================================
+   エラーハンドリング
+===================================================== */
+
+window.addEventListener(
+
+"error",
+
+event=>{
+
+console.error(
+"Global Error",
+event.error
+);
+
+}
+
+);
+
+window.addEventListener(
+
+"unhandledrejection",
+
+event=>{
+
+console.error(
+"Promise Error",
+event.reason
+);
+
+}
+
+);
+
+/* =====================================================
+   オンライン監視
+===================================================== */
+
+window.addEventListener(
+
+"offline",
+
+()=>{
+
+addAlert(
+"weather",
+"ネットワーク切断"
+);
+
+}
+
+);
+
+window.addEventListener(
+
+"online",
+
+()=>{
+
+addAlert(
+"weather",
+"ネットワーク復旧"
+);
+
+}
+
+);
+
+/* =====================================================
+   定期監視
+===================================================== */
+
+setInterval(()=>{
+
+if(
+
+SystemStatus.lastNewsUpdate &&
+(Date.now()
+-
+SystemStatus.lastNewsUpdate.getTime())
+
+>
+900000
+
+){
+
+loadNHKNews();
+
+}
+
+if(
+
+SystemStatus.lastWeatherUpdate &&
+(Date.now()
+-
+SystemStatus.lastWeatherUpdate.getTime())
+
+>
+1800000
+
+){
+
+loadWeather();
+
+}
+
+},300000);
+
+/* =====================================================
+   PWA準備
+===================================================== */
+
+if(
+"serviceWorker"
+in navigator
+){
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+navigator.serviceWorker
+.register("./sw.js")
+
+.then(()=>{
+
+console.log(
+"SW READY"
+);
+
+})
+
+.catch(error=>{
+
+console.warn(
+"SW ERROR",
+error
+);
+
+});
+
+}
+
+);
+
+}
+
+/* =====================================================
+   画像最適化
+===================================================== */
+
+function optimizeImages(){
+
+document
+
+.querySelectorAll("img")
+
+.forEach(img=>{
+
+img.loading =
+"lazy";
+
+img.decoding =
+"async";
+
+});
+
+}
+
+setInterval(
+optimizeImages,
+30000
+);
+
+/* =====================================================
+   起動メッセージ
+===================================================== */
+
+addAlert(
+"weather",
+"NHK News Wall Ultimate 起動"
+);
+
+console.log(
+"NHK NEWS WALL ULTIMATE 4K EDITION STARTED"
+);
+
+</script>
+
+</body>
+</html>

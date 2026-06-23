@@ -597,27 +597,29 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
+// 💡 【修正版】先頭ラインがぴったり上部に揃うスクロール処理
         async function autoScroll() {
             if (isPaused) return;
 
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // スクロールが最下部に達したか、次の3個先が存在しない場合はページをリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 const cleanUrl = window.location.href.split('?')[0];
                 window.location.href = cleanUrl + '?t=' + Date.now();
                 return;
             }
 
+            // インデックスを3つ進める
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                const containerTop = container.getBoundingClientRect().top;
-                const targetTop = targetItem.getBoundingClientRect().top;
-                container.scrollTo({
-                    top: container.scrollTop + (targetTop - containerTop),
-                    behavior: 'smooth'
+                // 🎯 ターゲット要素の上端を、親要素（container）の上端にぴったり合わせる
+                targetItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
                 });
             }
         }

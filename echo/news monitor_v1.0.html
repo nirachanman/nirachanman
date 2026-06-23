@@ -37,7 +37,6 @@
         
         body {
             display: grid;
-            /* 💡 レイアウト変更：ヘッダー、岩手警告、ニュースリストを完全に独立化 */
             grid-template-rows: auto auto 1fr; 
             padding: 10px;
             position: relative;
@@ -91,7 +90,6 @@
             100% { transform: translate(-100%, 0); } 
         }
 
-        /* 💡 岩手県警告専用の固定コンテナ（スクロールしない） */
         #iwate-alert-container {
             width: 100%;
             box-sizing: border-box;
@@ -116,7 +114,6 @@
             display: none;
         }
         
-        /* 🚨 岩手県 危険度・気象警報特大カード */
         .weather-alert-card {
             background-color: #2a1215;
             border: 2px solid #ff3333;
@@ -208,7 +205,6 @@
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
 
-        /* 🚨 災害速報共通オーバーレイ */
         #emergency-alert-overlay {
             display: none; 
             position: fixed;
@@ -304,6 +300,11 @@
         let iwateAlertLevel = 0; 
         let iwateActiveAlertsText = ""; 
         let iwateKikikuText = ""; 
+
+        // 💡 前回描画した内容を記憶する変数（バッティング防止用）
+        let lastRenderedMarquee = "";
+        let lastRenderedIwateKikiku = "";
+        let lastRenderedNewsLength = 0;
 
         const JMA_CODES = {
             "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
@@ -479,7 +480,7 @@
                     iwateKikikuText = ""; 
                 }
 
-                refreshMarqueeAndCards();
+                refreshMarqueeAndCards(false); // 💡 定期チェック時は強制上書きしないモードで実行
 
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
@@ -502,42 +503,54 @@
         const container = document.getElementById('news-container');
         const alertContainer = document.getElementById('iwate-alert-container');
 
-        function refreshMarqueeAndCards() {
+        // 💡 引数 force を追加：RSS自体の読み込み直し時(true)か、1分ごとの定期チェック(false)かを区別
+        function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
+            // --- 📌 マーキーのスマート描画判定 ---
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
-            
             if (iwateActiveAlertsText !== "") {
                 marqueeHtml += `<span style="color:#ff5555; font-weight:bold; margin-right:30px;">${iwateActiveAlertsText}</span>`;
             }
-
             for(let i = 0; i < marqueeCount; i++) {
                 marqueeHtml += `<a href="${currentNewsUniqueItems[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${currentNewsUniqueItems[i].title}</a>`;
                 if(i < marqueeCount - 1) marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
             }
             marqueeHtml += '</span>';
-            document.getElementById('marquee').innerHTML = marqueeHtml;
 
-            // 💡 岩手県の警告カードは専用の独立コンテナに描写（ニュース枠の外）
-            alertContainer.innerHTML = iwateKikikuText;
+            // 💡 文字列を比較し、内容が変わっている時だけ上書き（これでマーキーの強制巻き戻しが消滅）
+            if (force || marqueeHtml !== lastRenderedMarquee) {
+                document.getElementById('marquee').innerHTML = marqueeHtml;
+                lastRenderedMarquee = marqueeHtml;
+            }
 
-            // 💡 ニュース枠側は「純粋なニュースカードだけ」を描写（位置計算が100%狂わなくなる）
-            const currentScroll = container.scrollTop;
-            let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
-                <a href="${item.link}" target="_blank" class="news-item">
-                    <div class="news-header-row">
-                        <div class="news-title">${item.title}</div>
-                        <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
-                    </div>
-                    <div class="news-desc">${item.description}</div>
-                </a>
-            `).join('');
+            // --- 📌 岩手県警告カードのスマート描画判定 ---
+            if (force || iwateKikikuText !== lastRenderedIwateKikiku) {
+                alertContainer.innerHTML = iwateKikikuText;
+                lastRenderedIwateKikiku = iwateKikikuText;
+            }
 
-            container.innerHTML = newsListHtml;
-            
-            if (currentScroll > 0) {
-                container.scrollTop = currentScroll;
+            // --- 📌 ニュースリストのスマート描画判定 ---
+            // ニュースの件数が変わった（RSSが本当に更新された）時、または強制フラグがある時だけDOMを生成
+            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
+                const currentScroll = container.scrollTop;
+                let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
+                    <a href="${item.link}" target="_blank" class="news-item">
+                        <div class="news-header-row">
+                            <div class="news-title">${item.title}</div>
+                            <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                        </div>
+                        <div class="news-desc">${item.description}</div>
+                    </a>
+                `).join('');
+
+                container.innerHTML = newsListHtml;
+                lastRenderedNewsLength = currentNewsUniqueItems.length;
+                
+                if (currentScroll > 0) {
+                    container.scrollTop = currentScroll;
+                }
             }
         }
 
@@ -564,7 +577,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            refreshMarqueeAndCards();
+            refreshMarqueeAndCards(true); // 💡 新しいRSSを読み込んだ時は強制描画
             container.scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -600,7 +613,6 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-        // 🎯 ニュース枠内だけでピタッと3個ずつ頭出しを揃える精密スクロール
         async function autoScroll() {
             if (isPaused) return;
 
@@ -617,7 +629,6 @@
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                // ニュース枠（container）の最上部を基準としたターゲットの正確な絶対位置を算出
                 const targetScrollTop = targetItem.offsetTop - container.offsetTop;
                 container.scrollTo({
                     top: targetScrollTop,

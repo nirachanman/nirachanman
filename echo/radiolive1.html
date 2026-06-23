@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Blue Radio - Live Clock</title>
+    <title>Deep Blue Radio - Big Clock</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -39,20 +39,20 @@
         }
 
         h1 {
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 0.9rem; /* 時計を目立たせるためタイトルを少し控えめに */
+            font-weight: 400;
             letter-spacing: 0.2rem;
-            margin-bottom: 5px; /* 時刻表示を近づけるため縮小 */
-            color: var(--white-blue);
+            margin-bottom: 8px;
+            color: var(--soft-blue);
             text-transform: uppercase;
         }
 
-        /* 時計のスタイル */
+        /* 時計のスタイル（フォントサイズを大きく変更） */
         .live-clock {
-            font-size: 0.85rem;
+            font-size: 1.4rem; /* 0.85rem から 1.4rem に拡大 */
             color: var(--highlight-blue);
-            opacity: 0.85;
-            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); /* ほんのりネオン発光 */
+            margin-bottom: 30px;
             font-weight: 300;
             letter-spacing: 0.05rem;
         }
@@ -167,7 +167,7 @@
 <body>
 
 <div class="player-card">
-    <h1>📻Deep Blue Radio</h1>
+    <h1>📻 Radio 「LIVE」</h1>
     
     <div id="liveClock" class="live-clock">----/--/-- --:--:--</div>
     
@@ -250,7 +250,7 @@
         liveClock.textContent = `${yyyy}/${mm}/${dd} ${hh}:${min}:${ss}`;
     }
     setInterval(updateClock, 1000);
-    updateClock(); // 初回起動用
+    updateClock();
 
     // 放送局切り替え処理
     selector.addEventListener('change', function() {

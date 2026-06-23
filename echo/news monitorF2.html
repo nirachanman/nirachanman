@@ -597,32 +597,36 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
+// 💡 【修正版】ヘッダーを隠さず、ニュース枠内だけで先頭ラインをぴったり揃える
         async function autoScroll() {
             if (isPaused) return;
 
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // スクロールが最下部に達したか、次の3個先が存在しない場合はページをリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 const cleanUrl = window.location.href.split('?')[0];
                 window.location.href = cleanUrl + '?t=' + Date.now();
                 return;
             }
 
+            // インデックスを3つ進める
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                const containerTop = container.getBoundingClientRect().top;
-                const targetTop = targetItem.getBoundingClientRect().top;
+                // 🎯 ニュース枠（container）の一番上から、ターゲット要素までの正確な距離を計算
+                // container自体のpaddingTop（もしあれば）を考慮してぴったりに調整します
+                const targetScrollTop = targetItem.offsetTop - container.offsetTop;
+
                 container.scrollTo({
-                    top: container.scrollTop + (targetTop - containerTop),
+                    top: targetScrollTop,
                     behavior: 'smooth'
                 });
             }
         }
-
-
+        
         async function init() {
             if ('scrollRestoration' in history) {
                 history.scrollRestoration = 'manual';

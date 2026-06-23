@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Blue Radio - Big Clock</title>
+    <title>Deep Blue Radio - Dual Color Clock</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -13,6 +13,9 @@
             --soft-blue: #94a3b8;
             --highlight-blue: #38bdf8;
             --white-blue: #f1f5f9;
+            /* 時計用の別々のカラー */
+            --date-color: #cbd5e1;     /* 日付：落ち着いたライトグレー */
+            --time-color: #fde047;     /* 時刻：鮮やかなライトゴールド */
         }
 
         body {
@@ -39,7 +42,7 @@
         }
 
         h1 {
-            font-size: 0.9rem; /* 時計を目立たせるためタイトルを少し控えめに */
+            font-size: 0.9rem;
             font-weight: 400;
             letter-spacing: 0.2rem;
             margin-bottom: 8px;
@@ -47,14 +50,26 @@
             text-transform: uppercase;
         }
 
-        /* 時計のスタイル（フォントサイズを大きく変更） */
+        /* 時計全体のラッパースタイル */
         .live-clock {
-            font-size: 1.4rem; /* 0.85rem から 1.4rem に拡大 */
-            color: var(--highlight-blue);
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); /* ほんのりネオン発光 */
+            font-size: 1.4rem;
             margin-bottom: 30px;
             font-weight: 300;
             letter-spacing: 0.05rem;
+        }
+
+        /* 日付部分の個別スタイル */
+        .clock-date {
+            color: var(--date-color);
+            margin-right: 8px;
+            font-size: 1.2rem; /* 日付を少しだけ小さくして時刻を引き立てる */
+        }
+
+        /* 時刻部分の個別スタイル */
+        .clock-time {
+            color: var(--time-color);
+            text-shadow: 0 0 12px rgba(253, 224, 71, 0.25);
+            font-weight: 400;
         }
 
         .select-group {
@@ -169,7 +184,10 @@
 <div class="player-card">
     <h1>📻 Radio 「LIVE」</h1>
     
-    <div id="liveClock" class="live-clock">----/--/-- --:--:--</div>
+    <div id="liveClock" class="live-clock">
+        <span id="clockDate" class="clock-date">----/--/--</span>
+        <span id="clockTime" class="clock-time">--:--:--</span>
+    </div>
     
     <div class="select-group">
         <label>Station</label>
@@ -231,13 +249,14 @@
     const timerDisplay = document.getElementById('timerDisplay');
     const statusText = document.getElementById('statusText');
     const statusContainer = document.getElementById('statusContainer');
-    const liveClock = document.getElementById('liveClock');
+    const clockDate = document.getElementById('clockDate');
+    const clockTime = document.getElementById('clockTime');
     
     let hls = null;
     let sleepTimer = null;
     let remainingTime = 0;
 
-    // リアルタイム時計機能
+    // リアルタイム時計機能（分割して流し込み）
     function updateClock() {
         const now = new Date();
         const yyyy = now.getFullYear();
@@ -247,7 +266,8 @@
         const min = String(now.getMinutes()).padStart(2, '0');
         const ss = String(now.getSeconds()).padStart(2, '0');
         
-        liveClock.textContent = `${yyyy}/${mm}/${dd} ${hh}:${min}:${ss}`;
+        clockDate.textContent = `${yyyy}/${mm}/${dd}`;
+        clockTime.textContent = `${hh}:${min}:${ss}`;
     }
     setInterval(updateClock, 1000);
     updateClock();

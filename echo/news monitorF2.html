@@ -13,7 +13,7 @@
     <style>
         :root { 
             --bg-color: #0b0f14;        
-            --accent-color: #696969; /* 警報状況によってJSで動的に変化 */   
+            --accent-color: #696969;   
             --card-bg: #161c24;         
             
             --text-gray-title: #90caf9; 
@@ -37,7 +37,8 @@
         
         body {
             display: grid;
-            grid-template-rows: auto 1fr; 
+            /* 💡 レイアウト変更：ヘッダー、岩手警告、ニュースリストを完全に独立化 */
+            grid-template-rows: auto auto 1fr; 
             padding: 10px;
             position: relative;
         }
@@ -90,6 +91,14 @@
             100% { transform: translate(-100%, 0); } 
         }
 
+        /* 💡 岩手県警告専用の固定コンテナ（スクロールしない） */
+        #iwate-alert-container {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
@@ -107,7 +116,7 @@
             display: none;
         }
         
-        /* 🚨 岩手県 危険度・気象警報ピン留め特大カード */
+        /* 🚨 岩手県 危険度・気象警報特大カード */
         .weather-alert-card {
             background-color: #2a1215;
             border: 2px solid #ff3333;
@@ -117,8 +126,6 @@
             color: #ffffff;
             font-size: 1.2rem;
             line-height: 1.6;
-            margin-bottom: 4px;
-            flex-shrink: 0;
             box-sizing: border-box;
             width: 100%;
             animation: pulse-border 2s infinite;
@@ -154,8 +161,8 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #b87644;     
-            border-left: 4px solid #b87644; 
+            border: 1px solid #2f4f4f;     
+            border-left: 4px solid #2f4f4f; 
             gap: 8px;
             flex-shrink: 0; 
             box-sizing: border-box;         
@@ -201,7 +208,7 @@
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
 
-        /* 🚨 災害速報（EEW・津波）共通オーバーレイCSS */
+        /* 🚨 災害速報共通オーバーレイ */
         #emergency-alert-overlay {
             display: none; 
             position: fixed;
@@ -272,6 +279,9 @@
             <div class="marquee-container" id="marquee"></div>
         </div>
     </header>
+
+    <div id="iwate-alert-container"></div>
+
     <main id="news-container"></main>
 
     <script>
@@ -308,7 +318,6 @@
             } catch (err) { console.error("WakeLock取得失敗:", err); }
         }
 
-        // ⏱️ 緊急地震速報チェック（5分以内のデータのみ判定）
         async function checkEmergencyEarthquakeAlert() {
             if (isTsunamiActive) return;
             try {
@@ -320,12 +329,9 @@
                 
                 const alert = data[0];
 
-                // 時間判定：5分（300,000ミリ秒）以上前の古いデータは無視する
                 const alertTime = new Date(alert.time);
                 const now = new Date();
-                if (now - alertTime > 5 * 60 * 1000) {
-                    return; 
-                }
+                if (now - alertTime > 5 * 60 * 1000) return; 
 
                 if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
                     lastEewId = alert.id;
@@ -342,7 +348,6 @@
             } catch (e) { console.error("EEW取得エラー:", e); }
         }
 
-        // ⏱️ 津波情報チェック（5分以内のデータのみ判定）
         async function checkTsunamiAlert() {
             try {
                 const response = await fetch('https://api.p2pquake.net/v2/history?codes=552&limit=1');
@@ -353,7 +358,6 @@
 
                 const alert = data[0];
 
-                // 時間判定：5分（300,000ミリ秒）以上前の古いデータは無視する
                 const alertTime = new Date(alert.time);
                 const now = new Date();
                 if (now - alertTime > 5 * 60 * 1000) {
@@ -496,6 +500,7 @@
 
         let currentNewsUniqueItems = [];
         const container = document.getElementById('news-container');
+        const alertContainer = document.getElementById('iwate-alert-container');
 
         function refreshMarqueeAndCards() {
             if (currentNewsUniqueItems.length === 0) return;
@@ -514,14 +519,12 @@
             marqueeHtml += '</span>';
             document.getElementById('marquee').innerHTML = marqueeHtml;
 
-            const currentScroll = container.scrollTop;
-            let newsListHtml = "";
-            
-            if (iwateKikikuText !== "") {
-                newsListHtml += iwateKikikuText;
-            }
+            // 💡 岩手県の警告カードは専用の独立コンテナに描写（ニュース枠の外）
+            alertContainer.innerHTML = iwateKikikuText;
 
-            newsListHtml += currentNewsUniqueItems.slice(0, 50).map(item => `
+            // 💡 ニュース枠側は「純粋なニュースカードだけ」を描写（位置計算が100%狂わなくなる）
+            const currentScroll = container.scrollTop;
+            let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
                         <div class="news-title">${item.title}</div>
@@ -597,36 +600,32 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-// 💡 【修正版】ヘッダーを隠さず、ニュース枠内だけで先頭ラインをぴったり揃える
+        // 🎯 ニュース枠内だけでピタッと3個ずつ頭出しを揃える精密スクロール
         async function autoScroll() {
             if (isPaused) return;
 
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // スクロールが最下部に達したか、次の3個先が存在しない場合はページをリロード
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 const cleanUrl = window.location.href.split('?')[0];
                 window.location.href = cleanUrl + '?t=' + Date.now();
                 return;
             }
 
-            // インデックスを3つ進める
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
 
             if (targetItem) {
-                // 🎯 ニュース枠（container）の一番上から、ターゲット要素までの正確な距離を計算
-                // container自体のpaddingTop（もしあれば）を考慮してぴったりに調整します
+                // ニュース枠（container）の最上部を基準としたターゲットの正確な絶対位置を算出
                 const targetScrollTop = targetItem.offsetTop - container.offsetTop;
-
                 container.scrollTo({
                     top: targetScrollTop,
                     behavior: 'smooth'
                 });
             }
         }
-        
+
         async function init() {
             if ('scrollRestoration' in history) {
                 history.scrollRestoration = 'manual';

@@ -615,9 +615,9 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 💡 Silk対策のコア修正箇所：末尾まできたら画面リロード(location.href)せず、データだけ最新にして先頭に巻き戻す
+            // 📌 末尾（または50件目）に達した時だけ、RSSを更新して先頭にスムーズ巻き戻し
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNews(); // バックグラウンドでRSSだけを最新に更新してトップへ戻す
+                await updateNews(); 
                 return;
             }
 
@@ -652,12 +652,8 @@
         
         setInterval(autoScroll, 30000); 
         
-        // 💡 定期的にRSS自体もバックグラウンドで静かに更新する処理を追加（5分ごと）
-        setInterval(async () => {
-            if (!isPaused) {
-                await updateNews();
-            }
-        }, 300000);
+        // 💡 【修正箇所】ここにあった5分ごとの強制updateNewsのインターバルを削除しました。
+        // これにより、スクロールの途中で勝手に先頭に戻される問題が完全に解消されます。
         
         setInterval(async () => {
             await checkTsunamiAlert();

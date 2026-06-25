@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（岩手県防災・災害特化版）</title>
+    <title>NHK news monitorF2（岩手県防災・災害特化版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -301,6 +301,7 @@
         let iwateActiveAlertsText = ""; 
         let iwateKikikuText = ""; 
 
+        // 💡 前回描画した内容を記憶する変数（バッティング防止用）
         let lastRenderedMarquee = "";
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
@@ -479,7 +480,7 @@
                     iwateKikikuText = ""; 
                 }
 
-                refreshMarqueeAndCards(false); 
+                refreshMarqueeAndCards(false); // 💡 定期チェック時は強制上書きしないモードで実行
 
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
@@ -502,6 +503,7 @@
         const container = document.getElementById('news-container');
         const alertContainer = document.getElementById('iwate-alert-container');
 
+        // 💡 引数 force を追加：RSS自体の読み込み直し時(true)か、1分ごとの定期チェック(false)かを区別
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
@@ -517,6 +519,7 @@
             }
             marqueeHtml += '</span>';
 
+            // 💡 文字列を比較し、内容が変わっている時だけ上書き（これでマーキーの強制巻き戻しが消滅）
             if (force || marqueeHtml !== lastRenderedMarquee) {
                 document.getElementById('marquee').innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
@@ -528,9 +531,10 @@
                 lastRenderedIwateKikiku = iwateKikikuText;
             }
 
-            // --- 📌 ニュースリストのスマート描画判定（バグ修正箇所） ---
-            // 💡 起動時(force=true)か、件数が完全に変わった場合のみDOMを生成。Silkブラウザ用に安全にスクロール位置を0にします。
-            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength || container.children.length === 0) {
+            // --- 📌 ニュースリストのスマート描画判定 ---
+            // ニュースの件数が変わった（RSSが本当に更新された）時、または強制フラグがある時だけDOMを生成
+            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
+                const currentScroll = container.scrollTop;
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
@@ -544,9 +548,8 @@
                 container.innerHTML = newsListHtml;
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
                 
-                // 初回読み込み時は必ず最上部
-                if (force) {
-                    container.scrollTop = 0;
+                if (currentScroll > 0) {
+                    container.scrollTop = currentScroll;
                 }
             }
         }
@@ -574,8 +577,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            // 💡 ニュースデータの取得完了時は必ず「force=true」で描画を強制実行
-            refreshMarqueeAndCards(true); 
+            refreshMarqueeAndCards(true); // 💡 新しいRSSを読み込んだ時は強制描画
             container.scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -648,11 +650,6 @@
 
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
-            
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                if (container) container.scrollTop = 0;
-            }, 300);
         }
 
         init();

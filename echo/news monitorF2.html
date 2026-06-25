@@ -301,7 +301,6 @@
         let iwateActiveAlertsText = ""; 
         let iwateKikikuText = ""; 
 
-        // 💡 前回描画した内容を記憶する変数（バッティング防止用）
         let lastRenderedMarquee = "";
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
@@ -480,7 +479,7 @@
                     iwateKikikuText = ""; 
                 }
 
-                refreshMarqueeAndCards(false); // 💡 定期チェック時は強制上書きしないモードで実行
+                refreshMarqueeAndCards(false); 
 
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
@@ -503,7 +502,6 @@
         const container = document.getElementById('news-container');
         const alertContainer = document.getElementById('iwate-alert-container');
 
-        // 💡 引数 force を追加：RSS自体の読み込み直し時(true)か、1分ごとの定期チェック(false)かを区別
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
@@ -519,7 +517,6 @@
             }
             marqueeHtml += '</span>';
 
-            // 💡 文字列を比較し、内容が変わっている時だけ上書き（これでマーキーの強制巻き戻しが消滅）
             if (force || marqueeHtml !== lastRenderedMarquee) {
                 document.getElementById('marquee').innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
@@ -532,7 +529,6 @@
             }
 
             // --- 📌 ニュースリストのスマート描画判定 ---
-            // ニュースの件数が変わった（RSSが本当に更新された）時、または強制フラグがある時だけDOMを生成
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 const currentScroll = container.scrollTop;
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
@@ -548,7 +544,7 @@
                 container.innerHTML = newsListHtml;
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
                 
-                if (currentScroll > 0) {
+                if (!force && currentScroll > 0) {
                     container.scrollTop = currentScroll;
                 }
             }
@@ -577,7 +573,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            refreshMarqueeAndCards(true); // 💡 新しいRSSを読み込んだ時は強制描画
+            refreshMarqueeAndCards(true); 
             container.scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -619,9 +615,9 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // 💡 Silk対策のコア修正箇所：末尾まできたら画面リロード(location.href)せず、データだけ最新にして先頭に巻き戻す
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                const cleanUrl = window.location.href.split('?')[0];
-                window.location.href = cleanUrl + '?t=' + Date.now();
+                await updateNews(); // バックグラウンドでRSSだけを最新に更新してトップへ戻す
                 return;
             }
 
@@ -655,6 +651,13 @@
         init();
         
         setInterval(autoScroll, 30000); 
+        
+        // 💡 定期的にRSS自体もバックグラウンドで静かに更新する処理を追加（5分ごと）
+        setInterval(async () => {
+            if (!isPaused) {
+                await updateNews();
+            }
+        }, 300000);
         
         setInterval(async () => {
             await checkTsunamiAlert();

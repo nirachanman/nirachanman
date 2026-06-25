@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK news monitorF2（岩手県防災・災害特化版）</title>
+    <title>NHK ニュースモニター（岩手県防災・災害特化版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -301,7 +301,6 @@
         let iwateActiveAlertsText = ""; 
         let iwateKikikuText = ""; 
 
-        // 💡 前回描画した内容を記憶する変数（バッティング防止用）
         let lastRenderedMarquee = "";
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
@@ -431,7 +430,7 @@
                                     highestLevel = Math.max(highestLevel, 3); 
                                 } else if (["02","03","04","05","06","08","19"].includes(code)) {
                                     highestLevel = Math.max(highestLevel, 2); 
-                                } else {
+                                </div> else {
                                     highestLevel = Math.max(highestLevel, 1); 
                                 }
 
@@ -480,7 +479,7 @@
                     iwateKikikuText = ""; 
                 }
 
-                refreshMarqueeAndCards(false); // 💡 定期チェック時は強制上書きしないモードで実行
+                refreshMarqueeAndCards(false); 
 
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
@@ -503,11 +502,9 @@
         const container = document.getElementById('news-container');
         const alertContainer = document.getElementById('iwate-alert-container');
 
-        // 💡 引数 force を追加：RSS自体の読み込み直し時(true)か、1分ごとの定期チェック(false)かを区別
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
-            // --- 📌 マーキーのスマート描画判定 ---
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             if (iwateActiveAlertsText !== "") {
@@ -519,28 +516,23 @@
             }
             marqueeHtml += '</span>';
 
-            // 💡 文字列を比較し、内容が変わっている時だけ上書き（これでマーキーの強制巻き戻しが消滅）
             if (force || marqueeHtml !== lastRenderedMarquee) {
                 document.getElementById('marquee').innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
             }
 
-            // --- 📌 岩手県警告カードのスマート描画判定 ---
             if (force || iwateKikikuText !== lastRenderedIwateKikiku) {
                 alertContainer.innerHTML = iwateKikikuText;
                 lastRenderedIwateKikiku = iwateKikikuText;
             }
 
-            // --- 📌 ニュースリストのスマート描画判定 ---
-            // ニュースの件数が変わった（RSSが本当に更新された）時、または強制フラグがある時だけDOMを生成
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
-                const currentScroll = container.scrollTop;
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>
                             <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
-                        </div>
+                    </div>
                         <div class="news-desc">${item.description}</div>
                     </a>
                 `).join('');
@@ -548,9 +540,8 @@
                 container.innerHTML = newsListHtml;
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
                 
-                if (currentScroll > 0) {
-                    container.scrollTop = currentScroll;
-                }
+                // 💡 Silkブラウザ対策：HTML描画直後にニュースの箱のスクロール位置を最上部に強制リセット
+                container.scrollTop = 0;
             }
         }
 
@@ -577,7 +568,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            refreshMarqueeAndCards(true); // 💡 新しいRSSを読み込んだ時は強制描画
+            refreshMarqueeAndCards(true); 
             container.scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -648,8 +639,14 @@
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
 
+            // 💡 Silkブラウザ対策：ページ読み込み完了時、および一瞬遅らせたタイミングの二重で最上部へリセット
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
+            
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                if (container) container.scrollTop = 0;
+            }, 300);
         }
 
         init();

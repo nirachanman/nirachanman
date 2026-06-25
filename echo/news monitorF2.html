@@ -430,7 +430,7 @@
                                     highestLevel = Math.max(highestLevel, 3); 
                                 } else if (["02","03","04","05","06","08","19"].includes(code)) {
                                     highestLevel = Math.max(highestLevel, 2); 
-                                </div> else {
+                                } else {
                                     highestLevel = Math.max(highestLevel, 1); 
                                 }
 
@@ -505,6 +505,7 @@
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
+            // --- 📌 マーキーのスマート描画判定 ---
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             if (iwateActiveAlertsText !== "") {
@@ -521,18 +522,21 @@
                 lastRenderedMarquee = marqueeHtml;
             }
 
+            // --- 📌 岩手県警告カードのスマート描画判定 ---
             if (force || iwateKikikuText !== lastRenderedIwateKikiku) {
                 alertContainer.innerHTML = iwateKikikuText;
                 lastRenderedIwateKikiku = iwateKikikuText;
             }
 
-            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
+            // --- 📌 ニュースリストのスマート描画判定（バグ修正箇所） ---
+            // 💡 起動時(force=true)か、件数が完全に変わった場合のみDOMを生成。Silkブラウザ用に安全にスクロール位置を0にします。
+            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength || container.children.length === 0) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>
                             <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
-                    </div>
+                        </div>
                         <div class="news-desc">${item.description}</div>
                     </a>
                 `).join('');
@@ -540,8 +544,10 @@
                 container.innerHTML = newsListHtml;
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
                 
-                // 💡 Silkブラウザ対策：HTML描画直後にニュースの箱のスクロール位置を最上部に強制リセット
-                container.scrollTop = 0;
+                // 初回読み込み時は必ず最上部
+                if (force) {
+                    container.scrollTop = 0;
+                }
             }
         }
 
@@ -568,6 +574,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
+            // 💡 ニュースデータの取得完了時は必ず「force=true」で描画を強制実行
             refreshMarqueeAndCards(true); 
             container.scrollTop = 0;
             currentItemIndex = 0;
@@ -639,7 +646,6 @@
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
 
-            // 💡 Silkブラウザ対策：ページ読み込み完了時、および一瞬遅らせたタイミングの二重で最上部へリセット
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
             

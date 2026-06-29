@@ -407,13 +407,6 @@ function renderListForDate(dateKey) {
   });
 }
 
-// Fire TV Stick 用：フォーカス時に自動スクロール
-document.addEventListener('focusin', (e) => {
-  if (e.target.closest('.list div')) {
-    e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-});
-
 /* -------------------------
    再生処理
 ------------------------- */
@@ -562,6 +555,13 @@ setInterval(autoRefreshFeed, 300000);
 
 /* 初回ロード */
 fetchFeed();
+
+// Fire TV Stick 用：フォーカス時に自動スクロール
+document.addEventListener('focusin', (e) => {
+  if (e.target.closest('.list div')) {
+    e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+});
 </script>
 
 </body>

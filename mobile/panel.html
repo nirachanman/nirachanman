@@ -25,7 +25,7 @@ body {
   padding: 6px;
   font-size: 14px;
   height: 100vh;
-  overflow-y: auto;
+  overflow-y: hidden; /* 全体スクロールを防止 */
   box-sizing: border-box;
 }
 
@@ -108,7 +108,7 @@ button:disabled {
 }
 .player-card audio {
   width: 100%;
-  height: 30px;
+  height: 40px;
   border-radius: 6px;
 }
 
@@ -132,17 +132,23 @@ button:disabled {
 .summary-scroll::-webkit-scrollbar { display: none; }
 
 /* -------------------------
-   日付フィルタ（リスト式）
+   日付フィルタ
 ------------------------- */
-.date-select {
-  padding: 6px 10px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  color: #004080;
+.date-btn {
+  padding: 4px 10px;
+  height: 28px;
+  font-size: 13px;
+  border-radius: 18px;
+  background: #ddd;
+  color: var(--nhk-blue);
+  border: none;
+  margin-right: 6px;
   cursor: pointer;
-  flex: 0 0 auto;
+}
+.date-btn[aria-selected="true"] {
+  background: var(--nhk-light-blue);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30,136,229,0.18);
 }
 
 /* -------------------------
@@ -150,7 +156,7 @@ button:disabled {
 ------------------------- */
 .list {
   overflow-y: auto;
-  height: calc(100vh - 260px); /* テレビ向けに大きく確保 */
+  max-height: calc(100vh - 260px);
   background: #E0F7FA;
   border-radius: 6px;
   padding: 6px;
@@ -167,11 +173,6 @@ button:disabled {
   border: 1px solid rgba(0,0,0,0.15);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   cursor: pointer;
-}
-
-.list div:focus {
-  outline: 4px solid #1E88E5;
-  box-shadow: 0 0 12px rgba(30,136,229,0.6);
 }
 
 .list div.active {
@@ -191,46 +192,6 @@ button:disabled {
   .player-card audio { height: 60px; }
   .list div { padding: 16px; font-size: 18px; }
 }
-
-/* Fire TV Stick 最適化（大きめフォーカス・選択しやすい領域） */
-@media (min-width: 900px) {
-  button, .date-select {
-    font-size: 20px;
-    padding: 12px 20px;
-    border-radius: 10px;
-  }
-
-  .controls button {
-    font-size: 22px;
-    padding: 14px 24px;
-  }
-
-  .title {
-    font-size: 22px;
-  }
-
-  .player-card audio {
-    height: 70px;
-  }
-
-  /* フォーカス時の強調（Fire TV Stickはフォーカスが命） */
-  button:focus, .date-select:focus, .list div:focus {
-    outline: 4px solid #1E88E5;
-    box-shadow: 0 0 12px rgba(30,136,229,0.6);
-  }
-
-  /* ニュース一覧の行を大きくする */
-  .list div {
-    padding: 20px;
-    font-size: 20px;
-  }
-
-  /* クリック領域を広げる */
-  .list div span {
-    font-size: 20px;
-  }
-}
-
 </style>
 </head>
 
@@ -253,12 +214,11 @@ button:disabled {
 
   <!-- ★ 横並びの操作ボタン + 日付プルダウン -->
   <div class="summary-scroll">
-    <!-- ★ プルダウン式日付フィルタ -->
-    <select id="dateSelect" class="date-select"></select>
-
     <button id="liveButton">📡 らじる☆らじる</button>
     <button id="ondemandButton">▶️ 聴き逃し</button>
 
+    <!-- ★ プルダウン式日付フィルタ -->
+    <select id="dateSelect" class="date-select"></select>
   </div>
 
   <div id="list" class="list"></div>
@@ -384,7 +344,6 @@ function renderListForDate(dateKey) {
 
   filtered.forEach(item => {
     const div = document.createElement('div');
-    div.tabIndex = 0;   // ★ Fire TV Stick でフォーカス可能にする
     div.dataset.url = item.url;
 
     div.innerHTML = `
@@ -556,14 +515,6 @@ setInterval(autoRefreshFeed, 300000);
 
 /* 初回ロード */
 fetchFeed();
-
-// Fire TV Stick 用：フォーカス時に自動スクロール
-document.addEventListener('focusin', (e) => {
-  if (e.target.closest('.list div')) {
-    e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
-});
 </script>
-
 </body>
 </html>

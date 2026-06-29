@@ -243,36 +243,36 @@ function toDateKey(pubDateStr) {
 async function fetchFeed() {
 
   // ★ ここに追加したい RSS を並べるだけで拡張できます
-  const RSS_LIST = [
-    {
-      name: "NHKラジオニュース",
-      url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml"
-    },
-    {
-      name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」",
-      url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml"
-    },
-    {
-      name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」",
-      url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml"
-    },
-    {
-      name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml"
-    },
-    {
-      name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml"
-    },
-    {
-      name: "健康ライフ　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml"
-    }
+const RSS_LIST = [
+  {
+    name: "NHKラジオニュース",
+    url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml"
+  },
+  {
+    name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」",
+    url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml"
+  },
+  {
+    name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」",
+    url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml"
+  },
+  {
+    name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml"
+  },
+  {
+    name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml"
+  },
+  {
+    name: "健康ライフ　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml"
+  }
 
-    // ★ 他局を追加したい場合はここに追加
-    // { name: "TBSラジオ", url: "https://example.com/tbs.xml" },
-    // { name: "文化放送", url: "https://example.com/qrr.xml" },
-  ];
+  // ★ 他局を追加したい場合はここに追加
+  // { name: "TBSラジオ", url: "https://example.com/tbs.xml" },
+  // { name: "文化放送", url: "https://example.com/qrr.xml" },
+];
 
   try {
     const allItems = [];

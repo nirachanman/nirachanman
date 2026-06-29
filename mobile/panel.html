@@ -384,6 +384,7 @@ function renderListForDate(dateKey) {
 
   filtered.forEach(item => {
     const div = document.createElement('div');
+    div.tabIndex = 0;   // ★ Fire TV Stick でフォーカス可能にする
     div.dataset.url = item.url;
 
     div.innerHTML = `

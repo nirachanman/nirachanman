@@ -150,7 +150,7 @@ button:disabled {
 ------------------------- */
 .list {
   overflow-y: auto;
-  max-height: calc(100vh - 260px);
+  height: calc(100vh - 260px); /* テレビ向けに大きく確保 */
   background: #E0F7FA;
   border-radius: 6px;
   padding: 6px;
@@ -167,6 +167,11 @@ button:disabled {
   border: 1px solid rgba(0,0,0,0.15);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   cursor: pointer;
+}
+
+.list div:focus {
+  outline: 4px solid #1E88E5;
+  box-shadow: 0 0 12px rgba(30,136,229,0.6);
 }
 
 .list div.active {
@@ -186,8 +191,8 @@ button:disabled {
   .player-card audio { height: 60px; }
   .list div { padding: 16px; font-size: 18px; }
 }
-  
-  /* Fire TV Stick 最適化（大きめフォーカス・選択しやすい領域） */
+
+/* Fire TV Stick 最適化（大きめフォーカス・選択しやすい領域） */
 @media (min-width: 900px) {
   button, .date-select {
     font-size: 20px;
@@ -225,6 +230,7 @@ button:disabled {
     font-size: 20px;
   }
 }
+
 </style>
 </head>
 
@@ -400,6 +406,13 @@ function renderListForDate(dateKey) {
     list.appendChild(div);
   });
 }
+
+// Fire TV Stick 用：フォーカス時に自動スクロール
+document.addEventListener('focusin', (e) => {
+  if (e.target.closest('.list div')) {
+    e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+});
 
 /* -------------------------
    再生処理

@@ -108,7 +108,7 @@ button:disabled {
 }
 .player-card audio {
   width: 100%;
-  height: 40px;
+  height: 30px;
   border-radius: 6px;
 }
 
@@ -132,23 +132,17 @@ button:disabled {
 .summary-scroll::-webkit-scrollbar { display: none; }
 
 /* -------------------------
-   日付フィルタ
+   日付フィルタ（リスト式）
 ------------------------- */
-.date-btn {
-  padding: 4px 10px;
-  height: 28px;
-  font-size: 13px;
-  border-radius: 18px;
-  background: #ddd;
-  color: var(--nhk-blue);
-  border: none;
-  margin-right: 6px;
+.date-select {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #004080;
   cursor: pointer;
-}
-.date-btn[aria-selected="true"] {
-  background: var(--nhk-light-blue);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(30,136,229,0.18);
+  flex: 0 0 auto;
 }
 
 /* -------------------------
@@ -212,13 +206,16 @@ button:disabled {
     <audio id="audio" controls></audio>
   </div>
 
+  <!-- ★ 横並びの操作ボタン + 日付プルダウン -->
   <div class="summary-scroll">
-    <button id="refreshList">🔄 更新</button>
+    <!-- ★ プルダウン式日付フィルタ -->
+    <select id="dateSelect" class="date-select"></select>
+
     <button id="liveButton">📡 らじる☆らじる</button>
     <button id="ondemandButton">▶️ 聴き逃し</button>
+
   </div>
 
-  <div id="dateFilter"></div>
   <div id="list" class="list"></div>
 </div>
 
@@ -242,42 +239,18 @@ function toDateKey(pubDateStr) {
 ------------------------- */
 async function fetchFeed() {
 
-  // ★ ここに追加したい RSS を並べるだけで拡張できます
   const RSS_LIST = [
-    {
-      name: "NHKラジオニュース",
-      url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml"
-    },
-    {
-      name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」",
-      url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml"
-    },
-    {
-      name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」",
-      url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml"
-    },
-    {
-      name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml"
-    },
-    {
-      name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml"
-    },
-    {
-      name: "健康ライフ　ＮＨＫラジオ「マイあさ！」",
-      url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml"
-    }
-
-    // ★ 他局を追加したい場合はここに追加
-    // { name: "TBSラジオ", url: "https://example.com/tbs.xml" },
-    // { name: "文化放送", url: "https://example.com/qrr.xml" },
+    { name: "NHKラジオニュース", url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml" },
+    { name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」", url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml" },
+    { name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」", url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml" },
+    { name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml" },
+    { name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml" },
+    { name: "健康ライフ　ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml" }
   ];
 
   try {
     const allItems = [];
 
-    // ★ RSS を並列取得
     const results = await Promise.all(
       RSS_LIST.map(feed =>
         fetch(feed.url)
@@ -287,7 +260,6 @@ async function fetchFeed() {
       )
     );
 
-    // ★ RSS をパースして統合
     results.forEach(result => {
       if (!result) return;
 
@@ -307,7 +279,7 @@ async function fetchFeed() {
           "";
 
         allItems.push({
-          source: feed.name,   // ★ どの局のニュースか
+          source: feed.name,
           title,
           url,
           pubDate: pub,
@@ -316,14 +288,9 @@ async function fetchFeed() {
       });
     });
 
-    // ★ 日付順にソート（新しい順）
     items = allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-    // ★ UI更新（既存コードをそのまま利用）
-    buildDateFilter();
-
-    const firstBtn = document.querySelector(".date-btn");
-    if (firstBtn) firstBtn.click();
+    buildDateSelect();
 
   } catch (e) {
     alert("ニュースの取得に失敗しました");
@@ -331,37 +298,38 @@ async function fetchFeed() {
 }
 
 /* -------------------------
-   日付フィルタ生成
+   日付フィルタ（プルダウン）
 ------------------------- */
-function buildDateFilter() {
-  const df = document.getElementById('dateFilter');
-  df.innerHTML = '';
+function buildDateSelect() {
+  const sel = document.getElementById('dateSelect');
+  sel.innerHTML = '';
 
   const keys = [...new Set(items.map(it => it.dateKey))]
     .sort((a,b)=> new Date(b) - new Date(a));
 
-  keys.forEach((k, i) => {
+  keys.forEach(k => {
     const d = new Date(k);
     const label = `${d.getMonth()+1}月${d.getDate()}日(${['日','月','火','水','木','金','土'][d.getDay()]})`;
 
-    const btn = document.createElement('button');
-    btn.className = 'date-btn';
-    btn.dataset.date = k;
-    btn.textContent = label;
-    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = label;
 
-    btn.onclick = () => {
-      document.querySelectorAll('.date-btn').forEach(b => b.setAttribute('aria-selected','false'));
-      btn.setAttribute('aria-selected','true');
-      renderListForDate(k);
-    };
-
-    df.appendChild(btn);
+    sel.appendChild(opt);
   });
+
+  if (keys.length > 0) {
+    sel.value = keys[0];
+    renderListForDate(keys[0]);
+  }
+
+  sel.onchange = () => {
+    renderListForDate(sel.value);
+  };
 }
 
 /* -------------------------
-   日付別ニュース一覧（局名表示版）
+   日付別ニュース一覧（局名表示）
 ------------------------- */
 function renderListForDate(dateKey) {
   const list = document.getElementById('list');
@@ -373,7 +341,6 @@ function renderListForDate(dateKey) {
     const div = document.createElement('div');
     div.dataset.url = item.url;
 
-    // ★ 局名をタイトルに追加
     div.innerHTML = `
       <span style="display:inline-flex;width:32px;height:32px;">
         <svg viewBox="0 0 24 24" width="32" height="32">
@@ -460,11 +427,6 @@ document.getElementById('audio').onended = () => {
 };
 
 /* -------------------------
-   更新ボタン
-------------------------- */
-document.getElementById('refreshList').onclick = fetchFeed;
-
-/* -------------------------
    らじる☆らじる
 ------------------------- */
 document.getElementById('liveButton').onclick = () => {
@@ -492,7 +454,7 @@ document.getElementById('liveButton').onclick = () => {
 };
 
 /* -------------------------
-   聴き逃し（オンデマンド）
+   聴き逃し
 ------------------------- */
 document.getElementById('ondemandButton').onclick = () => {
   const audio = document.getElementById('audio');
@@ -502,19 +464,16 @@ document.getElementById('ondemandButton').onclick = () => {
   document.getElementById('title').textContent = '停止中';
   document.querySelector('.player-card').classList.remove('active');
 
-  // ボタン無効化
   document.getElementById('prev').disabled = true;
   document.getElementById('next').disabled = true;
   document.getElementById('liveButton').disabled = true;
   document.getElementById('ondemandButton').disabled = true;
 
-  // 新しいウィンドウで聴き逃しを開く
   const ondemandWindow = window.open(
     'https://www.nhk.or.jp/radio/ondemand/',
     '_blank'
   );
 
-  // 閉じたら復帰
   const timer = setInterval(() => {
     if (ondemandWindow && ondemandWindow.closed) {
       disabled = false;

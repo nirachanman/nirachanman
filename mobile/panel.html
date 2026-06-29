@@ -238,35 +238,95 @@ function toDateKey(pubDateStr) {
 }
 
 /* -------------------------
-   RSS取得
+   RSS取得（複数RSS統合版）
 ------------------------- */
 async function fetchFeed() {
-  const feedUrl = 'https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml';
-  try {
-    const res = await fetch(feedUrl);
-    const xml = await res.text();
-    const doc = new DOMParser().parseFromString(xml, 'text/xml');
-    const entries = [...doc.querySelectorAll('item')];
 
-    items = entries.map(e => {
-      const title = e.querySelector('title').textContent;
-      const url = e.querySelector('enclosure').getAttribute('url');
-      const pub = e.querySelector('pubDate').textContent;
-      return {
-        title,
-        url,
-        pubDate: pub,
-        dateKey: toDateKey(pub)
-      };
+  // ★ ここに追加したい RSS を並べるだけで拡張できます
+  const RSS_LIST = [
+    {
+      name: "NHKラジオニュース",
+      url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml"
+    },
+    {
+      name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」",
+      url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml"
+    },
+    {
+      name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」",
+      url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml"
+    },
+    {
+      name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」",
+      url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml"
+    },
+    {
+      name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」",
+      url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml"
+    },
+    {
+      name: "健康ライフ　ＮＨＫラジオ「マイあさ！」",
+      url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml"
+    }
+
+    // ★ 他局を追加したい場合はここに追加
+    // { name: "TBSラジオ", url: "https://example.com/tbs.xml" },
+    // { name: "文化放送", url: "https://example.com/qrr.xml" },
+  ];
+
+  try {
+    const allItems = [];
+
+    // ★ RSS を並列取得
+    const results = await Promise.all(
+      RSS_LIST.map(feed =>
+        fetch(feed.url)
+          .then(res => res.text())
+          .then(xml => ({ feed, xml }))
+          .catch(() => null)
+      )
+    );
+
+    // ★ RSS をパースして統合
+    results.forEach(result => {
+      if (!result) return;
+
+      const { feed, xml } = result;
+      const doc = new DOMParser().parseFromString(xml, "text/xml");
+      const entries = [...doc.querySelectorAll("item")];
+
+      entries.forEach(e => {
+        const title = e.querySelector("title")?.textContent || "";
+        const url =
+          e.querySelector("enclosure")?.getAttribute("url") ||
+          e.querySelector("link")?.textContent ||
+          "";
+        const pub =
+          e.querySelector("pubDate")?.textContent ||
+          e.querySelector("dc:date")?.textContent ||
+          "";
+
+        allItems.push({
+          source: feed.name,   // ★ どの局のニュースか
+          title,
+          url,
+          pubDate: pub,
+          dateKey: toDateKey(pub)
+        });
+      });
     });
 
+    // ★ 日付順にソート（新しい順）
+    items = allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    // ★ UI更新（既存コードをそのまま利用）
     buildDateFilter();
 
-    const firstBtn = document.querySelector('.date-btn');
+    const firstBtn = document.querySelector(".date-btn");
     if (firstBtn) firstBtn.click();
 
   } catch (e) {
-    alert('NHKラジオニュースの取得に失敗しました');
+    alert("ニュースの取得に失敗しました");
   }
 }
 
@@ -301,7 +361,7 @@ function buildDateFilter() {
 }
 
 /* -------------------------
-   日付別ニュース一覧
+   日付別ニュース一覧（局名表示版）
 ------------------------- */
 function renderListForDate(dateKey) {
   const list = document.getElementById('list');
@@ -309,17 +369,18 @@ function renderListForDate(dateKey) {
 
   const filtered = items.filter(it => it.dateKey === dateKey);
 
-  filtered.forEach((item, i) => {
+  filtered.forEach(item => {
     const div = document.createElement('div');
     div.dataset.url = item.url;
 
+    // ★ 局名をタイトルに追加
     div.innerHTML = `
       <span style="display:inline-flex;width:32px;height:32px;">
         <svg viewBox="0 0 24 24" width="32" height="32">
           <path d="M8 5v14l11-7z" fill="#600080"></path>
         </svg>
       </span>
-      <span>${item.title}</span>
+      <span><strong>[${item.source}]</strong> ${item.title}</span>
     `;
 
     if (item.url === items[index]?.url) div.classList.add('active');

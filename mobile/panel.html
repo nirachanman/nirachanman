@@ -186,6 +186,45 @@ button:disabled {
   .player-card audio { height: 60px; }
   .list div { padding: 16px; font-size: 18px; }
 }
+  
+  /* Fire TV Stick 最適化（大きめフォーカス・選択しやすい領域） */
+@media (min-width: 900px) {
+  button, .date-select {
+    font-size: 20px;
+    padding: 12px 20px;
+    border-radius: 10px;
+  }
+
+  .controls button {
+    font-size: 22px;
+    padding: 14px 24px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .player-card audio {
+    height: 70px;
+  }
+
+  /* フォーカス時の強調（Fire TV Stickはフォーカスが命） */
+  button:focus, .date-select:focus, .list div:focus {
+    outline: 4px solid #1E88E5;
+    box-shadow: 0 0 12px rgba(30,136,229,0.6);
+  }
+
+  /* ニュース一覧の行を大きくする */
+  .list div {
+    padding: 20px;
+    font-size: 20px;
+  }
+
+  /* クリック領域を広げる */
+  .list div span {
+    font-size: 20px;
+  }
+}
 </style>
 </head>
 

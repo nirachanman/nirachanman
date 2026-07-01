@@ -10,8 +10,6 @@
     <meta http-equiv="Expires" content="0">
     <link rel="icon" href="data:,">
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
     <style>
         :root { 
             --bg-color: #0b0f14;        
@@ -56,23 +54,13 @@
             transition: border-color 0.5s ease; 
         }
         
-        /* 📻 ラジオボタン配置のために上部ヘッダーのレイアウトを調整 */
         .header-top { 
             display: flex; 
             align-items: center; 
-            justify-content: space-between;
             gap: 15px; 
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
-            overflow: hidden;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-grow: 1;
             overflow: hidden;
         }
         
@@ -100,31 +88,6 @@
         @keyframes scroll-x { 
             0% { transform: translate(0, 0); } 
             100% { transform: translate(-100%, 0); } 
-        }
-
-        /* 📻 ラジオコントロールボタンのスタイル */
-        .radio-control {
-            flex-shrink: 0;
-        }
-        .radio-btn {
-            background-color: #263238;
-            color: #b0bec5;
-            border: 1px solid #455a64;
-            padding: 6px 12px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .radio-btn.playing {
-            background-color: #00e676;
-            color: #000000;
-            border-color: #00e676;
-            box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
         }
 
         #iwate-alert-container {
@@ -306,15 +269,10 @@
 
     <header>
         <div class="header-top">
-            <div class="header-left">
-                <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-                    <h1>NHK ニュース</h1>
-                </a>
-                <div class="marquee-container" id="marquee"></div>
-            </div>
-            <div class="radio-control">
-                <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">📻 ラジオ OFF</button>
-            </div>
+            <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
+                <h1>NHK 全国新着ニュース</h1>
+            </a>
+            <div class="marquee-container" id="marquee"></div>
         </div>
     </header>
 
@@ -329,12 +287,6 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
-
-        // 📻 ご指定いただいたM3U8ストリームURLとHLS再生用変数
-        const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/8/joined/master.m3u8";
-        const radioAudio = new Audio();
-        let hls = null;
-        let isRadioPlaying = false;
 
         let isPaused = false;
         let wakeLock = null;
@@ -358,55 +310,6 @@
             "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
-
-        // 📻 HLS（M3U8）ストリームを安全に処理するON/OFF切り替え関数
-        function toggleRadio() {
-            const btn = document.getElementById('radio-toggle-btn');
-            
-            if (!isRadioPlaying) {
-                if (Hls.isSupported()) {
-                    // PCやAndroid等の一般的な標準ブラウザ向け処理
-                    if (!hls) {
-                        hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
-                        hls.loadSource(RADIO_STREAM_URL);
-                        hls.attachMedia(radioAudio);
-                    } else {
-                        hls.loadSource(RADIO_STREAM_URL);
-                    }
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        playAudioStream(btn);
-                    });
-                } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-                    // iPhone/SafariなどOSネイティブでM3U8が直接動く環境向け処理
-                    radioAudio.src = RADIO_STREAM_URL;
-                    radioAudio.addEventListener('loadedmetadata', function() {
-                        playAudioStream(btn);
-                    });
-                } else {
-                    alert("お使いのブラウザはストリーミング再生（M3U8）に対応していません。");
-                }
-            } else {
-                // 停止時の処理
-                radioAudio.pause();
-                if (hls) {
-                    hls.stopLoad(); // バックグラウンド通信を切断して通信量を節約
-                }
-                isRadioPlaying = false;
-                btn.innerText = "📻 ラジオ OFF";
-                btn.classList.remove('playing');
-            }
-        }
-
-        function playAudioStream(btn) {
-            radioAudio.play().then(() => {
-                isRadioPlaying = true;
-                btn.innerText = "📻 ラジオ ON";
-                btn.classList.add('playing');
-            }).catch(err => {
-                console.error("再生エラー:", err);
-                alert("ブラウザの制限によりブロックされました。画面を一度どこでも良いのでタップしてから再度ONにしてください。");
-            });
-        }
 
         async function requestWakeLock() {
             try {
@@ -577,18 +480,13 @@
                     iwateKikikuText = ""; 
                 }
 
-                refreshMarqueeAndCards(false); 
+                refreshMarqueeAndCards(false); // 💡 定期チェック時は強制上書きしないモードで実行
 
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
 
-        // 📻 緊急アラート時はラジオ音声を一時停止するよう連携
         function showAlertOverlay(duration) {
             isPaused = true;
-            if (isRadioPlaying) {
-                radioAudio.pause();
-            }
-
             const overlay = document.getElementById('emergency-alert-overlay');
             overlay.style.display = 'flex';
             if (duration > 0) {
@@ -596,22 +494,20 @@
             }
         }
 
-        // 📻 アラート終了時にラジオ音声を再開するよう連携
         function hideAlertOverlay() {
             document.getElementById('emergency-alert-overlay').style.display = 'none';
             isPaused = false;
-            if (isRadioPlaying) {
-                radioAudio.play().catch(e => console.log(e));
-            }
         }
 
         let currentNewsUniqueItems = [];
         const container = document.getElementById('news-container');
         const alertContainer = document.getElementById('iwate-alert-container');
 
+        // 💡 引数 force を追加：RSS自体の読み込み直し時(true)か、1分ごとの定期チェック(false)かを区別
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
 
+            // --- 📌 マーキーのスマート描画判定 ---
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             if (iwateActiveAlertsText !== "") {
@@ -623,16 +519,20 @@
             }
             marqueeHtml += '</span>';
 
+            // 💡 文字列を比較し、内容が変わっている時だけ上書き（これでマーキーの強制巻き戻しが消滅）
             if (force || marqueeHtml !== lastRenderedMarquee) {
                 document.getElementById('marquee').innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
             }
 
+            // --- 📌 岩手県警告カードのスマート描画判定 ---
             if (force || iwateKikikuText !== lastRenderedIwateKikiku) {
                 alertContainer.innerHTML = iwateKikikuText;
                 lastRenderedIwateKikiku = iwateKikikuText;
             }
 
+            // --- 📌 ニュースリストのスマート描画判定 ---
+            // ニュースの件数が変わった（RSSが本当に更新された）時、または強制フラグがある時だけDOMを生成
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 const currentScroll = container.scrollTop;
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
@@ -677,7 +577,7 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
 
-            refreshMarqueeAndCards(true); 
+            refreshMarqueeAndCards(true); // 💡 新しいRSSを読み込んだ時は強制描画
             container.scrollTop = 0;
             currentItemIndex = 0;
         }
@@ -719,10 +619,9 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 📻 【重要改善】最下部に達した際、ページ丸ごとリロードするとラジオがブツブツ切れるため、
-            // ラジオ再生を維持したままニュースRSSのみをバックグラウンド更新する方式に最適化しました。
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNews(); 
+                const cleanUrl = window.location.href.split('?')[0];
+                window.location.href = cleanUrl + '?t=' + Date.now();
                 return;
             }
 

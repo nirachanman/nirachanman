@@ -10,6 +10,8 @@
     <meta http-equiv="Expires" content="0">
     <link rel="icon" href="data:,">
 
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
     <style>
         :root { 
             --bg-color: #0b0f14;        
@@ -326,8 +328,10 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        // 📻 【修正】全ブラウザで互換性のある、らじる★らじる（ラジオ第1/東京）のダイレクトストリームURLに変更
-        const radioAudio = new Audio("https://simul.drdi.st.nhk/live/8/joined/master.m3u8");
+        // 📻 【変更】指定されたM3U8ストリームURL
+        const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/8/joined/master.m3u8";
+        const radioAudio = new Audio();
+        let hls = null;
         let isRadioPlaying = false;
 
         let isPaused = false;
@@ -352,24 +356,54 @@
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
+        // 📻 HLS（M3U8）再生に対応したON/OFF切り替えロジック
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
+            
             if (!isRadioPlaying) {
-                radioAudio.load(); 
-                radioAudio.play().then(() => {
-                    isRadioPlaying = true;
-                    btn.innerText = "📻 ラジオ ON";
-                    btn.classList.add('playing');
-                }).catch(err => {
-                    console.error("ラジオ再生失敗:", err);
-                    alert("ブラウザのセキュリティ制限によりブロックされました。画面を一度どこでも良いのでタップしてから、再度ONにしてください。");
-                });
+                // 再生処理
+                if (Hls.isSupported()) {
+                    // PC/Androidなど一般的なブラウザ向け処理
+                    if (!hls) {
+                        hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
+                        hls.loadSource(RADIO_STREAM_URL);
+                        hls.attachMedia(radioAudio);
+                    } else {
+                        hls.loadSource(RADIO_STREAM_URL);
+                    }
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        playAudioStream(btn);
+                    });
+                } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+                    // iPhone/SafariなどネイティブでM3U8が動く環境向け処理
+                    radioAudio.src = RADIO_STREAM_URL;
+                    radioAudio.addEventListener('loadedmetadata', function() {
+                        playAudioStream(btn);
+                    });
+                } else {
+                    alert("お使いのブラウザはストリーミング再生（M3U8）に対応していません。");
+                }
             } else {
+                // 停止処理
                 radioAudio.pause();
+                if (hls) {
+                    hls.stopLoad(); // バックグラウンド通信も完全に止めてパケットを節約
+                }
                 isRadioPlaying = false;
                 btn.innerText = "📻 ラジオ OFF";
                 btn.classList.remove('playing');
             }
+        }
+
+        function playAudioStream(btn) {
+            radioAudio.play().then(() => {
+                isRadioPlaying = true;
+                btn.innerText = "📻 ラジオ ON";
+                btn.classList.add('playing');
+            }).catch(err => {
+                console.error("再生エラー:", err);
+                alert("ブラウザの制限によりブロックされました。画面を一度どこでも良いのでタップしてから再度ONにしてください。");
+            });
         }
 
         async function requestWakeLock() {

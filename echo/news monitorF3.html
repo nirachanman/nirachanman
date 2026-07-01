@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NHK news monitorF2（岩手県防災・災害特化版）</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" href="data:,">
+
+    <style>
+        :root { 
+            --bg-color: #0b0f14;        
+            --accent-color: #696969;   
+            --card-bg: #161c24;         
+            
+            --text-gray-title: #90caf9; 
+            --text-gray-desc: #b0bec5;  
+            
+            --text-mint-title: #90caf9; 
+            --text-mint-desc: #b0bec5;  
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            max-width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: sans-serif;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: grid;
+            grid-template-rows: auto auto 1fr; 
+            padding: 10px;
+            position: relative;
+        }
+        
+        header { 
+            border-bottom: 3px solid var(--accent-color); 
+            padding-bottom: 8px; 
+            margin-bottom: 10px;
+            background-color: var(--bg-color);
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: border-color 0.5s ease; 
+        }
+        
+        .header-top { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            gap: 15px; 
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
+        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
+        
+        .marquee-container { 
+            flex-grow: 1; 
+            height: 1.5rem;      
+            overflow: hidden; 
+            white-space: nowrap; 
+            position: relative;  
+        }
+        
+        .marquee-text { 
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: inline-block; 
+            padding-left: 100%;                  
+            animation: scroll-x 120s linear infinite; 
+            font-size: 1.1rem; 
+            color: #ffffff; 
+        }
+        @keyframes scroll-x { 
+            0% { transform: translate(0, 0); } 
+            100% { transform: translate(-100%, 0); } 
+        }
+
+        /* 📻 ラジオボタン用スタイル */
+        .radio-control {
+            flex-shrink: 0;
+        }
+        .radio-btn {
+            background-color: #263238;
+            color: #b0bec5;
+            border: 1px solid #455a64;
+            padding: 6px 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .radio-btn.playing {
+            background-color: #00e676;
+            color: #000000;
+            border-color: #00e676;
+            box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+        }
+
+        #iwate-alert-container {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+
+        #news-container { 
+            overflow-y: auto;          
+            scroll-behavior: smooth; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            width: 100%;
+            max-width: 100%;
+            height: 100%; 
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        #news-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .weather-alert-card {
+            background-color: #2a1215;
+            border: 2px solid #ff3333;
+            border-left: 8px solid #ff3333;
+            padding: 15px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            box-sizing: border-box;
+            width: 100%;
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: #ff3333; }
+            50% { border-color: #ffaa00; }
+        }
+        .weather-alert-card.special {
+            background-color: #24122a;
+            border: 2px solid #da70d6;
+            border-left: 8px solid #da70d6;
+            animation: pulse-special 1.5s infinite;
+        }
+        @keyframes pulse-special {
+            0%, 100% { border-color: #da70d6; }
+            50% { border-color: #ffffff; }
+        }
+        .weather-alert-title {
+            font-weight: bold;
+            color: #ff5555;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .weather-alert-card.special .weather-alert-title {
+            color: #ff77ff;
+        }
+
+        .news-item { 
+            display: flex; 
+            flex-direction: column; 
+            text-decoration: none; 
+            background-color: var(--card-bg); 
+            padding: 12px; 
+            border-radius: 4px; 
+            border: 1px solid #2f4f4f;     
+            border-left: 4px solid #2f4f4f; 
+            gap: 8px;
+            flex-shrink: 0; 
+            box-sizing: border-box;         
+            width: 100%; 
+        }
+        
+        .news-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .news-title { 
+            font-size: 1.3rem; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            font-weight: 400; 
+        }
+        
+        .news-time { 
+            font-size: 1.1rem; 
+            color: #607d8b; 
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .news-desc {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            white-space: normal;       
+            word-wrap: break-word;     
+            text-overflow: clip;       
+            overflow: visible;         
+        }
+
+        .news-item:nth-child(odd) .news-title { color: var(--text-gray-title); }
+        .news-item:nth-child(odd) .news-desc { color: var(--text-gray-desc); }
+
+        .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
+        .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
+
+        #emergency-alert-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(186, 12, 47, 0.98); 
+            z-index: 99999;
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            box-sizing: border-box;
+            padding: 40px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .alert-flash {
+            animation: blink 1s ease infinite;
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            color: #fffb00; 
+        }
+        .alert-box {
+            background-color: #000000;
+            border: 4px solid #fffb00;
+            border-radius: 12px;
+            padding: 30px 60px;
+            display: inline-block;
+            max-width: 85%;
+        }
+        .alert-main-info {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #ff3333;
+            margin: 15px 0;
+        }
+        .alert-sub-info {
+            font-size: 1.8rem;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+    <div id="emergency-alert-overlay">
+        <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
+        <div class="alert-box">
+            <div id="alert-header" style="font-weight: bold; font-size: 2.5rem; color: #ffffff;">情報を解析中...</div>
+            <div id="alert-main" class="alert-main-info">⚠️ 警戒してください</div>
+            <div id="alert-detail" class="alert-sub-info">海岸や川の近くからすぐに離してください。</div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-top">
+            <div class="header-left">
+                <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
+                    <h1>NHK 全国新着ニュース</h1>
+                </a>
+                <div class="marquee-container" id="marquee"></div>
+            </div>
+            <div class="radio-control">
+                <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">📻 ラジオ OFF</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="iwate-alert-container"></div>
+
+    <main id="news-container"></main>
+
+    <script>
+        const RSS_URLS = [
+            'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
+            'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
+        ];
+
+        // 📻 ラジオ音声オブジェクトの作成 (らじる★らじる ラジオ第1/東京)
+        const radioAudio = new Audio("https://nhkradior1-hls.akamaized.net/hls/live/2034057/nhkradior1/master.m3u8");
+        let isRadioPlaying = false;
+
+        let isPaused = false;
+        let wakeLock = null;
+        let resumeTimeout = null;
+        let currentItemIndex = 0; 
+        
+        let lastEewId = "";
+        let lastTsunamiId = "";
+        let isTsunamiActive = false;
+        
+        let iwateAlertLevel = 0; 
+        let iwateActiveAlertsText = ""; 
+        let iwateKikikuText = ""; 
+
+        let lastRenderedMarquee = "";
+        let lastRenderedIwateKikiku = "";
+        let lastRenderedNewsLength = 0;
+
+        const JMA_CODES = {
+            "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
+            "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
+        };
+
+        // 📻 ラジオのON/OFF切り替え関数
+        function toggleRadio() {
+            const btn = document.getElementById('radio-toggle-btn');
+            if (!isRadioPlaying) {
+                // 再生開始
+                radioAudio.load(); // ストリーミングの遅延（バッファ）をクリアして最新情報にする
+                radioAudio.play().then(() => {
+                    isRadioPlaying = true;
+                    btn.innerText = "📻 ラジオ ON";
+                    btn.classList.add('playing');
+                }).catch(err => {
+                    console.error("ラジオ再生失敗:", err);
+                    alert("ブラウザの制限により再生できませんでした。もう一度ボタンを押してください。");
+                });
+            } else {
+                // 停止
+                radioAudio.pause();
+                isRadioPlaying = false;
+                btn.innerText = "📻 ラジオ OFF";
+                btn.classList.remove('playing');
+            }
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) { console.error("WakeLock取得失敗:", err); }
+        }
+
+        async function checkEmergencyEarthquakeAlert() {
+            if (isTsunamiActive) return;
+            try {
+                const response = await fetch('https://api.p2pquake.net/v2/history?codes=556&limit=1');
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0 || !data[0]) return;
+                
+                const alert = data[0];
+
+                const alertTime = new Date(alert.time);
+                const now = new Date();
+                if (now - alertTime > 5 * 60 * 1000) return; 
+
+                if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
+                    lastEewId = alert.id;
+                    const epicenter = alert.earthquake.hypocenter.name || "調査中";
+                    const maxShindo = alert.earthquake.maxScaleString || "不明";
+                    
+                    document.getElementById('alert-title').innerText = "🚨 緊急地震速報 (EEW) 🚨";
+                    document.getElementById('alert-header').innerText = `震源地: ${epicenter}`;
+                    document.getElementById('alert-main').innerText = `最大震度 ${maxShindo}`;
+                    document.getElementById('alert-detail').innerText = "強い揺れに警戒してください。倒れやすい家具から離してください。";
+                    
+                    showAlertOverlay(180000); 
+                }
+            } catch (e) { console.error("EEW取得エラー:", e); }
+        }
+
+        async function checkTsunamiAlert() {
+            try {
+                const response = await fetch('https://api.p2pquake.net/v2/history?codes=552&limit=1');
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0 || !data[0]) return;
+
+                const alert = data[0];
+
+                const alertTime = new Date(alert.time);
+                const now = new Date();
+                if (now - alertTime > 5 * 60 * 1000) {
+                    if (isTsunamiActive) {
+                        isTsunamiActive = false;
+                        hideAlertOverlay();
+                    }
+                    return; 
+                }
+
+                if (alert.id !== lastTsunamiId) {
+                    lastTsunamiId = alert.id;
+
+                    if (alert.areas && alert.areas.length > 0) {
+                        isTsunamiActive = true;
+
+                        let infoText = "";
+                        alert.areas.forEach(area => {
+                            infoText += `■ ${area.name} ： 【${area.grade}】\n`;
+                        });
+
+                        document.getElementById('alert-title').innerText = "🌊 津波警報・注意報 発表中 🌊";
+                        document.getElementById('alert-header').innerText = "海岸や川の近くから今すぐ離れてください！";
+                        document.getElementById('alert-main').innerText = "津波警報 発表中";
+                        document.getElementById('alert-detail').style.whiteSpace = "pre-wrap";
+                        document.getElementById('alert-detail').innerText = infoText;
+
+                        showAlertOverlay(0);
+
+                    } else {
+                        if (isTsunamiActive) {
+                            isTsunamiActive = false;
+                            hideAlertOverlay();
+                        }
+                    }
+                }
+            } catch (e) { console.error("津波情報取得エラー:", e); }
+        }
+
+        async function checkIwateWeatherAlerts() {
+            try {
+                const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://www.jma.go.jp/bosai/warning/data/r8/030000.json?t=' + Date.now());
+                const response = await fetch(targetUrl);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                let highestLevel = 0; 
+                let collectedAlerts = new Set();
+                let dangerousCities = {}; 
+
+                if (Array.isArray(data)) {
+                    for (let areaGroup of data) {
+                        if (!areaGroup.areaTypes) continue;
+                        
+                        const cityAreas = areaGroup.areaTypes[1]?.areas;
+                        if (!cityAreas) continue;
+
+                        for (let city of cityAreas) {
+                            const cityName = city.area.name;
+                            if (!city.warnings) continue;
+
+                            for (let w of city.warnings) {
+                                if (w.state === "none" || w.state === "delete") continue;
+
+                                const code = w.code;
+                                const name = JMA_CODES[code] || "気象注意報・警報";
+                                collectedAlerts.add(name);
+
+                                if (code.startsWith("3")) {
+                                    highestLevel = Math.max(highestLevel, 3); 
+                                } else if (["02","03","04","05","06","08","19"].includes(code)) {
+                                    highestLevel = Math.max(highestLevel, 2); 
+                                } else {
+                                    highestLevel = Math.max(highestLevel, 1); 
+                                }
+
+                                if (!dangerousCities[cityName]) dangerousCities[cityName] = [];
+                                if (!dangerousCities[cityName].includes(name)) {
+                                    dangerousCities[cityName].push(name);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                iwateAlertLevel = highestLevel;
+
+                const root = document.documentElement;
+                if (highestLevel === 3) root.style.setProperty('--accent-color', '#da70d6'); 
+                else if (highestLevel === 2) root.style.setProperty('--accent-color', '#ff3333'); 
+                else if (highestLevel === 1) root.style.setProperty('--accent-color', '#ffd700'); 
+                else root.style.setProperty('--accent-color', '#696969'); 
+
+                if (collectedAlerts.size > 0) {
+                    iwateActiveAlertsText = `【⚠️岩手県警告：${Array.from(collectedAlerts).join('・')}発表中】`;
+                } else {
+                    iwateActiveAlertsText = "";
+                }
+
+                let citiesListText = "";
+                for (let city in dangerousCities) {
+                    if (dangerousCities[city].length > 0) {
+                        citiesListText += `<div><strong>${city}</strong>: ${dangerousCities[city].join(', ')}</div>`;
+                    }
+                }
+
+                if (citiesListText !== "") {
+                    const cardClass = highestLevel === 3 ? "weather-alert-card special" : "weather-alert-card";
+                    const titleText = highestLevel === 3 ? "🚨 岩手県：特別警報発表中" : "⚠️ 岩手県：気象警報・注意報（警戒地域一覧）";
+                    
+                    iwateKikikuText = `
+                        <div class="${cardClass}">
+                            <div class="weather-alert-title">${titleText}</div>
+                            <div style="font-size:1.1rem; margin-bottom:8px;">岩手県内の以下の地域に気象警報・注意報が発表されています。周囲の状況を確認してください。</div>
+                            <div style="font-size:1.05rem; background:rgba(0,0,0,0.3); padding:8px; border-radius:4px;">${citiesListText}</div>
+                        </div>
+                    `;
+                } else {
+                    iwateKikikuText = ""; 
+                }
+
+                refreshMarqueeAndCards(false); 
+
+            } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
+        }
+
+        function showAlertOverlay(duration) {
+            isPaused = true;
+            
+            // 🚨 緊急アラート時はラジオ音声を一時停止してサイレン等を聞き取りやすくする
+            if (isRadioPlaying) {
+                radioAudio.pause();
+            }
+
+            const overlay = document.getElementById('emergency-alert-overlay');
+            overlay.style.display = 'flex';
+            if (duration > 0) {
+                setTimeout(() => { if (!isTsunamiActive) hideAlertOverlay(); }, duration);
+            }
+        }
+
+        function hideAlertOverlay() {
+            document.getElementById('emergency-alert-overlay').style.display = 'none';
+            isPaused = false;
+
+            // アラート解除後に自動でラジオを再開させる場合
+            if (isRadioPlaying) {
+                radioAudio.play().catch(e => console.log(e));
+            }
+        }
+
+        let currentNewsUniqueItems = [];
+        const container = document.getElementById('news-container');
+        const alertContainer = document.getElementById('iwate-alert-container');
+
+        function refreshMarqueeAndCards(force = false) {
+            if (currentNewsUniqueItems.length === 0) return;
+
+            const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
+            let marqueeHtml = '<span class="marquee-text">';
+            if (iwateActiveAlertsText !== "") {
+                marqueeHtml += `<span style="color:#ff5555; font-weight:bold; margin-right:30px;">${iwateActiveAlertsText}</span>`;
+            }
+            for(let i = 0; i < marqueeCount; i++) {
+                marqueeHtml += `<a href="${currentNewsUniqueItems[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${currentNewsUniqueItems[i].title}</a>`;
+                if(i < marqueeCount - 1) marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
+            }
+            marqueeHtml += '</span>';
+
+            if (force || marqueeHtml !== lastRenderedMarquee) {
+                document.getElementById('marquee').innerHTML = marqueeHtml;
+                lastRenderedMarquee = marqueeHtml;
+            }
+
+            if (force || iwateKikikuText !== lastRenderedIwateKikiku) {
+                alertContainer.innerHTML = iwateKikikuText;
+                lastRenderedIwateKikiku = iwateKikikuText;
+            }
+
+            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
+                const currentScroll = container.scrollTop;
+                let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
+                    <a href="${item.link}" target="_blank" class="news-item">
+                        <div class="news-header-row">
+                            <div class="news-title">${item.title}</div>
+                            <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                        </div>
+                        <div class="news-desc">${item.description}</div>
+                    </a>
+                `).join('');
+
+                container.innerHTML = newsListHtml;
+                lastRenderedNewsLength = currentNewsUniqueItems.length;
+                
+                if (!force && currentScroll > 0) {
+                    container.scrollTop = currentScroll;
+                }
+            }
+        }
+
+        async function updateNews() {
+            let allItems = [];
+            for (const url of RSS_URLS) {
+                try {
+                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
+                    const res = await fetch(targetUrl);
+                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+                    for (let item of xml.getElementsByTagName('item')) {
+                        const descEl = item.getElementsByTagName('description')[0];
+                        allItems.push({
+                            title: item.getElementsByTagName('title')[0].textContent,
+                            link: item.getElementsByTagName('link')[0].textContent,
+                            description: descEl ? descEl.textContent : '',
+                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
+                        });
+                    }
+                } catch (e) {}
+            }
+            if (allItems.length === 0) return;
+
+            allItems.sort((a, b) => b.pubDate - a.pubDate);
+            currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+
+            refreshMarqueeAndCards(true); 
+            container.scrollTop = 0;
+            currentItemIndex = 0;
+        }
+
+        function syncAndPauseScroll() {
+            if(document.getElementById('emergency-alert-overlay').style.display === 'flex') return;
+
+            isPaused = true;
+            clearTimeout(resumeTimeout);
+
+            const items = container.querySelectorAll('.news-item');
+            const containerTop = container.getBoundingClientRect().top;
+            
+            let closestIndex = 0;
+            let minDistance = Infinity;
+
+            items.forEach((item, index) => {
+                const rect = item.getBoundingClientRect();
+                const distance = Math.abs(rect.top - containerTop);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            currentItemIndex = closestIndex;
+
+            resumeTimeout = setTimeout(() => { isPaused = false; }, 5000);
+        }
+
+        container.addEventListener('touchstart', syncAndPauseScroll, { passive: true });
+        container.addEventListener('touchmove', syncAndPauseScroll, { passive: true });
+        container.addEventListener('scroll', syncAndPauseScroll);
+        container.addEventListener('mousedown', () => isPaused = true);
+        container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
+
+        async function autoScroll() {
+            if (isPaused) return;
+
+            const items = container.querySelectorAll('.news-item');
+            if (items.length === 0) return;
+
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
+                await updateNews(); 
+                return;
+            }
+
+            currentItemIndex += 3;
+            const targetItem = items[currentItemIndex];
+
+            if (targetItem) {
+                const targetScrollTop = targetItem.offsetTop - container.offsetTop;
+                container.scrollTo({
+                    top: targetScrollTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        async function init() {
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+
+            await updateNews();
+            await checkTsunamiAlert(); 
+            await checkEmergencyEarthquakeAlert(); 
+            await checkIwateWeatherAlerts(); 
+            await requestWakeLock();
+
+            window.scrollTo(0, 0);
+            if (container) container.scrollTop = 0;
+        }
+
+        init();
+        
+        setInterval(autoScroll, 30000); 
+        
+        setInterval(async () => {
+            await checkTsunamiAlert();
+            await checkEmergencyEarthquakeAlert();
+        }, 5000);
+
+        setInterval(async () => {
+            await checkIwateWeatherAlerts();
+        }, 60000);
+        
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>

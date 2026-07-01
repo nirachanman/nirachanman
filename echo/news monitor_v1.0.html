@@ -56,7 +56,6 @@
             transition: border-color 0.5s ease; 
         }
         
-        /* 📻 ラジオボタン配置のために上部ヘッダーのレイアウトを調整 */
         .header-top { 
             display: flex; 
             align-items: center; 
@@ -102,7 +101,6 @@
             100% { transform: translate(-100%, 0); } 
         }
 
-        /* 📻 ラジオコントロールボタンのスタイル */
         .radio-control {
             flex-shrink: 0;
         }
@@ -330,7 +328,6 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        // 📻 ご指定いただいたM3U8ストリームURLとHLS再生用変数
         const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/8/joined/master.m3u8";
         const radioAudio = new Audio();
         let hls = null;
@@ -349,7 +346,6 @@
         let iwateActiveAlertsText = ""; 
         let iwateKikikuText = ""; 
 
-        // 💡 前回描画した内容を記憶する変数（バッティング防止用）
         let lastRenderedMarquee = "";
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
@@ -359,13 +355,11 @@
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
-        // 📻 HLS（M3U8）ストリームを安全に処理するON/OFF切り替え関数
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
             
             if (!isRadioPlaying) {
                 if (Hls.isSupported()) {
-                    // PCやAndroid等の一般的な標準ブラウザ向け処理
                     if (!hls) {
                         hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
                         hls.loadSource(RADIO_STREAM_URL);
@@ -377,7 +371,6 @@
                         playAudioStream(btn);
                     });
                 } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-                    // iPhone/SafariなどOSネイティブでM3U8が直接動く環境向け処理
                     radioAudio.src = RADIO_STREAM_URL;
                     radioAudio.addEventListener('loadedmetadata', function() {
                         playAudioStream(btn);
@@ -386,10 +379,9 @@
                     alert("お使いのブラウザはストリーミング再生（M3U8）に対応していません。");
                 }
             } else {
-                // 停止時の処理
                 radioAudio.pause();
                 if (hls) {
-                    hls.stopLoad(); // バックグラウンド通信を切断して通信量を節約
+                    hls.stopLoad(); 
                 }
                 isRadioPlaying = false;
                 btn.innerText = "📻 ラジオ OFF";
@@ -416,6 +408,18 @@
             } catch (err) { console.error("WakeLock取得失敗:", err); }
         }
 
+        // 🛠️ iPhone (Safari) の互換性のために、APIの時間（スラッシュ/ハイフン）を安全にパースする関数
+        function parseTargetTime(timeStr) {
+            if (!timeStr) return new Date();
+            // ハイフンをすべてスラッシュに置換し、タイムゾーン(JST)を明確に明示してパース
+            let formatted = timeStr.replace(/-/g, '/');
+            if (!formatted.includes('JST') && !formatted.includes('+09')) {
+                formatted += ' +0900';
+            }
+            let d = new Date(formatted);
+            return isNaN(d.getTime()) ? new Date() : d;
+        }
+
         async function checkEmergencyEarthquakeAlert() {
             if (isTsunamiActive) return;
             try {
@@ -427,9 +431,12 @@
                 
                 const alert = data[0];
 
-                const alertTime = new Date(alert.time);
+                // 🛠️ iPhone用に安全にパース
+                const alertTime = parseTargetTime(alert.time);
                 const now = new Date();
-                if (now - alertTime > 5 * 60 * 1000) return; 
+                
+                // 5分（300,000ミリ秒）以上前の古いデータなら完全に無視
+                if (now.getTime() - alertTime.getTime() > 5 * 60 * 1000) return; 
 
                 if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
                     lastEewId = alert.id;
@@ -456,9 +463,11 @@
 
                 const alert = data[0];
 
-                const alertTime = new Date(alert.time);
+                // 🛠️ iPhone用に安全にパース
+                const alertTime = parseTargetTime(alert.time);
                 const now = new Date();
-                if (now - alertTime > 5 * 60 * 1000) {
+                
+                if (now.getTime() - alertTime.getTime() > 5 * 60 * 1000) {
                     if (isTsunamiActive) {
                         isTsunamiActive = false;
                         hideAlertOverlay();
@@ -582,7 +591,6 @@
             } catch (e) { console.error("気象庁データ取得・解析エラー:", e); }
         }
 
-        // 📻 緊急アラート時はラジオ音声を一時停止するよう連携
         function showAlertOverlay(duration) {
             isPaused = true;
             if (isRadioPlaying) {
@@ -596,7 +604,6 @@
             }
         }
 
-        // 📻 アラート終了時にラジオ音声を再開するよう連携
         function hideAlertOverlay() {
             document.getElementById('emergency-alert-overlay').style.display = 'none';
             isPaused = false;
@@ -719,8 +726,6 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 📻 【重要改善】最下部に達した際、ページ丸ごとリロードするとラジオがブツブツ切れるため、
-            // ラジオ再生を維持したままニュースRSSのみをバックグラウンド更新する方式に最適化しました。
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 await updateNews(); 
                 return;

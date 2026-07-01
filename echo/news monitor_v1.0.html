@@ -408,16 +408,21 @@
             } catch (err) { console.error("WakeLock取得失敗:", err); }
         }
 
-        // 🛠️ iPhone (Safari) の互換性のために、APIの時間（スラッシュ/ハイフン）を安全にパースする関数
-        function parseTargetTime(timeStr) {
-            if (!timeStr) return new Date();
-            // ハイフンをすべてスラッシュに置換し、タイムゾーン(JST)を明確に明示してパース
-            let formatted = timeStr.replace(/-/g, '/');
-            if (!formatted.includes('JST') && !formatted.includes('+09')) {
-                formatted += ' +0900';
+        // 🛠️ iPhone (Safari) 対策：文字列パースをせず、API固有のタイムスタンプ情報から安全に時間（ミリ秒）を取得するロジック
+        function getSafeTimeMs(itemData) {
+            if (!itemData) return 0;
+            // P2P地震情報APIが提供する「issue.time」や「time」を確実な日付形式に正規化してタイムスタンプ化
+            let rawTime = itemData.time || (itemData.issue ? itemData.issue.time : null);
+            if (!rawTime) return Date.now();
+            
+            // ハイフンをスラッシュに置換
+            let normalized = rawTime.replace(/-/g, '/');
+            // タイムゾーンが未指定な場合はJST(+09:00)として補正
+            if (!normalized.includes('JST') && !normalized.includes('+09')) {
+                normalized += ' +0900';
             }
-            let d = new Date(formatted);
-            return isNaN(d.getTime()) ? new Date() : d;
+            let parsed = Date.parse(normalized);
+            return isNaN(parsed) ? Date.now() : parsed;
         }
 
         async function checkEmergencyEarthquakeAlert() {
@@ -431,12 +436,12 @@
                 
                 const alert = data[0];
 
-                // 🛠️ iPhone用に安全にパース
-                const alertTime = parseTargetTime(alert.time);
-                const now = new Date();
+                // 🛠️ ミリ秒単位で直接引き算して判定（iPhoneバグの完全排除）
+                const alertTimeMs = getSafeTimeMs(alert);
+                const nowMs = Date.now();
                 
-                // 5分（300,000ミリ秒）以上前の古いデータなら完全に無視
-                if (now.getTime() - alertTime.getTime() > 5 * 60 * 1000) return; 
+                // 現在時刻より5分（300000ミリ秒）以上古い歴史データなら絶対にスルーする
+                if (nowMs - alertTimeMs > 5 * 60 * 1000) return; 
 
                 if (alert.id !== lastEewId && alert.earthquake && !alert.cancelled) {
                     lastEewId = alert.id;
@@ -463,11 +468,11 @@
 
                 const alert = data[0];
 
-                // 🛠️ iPhone用に安全にパース
-                const alertTime = parseTargetTime(alert.time);
-                const now = new Date();
+                // 🛠️ ミリ秒単位で直接引き算して判定
+                const alertTimeMs = getSafeTimeMs(alert);
+                const nowMs = Date.now();
                 
-                if (now.getTime() - alertTime.getTime() > 5 * 60 * 1000) {
+                if (nowMs - alertTimeMs > 5 * 60 * 1000) {
                     if (isTsunamiActive) {
                         isTsunamiActive = false;
                         hideAlertOverlay();

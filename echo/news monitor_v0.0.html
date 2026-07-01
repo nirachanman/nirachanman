@@ -295,7 +295,8 @@
             const btn = document.getElementById('radio-toggle-btn');
             
             if (!isRadioPlaying) {
-                if (Hls.isSupported()) {
+                // Hlsが利用可能なブラウザ（PCやAndroidなど）
+                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                     if (!hls) {
                         hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
                         hls.loadSource(RADIO_STREAM_URL);
@@ -306,7 +307,9 @@
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         playAudioStream(btn);
                     });
-                } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+                } 
+                // Safari（iPhone/iPad/Mac）などネイティブでM3U8を再生できるブラウザ
+                else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
                     radioAudio.src = RADIO_STREAM_URL;
                     radioAudio.addEventListener('loadedmetadata', function() {
                         playAudioStream(btn);

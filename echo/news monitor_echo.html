@@ -413,16 +413,19 @@
             refreshMarqueeAndCards(true); 
         }
 
-        function refreshMarqueeAndCards(force = false) {
+function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
-            // ... (表示ロジックは従来通り)
+            
             const container = document.getElementById('news-container');
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
-                        <div class="news-header-row"><div class="news-title">${item.title}<div class="news-time">
-    ${String(item.pubDate.getHours()).padStart(2, '0')}:${String(item.pubDate.getMinutes()).padStart(2, '0')}
-</div></div></div>
+                        <div class="news-header-row">
+                            <div class="news-title">${item.title}</div>
+                            <div class="news-time">
+                                ${String(item.pubDate.getHours()).padStart(2, '0')}:${String(item.pubDate.getMinutes()).padStart(2, '0')}
+                            </div>
+                        </div>
                         <div class="news-desc">${item.description}</div>
                     </a>
                 `).join('');
@@ -430,7 +433,6 @@
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
             }
         }
-
         async function autoScroll() {
             if (isPaused) return;
             const container = document.getElementById('news-container');

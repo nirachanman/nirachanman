@@ -423,6 +423,7 @@ function refreshMarqueeAndCards(force = false) {
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>
                             <div class="news-time">
+                                ${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} 
                                 ${String(item.pubDate.getHours()).padStart(2, '0')}:${String(item.pubDate.getMinutes()).padStart(2, '0')}
                             </div>
                         </div>
@@ -433,6 +434,7 @@ function refreshMarqueeAndCards(force = false) {
                 lastRenderedNewsLength = currentNewsUniqueItems.length;
             }
         }
+
         async function autoScroll() {
             if (isPaused) return;
             const container = document.getElementById('news-container');

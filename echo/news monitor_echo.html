@@ -351,6 +351,7 @@
         let lastRenderedMarquee = "";
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
+        let currentNewsUniqueItems = [];
 
         const JMA_CODES = {
             "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
@@ -413,9 +414,24 @@
             refreshMarqueeAndCards(true); 
         }
 
-function refreshMarqueeAndCards(force = false) {
+        function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             
+            // マーキー（横流れタイトル）の描画ロジック
+            const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
+            let marqueeHtml = '<span class="marquee-text">';
+            for(let i = 0; i < marqueeCount; i++) {
+                marqueeHtml += `<a href="${currentNewsUniqueItems[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${currentNewsUniqueItems[i].title}</a>`;
+                if(i < marqueeCount - 1) marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
+            }
+            marqueeHtml += '</span>';
+
+            if (force || marqueeHtml !== lastRenderedMarquee) {
+                document.getElementById('marquee').innerHTML = marqueeHtml;
+                lastRenderedMarquee = marqueeHtml;
+            }
+
+            // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
@@ -444,12 +460,10 @@ function refreshMarqueeAndCards(force = false) {
             // リストの最後まで到達した場合の処理
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
                 if (isRadioPlaying) {
-                    // ラジオ中はリロードせず、データ更新のみして先頭へ戻る
                     await updateNews();
                     currentItemIndex = 0;
                     container.scrollTop = 0;
                 } else {
-                    // ラジオ停止中：ページ全体をリロード
                     window.location.reload();
                 }
                 return;

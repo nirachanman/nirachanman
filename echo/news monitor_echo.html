@@ -102,6 +102,9 @@
         }
 
         .radio-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             flex-shrink: 0;
         }
         .radio-btn {
@@ -291,21 +294,22 @@
             50% { opacity: 0.2; }
         }
 
-        /* 📺 スリープ防止用のダミー動画（1px四方・ほぼ不可視） */
+        /* 📺 強化版スリープ防止：不透明度100%で実描画しつつ、背景色と同化させて隠す */
         #keep-awake-video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1px;
-            height: 1px;
-            opacity: 0.01;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 2px;
+            height: 2px;
+            opacity: 1.0; 
+            background-color: var(--bg-color);
             pointer-events: none;
-            z-index: -1;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
-    <video id="keep-awake-video" playsinline muted loop src="data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wStandardAAAC9bW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAAAAAD6AAAA+gBAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAMAdHJhawAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAD6AAAAAAAQAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAYRtZGlhAAAAWG1kaGNodegAAAAAAAAAAAAAAAAAAGQAAAZAAVcQAAAAAAAAMWhkaHIAAAAAAAAAAHZpZGVvAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAVxtaW5mAAAAFHZtaGinternalAAAAAAAAAAAAAAJGRpbmYAAAAccmVmZAAAAA11cmwgAAAAAQAAAU9zdGJsAAAAfHN0c2QAAAAAAAAAAQAAAGZidmMxAAAAAAABAAEAAAAAAAAAAAAAAAAAABgAGABAdHJhY2sAAABidXV1ZAAAAAAMYXZjQwH0AAr/AAAAFWhleGNvAAAAAAAAAAAAAAAAYnN0dHMAAAAAAAAAAQAAAAEAAAMYAAAAIHN0c3oAAAAAAAAAAAAAAAIAAAADAAAAAQAAAAEAAAAsc3RjbwAAAAAAAAACAAAAMgAAAGwAAABsc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAKHVkdGEAAABsbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRhdAAAAAAAAAAAAAAAAGNoZWMAAAAA"></video>
+    <video id="keep-awake-video" playsinline muted loop src="data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAAAAG1wStandardNfYm9vdmYAAABsbXZoZAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAGd0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAGRtZGlhAAAAWG1kaGNodegAAAAAAAAAAAAAAAAAAGAAAAEAAAFVAAAAAAAAMWhkaHIAAAAAAAAAAHZpZGVvAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAVxtaW5mAAAAFHZtaGinternalAAAAAAAAAAAAAAJGRpbmYAAAAccmVmZAAAAA11cmwgAAAAAQAAAU1zdGJsAAAAfHN0c2QAAAAAAAAAAQAAAGZidmMxAAAAAAABAAEAAAAAAAAAAAAAAAAAABgAGABAdHJhY2sAAABidXV1ZAAAAAAMYXZjQwH0AAr/AAAAFWhleGNvAAAAAAAAAAAAAAAAYnN0dHMAAAAAAAAAAQAAAAEAAAEAAAAAIHN0c3oAAAAAAAAAAAAAAAIAAAADAAAAAQAAAAEAAAAsc3RjbwAAAAAAAAACAAAAMgAAAGwAAABsc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAKHVkdGEAAABsbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRhdAAAAAAAAAAAAAAAAGNoZWMAAAAA"></video>
 
     <div id="emergency-alert-overlay">
         <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
@@ -369,20 +373,40 @@
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
-        // 📺 ダミー動画の再生を開始する関数
+        // 📺 動画再生を開始・維持する関数
         function startKeepAwakeVideo() {
             const v = document.getElementById('keep-awake-video');
             if (v) {
-                v.play().catch(err => {
-                    console.log("スリープ防止動画の自動再生が制限されました。ユーザー操作を待ちます。", err);
+                v.play().then(() => {
+                    updateRadioBtnText(); // 再生成功時に表示を更新
+                }).catch(err => {
+                    console.log("動画再生が制限されました。タップを待ちます。");
                 });
+            }
+        }
+
+        // ボタンのテキスト表示を一括管理する関数
+        function updateRadioBtnText() {
+            const btn = document.getElementById('radio-toggle-btn');
+            const video = document.getElementById('keep-awake-video');
+            
+            let statusTag = "";
+            // 動画が正常に再生されている（＝スリープ防止中）かチェック
+            if (video && !video.paused && !video.ended) {
+                statusTag = " [スリープ防止中]";
+            }
+
+            if (isRadioPlaying) {
+                btn.innerText = "📻 ラジオ ON" + statusTag;
+            } else {
+                btn.innerText = "📻 ラジオ OFF" + statusTag;
             }
         }
 
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
             
-            // ユーザーがボタンを押したこのタイミングで動画再生も確実に確定させる
+            // ユーザーが画面をタップしたこの瞬間に動画再生のロックを100%解除する
             startKeepAwakeVideo();
             
             if (!isRadioPlaying) {
@@ -411,7 +435,7 @@
                     hls.stopLoad(); 
                 }
                 isRadioPlaying = false;
-                btn.innerText = "📻 ラジオ OFF";
+                updateRadioBtnText();
                 btn.classList.remove('playing');
             }
         }
@@ -419,7 +443,7 @@
         function playAudioStream(btn) {
             radioAudio.play().then(() => {
                 isRadioPlaying = true;
-                btn.innerText = "📻 ラジオ ON";
+                updateRadioBtnText();
                 btn.classList.add('playing');
             }).catch(err => {
                 console.error("再生エラー:", err);
@@ -725,9 +749,16 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-        // 📺 最初の画面タッチ（クリックまたはスクロール開始）の瞬間に動画再生のブロックを確実に解除する
-        document.body.addEventListener('click', startKeepAwakeVideo, { once: true });
-        document.body.addEventListener('touchstart', startKeepAwakeVideo, { once: true });
+        // 🛑 ユーザーが画面上の「どこか」に触れた瞬間に動画ロックを確実に解除するイベント
+        document.addEventListener('click', () => { startKeepAwakeVideo(); }, { passive: true });
+        document.addEventListener('touchstart', () => { startKeepAwakeVideo(); }, { passive: true });
+
+        // 🔁 ブラウザによる動画のプチフリーズ・ループ停止バグへの対策（終了・中断時に強制再開）
+        const keepAwakeVid = document.getElementById('keep-awake-video');
+        if (keepAwakeVid) {
+            keepAwakeVid.addEventListener('ended', startKeepAwakeVideo);
+            keepAwakeVid.addEventListener('pause', startKeepAwakeVideo);
+        }
 
         async function autoScroll() {
             if (isPaused) return;
@@ -764,7 +795,8 @@
             await checkEmergencyEarthquakeAlert(); 
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
-            startKeepAwakeVideo(); // 初期化時に動画の再生を試みる
+            
+            startKeepAwakeVideo(); // 起動時に一度再生を試みる
 
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
@@ -772,6 +804,15 @@
 
         init();
         
+        // 5秒おきに動画プレイヤーの生存を監視し、ボタンのテキスト状態を維持・更新
+        setInterval(() => {
+            if (keepAwakeVid && (keepAwakeVid.paused || keepAwakeVid.ended)) {
+                startKeepAwakeVideo();
+            } else {
+                updateRadioBtnText();
+            }
+        }, 5000);
+
         setInterval(autoScroll, 30000); 
         
         setInterval(async () => {
@@ -786,7 +827,7 @@
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible') {
                 await requestWakeLock();
-                startKeepAwakeVideo(); // バックグラウンドから復帰した際にも動画再生を維持
+                startKeepAwakeVideo(); 
             }
         });
     </script>

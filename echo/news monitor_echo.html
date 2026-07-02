@@ -290,9 +290,22 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.2; }
         }
+
+        /* 📺 スリープ防止用のダミー動画（1px四方・ほぼ不可視） */
+        #keep-awake-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            pointer-events: none;
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
+    <video id="keep-awake-video" playsinline muted loop src="data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wStandardAAAC9bW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAAAAAD6AAAA+gBAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAMAdHJhawAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAD6AAAAAAAQAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAYRtZGlhAAAAWG1kaGNodegAAAAAAAAAAAAAAAAAAGQAAAZAAVcQAAAAAAAAMWhkaHIAAAAAAAAAAHZpZGVvAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAVxtaW5mAAAAFHZtaGinternalAAAAAAAAAAAAAAJGRpbmYAAAAccmVmZAAAAA11cmwgAAAAAQAAAU9zdGJsAAAAfHN0c2QAAAAAAAAAAQAAAGZidmMxAAAAAAABAAEAAAAAAAAAAAAAAAAAABgAGABAdHJhY2sAAABidXV1ZAAAAAAMYXZjQwH0AAr/AAAAFWhleGNvAAAAAAAAAAAAAAAAYnN0dHMAAAAAAAAAAQAAAAEAAAMYAAAAIHN0c3oAAAAAAAAAAAAAAAIAAAADAAAAAQAAAAEAAAAsc3RjbwAAAAAAAAACAAAAMgAAAGwAAABsc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAKHVkdGEAAABsbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRhdAAAAAAAAAAAAAAAAGNoZWMAAAAA"></video>
 
     <div id="emergency-alert-overlay">
         <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
@@ -356,8 +369,21 @@
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
+        // 📺 ダミー動画の再生を開始する関数
+        function startKeepAwakeVideo() {
+            const v = document.getElementById('keep-awake-video');
+            if (v) {
+                v.play().catch(err => {
+                    console.log("スリープ防止動画の自動再生が制限されました。ユーザー操作を待ちます。", err);
+                });
+            }
+        }
+
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
+            
+            // ユーザーがボタンを押したこのタイミングで動画再生も確実に確定させる
+            startKeepAwakeVideo();
             
             if (!isRadioPlaying) {
                 if (Hls.isSupported()) {
@@ -699,18 +725,18 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
+        // 📺 最初の画面タッチ（クリックまたはスクロール開始）の瞬間に動画再生のブロックを確実に解除する
+        document.body.addEventListener('click', startKeepAwakeVideo, { once: true });
+        document.body.addEventListener('touchstart', startKeepAwakeVideo, { once: true });
+
         async function autoScroll() {
             if (isPaused) return;
 
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // 🔄 50件の最後まで到達、またはこれ以上スクロールできない場合
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                // 📻 ラジオを一切止めずに、バックグラウンドでニュースデータだけを滑らかに更新
                 await updateNews(); 
-                
-                // インデックスとスクロール位置を初期位置（最上部）へスムーズに戻す
                 currentItemIndex = 0;
                 container.scrollTop = 0;
                 return;
@@ -738,6 +764,7 @@
             await checkEmergencyEarthquakeAlert(); 
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
+            startKeepAwakeVideo(); // 初期化時に動画の再生を試みる
 
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
@@ -759,6 +786,7 @@
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible') {
                 await requestWakeLock();
+                startKeepAwakeVideo(); // バックグラウンドから復帰した際にも動画再生を維持
             }
         });
     </script>

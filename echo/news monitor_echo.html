@@ -708,16 +708,17 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            // リロード / データ更新の条件判定
+            // 50件の最後まで読み進めた時の判定
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
                 if (isRadioPlaying) {
-                    // 【ラジオ再生中】音声を途切れさせないため、データ更新のみ行い先頭へ戻る
+                    // ラジオ再生中は裏側でデータ更新のみ行い、先頭へ
                     await updateNews(); 
                     currentItemIndex = 0;
                     container.scrollTop = 0;
                     return;
                 } else {
-                    // 【ラジオ停止中】メモリ解放などのためページ全体をリロード
+                    // 【ラジオ停止中】最後まで読み切った場合は記憶をクリアして完全リロード
+                    sessionStorage.removeItem('savedScrollIndex');
                     window.location.reload();
                     return;
                 }
@@ -746,14 +747,44 @@
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
 
-            window.scrollTo(0, 0);
-            if (container) container.scrollTop = 0;
+            // スリープ防止用の「スクロール位置復元機能」
+            const savedIndex = sessionStorage.getItem('savedScrollIndex');
+            if (savedIndex !== null) {
+                currentItemIndex = parseInt(savedIndex, 10);
+                sessionStorage.removeItem('savedScrollIndex');
+                
+                // ニュースが画面に描画されるのを少し待ってから該当位置へスクロール
+                setTimeout(() => {
+                    const items = container.querySelectorAll('.news-item');
+                    if (items[currentItemIndex]) {
+                        container.scrollTop = items[currentItemIndex].offsetTop - container.offsetTop;
+                    }
+                }, 500);
+            } else {
+                window.scrollTo(0, 0);
+                if (container) container.scrollTop = 0;
+            }
         }
 
         init();
         
         setInterval(autoScroll, 30000); 
         
+        // ブラウザや端末のスリープ設定（5分）が来る前に、4分ごとに現在位置を保ったままリロードしてスリープタイマーを強制リセット
+        setInterval(() => {
+            if (!isRadioPlaying && !isPaused) {
+                sessionStorage.setItem('savedScrollIndex', currentItemIndex);
+                window.location.reload();
+            }
+        }, 4 * 60 * 1000); // 4分 = 240,000ミリ秒
+        
+        // WakeLock（画面オン維持命令）を1分ごとに再要求して動作の安定性を強化
+        setInterval(async () => {
+            if (document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        }, 60000);
+
         setInterval(async () => {
             await checkTsunamiAlert();
             await checkEmergencyEarthquakeAlert();

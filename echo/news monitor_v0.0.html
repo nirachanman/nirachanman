@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK ニュースモニター（横幅完全固定版）</title>
+    <title>NHKニュースモニター</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <link rel="icon" href="data:,">
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
         :root { 
             --bg-color: #0b0f14;        
-            --accent-color: #696969;    
+            --accent-color: #696969;   
             --card-bg: #161c24;         
-            
             --text-gray-title: #90caf9; 
             --text-gray-desc: #b0bec5;  
-            
             --text-mint-title: #90caf9; 
             --text-mint-desc: #b0bec5;  
         }
         
-        /* 🎨 修正箇所①: 画面外枠（最上位）を物理画面幅（100vw）に絶対固定 */
         html, body {
             margin: 0;
             padding: 0;
             width: 100vw;
-            max-width: 100vw;
             height: 100vh;
             background-color: var(--bg-color);
             font-family: sans-serif;
@@ -41,78 +40,50 @@
             padding: 10px;
         }
         
-        /* 🎨 修正箇所②: ヘッダーも画面幅を超えないよう厳格にロック */
         header { 
-            border-bottom: 2px solid var(--accent-color); 
+            border-bottom: 3px solid var(--accent-color); 
             padding-bottom: 8px; 
             margin-bottom: 10px;
-            background-color: var(--bg-color);
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
         }
         
         .header-top { 
             display: flex; 
             align-items: center; 
+            justify-content: space-between;
             gap: 15px; 
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
         }
         
-        .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
-        h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        h1 { font-size: 1.2rem; margin: 0; color: #ffffff; white-space: nowrap; }
         
-        /* 🎨 修正箇所③: マーキーコンテナの高さ（Height）を固定し、中身を「絶対配置」にする土台にする */
-        .marquee-container { 
-            flex-grow: 1; 
-            height: 1.5rem;      /* 文字の高さ分の通り道を確保 */
-            overflow: hidden; 
-            white-space: nowrap; 
-            position: relative;  /* 中身をabsoluteにするための基準線 */
+        .radio-control { flex-shrink: 0; }
+        .radio-btn {
+            background-color: #263238;
+            color: #b0bec5;
+            border: 1px solid #455a64;
+            padding: 6px 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        
-        /* 🎨 修正箇所④: position: absolute を指定。
-           これにより、この長大な文字塊は「画面の横幅を押し広げる力」を完全に失い、
-           コンテナの枠内だけで大人しく流れるようになります（バグの根本原因を解消）。
-        */
-        .marquee-text { 
-            position: absolute;
-            left: 0;
-            top: 0;
-            display: inline-block; 
-            padding-left: 100%;                  
-            animation: scroll-x 120s linear infinite; 
-            font-size: 1.1rem; 
-            color: #ffffff; 
-        }
-        @keyframes scroll-x { 
-            0% { transform: translate(0, 0); } 
-            100% { transform: translate(-100%, 0); } 
+        .radio-btn.playing {
+            background-color: #00e676;
+            color: #000000;
+            border-color: #00e676;
         }
 
-        /* 🎨 修正箇所⑤: ニュースリストの横幅も画面幅から1pxもハミ出さないよう厳守 */
         #news-container { 
             overflow-y: auto;          
             scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
-            width: 100%;
-            max-width: 100%;
             height: 100%; 
-            box-sizing: border-box;
-            -webkit-overflow-scrolling: touch; 
         }
         
-        #news-container::-webkit-scrollbar {
-            display: none;
-        }
+        #news-container::-webkit-scrollbar { display: none; }
         
-        /* 🎨 変更箇所: 1pxの細い枠線（border）を追加し、破綻しないようbox-sizingを保証 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -120,63 +91,30 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #2f4f4f;     /* 四方に1pxの細い枠線を追加 */
-            border-left: 4px solid #2f4f4f; /* 左側の太線アクセントは維持 */
+            border: 1px solid #2f4f4f;     
+            border-left: 4px solid #2f4f4f; 
             gap: 8px;
-            flex-shrink: 0; 
-            box-sizing: border-box;         /* 枠線を追加しても幅がハミ出さないよう固定 */
-            width: 100%;               
         }
         
-        .news-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .news-title { 
-            font-size: 1.3rem; 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex-grow: 1;
-            font-weight: 400; 
-        }
-        
-        .news-time { 
-            font-size: 1.1rem; 
-            color: #607d8b; 
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .news-desc {
-            font-size: 1.1rem;
-            line-height: 1.5;
-            white-space: normal;       
-            word-wrap: break-word;     
-            text-overflow: clip;       
-            overflow: visible;         
-        }
-
-        .news-item:nth-child(odd) .news-title { color: var(--text-gray-title); }
-        .news-item:nth-child(odd) .news-desc { color: var(--text-gray-desc); }
-
-        .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
-        .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
+        .news-header-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .news-title { font-size: 1.3rem; font-weight: 400; color: var(--text-gray-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .news-time { font-size: 1.1rem; color: #607d8b; white-space: nowrap; }
+        .news-desc { font-size: 1.1rem; color: var(--text-gray-desc); line-height: 1.5; }
     </style>
 </head>
 <body>
+
     <header>
         <div class="header-top">
-            <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-                <h1>NHK 新着ニュース</h1>
-            </a>
-            <div class="marquee-container" id="marquee"></div>
+            <div class="header-left">
+                <h1>NHKニュース一覧</h1>
+            </div>
+            <div class="radio-control">
+                <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">📻 ラジオ OFF</button>
+            </div>
         </div>
     </header>
+
     <main id="news-container"></main>
 
     <script>
@@ -187,18 +125,35 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        let isPaused = false;
-        let wakeLock = null;
-        let resumeTimeout = null;
+        const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/8/joined/master.m3u8";
+        const radioAudio = new Audio();
+        let hls = null;
+        let isRadioPlaying = false;
+        let currentNewsUniqueItems = [];
         let currentItemIndex = 0; 
+        let lastRenderedNewsLength = 0;
 
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
+        function toggleRadio() {
+            const btn = document.getElementById('radio-toggle-btn');
+            if (!isRadioPlaying) {
+                if (Hls.isSupported()) {
+                    if (!hls) {
+                        hls = new Hls({ liveDurationInfinity: true });
+                        hls.loadSource(RADIO_STREAM_URL);
+                        hls.attachMedia(radioAudio);
+                    }
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => radioAudio.play().then(() => {
+                        isRadioPlaying = true;
+                        btn.innerText = "📻 ラジオ ON";
+                        btn.classList.add('playing');
+                    }));
                 }
-            } catch (err) {
-                console.error(err);
+            } else {
+                radioAudio.pause();
+                if (hls) hls.stopLoad();
+                isRadioPlaying = false;
+                btn.innerText = "📻 ラジオ OFF";
+                btn.classList.remove('playing');
             }
         }
 
@@ -206,133 +161,67 @@
             let allItems = [];
             for (const url of RSS_URLS) {
                 try {
-                    const targetUrl = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
-                    const res = await fetch(targetUrl);
+                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                     const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
                     for (let item of xml.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
-                        const description = descEl ? descEl.textContent : '';
-
                         allItems.push({
                             title: item.getElementsByTagName('title')[0].textContent,
                             link: item.getElementsByTagName('link')[0].textContent,
-                            description: description,
+                            description: descEl ? descEl.textContent : '',
                             pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
                         });
                     }
                 } catch (e) {}
             }
-            if (allItems.length === 0) return;
-
             allItems.sort((a, b) => b.pubDate - a.pubDate);
-            const unique = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+            currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+            refreshCards();
+        }
 
-            const marqueeCount = Math.min(unique.length, 15); 
-            let marqueeHtml = '<span class="marquee-text">';
-            for(let i = 0; i < marqueeCount; i++) {
-                marqueeHtml += `<a href="${unique[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${unique[i].title}</a>`;
-                if(i < marqueeCount - 1) {
-                    marqueeHtml += ' &nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp; '; 
-                }
-            }
-            marqueeHtml += '</span>';
-            document.getElementById('marquee').innerHTML = marqueeHtml;
-            
-            document.getElementById('news-container').innerHTML = unique.slice(0, 50).map(item => `
+        function refreshCards() {
+            const container = document.getElementById('news-container');
+            container.innerHTML = currentNewsUniqueItems.slice(0, 50).map(item => `
                 <a href="${item.link}" target="_blank" class="news-item">
                     <div class="news-header-row">
                         <div class="news-title">${item.title}</div>
-                        <div class="news-time">${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} ${String(item.pubDate.getHours()).padStart(2,'0')}:${String(item.pubDate.getMinutes()).padStart(2,'0')}</div>
+                        <div class="news-time">
+                            ${item.pubDate.getMonth()+1}/${item.pubDate.getDate()} 
+                            ${String(item.pubDate.getHours()).padStart(2, '0')}:${String(item.pubDate.getMinutes()).padStart(2, '0')}
+                        </div>
                     </div>
                     <div class="news-desc">${item.description}</div>
                 </a>
             `).join('');
-            
-            document.getElementById('news-container').scrollTop = 0;
-            currentItemIndex = 0;
         }
 
-        const container = document.getElementById('news-container');
-
-        function syncAndPauseScroll() {
-            isPaused = true;
-            clearTimeout(resumeTimeout);
-
-            const items = container.querySelectorAll('.news-item');
-            const containerTop = container.getBoundingClientRect().top;
-            
-            let closestIndex = 0;
-            let minDistance = Infinity;
-
-            items.forEach((item, index) => {
-                const rect = item.getBoundingClientRect();
-                const distance = Math.abs(rect.top - containerTop);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestIndex = index;
-                }
-            });
-            currentItemIndex = closestIndex;
-
-            resumeTimeout = setTimeout(() => {
-                isPaused = false;
-            }, 5000);
-        }
-
-        container.addEventListener('touchstart', syncAndPauseScroll, { passive: true });
-        container.addEventListener('touchmove', syncAndPauseScroll, { passive: true });
-        container.addEventListener('scroll', syncAndPauseScroll);
-        container.addEventListener('mousedown', () => isPaused = true);
-        container.addEventListener('mouseup', () => { isPaused = false; });
-
-        async function autoScroll() {
-            if (isPaused) return;
-
+        function autoScroll() {
+            const container = document.getElementById('news-container');
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                location.reload();
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
+                if (isRadioPlaying) {
+                    updateNews();
+                    currentItemIndex = 0;
+                    container.scrollTop = 0;
+                } else {
+                    window.location.reload();
+                }
                 return;
             }
 
             currentItemIndex += 3;
-            const targetItem = items[currentItemIndex];
-
-            if (targetItem) {
-                const containerTop = container.getBoundingClientRect().top;
-                const targetTop = targetItem.getBoundingClientRect().top;
-                
-                container.scrollTo({
-                    top: container.scrollTop + (targetTop - containerTop),
-                    behavior: 'smooth'
-                });
+            if (items[currentItemIndex]) {
+                container.scrollTo({ top: items[currentItemIndex].offsetTop - container.offsetTop, behavior: 'smooth' });
             }
         }
 
         async function init() {
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
-
             await updateNews();
-            await requestWakeLock();
-
-            window.scrollTo(0, 0);
-            if (container) {
-                container.scrollTop = 0;
-            }
+            setInterval(autoScroll, 30000);
         }
-
         init();
-        
-        setInterval(autoScroll, 30000); 
-        
-        document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                await requestWakeLock();
-            }
-        });
     </script>
 </body>
 </html>

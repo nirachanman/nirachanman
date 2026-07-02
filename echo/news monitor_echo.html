@@ -708,11 +708,19 @@
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // リロード / データ更新の条件判定
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20 || currentItemIndex + 3 >= items.length) {
-                await updateNews(); 
-                currentItemIndex = 0;
-                container.scrollTop = 0;
-                return;
+                if (isRadioPlaying) {
+                    // 【ラジオ再生中】音声を途切れさせないため、データ更新のみ行い先頭へ戻る
+                    await updateNews(); 
+                    currentItemIndex = 0;
+                    container.scrollTop = 0;
+                    return;
+                } else {
+                    // 【ラジオ停止中】メモリ解放などのためページ全体をリロード
+                    window.location.reload();
+                    return;
+                }
             }
 
             currentItemIndex += 3;

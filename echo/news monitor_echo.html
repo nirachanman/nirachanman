@@ -293,23 +293,9 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.2; }
         }
-
-        /* 📺 強化版スリープ防止：不透明度100%で実描画しつつ、背景色と同化させて隠す */
-        #keep-awake-video {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 2px;
-            height: 2px;
-            opacity: 1.0; 
-            background-color: var(--bg-color);
-            pointer-events: none;
-            z-index: 9999;
-        }
     </style>
 </head>
 <body>
-    <video id="keep-awake-video" playsinline muted loop src="data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAAAAG1wStandardNfYm9vdmYAAABsbXZoZAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAGd0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAGRtZGlhAAAAWG1kaGNodegAAAAAAAAAAAAAAAAAAGAAAAEAAAFVAAAAAAAAMWhkaHIAAAAAAAAAAHZpZGVvAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAVxtaW5mAAAAFHZtaGinternalAAAAAAAAAAAAAAJGRpbmYAAAAccmVmZAAAAA11cmwgAAAAAQAAAU1zdGJsAAAAfHN0c2QAAAAAAAAAAQAAAGZidmMxAAAAAAABAAEAAAAAAAAAAAAAAAAAABgAGABAdHJhY2sAAABidXV1ZAAAAAAMYXZjQwH0AAr/AAAAFWhleGNvAAAAAAAAAAAAAAAAYnN0dHMAAAAAAAAAAQAAAAEAAAEAAAAAIHN0c3oAAAAAAAAAAAAAAAIAAAADAAAAAQAAAAEAAAAsc3RjbwAAAAAAAAACAAAAMgAAAGwAAABsc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAKHVkdGEAAABsbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRhdAAAAAAAAAAAAAAAAGNoZWMAAAAA"></video>
 
     <div id="emergency-alert-overlay">
         <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
@@ -368,33 +354,34 @@
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
 
+        let isAwakeSystemActive = false; // スリープ防止のアクティブ状態
+
         const JMA_CODES = {
             "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
-        // 📺 動画再生を開始・維持する関数
-        function startKeepAwakeVideo() {
-            const v = document.getElementById('keep-awake-video');
-            if (v) {
-                v.play().then(() => {
-                    updateRadioBtnText(); // 再生成功時に表示を更新
-                }).catch(err => {
-                    console.log("動画再生が制限されました。タップを待ちます。");
-                });
+        // 🔄 スリープ防止ロジック（微小フェイクスクロール駆動）
+        function triggerFakeActivity() {
+            isAwakeSystemActive = true;
+            updateRadioBtnText();
+
+            // ユーザーが自ら操作している最中（isPaused=true）なら処理をスキップ
+            if (isPaused) return;
+
+            // 1pxだけスクロールさせて即座に戻す（ブラウザに人間が触っていると誤認させる）
+            if (container) {
+                const prevScroll = container.scrollTop;
+                container.scrollTop += 1;
+                setTimeout(() => {
+                    if (!isPaused && container) container.scrollTop = prevScroll;
+                }, 50);
             }
         }
 
-        // ボタンのテキスト表示を一括管理する関数
         function updateRadioBtnText() {
             const btn = document.getElementById('radio-toggle-btn');
-            const video = document.getElementById('keep-awake-video');
-            
-            let statusTag = "";
-            // 動画が正常に再生されている（＝スリープ防止中）かチェック
-            if (video && !video.paused && !video.ended) {
-                statusTag = " [スリープ防止中]";
-            }
+            let statusTag = isAwakeSystemActive ? " [スリープ防止中]" : "";
 
             if (isRadioPlaying) {
                 btn.innerText = "📻 ラジオ ON" + statusTag;
@@ -405,9 +392,7 @@
 
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
-            
-            // ユーザーが画面をタップしたこの瞬間に動画再生のロックを100%解除する
-            startKeepAwakeVideo();
+            triggerFakeActivity(); // ボタンタップでシステムを強制オン
             
             if (!isRadioPlaying) {
                 if (Hls.isSupported()) {
@@ -749,16 +734,9 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-        // 🛑 ユーザーが画面上の「どこか」に触れた瞬間に動画ロックを確実に解除するイベント
-        document.addEventListener('click', () => { startKeepAwakeVideo(); }, { passive: true });
-        document.addEventListener('touchstart', () => { startKeepAwakeVideo(); }, { passive: true });
-
-        // 🔁 ブラウザによる動画のプチフリーズ・ループ停止バグへの対策（終了・中断時に強制再開）
-        const keepAwakeVid = document.getElementById('keep-awake-video');
-        if (keepAwakeVid) {
-            keepAwakeVid.addEventListener('ended', startKeepAwakeVideo);
-            keepAwakeVid.addEventListener('pause', startKeepAwakeVideo);
-        }
+        // 🛑 ユーザーがタッチした瞬間にスリープ防止機能を覚醒・点灯
+        document.addEventListener('click', triggerFakeActivity, { passive: true });
+        document.addEventListener('touchstart', triggerFakeActivity, { passive: true });
 
         async function autoScroll() {
             if (isPaused) return;
@@ -795,8 +773,6 @@
             await checkEmergencyEarthquakeAlert(); 
             await checkIwateWeatherAlerts(); 
             await requestWakeLock();
-            
-            startKeepAwakeVideo(); // 起動時に一度再生を試みる
 
             window.scrollTo(0, 0);
             if (container) container.scrollTop = 0;
@@ -804,14 +780,8 @@
 
         init();
         
-        // 5秒おきに動画プレイヤーの生存を監視し、ボタンのテキスト状態を維持・更新
-        setInterval(() => {
-            if (keepAwakeVid && (keepAwakeVid.paused || keepAwakeVid.ended)) {
-                startKeepAwakeVideo();
-            } else {
-                updateRadioBtnText();
-            }
-        }, 5000);
+        // ⏰ 3秒に1回、超微細スクロール（フェイクアクティビティ）を発生させて端末の眠りを防ぐ
+        setInterval(triggerFakeActivity, 3000);
 
         setInterval(autoScroll, 30000); 
         
@@ -827,7 +797,7 @@
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible') {
                 await requestWakeLock();
-                startKeepAwakeVideo(); 
+                triggerFakeActivity();
             }
         });
     </script>

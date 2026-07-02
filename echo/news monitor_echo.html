@@ -420,7 +420,9 @@
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 50).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
-                        <div class="news-header-row"><div class="news-title">${item.title}</div><div class="news-time">${item.pubDate.getHours()}:${item.pubDate.getMinutes()}</div></div>
+                        <div class="news-header-row"><div class="news-title">${item.title}<div class="news-time">
+    ${String(item.pubDate.getHours()).padStart(2, '0')}:${String(item.pubDate.getMinutes()).padStart(2, '0')}
+</div></div></div>
                         <div class="news-desc">${item.description}</div>
                     </a>
                 `).join('');

@@ -189,6 +189,7 @@
             color: #ff77ff;
         }
 
+        /* 📺 ニュースカード背景：超高速（0.05秒周期）でRGB値を1つ分だけ明滅させ、ブラウザの描画エンジンを強制駆動 */
         .news-item { 
             display: flex; 
             flex-direction: column; 
@@ -202,6 +203,13 @@
             flex-shrink: 0; 
             box-sizing: border-box;         
             width: 100%; 
+            animation: force-render-glitch 0.05s infinite alternate linear;
+        }
+
+        /* 肉眼ではほぼ判別不能（#161c24 から #171d25 への極微細な変化） */
+        @keyframes force-render-glitch {
+            0% { background-color: #161c24; }
+            100% { background-color: #171d25; }
         }
         
         .news-header-row {
@@ -354,29 +362,18 @@
         let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
 
-        let isAwakeSystemActive = false; // スリープ防止のアクティブ状態
+        let isAwakeSystemActive = false;
 
         const JMA_CODES = {
             "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
             "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
         };
 
-        // 🔄 スリープ防止ロジック（微小フェイクスクロール駆動）
-        function triggerFakeActivity() {
+        // 🔄 常時稼働を明示するシステム激活
+        function activateAwakeSystem() {
             isAwakeSystemActive = true;
             updateRadioBtnText();
-
-            // ユーザーが自ら操作している最中（isPaused=true）なら処理をスキップ
-            if (isPaused) return;
-
-            // 1pxだけスクロールさせて即座に戻す（ブラウザに人間が触っていると誤認させる）
-            if (container) {
-                const prevScroll = container.scrollTop;
-                container.scrollTop += 1;
-                setTimeout(() => {
-                    if (!isPaused && container) container.scrollTop = prevScroll;
-                }, 50);
-            }
+            requestWakeLock();
         }
 
         function updateRadioBtnText() {
@@ -392,7 +389,7 @@
 
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
-            triggerFakeActivity(); // ボタンタップでシステムを強制オン
+            activateAwakeSystem(); 
             
             if (!isRadioPlaying) {
                 if (Hls.isSupported()) {
@@ -734,9 +731,9 @@
         container.addEventListener('mousedown', () => isPaused = true);
         container.addEventListener('mouseup', () => { if(document.getElementById('emergency-alert-overlay').style.display !== 'flex') isPaused = false; });
 
-        // 🛑 ユーザーがタッチした瞬間にスリープ防止機能を覚醒・点灯
-        document.addEventListener('click', triggerFakeActivity, { passive: true });
-        document.addEventListener('touchstart', triggerFakeActivity, { passive: true });
+        // タッチ操作によりシステム起動
+        document.addEventListener('click', activateAwakeSystem, { passive: true });
+        document.addEventListener('touchstart', activateAwakeSystem, { passive: true });
 
         async function autoScroll() {
             if (isPaused) return;
@@ -780,9 +777,6 @@
 
         init();
         
-        // ⏰ 3秒に1回、超微細スクロール（フェイクアクティビティ）を発生させて端末の眠りを防ぐ
-        setInterval(triggerFakeActivity, 3000);
-
         setInterval(autoScroll, 30000); 
         
         setInterval(async () => {
@@ -797,7 +791,7 @@
         document.addEventListener('visibilitychange', async () => {
             if (document.visibilityState === 'visible') {
                 await requestWakeLock();
-                triggerFakeActivity();
+                activateAwakeSystem();
             }
         });
     </script>

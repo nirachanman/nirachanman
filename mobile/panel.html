@@ -10,7 +10,7 @@
   --nhk-blue: #004080;
   --nhk-light-blue: #1E88E5;
   --nhk-bg: #F5F5F5;
-  --card-bg: #FFFFFF;
+  --card-bg: #fef4f4;
   --accent: #1565C0;
 }
 
@@ -156,7 +156,7 @@ button:disabled {
 ------------------------- */
 .list {
   overflow-y: auto;
-  max-height: calc(100vh - 240px);
+  max-height: calc(100vh - 210px);
   background: #E0F7FA;
   border-radius: 6px;
   padding: 6px;
@@ -177,7 +177,7 @@ button:disabled {
 
 .list div.active {
   border: 2px solid var(--nhk-light-blue);
-  background: #E6F0FF;
+  background: #fffef2;
   font-weight: bold;
   color: var(--nhk-blue);
   border-left: 6px solid var(--nhk-light-blue);
@@ -187,10 +187,10 @@ button:disabled {
    Echo Show 8
 ------------------------- */
 @media (min-width: 800px) {
-  button { font-size: 18px; padding: 10px 16px; }
+  button { font-size: 18px; padding: 4px 2px; }
   .title { font-size: 18px; }
-  .player-card audio { height: 60px; }
-  .list div { padding: 16px; font-size: 18px; }
+  .player-card audio { height: 40px; }
+  .list div { padding: 10px; font-size: 18px; }
 }
 </style>
 </head>

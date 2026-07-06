@@ -242,19 +242,42 @@ function toDateKey(pubDateStr) {
 ------------------------- */
 async function fetchFeed() {
 
-  const RSS_LIST = [
-    { name: "NHKラジオニュース", url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml" },
-    { name: "杉田デスクと考える みんなのＮらじ NHKラジオ「Nらじ」", url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml" },
-    { name: "Nらじ・お～日本と世界のいま～ NHKラジオ「Nらじ」", url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml" },
-    { name: "マイ！Ｂｉｚ＆政治の現場 ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml" },
-    { name: "ワールドリポート ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml" },
-    { name: "健康ライフ ＮＨＫラジオ「マイあさ！」", url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml" },
-    { name: "文化放送ニュースパレード", url: "https://www.omnycontent.com/d/playlist/92f07af0-df9c-498e-a68a-ab4201477bd9/53510f47-30f6-4032-9b72-aeca00662d2b/91bdcf3c-d83b-43f5-98b3-aeca0066c8a2/podcast.rss" }
-  ];
+  // ★ ここに追加したい RSS を並べるだけで拡張できます
+const RSS_LIST = [
+  {
+    name: "NHKラジオニュース",
+    url: "https://www.nhk.or.jp/s-media/news/podcast/list/v1/all.xml"
+  },
+  {
+    name: "杉田デスクと考える　みんなのＮらじ　NHKラジオ「Nらじ」",
+    url: "https://www.nhk.or.jp/s-media/F771/podcast/list/v1/all.xml"
+  },
+  {
+    name: "Nらじ・お～日本と世界のいま～　NHKラジオ「Nらじ」",
+    url: "https://www.nhk.or.jp/s-media/F532/podcast/list/v1/all.xml"
+  },
+  {
+    name: "マイ！Ｂｉｚ＆政治の現場　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F867/podcast/list/v1/all.xml"
+  },
+  {
+    name: "ワールドリポート　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F519/podcast/list/v1/all.xml"
+  },
+  {
+    name: "健康ライフ　ＮＨＫラジオ「マイあさ！」",
+    url: "https://www.nhk.or.jp/s-media/F527/podcast/list/v1/all.xml"
+  }
+
+  // ★ 他局を追加したい場合はここに追加
+  // { name: "TBSラジオ", url: "https://example.com/tbs.xml" },
+  // { name: "文化放送", url: "https://example.com/qrr.xml" },
+];
 
   try {
     const allItems = [];
 
+    // ★ RSS を並列取得
     const results = await Promise.all(
       RSS_LIST.map(feed =>
         fetch(feed.url)
@@ -264,6 +287,7 @@ async function fetchFeed() {
       )
     );
 
+    // ★ RSS をパースして統合
     results.forEach(result => {
       if (!result) return;
 
@@ -283,7 +307,7 @@ async function fetchFeed() {
           "";
 
         allItems.push({
-          source: feed.name,
+          source: feed.name,   // ★ どの局のニュースか
           title,
           url,
           pubDate: pub,
@@ -292,15 +316,20 @@ async function fetchFeed() {
       });
     });
 
+    // ★ 日付順にソート（新しい順）
     items = allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-    buildDateSelect();
+    // ★ UI更新（既存コードをそのまま利用）
+    buildDateFilter();
+
+    const firstBtn = document.querySelector(".date-btn");
+    if (firstBtn) firstBtn.click();
 
   } catch (e) {
     alert("ニュースの取得に失敗しました");
   }
 }
-  
+
 /* -------------------------
    日付フィルタ生成
 ------------------------- */

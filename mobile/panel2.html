@@ -240,7 +240,7 @@ function toDateKey(pubDateStr) {
 }
 
 /* -------------------------
-   RSS取得（複数RSS統合版）
+   RSS取得（複数RSS統合版 - 過去2週間に制限）
 ------------------------- */
 async function fetchFeed() {
 
@@ -260,6 +260,9 @@ async function fetchFeed() {
 
   try {
     const allItems = [];
+    
+    // ★ 現在時刻から2週間前（14日間）のタイムスタンプを算出
+    const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
 
     const results = await Promise.all(
       RSS_LIST.map(feed =>
@@ -278,14 +281,21 @@ async function fetchFeed() {
       const entries = [...doc.querySelectorAll("item")];
 
       entries.forEach(e => {
+        const pub =
+          e.querySelector("pubDate")?.textContent ||
+          e.querySelector("dc:date")?.textContent ||
+          "";
+          
+        // ★ 日付の妥当性チェックと2週間以内かどうかの判定を追加
+        const pubTimestamp = Date.parse(pub);
+        if (isNaN(pubTimestamp) || pubTimestamp < twoWeeksAgo) {
+          return; // 2週間より古い、または日時が解析できない場合はスキップ
+        }
+
         const title = e.querySelector("title")?.textContent || "";
         const url =
           e.querySelector("enclosure")?.getAttribute("url") ||
           e.querySelector("link")?.textContent ||
-          "";
-        const pub =
-          e.querySelector("pubDate")?.textContent ||
-          e.querySelector("dc:date")?.textContent ||
           "";
 
         allItems.push({
@@ -306,7 +316,6 @@ async function fetchFeed() {
     alert("ニュースの取得に失敗しました");
   }
 }
-
 /* -------------------------
    日付フィルタ（プルダウン）
 ------------------------- */

@@ -274,8 +274,8 @@
             for (const url of RSS_URLS) {
                 try {
                     const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
-                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-                    for (let item of xml.getElementsByTagName('item')) {
+                    const rdf = new DOMParser().parseFromString(await res.text(), 'text/rdf');
+                    for (let item of rdf.getElementsByTagName('item')) {
                         const descEl = item.getElementsByTagName('description')[0];
                         allItems.push({
                             title: item.getElementsByTagName('title')[0].textContent,

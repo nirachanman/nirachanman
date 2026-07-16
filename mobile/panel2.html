@@ -201,12 +201,12 @@ button:disabled {
   NHKラジオニュース&PodCastを連続再生
 </div>
 
-<div class="player-container">
-  <div class="controls">
-    <button id="prev">⬅️ 前へ</button>
-    <div id="title" class="title">ニュースを選択してください</div>
-    <button id="next">➡️ 後へ</button>
-  </div>
+<div class="controls">
+  <button id="prev">⏮️ 前に戻る</button>   <!-- 古いニュースへ -->
+  <div id="title" class="title">ニュースを選択してください</div>
+  <button id="next">⏭️ 次に進む</button>   <!-- 最新ニュースへ -->
+</div>
+
 
   <div class="player-card">
     <audio id="audio" controls></audio>
@@ -412,21 +412,11 @@ function updateListHighlight() {
 /* -------------------------
    前後ボタン
 ------------------------- */
-document.getElementById('prev').onclick = () => {
-  if (disabled) return;
-  if (index > 0) {
-    index--;
-    playCurrent();
-  } else alert('最初のニュースです');
-};
-
-document.getElementById('next').onclick = () => {
-  if (disabled) return;
-  if (index < items.length - 1) {
-    index++;
-    playCurrent();
-  } else alert('最後のニュースです');
-};
+<div class="controls">
+  <button id="prev">⏮️ 前に戻る</button>   <!-- 古いニュースへ -->
+  <div id="title" class="title">ニュースを選択してください</div>
+  <button id="next">⏭️ 次に進む</button>   <!-- 最新ニュースへ -->
+</div>
 
 /* -------------------------
    再生終了時（6件ループ）

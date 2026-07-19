@@ -2,97 +2,391 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</title>
-<meta name="keywords" content="ページのキーワードA,B,C">
-<meta name="description" content="ページの説明">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="index.css">
+<title>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</title>
+<style>
+  :root {
+    --bg-color: #121214;
+    --card-bg: #1e1e24;
+    --text-color: #e0e0e6;
+    --text-muted: #a0a0aa;
+    --primary-color: #00c853; /* ニラグリーン */
+    --accent-blue: #00b0ff;   /* ラジオ系 */
+    --accent-purple: #aa00ff; /* メニュー系 */
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    padding: 20px 10px;
+  }
+
+  #outer {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px 0 30px;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h2.section-title {
+    font-size: 1.2rem;
+    margin: 30px 0 15px;
+    padding-left: 10px;
+    border-left: 4px solid var(--primary-color);
+    color: #fff;
+  }
+
+  h2.section-title.radio { border-left-color: var(--accent-blue); }
+  h2.section-title.menu { border-left-color: var(--accent-purple); }
+
+  /* タイルグリッドのベース */
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* タイル（カード）のスタイル */
+  .tile {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #2a2a32;
+    position: relative;
+  }
+
+  .tile:active {
+    transform: scale(0.98);
+  }
+
+  @media (min-width: 768px) {
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+  }
+
+  /* カード内のリンクを全面に広げる */
+  .tile a {
+    display: block;
+    padding: 20px;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .tile-header {
+    font-size: 1.05rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #fff;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  /* カテゴリごとの文字色変化 */
+  .cal-group .tile-header { color: var(--primary-color); }
+  .radio-group .tile-header { color: var(--accent-blue); }
+  .menu-group .tile-header { color: var(--accent-purple); }
+
+  .tile-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* ギットハブ用の特別ボタンタイル */
+  .tile.btn-tile {
+    cursor: pointer;
+  }
+
+  /* フッター */
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding: 20px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid #2a2a32;
+  }
+
+  #pagetop {
+    margin-bottom: 15px;
+  }
+
+  #pagetop a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: var(--card-bg);
+    border-radius: 50%;
+    border: 1px solid #2a2a32;
+  }
+
+  #pagetop svg path {
+    fill: var(--text-muted);
+  }
+
+  /* スマホ用の微調整 (画面幅が狭い時) */
+  @media (max-width: 480px) {
+    .tile-grid {
+      grid-template-columns: 1fr; /* 縦1列にすっきり並べる */
+      gap: 12px;
+    }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
 </head>
 <body>
 <div id="outer">
-<div id="inner">
-<header><h1>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</h1>
-</header>
-<main>
-<!-- 
-<h2>記事ページ見出し・大</h2>
-<p>文章あれこれ</p>
-<h3>記事ページ見出し・中</h3>
-<p>文章あれこれ</p>
- -->
-<h4><li><a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">☆Googleスプレッドシート</a></li></h4>
-<p>Googleカレンダーに同期・更新・削除</p>
 
-<h4><li><a href="events/calendar_kouminkan.html">☆ 川口公民館カレンダー（Google カレンダー連携）「undisclosed」</a></li></h4>
-<p>calendar_kouminkan.html</p>
+  <header>
+    <h1>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</h1>
+  </header>
 
- <h4><li><a href="events/calendar_taiikukan.html">☆ 川口社会体育館 カレンダー「undisclosed」</a></li></h4>
-<p>川口社会体育館 カレンダー</p>
- 
-<h4><li><a href="events/calendar_all2.html">☆ 全（公民館・体育館・別館）「undisclosed」</a></li></h4>
-<p>calendar_all2.html</p>
+  <main>
+    <!-- カレンダー・施設関連 -->
+    <h2 class="section-title">📅 施設カレンダー & スプレッドシート</h2>
+    <div class="tile-grid cal-group">
 
-<h4><li><a href="events/calendar.html">☆ 施設カレンダー</a></li></h4>
-<p>施設カレンダーごとに印刷</p>
+      <div class="tile">
+        <a href="events/calendar_all2.html">
+          <div class="tile-header">📅 全施設の予定表</div>
+          <div class="tile-desc">（公民館・体育館・別館）</div>
+        </a>
+      </div>
 
-<h4><li><a href="events/calendar-gym1.html">☆ 社会体育館 日程表1</a></li></h4>
-<p>calendar_gym1.html</p>
- 
-<h4><li><a href="events/calendar-gym2.html">☆ 社会体育館 日程表2</a></li></h4>
-<p>calendar_gym2.html</p>
- 
-<h4><li><a href="events/calendar-gym3.html">☆ 社会体育館 日程表3 1200px</a></li></h4>
-<p>calendar-gym3.html</p>
+      <div class="tile">
+        <a href="events/calendar-gym1.html">
+          <div class="tile-header">🗓️ 社会体育館 日程表1</div>
+          <div class="tile-desc">当月から2か月先までの予定表</div>
+        </a>
+      </div>
 
-<h4><li><a href="events/calendar-gym4.html">☆社会体育館 日程表4</a></li></h4>
-<p>川口地区社会体育館</p> 
-</main>
-<aside>
-<div class="title">RadioPlayer.html</div>
-<ul>
-<li><a href="echo/EchoRadioPlayer.html">Echo Radio Player</a></li>
-<li><a href="echo/radiolive1.html">Deep Blue Radio - Sleep Timer</a></li>
-<li><a href="echo/radiolive1.html">韮ちゃん Stream Radio</a></li>
-<li><a href="echo/NHK LIVE Player.html">地域別 NHK「LIVE」</a></li>
- <li><a href="mobile/localradio.html">Internet Local Radio Player</a></li>
-<li><a href="mobile/panel.html">NHKラジオPodcastをリピート再生</a></li>
-<li><a href="mobile/panel2.html">NHKラジオニュースをEchoで連続再生</a></li>
-<li><a href="mobile/panel4.html">NHKラジオニュースをfire tvで連続再生</a></li> 
-<li><a href="echo/news monitor_echoFM.html">NHK News&FM echoMonitor</a></li>
-<li><a href="echo/news monitor_echoAM.html">NHK News&AM echoMonitor</a></li> 
-<li><a href="echo/news monitor_fireFM.html">NHK News&FM fireMonitor</a></li>
-<li><a href="echo/news monitor_fireAM.html">NHK News&AM fireMonitor</a></li>
-<li>記事ページへのリンク</li>
-</ul>
-</aside>
-<aside>
-<div class="title">menu</div>
-<ul>
-<li><a href="events/calendar-gym1.html">社会体育館 日程表</a></li>
-<li><a href="events/calendar_all1.html">calendar_all1.html</a></li>
-<li><a href="tile_index.html">tile_index.html</a></li>
-<li><a href="events/calendar.html">calendar.html</a></li>
-<li><a href="events/calendar_shisethu.html">shisethu</a></li>
-<li><a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-<button onclick="window.open('https://github.com/', '_blank')">GitHub</button>
-<li><a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">Googleスプレッドシートで予定を同期する</a></li>
- <p>GoogleスプレッドシートでGoogleカレンダーに予定を同期</p>
-</ul>
-</aside>
-<footer>
-<div id="pagetop">
-<a href="#outer"><svg viewBox="0 0 24 24" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg">
-<path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z" fill="#999"/></svg></a>
+      <div class="tile">
+        <a href="events/calendar-gym2.html">
+          <div class="tile-header">🗓️ 社会体育館 日程表2</div>
+          <div class="tile-desc">月切り替え予定表</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar_kouminkan.html">
+          <div class="tile-header">📅 川口公民館カレンダー</div>
+          <div class="tile-desc">印刷レイアウト</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar_taiikukan.html">
+          <div class="tile-header">🗓️ 川口社会体育館 カレンダー</div>
+          <div class="tile-desc">印刷レイアウト</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar.html">
+          <div class="tile-header">📅 施設カレンダー</div>
+          <div class="tile-desc">施設ごとに印刷</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar-gym3.html">
+          <div class="tile-header">🗓️ 社会体育館 日程表3 (1200px)</div>
+          <div class="tile-desc"> 横(1200px)</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <div class="tile-header">Googleスプレッドシート連携</div>
+          <div class="tile-desc">Googleカレンダーに予定を同期</div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ラジオプレイヤー関連 -->
+    <h2 class="section-title radio">📻 RadioPlayer.html</h2>
+    <div class="tile-grid radio-group">
+
+      <div class="tile">
+        <a href="echo/EchoRadioPlayer.html">
+          <div class="tile-header">Echo Radio Player</div>
+          <div class="tile-desc">Sleep Timer</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/radiolive1.html">
+          <div class="tile-header">Deep Blue Radio</div>
+          <div class="tile-desc">Deep Blue Radio</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="mobile/localradio.html">
+          <div class="tile-header">Internet Local Radio Player</div>
+          <div class="tile-desc">調整中</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/NHK LIVE Player.html">
+          <div class="tile-header">地域別 NHK「LIVE」</div>
+          <div class="tile-desc">全国のローカル放送</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="mobile/panel.html">
+          <div class="tile-header">NHKラジオPodcast</div>
+          <div class="tile-desc">NHKラジオニュースをリピート再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="mobile/panel2.html">
+          <div class="tile-header">NHKラジオニュース</div>
+          <div class="tile-desc">EchoでNHKラジオニュースを再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="mobile/panel4.html">
+          <div class="tile-header">NHKラジオニュース</div>
+          <div class="tile-desc">fire tvでNHKラジオニュースを再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/news monitor_echoFM.html">
+          <div class="tile-header">NHK News&FM echoMonitor</div>
+          <div class="tile-desc">EchoでラジオFM放送再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/news monitor_echoAM.html">
+          <div class="tile-header">NHK News&AM echoMonitor</div>
+          <div class="tile-desc">EchoでラジオAM放送再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/news monitorFM.html">
+          <div class="tile-header">NHK News&FM fire tvFM</div>
+          <div class="tile-desc">fire tvでラジオFM放送再生</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="echo/news monitorAM.html">
+          <div class="tile-header">NHK News&AM fire tvAM</div>
+          <div class="tile-desc">fire tvでラジオAM放送再生</div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- その他メニュー -->
+    <h2 class="section-title menu">🛠️ Menu / Links（表示テスト用）</h2>
+    <div class="tile-grid menu-group">
+
+      <div class="tile">
+        <a href="events/calendar-gym1.html">
+          <div class="tile-header">社会体育館 日程表</div>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar_all1.html">
+          <div class="tile-header">calendar_all1.html</div>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="tile_index.html">
+          <div class="tile-header">tile_index.html</div>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar.html">
+          <div class="tile-header">calendar.html</div>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="events/calendar_shisethu.html">
+          <div class="tile-header">shisethu</div>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile btn-tile" onclick="window.open('https://github.com/', '_blank')">
+        <a href="https://github.com/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">
+          <div class="tile-header">GitHubで管理状況を確認 ↗</div>
+          <div class="tile-desc">別タブで開きます</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <div class="tile-header">Googleスプレッドシート連携</div>
+          <div class="tile-desc">GoogleスプレッドシートでGoogleカレンダーに予定を同期</div>
+        </a>
+      </div>
+
+      <div class="tile">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <div class="tile-header">☆ Googleスプレッドシート</div>
+          <div class="tile-desc">Googleカレンダーに同期・更新・削除</div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div id="pagetop">
+      <a href="#outer" aria-label="ページトップへ戻る">
+        <svg viewBox="0 0 24 24" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/>
+        </svg>
+      </a>
+    </div>
+    &copy; 2026 nirachamamn
+  </footer>
+
 </div>
-© 2025 nirachamamn
-</footer>
-</div></div>
 </body>
-
 </html>
-
-
-
-
-
-

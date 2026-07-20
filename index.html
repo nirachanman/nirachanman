@@ -60,7 +60,6 @@
   h2.section-title.radio { border-left-color: var(--accent-blue); }
   h2.section-title.menu { border-left-color: var(--accent-purple); }
 
-  /* タイルグリッドのベース */
   .tile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -73,7 +72,7 @@
     background-color: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid var(--border-color);
     position: relative;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
@@ -81,14 +80,12 @@
 
   .tile:active {
     transform: scale(0.98);
-    background-color: #f1f3f5;
   }
 
   @media (min-width: 768px) {
     .tile:hover {
       transform: translateY(-4px);
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-      border-color: #ced4da;
     }
   }
 
@@ -101,23 +98,50 @@
     color: inherit;
   }
 
-  .tile-header {
+  /* ご提示いただいたイメージをベースにした新ボタンクラス */
+  .tile-btn {
+    display: block;
+    text-align: center;
+    background-color: #eee; /* デフォルトの薄いグレー */
+    color: #111;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 10px;
     font-size: 1.15rem;
     font-weight: 500;
-    margin-bottom: 6px;
-    color: var(--text-color);
-    display: flex;
-    align-items: flex-start;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 10px; /* 中央寄せと下部への余白 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: background-color 0.2s, color 0.2s;
   }
 
-  /* カテゴリごとの文字色変化 */
-  .cal-group .tile-header { color: var(--primary-color); }
-  .radio-group .tile-header { color: var(--accent-blue); }
-  .menu-group .tile-header { color: var(--accent-purple); }
+  /* 各カテゴリごとにボタンの色味を変更して見やすく */
+  .cal-group .tile-btn {
+    background-color: #e8f5e9; /* 薄い緑 */
+    color: var(--primary-color);
+  }
+  .radio-group .tile-btn {
+    background-color: #e1f5fe; /* 薄い青 */
+    color: var(--accent-blue);
+  }
+  .menu-group .tile-btn {
+    background-color: #f3e5f5; /* 薄い紫 */
+    color: var(--accent-purple);
+  }
+
+  /* タイルホバー時にボタンの色を少し濃くして目立たせる効果 */
+  @media (min-width: 768px) {
+    .cal-group .tile:hover .tile-btn { background-color: var(--primary-color); color: #fff; }
+    .radio-group .tile:hover .tile-btn { background-color: var(--accent-blue); color: #fff; }
+    .menu-group .tile:hover .tile-btn { background-color: var(--accent-purple); color: #fff; }
+  }
 
   .tile-desc {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
+    text-align: center; /* 説明文も中央寄せに */
   }
 
   /* ギットハブ用の特別ボタンタイル */
@@ -125,7 +149,6 @@
     cursor: pointer;
   }
 
-  /* フッター */
   footer {
     text-align: center;
     margin-top: 60px;
@@ -155,10 +178,9 @@
     fill: var(--text-muted);
   }
 
-  /* スマホ用の微調整 (画面幅が狭い時) */
   @media (max-width: 480px) {
     .tile-grid {
-      grid-template-columns: 1fr; /* 縦1列にすっきり並べる */
+      grid-template-columns: 1fr;
       gap: 12px;
     }
     header h1 { font-size: 1.5rem; }
@@ -179,56 +201,56 @@
 
       <div class="tile">
         <a href="events/calendar_all2.html">
-          <div class="tile-header">📅 全施設の予定表</div>
+          <button class="tile-btn">📅 全施設の予定表</button>
           <div class="tile-desc">（公民館・体育館・別館）</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar-gym1.html">
-          <div class="tile-header">🗓️ 社会体育館 日程表1</div>
+          <button class="tile-btn">🗓️ 社会体育館 日程表1</button>
           <div class="tile-desc">当月から2か月先までの予定表</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar-gym2.html">
-          <div class="tile-header">🗓️ 社会体育館 日程表2</div>
+          <button class="tile-btn">🗓️ 社会体育館 日程表2</button>
           <div class="tile-desc">月切り替え予定表</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar_kouminkan.html">
-          <div class="tile-header">📅 川口公民館</div>
+          <button class="tile-btn">📅 川口公民館印刷</button>
           <div class="tile-desc">印刷レイアウト</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar_taiikukan.html">
-          <div class="tile-header">🗓️ 川口社会体育館</div>
+          <button class="tile-btn">🗓️ 川口社会体育館印刷</button>
           <div class="tile-desc">印刷レイアウト</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar.html">
-          <div class="tile-header">📅 施設カレンダー</div>
+          <button class="tile-btn">📅 施設カレンダー印刷</button>
           <div class="tile-desc">施設ごとに印刷</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar-gym3.html">
-          <div class="tile-header">🗓️ 社会体育館 日程表3</div>
+          <button class="tile-btn">🗓️ 社会体育館 日程表3</button>
           <div class="tile-desc"> 横(1200px)</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <div class="tile-header">Googleスプレッドシート ↗</div>
+          <button class="tile-btn">スプレッドシート連携 ↗</button>
           <div class="tile-desc">Googleカレンダーに予定を同期</div>
         </a>
       </div>
@@ -241,77 +263,77 @@
 
       <div class="tile">
         <a href="echo/EchoRadioPlayer.html">
-          <div class="tile-header">Echo Radio Player</div>
+          <button class="tile-btn">Echo Radio Player</button>
           <div class="tile-desc">Sleep Timer</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/radiolive1.html">
-          <div class="tile-header">Deep Blue Radio</div>
+          <button class="tile-btn">Deep Blue Radio</button>
           <div class="tile-desc">Deep Blue Radio</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="mobile/localradio.html">
-          <div class="tile-header">Internet Local Radio Player</div>
+          <button class="tile-btn">Internet Local Radio Player</button>
           <div class="tile-desc">調整中</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/NHK LIVE Player.html">
-          <div class="tile-header">地域別 NHK「LIVE」</div>
+          <button class="tile-btn">地域別 NHK「LIVE」</button>
           <div class="tile-desc">全国のローカル放送局</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="mobile/panel.html">
-          <div class="tile-header">NHKラジオPodcast</div>
+          <button class="tile-btn">NHKラジオPodcast</button>
           <div class="tile-desc">ニュースをリピート再生</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="mobile/panel2.html">
-          <div class="tile-header">NHKラジオニュース [Echo]</div>
+          <button class="tile-btn">NHKラジオニュース [Echo]</button>
           <div class="tile-desc">Podcastニュースを再生</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="mobile/panel4.html">
-          <div class="tile-header">NHKラジオニュース [fire tv]</div>
+          <button class="tile-btn">NHKラジオニュース [fire tv]</button>
           <div class="tile-desc">Podcastニュースを再生</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/news monitor_echoFM.html">
-          <div class="tile-header">News_text monitor [Echo]</div>
+          <button class="tile-btn">News_text monitor [Echo]</button>
           <div class="tile-desc">ニュースモニター&FM</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/news monitor_echoAM.html">
-          <div class="tile-header">News_text monitor [Echo]</div>
+          <button class="tile-btn">News_text monitor [Echo]</button>
           <div class="tile-desc">ニュースモニター&AM防災</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/news monitor_fireFM.html">
-          <div class="tile-header">News_text monitor [fire tv]</div>
+          <button class="tile-btn">News_text monitor [fire tv]</button>
           <div class="tile-desc">ニュースモニター&FM</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/news monitor_fireAM.html">
-          <div class="tile-header">News_text monitor [fire tv]</div>
+          <button class="tile-btn">News_text monitor [fire tv]</button>
           <div class="tile-desc">ニュースモニター&AM防災</div>
         </a>
       </div>
@@ -324,56 +346,56 @@
 
       <div class="tile">
         <a href="events/calendar-gym1.html">
-          <div class="tile-header">社会体育館 日程表</div>
+          <button class="tile-btn">社会体育館 日程表</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar_all1.html">
-          <div class="tile-header">calendar_all1.html</div>
+          <button class="tile-btn">calendar_all1.html</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="tile_index.html">
-          <div class="tile-header">tile_index.html</div>
+          <button class="tile-btn">tile_index.html</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar.html">
-          <div class="tile-header">calendar.html</div>
+          <button class="tile-btn">calendar.html</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="events/calendar_shisethu.html">
-          <div class="tile-header">shisethu</div>
+          <button class="tile-btn">shisethu</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
       <div class="tile btn-tile" onclick="window.open('https://github.com/', '_blank')">
         <a href="https://github.com/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">
-          <div class="tile-header">GitHubで管理状況を確認 ↗</div>
+          <button class="tile-btn">GitHubで管理状況を確認 ↗</button>
           <div class="tile-desc">別タブで開きます</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <div class="tile-header">スプレッドシートに連携 ↗</div>
-          <div class="tile-desc">Googleカレンダーに予定を同期</div>
+          <button class="tile-btn">Googleスプレッドシート ↗</button>
+          <div class="tile-desc">予定を同期・更新・削除</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <div class="tile-header">☆ Googleスプレッドシート ↗</div>
+          <button class="tile-btn">☆ Googleスプレッドシート ↗</button>
           <div class="tile-desc">同期・更新・削除</div>
         </a>
       </div>

@@ -98,26 +98,26 @@
     color: inherit;
   }
 
-  /* ご提示いただいたイメージをベースにした新ボタンクラス */
+  /* ボタン風デザインの調整クラス */
   .tile-btn {
     display: block;
     text-align: center;
-    background-color: #eee; /* デフォルトの薄いグレー */
+    background-color: #eee; 
     color: #111;
     border: none;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 10px;
-    font-size: 1.15rem;
-    font-weight: 500;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
     width: 100%;
     max-width: 340px;
-    margin: 0 auto 10px; /* 中央寄せと下部への余白 */
+    margin: 0 auto 12px; /* 中央寄せと説明文へのマージン */
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
   }
 
-  /* 各カテゴリごとにボタンの色味を変更して見やすく */
+  /* 各カテゴリごとにボタンの色味を変更 */
   .cal-group .tile-btn {
     background-color: #e8f5e9; /* 薄い緑 */
     color: var(--primary-color);
@@ -131,11 +131,28 @@
     color: var(--accent-purple);
   }
 
-  /* タイルホバー時にボタンの色を少し濃くして目立たせる効果 */
+  /* タイルホバー時にボタンの色とスタイルが美しく反転する効果 */
   @media (min-width: 768px) {
-    .cal-group .tile:hover .tile-btn { background-color: var(--primary-color); color: #fff; }
-    .radio-group .tile:hover .tile-btn { background-color: var(--accent-blue); color: #fff; }
-    .menu-group .tile:hover .tile-btn { background-color: var(--accent-purple); color: #fff; }
+    .cal-group .tile:hover .tile-btn { 
+      background-color: var(--primary-color); 
+      color: #fff; 
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    }
+    .radio-group .tile:hover .tile-btn { 
+      background-color: var(--accent-blue); 
+      color: #fff; 
+      box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
+    }
+    .menu-group .tile:hover .tile-btn { 
+      background-color: var(--accent-purple); 
+      color: #fff; 
+      box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
+    }
+  }
+
+  /* スマホ等でのタップ時のボタンプッシュ感 */
+  .tile:active .tile-btn {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   .tile-desc {
@@ -277,7 +294,7 @@
 
       <div class="tile">
         <a href="mobile/localradio.html">
-          <button class="tile-btn">Internet Local Radio Player</button>
+          <button class="tile-btn">Local Radio Player</button>
           <div class="tile-desc">調整中</div>
         </a>
       </div>

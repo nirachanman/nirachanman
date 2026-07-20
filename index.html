@@ -6,13 +6,14 @@
 <title>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</title>
 <style>
   :root {
-    --bg-color: #121214;
-    --card-bg: #1e1e24;
-    --text-color: #e0e0e6;
-    --text-muted: #a0a0aa;
-    --primary-color: #00c853; /* ニラグリーン */
-    --accent-blue: #00b0ff;   /* ラジオ系 */
-    --accent-purple: #aa00ff; /* メニュー系 */
+    --bg-color: #f8f9fa;      /* 明るい背景色 */
+    --card-bg: #ffffff;      /* 白いカード背景 */
+    --text-color: #212529;   /* メインの濃い文字色 */
+    --text-muted: #6c757d;   /* 補足のグレー文字色 */
+    --primary-color: #2e7d32; /* ニラグリーン（ライトモード最適化） */
+    --accent-blue: #0288d1;   /* ラジオ系 */
+    --accent-purple: #7b1fa2; /* メニュー系 */
+    --border-color: #e9ecef;  /* 境界線 */
   }
 
   * {
@@ -41,8 +42,8 @@
 
   header h1 {
     font-size: 1.8rem;
-    font-weight: 500;
-    color: #fff;
+    font-weight: 600;
+    color: #111111;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -53,7 +54,7 @@
     margin: 30px 0 15px;
     padding-left: 10px;
     border-left: 4px solid var(--primary-color);
-    color: #fff;
+    color: #111111;
   }
 
   h2.section-title.radio { border-left-color: var(--accent-blue); }
@@ -72,19 +73,22 @@
     background-color: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #2a2a32;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border: 1px solid var(--border-color);
     position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   }
 
   .tile:active {
     transform: scale(0.98);
+    background-color: #f1f3f5;
   }
 
   @media (min-width: 768px) {
     .tile:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      border-color: #ced4da;
     }
   }
 
@@ -98,10 +102,10 @@
   }
 
   .tile-header {
-    font-size: 1.2rem;
-    //font-weight: bold;
-    margin-bottom: 8px;
-    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-color);
     display: flex;
     align-items: flex-start;
   }
@@ -112,7 +116,7 @@
   .menu-group .tile-header { color: var(--accent-purple); }
 
   .tile-desc {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     color: var(--text-muted);
   }
 
@@ -128,7 +132,7 @@
     padding: 20px 0;
     color: var(--text-muted);
     font-size: 0.9rem;
-    border-top: 1px solid #2a2a32;
+    border-top: 1px solid var(--border-color);
   }
 
   #pagetop {
@@ -143,7 +147,8 @@
     height: 44px;
     background-color: var(--card-bg);
     border-radius: 50%;
-    border: 1px solid #2a2a32;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   }
 
   #pagetop svg path {
@@ -223,7 +228,7 @@
 
       <div class="tile">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <div class="tile-header">Googleスプレッドシート連携</div>
+          <div class="tile-header">Googleスプレッドシート連携 ↗</div>
           <div class="tile-desc">Googleカレンダーに予定を同期</div>
         </a>
       </div>
@@ -341,7 +346,7 @@
       <div class="tile">
         <a href="events/calendar.html">
           <div class="tile-header">calendar.html</div>
-          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+          <div class="tile-desc">Menu / Links（表示テスト用']</div>
         </a>
       </div>
 

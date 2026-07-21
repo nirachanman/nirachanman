@@ -84,7 +84,7 @@
 
   @media (min-width: 768px) {
     .tile:hover {
-      transform: translateY(-4px);
+      transform: none; /* 上への動きを停止 */
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
     }
   }
@@ -98,59 +98,64 @@
     color: inherit;
   }
 
-  /* ボタン風デザインの調整クラス */
+  /* ボタン風デザイン（1pxの枠線を追加） */
   .tile-btn {
     display: block;
     text-align: center;
     background-color: #eee; 
     color: #111;
-    border: none;
+    border: 1px solid #ced4da; /* 1pxの基本枠線 */
     padding: 8px 12px;
     border-radius: 10px;
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     width: 100%;
     max-width: 340px;
-    margin: 0 auto 12px; /* 中央寄せと説明文へのマージン */
+    margin: 0 auto 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   }
 
-  /* 各カテゴリごとにボタンの色味を変更 */
+  /* 各カテゴリごとの背景と1px枠線 */
   .cal-group .tile-btn {
-    background-color: #e8f5e9; /* 薄い緑 */
+    background-color: #e8f5e9;
     color: var(--primary-color);
+    border: 1px solid #c8e6c9;
   }
   .radio-group .tile-btn {
-    background-color: #e1f5fe; /* 薄い青 */
+    background-color: #e1f5fe;
     color: var(--accent-blue);
+    border: 1px solid #b3e5fc;
   }
   .menu-group .tile-btn {
-    background-color: #f3e5f5; /* 薄い紫 */
+    background-color: #f3e5f5;
     color: var(--accent-purple);
+    border: 1px solid #e1bee7;
   }
 
-  /* タイルホバー時にボタンの色とスタイルが美しく反転する効果 */
+  /* ホバー時に色反転と枠線の最適化 */
   @media (min-width: 768px) {
     .cal-group .tile:hover .tile-btn { 
       background-color: var(--primary-color); 
       color: #fff; 
+      border-color: var(--primary-color);
       box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
     }
     .radio-group .tile:hover .tile-btn { 
       background-color: var(--accent-blue); 
       color: #fff; 
+      border-color: var(--accent-blue);
       box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
     }
     .menu-group .tile:hover .tile-btn { 
       background-color: var(--accent-purple); 
       color: #fff; 
+      border-color: var(--accent-purple);
       box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
     }
   }
 
-  /* スマホ等でのタップ時のボタンプッシュ感 */
   .tile:active .tile-btn {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
@@ -158,10 +163,9 @@
   .tile-desc {
     font-size: 0.9rem;
     color: var(--text-muted);
-    text-align: center; /* 説明文も中央寄せに */
+    text-align: center;
   }
 
-  /* ギットハブ用の特別ボタンタイル */
   .tile.btn-tile {
     cursor: pointer;
   }
@@ -343,14 +347,14 @@
 
       <div class="tile">
         <a href="echo/news monitor_fireFM.html">
-          <button class="tile-btn">News_text monitor [fire tv]</button>
+          <button class="tile-btn">News_text monitor [fire]</button>
           <div class="tile-desc">ニュースモニター&FM</div>
         </a>
       </div>
 
       <div class="tile">
         <a href="echo/news monitor_fireAM.html">
-          <button class="tile-btn">News_text monitor [fire tv]</button>
+          <button class="tile-btn">News_text monitor [fire]</button>
           <div class="tile-desc">ニュースモニター&AM防災</div>
         </a>
       </div>

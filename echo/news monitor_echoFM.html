@@ -77,24 +77,26 @@
         .header-link { text-decoration: none; display: flex; align-items: center; flex-shrink: 0; }
         h1 { font-size: 1.2rem; margin: 0; white-space: nowrap; color: #ffffff; }
         
-        .marquee-container { 
-            flex-grow: 1; 
-            height: 1.5rem;      
-            overflow: hidden; 
-            white-space: nowrap; 
-            position: relative;  
-        }
-        
-        .marquee-text { 
-            position: absolute;
-            left: 0;
-            top: 0;
-            display: inline-block; 
-            padding-left: 100%;                  
-            animation: scroll-x 120s linear infinite; 
-            font-size: 1.1rem; 
-            color: #ffffff; 
-        }
+/* 1. 親容器の高さの調整（文字が上下にはみ出るのを防ぐため） */
+.marquee-container { 
+    flex-grow: 1; 
+    height: 1.8rem;      /* ← 元の 1.5rem から 1.8rem などに少し広げる */
+    overflow: hidden; 
+    white-space: nowrap; 
+    position: relative;  
+}
+
+/* 2. マーキー文字自体のサイズ変更 */
+.marquee-text { 
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: inline-block; 
+    padding-left: 100%;                  
+    animation: scroll-x 120s linear infinite; 
+    font-size: 1.4rem;  /* ← 元の 1.1rem から 1.4rem（または1.5remなど）に大きくする */
+    color: #ffffff; 
+}
         @keyframes scroll-x { 
             0% { transform: translate(0, 0); } 
             100% { transform: translate(-100%, 0); } 

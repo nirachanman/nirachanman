@@ -177,8 +177,8 @@
         }
         
         .news-time { 
-            font-size: 1.2rem; 
-            color: #607d8b; 
+            font-size: 1.3rem; 
+            color: #ebd842; 
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -197,6 +197,41 @@
 
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
+
+.radio-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.radio-select {
+    background-color: #263238;
+    color: #ffffff;
+    border: 1px solid #455a64;
+    padding: 6px 8px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+}
+.radio-btn {
+    background-color: #263238;
+    color: #b0bec5;
+    border: 1px solid #455a64;
+    padding: 6px 12px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.radio-btn.playing {
+    background-color: #00e676;
+    color: #000000;
+    border-color: #00e676;
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+}
     </style>
 </head>
 <body>
@@ -209,9 +244,14 @@
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
-            <div class="radio-control">
-                <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">📻 ラジオ OFF</button>
-            </div>
+<div class="radio-control">
+    <!-- 2局切替用のドロップダウンメニュー -->
+    <select id="radio-station-select" class="radio-select" onchange="changeStation()">
+        <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">📻 NHK第1 (AM)</option>
+        <option value="https://simul.drdi.st.nhk/live/11/joined/master.m3u8">📻 NHK-FM (FM)</option>
+    </select>
+    <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">OFF</button>
+</div>
         </div>
     </header>
 
@@ -225,49 +265,67 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/5/joined/master.m3u8";
-        const radioAudio = new Audio();
-        let hls = null;
-        let isRadioPlaying = false;
+const radioAudio = new Audio();
+let hls = null;
+let isRadioPlaying = false;
 
-        let isPaused = false;
-        let currentItemIndex = 0; 
-        let lastRenderedMarquee = "";
-        let lastRenderedNewsLength = 0;
-        let currentNewsUniqueItems = [];
+// ラジオのON/OFF切り替え
+function toggleRadio() {
+    const btn = document.getElementById('radio-toggle-btn');
+    const stationSelect = document.getElementById('radio-station-select');
+    const selectedUrl = stationSelect.value;
+    
+    if (!isRadioPlaying) {
+        startStream(selectedUrl, btn);
+    } else {
+        stopStream(btn);
+    }
+}
 
-        function toggleRadio() {
-            const btn = document.getElementById('radio-toggle-btn');
-            if (!isRadioPlaying) {
-                if (Hls.isSupported()) {
-                    if (!hls) {
-                        hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
-                        hls.loadSource(RADIO_STREAM_URL);
-                        hls.attachMedia(radioAudio);
-                    } else {
-                        hls.loadSource(RADIO_STREAM_URL);
-                    }
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
-                } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-                    radioAudio.src = RADIO_STREAM_URL;
-                    radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
-                }
-            } else {
-                radioAudio.pause();
-                if (hls) hls.stopLoad();
-                isRadioPlaying = false;
-                btn.innerText = "📻 ラジオ OFF";
-                btn.classList.remove('playing');
-            }
+// 放送局切替イベント（再生中に局を変えたら自動で切り替える）
+function changeStation() {
+    const btn = document.getElementById('radio-toggle-btn');
+    const stationSelect = document.getElementById('radio-station-select');
+    const selectedUrl = stationSelect.value;
+
+    if (isRadioPlaying) {
+        stopStream(btn);
+        startStream(selectedUrl, btn);
+    }
+}
+
+// ストリーミング再生開始ロジック
+function startStream(streamUrl, btn) {
+    if (Hls.isSupported()) {
+        if (!hls) {
+            hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
         }
+        hls.loadSource(streamUrl);
+        hls.attachMedia(radioAudio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
+    } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+        radioAudio.src = streamUrl;
+        radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
+    }
+}
 
-        function playAudioStream(btn) {
-            radioAudio.play().then(() => {
-                isRadioPlaying = true;
-                btn.innerText = "📻 ラジオ ON";
-                btn.classList.add('playing');
-            }).catch(err => console.error("再生エラー:", err));
-        }
+// 停止ロジック
+function stopStream(btn) {
+    radioAudio.pause();
+    if (hls) hls.stopLoad();
+    isRadioPlaying = false;
+    btn.innerText = "OFF";
+    btn.classList.remove('playing');
+}
+
+// 音声再生ロジック
+function playAudioStream(btn) {
+    radioAudio.play().then(() => {
+        isRadioPlaying = true;
+        btn.innerText = "ON";
+        btn.classList.add('playing');
+    }).catch(err => console.error("再生エラー:", err));
+}
 
         async function updateNews() {
             let allItems = [];

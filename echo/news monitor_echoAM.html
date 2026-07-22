@@ -80,7 +80,7 @@
         
         .marquee-container { 
             flex-grow: 1; 
-            height: 1.8rem;      /* ← 元の 1.5rem から 1.8rem などに少し広げる */
+            height: 1.8rem;      
             overflow: hidden; 
             white-space: nowrap; 
             position: relative;  
@@ -93,10 +93,9 @@
             display: inline-block; 
             padding-left: 100%;                  
             animation: scroll-x 120s linear infinite; 
-            font-size: 1.4rem;  /* ← 元の 1.1rem から 1.4rem（または1.5remなど）に大きくする */
+            font-size: 1.4rem; 
             color: #ffffff; 
         }
-
         @keyframes scroll-x { 
             0% { transform: translate(0, 0); } 
             100% { transform: translate(-100%, 0); } 
@@ -108,7 +107,9 @@
             gap: 8px;
             flex-shrink: 0;
         }
-        .radio-btn {
+        
+        /* プルダウンメニュー（select）のスタイル設定 */
+        .radio-select {
             background-color: #263238;
             color: #b0bec5;
             border: 1px solid #455a64;
@@ -117,12 +118,12 @@
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
+            outline: none;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .radio-btn.playing {
+        
+        /* 再生中（AM/FM選択時）のスタイル */
+        .radio-select.playing {
             background-color: #00e676;
             color: #000000;
             border-color: #00e676;
@@ -311,12 +312,17 @@
         <div class="header-top">
             <div class="header-left">
                 <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-                    <h1>NHK新着ニュース一覧</h1>
+                    <h1>NHKニュース&📻</h1>
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
             <div class="radio-control">
-                <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">📻 ラジオ OFF</button>
+                <!-- プルダウンメニュー -->
+                <select id="radio-select" class="radio-select" onchange="changeRadio(this.value)">
+                    <option value="off">📻 ラジオ OFF</option>
+                    <option value="am">📻 NHK[AM]</option>
+                    <option value="fm">📻 NHK[FM]</option>
+                </select>
             </div>
         </div>
     </header>
@@ -333,16 +339,15 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        // ラジオ放送局の定義（0: OFF, 1: AM, 2: FM）
-        const RADIO_STATIONS = [
-            { mode: 'off', label: '📻 ラジオ OFF', url: '' },
-            { mode: 'am',  label: '📻 NHKラジオ(AM)', url: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8' },
-            { mode: 'fm',  label: '📻 NHK-FM',            url: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8' }
-        ];
-        let currentRadioIndex = 0; // 初期状態は OFF (0)
+        // 各局のURLマッピング
+        const RADIO_STREAMS = {
+            am: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8',
+            fm: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8'
+        };
 
         const radioAudio = new Audio();
         let hls = null;
+        let currentRadioMode = 'off'; // 'off', 'am', 'fm'
 
         let isPaused = false;
         let currentItemIndex = 0; 
@@ -360,43 +365,38 @@
         let lastRenderedNewsLength = 0;
         let currentNewsUniqueItems = [];
 
-        function toggleRadio() {
-            const btn = document.getElementById('radio-toggle-btn');
-            
-            // 次のモードへ進める（OFF → AM → FM → OFF）
-            currentRadioIndex = (currentRadioIndex + 1) % RADIO_STATIONS.length;
-            const station = RADIO_STATIONS[currentRadioIndex];
+        function changeRadio(selectedMode) {
+            const selectEl = document.getElementById('radio-select');
+            currentRadioMode = selectedMode;
 
-            if (station.mode === 'off') {
-                // OFFにする処理
+            if (selectedMode === 'off') {
+                // OFFの場合
                 radioAudio.pause();
                 if (hls) hls.stopLoad();
-                btn.innerText = station.label;
-                btn.classList.remove('playing');
+                selectEl.classList.remove('playing');
             } else {
-                // AM または FM を再生する処理
-                loadAndPlayStream(station.url, station.label, btn);
+                // AM または FM の場合
+                loadAndPlayStream(RADIO_STREAMS[selectedMode], selectEl);
             }
         }
 
-        function loadAndPlayStream(url, label, btn) {
+        function loadAndPlayStream(url, selectEl) {
             if (Hls.isSupported()) {
                 if (!hls) {
                     hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
                     hls.attachMedia(radioAudio);
                 }
                 hls.loadSource(url);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(label, btn));
+                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(selectEl));
             } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
                 radioAudio.src = url;
-                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(label, btn));
+                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(selectEl));
             }
         }
 
-        function playAudioStream(label, btn) {
+        function playAudioStream(selectEl) {
             radioAudio.play().then(() => {
-                btn.innerText = label;
-                btn.classList.add('playing');
+                selectEl.classList.add('playing');
             }).catch(err => console.error("再生エラー:", err));
         }
 
@@ -468,7 +468,7 @@
 
             // リストの最後まで到達した場合の処理
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
-                if (currentRadioIndex !== 0) { // ラジオ再生中（AM/FM）
+                if (currentRadioMode !== 'off') { // ラジオ再生中（AM/FM）
                     await updateNews();
                     currentItemIndex = 0;
                     container.scrollTop = 0;

@@ -310,7 +310,7 @@
         <div class="header-top">
             <div class="header-left">
                 <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-                    <h1>NHK新着ニュース一覧</h1>
+                    <h1>NHKニュース&ラジオ</h1>
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
@@ -335,8 +335,8 @@
         // ラジオ放送局の定義（0: OFF, 1: AM, 2: FM）
         const RADIO_STATIONS = [
             { mode: 'off', label: '📻 ラジオ OFF', url: '' },
-            { mode: 'am',  label: '📻 NHKラジオ第1 (AM)', url: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8' },
-            { mode: 'fm',  label: '📻 NHK-FM',            url: 'https://simul.drdi.st.nhk/live/10/joined/master.m3u8' }
+            { mode: 'am',  label: '📻 NHK-AM', url: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8' },
+            { mode: 'fm',  label: '📻 NHK-FM',            url: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8' }
         ];
         let currentRadioIndex = 0; // 初期状態は OFF (0)
 

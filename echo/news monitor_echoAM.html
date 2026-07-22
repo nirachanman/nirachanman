@@ -80,7 +80,7 @@
         
         .marquee-container { 
             flex-grow: 1; 
-            height: 1.5rem;      
+            height: 1.8rem;      
             overflow: hidden; 
             white-space: nowrap; 
             position: relative;  
@@ -93,7 +93,7 @@
             display: inline-block; 
             padding-left: 100%;                  
             animation: scroll-x 120s linear infinite; 
-            font-size: 1.1rem; 
+            font-size: 1.4rem; 
             color: #ffffff; 
         }
         @keyframes scroll-x { 
@@ -310,7 +310,7 @@
         <div class="header-top">
             <div class="header-left">
                 <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
-                    <h1>NHKニュース&AM</h1>
+                    <h1>NHK新着ニュース一覧</h1>
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
@@ -332,10 +332,16 @@
             'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat7.xml'
         ];
 
-        const RADIO_STREAM_URL = "https://simul.drdi.st.nhk/live/8/joined/master.m3u8";
+        // ラジオ放送局の定義（0: OFF, 1: AM, 2: FM）
+        const RADIO_STATIONS = [
+            { mode: 'off', label: '📻 ラジオ OFF', url: '' },
+            { mode: 'am',  label: '📻 NHKラジオ第1 (AM)', url: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8' },
+            { mode: 'fm',  label: '📻 NHK-FM',            url: 'https://simul.drdi.st.nhk/live/10/joined/master.m3u8' }
+        ];
+        let currentRadioIndex = 0; // 初期状態は OFF (0)
+
         const radioAudio = new Audio();
         let hls = null;
-        let isRadioPlaying = false;
 
         let isPaused = false;
         let currentItemIndex = 0; 
@@ -353,40 +359,42 @@
         let lastRenderedNewsLength = 0;
         let currentNewsUniqueItems = [];
 
-        const JMA_CODES = {
-            "02": "暴風雪警報", "03": "大雨警報", "04": "洪水警報", "05": "暴風警報", "06": "大雪警報", "08": "高潮警報", "32": "暴風雪特別警報", "33": "大雨特別警報", "35": "暴風特別警報", "36": "大雪特別警報", "38": "高潮特別警報",
-            "10": "大雨注意報", "12": "大雪注意報", "13": "風雪注意報", "14": "暴風注意報", "15": "強風注意報", "16": "波浪注意報", "17": "高潮注意報", "18": "洪水注意報", "20": "濃霧注意報", "21": "乾燥注意報", "22": "雷注意報", "23": "融雪注意報", "24": "霜注意報", "25": "雪崩注意報", "26": "低温注意報", "27": "着氷注意報", "28": "着雪注意報"
-        };
-
         function toggleRadio() {
             const btn = document.getElementById('radio-toggle-btn');
-            if (!isRadioPlaying) {
-                if (Hls.isSupported()) {
-                    if (!hls) {
-                        hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
-                        hls.loadSource(RADIO_STREAM_URL);
-                        hls.attachMedia(radioAudio);
-                    } else {
-                        hls.loadSource(RADIO_STREAM_URL);
-                    }
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
-                } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-                    radioAudio.src = RADIO_STREAM_URL;
-                    radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
-                }
-            } else {
+            
+            // 次のモードへ進める（OFF → AM → FM → OFF）
+            currentRadioIndex = (currentRadioIndex + 1) % RADIO_STATIONS.length;
+            const station = RADIO_STATIONS[currentRadioIndex];
+
+            if (station.mode === 'off') {
+                // OFFにする処理
                 radioAudio.pause();
                 if (hls) hls.stopLoad();
-                isRadioPlaying = false;
-                btn.innerText = "📻 ラジオ OFF";
+                btn.innerText = station.label;
                 btn.classList.remove('playing');
+            } else {
+                // AM または FM を再生する処理
+                loadAndPlayStream(station.url, station.label, btn);
             }
         }
 
-        function playAudioStream(btn) {
+        function loadAndPlayStream(url, label, btn) {
+            if (Hls.isSupported()) {
+                if (!hls) {
+                    hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
+                    hls.attachMedia(radioAudio);
+                }
+                hls.loadSource(url);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(label, btn));
+            } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+                radioAudio.src = url;
+                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(label, btn));
+            }
+        }
+
+        function playAudioStream(label, btn) {
             radioAudio.play().then(() => {
-                isRadioPlaying = true;
-                btn.innerText = "📻 ラジオ ON";
+                btn.innerText = label;
                 btn.classList.add('playing');
             }).catch(err => console.error("再生エラー:", err));
         }
@@ -459,11 +467,11 @@
 
             // リストの最後まで到達した場合の処理
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
-                if (isRadioPlaying) {
+                if (currentRadioIndex !== 0) { // ラジオ再生中（AM/FM）
                     await updateNews();
                     currentItemIndex = 0;
                     container.scrollTop = 0;
-                } else {
+                } else { // ラジオOFF時
                     window.location.reload();
                 }
                 return;

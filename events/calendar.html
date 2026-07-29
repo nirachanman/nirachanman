@@ -211,34 +211,33 @@ const LOCATION_WORDS = [
   "駐車場"
 ];
 
-/* ---------------- 印刷月プルダウン（今月 → 14か月先） ---------------- */
+/* ---------------- 印刷月プルダウン（） ---------------- */
 function setupMonthSelector() {
   const sel = document.getElementById("print-month");
   sel.innerHTML = "";
 
   const today = new Date();
-  let y = today.getFullYear();
-  let m = today.getMonth() + 1;
+  const thisYear = today.getFullYear();
+  const thisMonth = today.getMonth() + 1;
 
-  const totalMonths = 14;
+  const startYear = thisYear - 10;  // 過去10年
+  const endYear   = thisYear + 1;   // 未来1年
 
-  for (let i = 0; i < totalMonths; i++) {
-    const value = `${y}-${String(m).padStart(2, "0")}`;
-    const label = `${y}年${m}月`;
+  // startYear → endYear の全月を追加
+  for (let y = startYear; y <= endYear; y++) {
+    for (let m = 1; m <= 12; m++) {
+      const value = `${y}-${String(m).padStart(2, "0")}`;
+      const label = `${y}年${m}月`;
 
-    const opt = document.createElement("option");
-    opt.value = value;
-    opt.textContent = label;
-    sel.appendChild(opt);
-
-    m++;
-    if (m > 12) {
-      m = 1;
-      y++;
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      sel.appendChild(opt);
     }
   }
 
-  sel.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  // 初期選択は「今月」
+  sel.value = `${thisYear}-${String(thisMonth).padStart(2, "0")}`;
 }
 
 /* ---------------- タブ切り替え ---------------- */

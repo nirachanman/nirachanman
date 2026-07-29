@@ -249,8 +249,8 @@
     <select id="radio-station-select" class="radio-select" onchange="changeStation()">
         <option value="https://simul.drdi.st.nhk/live/8/joined/master.m3u8">📻 NHK-(AM)</option>
         <option value="https://simul.drdi.st.nhk/live/9/joined/master.m3u8">📻 NHK-(FM)</option>
-        <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">📻 NHK-(AM)</option>
-        <option value="https://simul.drdi.st.nhk/live/5/joined/master.m3u8">📻 NHK-(FM)</option>
+        <option value="https://simul.drdi.st.nhk/live/3/joined/master.m3u8">📻 NHK-(AM東京)</option>
+        <option value="https://simul.drdi.st.nhk/live/5/joined/master.m3u8">📻 NHK-(FM東京)</option>
     </select>
     <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">OFF</button>
 </div>
@@ -261,12 +261,10 @@
 
 <script>
     const RSS_URLS = [
-    const RSS_URLS = [
-    const RSS_URLS = [
-        'https://news.web.nhk/n-data/conf/na/rss/cat0.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat1.xml',
-        'https://news.web.nhk/n-data/conf/na/rss/cat2.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat3.xml',
-        'https://news.web.nhk/n-data/conf/na/rss/cat4.xml', 'https://news.web.nhk/n-data/conf/na/rss/cat5.xml',
-        'https://news.web.nhk/n-data/conf/na/rss/cat6.xml', 'https://news.yahoo.co.jp/rss/media/abema/all.xml',
+        'https://news.yahoo.co.jp/rss/topics/it.xml', 'https://news.yahoo.co.jp/rss/topics/science.xml',
+        'https://news.yahoo.co.jp/rss/topics/sports.xml', 'https://news.yahoo.co.jp/rss/media/ann/all.xml',
+        'https://news.yahoo.co.jp/rss/media/iwanichi/all.xml', 'https://news.yahoo.co.jp/rss/media/nmit/all.xml',
+        'https://news.yahoo.co.jp/rss/media/tvi/all.xml', 'https://news.yahoo.co.jp/rss/media/abema/all.xml',
         'https://news.yahoo.co.jp/rss/media/ibciwatev/all.xml', 'https://news.yahoo.co.jp/rss/media/iat/all.xml'
     ];
 

@@ -139,11 +139,6 @@ table.print-table th {
       <button id="btn-all"                  onclick="showCalendar('all')">📅 全て</button>
     </div>
 
-    <div>
-      <label for="print-month">印刷する月：</label>
-      <select id="print-month"></select>
-    </div>
-
     <button onclick="printWithEvents()">🖨 印刷</button>
 
     <!-- ★ 追加：Google カレンダーリンクボタン（右寄せ） -->
@@ -210,36 +205,6 @@ const LOCATION_WORDS = [
   "メモ",
   "駐車場"
 ];
-
-/* ---------------- 印刷月プルダウン（今月 → 14か月先） ---------------- */
-function setupMonthSelector() {
-  const sel = document.getElementById("print-month");
-  sel.innerHTML = "";
-
-  const today = new Date();
-  let y = today.getFullYear();
-  let m = today.getMonth() + 1;
-
-  const totalMonths = 14;
-
-  for (let i = 0; i < totalMonths; i++) {
-    const value = `${y}-${String(m).padStart(2, "0")}`;
-    const label = `${y}年${m}月`;
-
-    const opt = document.createElement("option");
-    opt.value = value;
-    opt.textContent = label;
-    sel.appendChild(opt);
-
-    m++;
-    if (m > 12) {
-      m = 1;
-      y++;
-    }
-  }
-
-  sel.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-}
 
 /* ---------------- タブ切り替え ---------------- */
 function showCalendar(target) {
@@ -486,7 +451,3 @@ document.addEventListener("DOMContentLoaded", setupMonthSelector);
 
 </body>
 </html>
-
-
-
-

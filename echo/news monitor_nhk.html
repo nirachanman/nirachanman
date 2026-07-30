@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHK news monitor_echo（岩手県防災・災害特化版）</title>
+    <title>NHK news monitor_nhk（岩手県防災・災害特化版）</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -320,8 +320,10 @@
                 <!-- プルダウンメニュー -->
                 <select id="radio-select" class="radio-select" onchange="changeRadio(this.value)">
                     <option value="off">📻 ラジオ OFF</option>
-                    <option value="am">📻 NHK-AM</option>
-                    <option value="fm">📻 NHK-FM</option>
+                    <option value="amt">📻 NHK-AM東京</option>
+                    <option value="fmt">📻 NHK-FM東京</option>
+                    <option value="ams">📻 NHK-AM仙台</option>
+                    <option value="fms">📻 NHK-FM仙台</option>
                 </select>
             </div>
         </div>
@@ -341,8 +343,10 @@
 
         // 各局のURLマッピング
         const RADIO_STREAMS = {
-            am: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8',
-            fm: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8'
+            amt: 'https://simul.drdi.st.nhk/live/8/joined/master.m3u8',
+            fmt: 'https://simul.drdi.st.nhk/live/9/joined/master.m3u8',
+            ams: 'https://simul.drdi.st.nhk/live/3/joined/master.m3u8',
+            fms: 'https://simul.drdi.st.nhk/live/5/joined/master.m3u8'
         };
 
         const radioAudio = new Audio();

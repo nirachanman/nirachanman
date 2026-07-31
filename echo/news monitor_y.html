@@ -381,7 +381,7 @@ function playAudioStream(btn) {
             // ニュースリストカードの描画処理（日付表示・時間0埋め対応版）
             const container = document.getElementById('news-container');
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
-                let newsListHtml = currentNewsUniqueItems.slice(0, 80).map(item => `
+                let newsListHtml = currentNewsUniqueItems.slice(0, 90).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>
@@ -405,7 +405,7 @@ function playAudioStream(btn) {
             if (items.length === 0) return;
 
             // リストの最後まで到達した場合の処理
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 80 || currentItemIndex + 3 >= items.length) {
+            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 90 || currentItemIndex + 3 >= items.length) {
                 if (isRadioPlaying) {
                     await updateNews();
                     currentItemIndex = 0;
@@ -426,7 +426,7 @@ function playAudioStream(btn) {
         // 初期化処理
         async function init() {
             await updateNews();
-            setInterval(autoScroll, 22000); // 22秒毎にスクロール
+            setInterval(autoScroll, 30000); // 30秒毎にスクロール
         }
         init();
     </script>

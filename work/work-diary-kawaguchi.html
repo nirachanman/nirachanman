@@ -149,7 +149,7 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* スマホ向けメディアクエリ */
+/* スマホ向けメディアクエリ */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -167,6 +167,16 @@
             }
             .form-card, .diary-card {
                 padding: 15px;
+            }
+            /* ★ スマホ表示での投稿本文フォントサイズを拡大 */
+            .content {
+                font-size: 1.1rem;
+                line-height: 1.7;
+            }
+            /* タイムスタンプ見出しもスマホ用に少し調整 */
+            .section-header {
+                font-size: 0.95rem;
+                padding: 6px 10px;
             }
         }
     </style>

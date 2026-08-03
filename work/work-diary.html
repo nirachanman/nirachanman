@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>川口公民館日誌・引継ぎ簿</title>
+    <style>
+        /* 基本スタイル（ベース設定） */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            background: #f4f6f9;
+            color: #333;
+        }
+        
+        /* ヘッダー・ナビゲーション */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            text-align: center;
+            word-break: break-word;
+        }
+        .nav-btn, .submit-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            touch-action: manipulation;
+        }
+        .nav-btn:active, .submit-btn:active {
+            background: #0056b3;
+        }
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* フォームエリア */
+        .form-card {
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+        .form-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 6px;
+            color: #007bff;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fafafa;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            background-color: #fff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* 日誌表示エリア（カード） */
+        .diary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: none;
+            margin-bottom: 15px;
+        }
+        .diary-card.active {
+            display: block;
+        }
+        .diary-card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #111;
+        }
+        .meta-info {
+            color: #666;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .content {
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        /* タイムスタンプ行の装飾 */
+        .section-header {
+            display: block;
+            background-color: #eef5ff;
+            color: #0056b3;
+            font-weight: normal;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 4px 8px;
+            margin-top: 10px;
+            margin-bottom: 2px;
+            border-left: 3px solid #007bff;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* スマホ向けメディアクエリ */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .header {
+                padding: 10px;
+            }
+            .header h3 {
+                font-size: 0.95rem;
+            }
+            .nav-btn {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+            .form-card, .diary-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 新規投稿エリア -->
+    <div class="form-card">
+        <h3>📝 新しい日誌を書く</h3>
+        <form id="diaryForm">
+            <div class="form-group">
+                <label>日付</label>
+                <input type="text" id="inputDate" required placeholder="YYYY/MM/DD (曜日)">
+            </div>
+            
+            <div class="form-group">
+                <label>記入者</label>
+                <!-- ★ ドロップダウン（選択式）に変更 -->
+                <select id="inputAuthor" required>
+                    <option value="" disabled selected>選択してください</option>
+                    <option value="髙橋">髙橋</option>
+                    <option value="田中">田中</option>
+                    <option value="佐々木">佐々木</option>
+                    <option value="韮澤">韮澤</option>
+                    <option value="滝川">滝川</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>引継ぎ・連絡事項</label>
+                <textarea id="inputContent" rows="5" placeholder="ここに引継ぎ・連絡事項を入力してください..." required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">投稿する</button>
+        </form>
+    </div>
+
+    <div class="header">
+        <button id="prevBtn" class="nav-btn" onclick="changePage(-1)">← 前日</button>
+        <h3 id="currentDateTitle">川口公民館日誌</h3>
+        <button id="nextBtn" class="nav-btn" onclick="changePage(1)">翌日 →</button>
+    </div>
+
+    <!-- 日誌カードがここに動的に追加されます -->
+    <div id="diaryContainer"></div>
+
+<script>
+    // ★GASのWebアプリURL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz0FP2b8zgg9H1V1aUf8OHacwYiy4FpvR6I7Hbp3R08S8aVzUTxgeaGoVlEjaoarGG6MQ/exec";
+
+    let diaryData = [];
+    let currentIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const dateInput = document.getElementById('inputDate');
+        
+        if (dateInput) {
+            dateInput.value = formatDateWithDay(today);
+            dateInput.addEventListener('change', autoCorrectDateInput);
+        }
+
+        resetFormContent();
+        fetchDiaries();
+    });
+
+    function formatDateWithDay(dateObj) {
+        if (!dateObj || isNaN(dateObj.getTime())) return '';
+        const yyyy = dateObj.getFullYear();
+        const mm = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+        const dd = ('0' + dateObj.getDate()).slice(-2);
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayStr = dayNames[dateObj.getDay()];
+
+        return `${yyyy}/${mm}/${dd} (${dayStr})`;
+    }
+
+    function autoCorrectDateInput() {
+        const dateInput = document.getElementById('inputDate');
+        if (!dateInput) return;
+
+        const matches = dateInput.value.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (matches) {
+            const year = parseInt(matches[1], 10);
+            const month = parseInt(matches[2], 10) - 1;
+            const day = parseInt(matches[3], 10);
+            
+            const dateObj = new Date(year, month, day);
+            if (!isNaN(dateObj.getTime())) {
+                dateInput.value = formatDateWithDay(dateObj);
+            }
+        }
+    }
+
+    function resetFormContent() {
+        const contentInput = document.getElementById('inputContent');
+        if (contentInput) {
+            contentInput.value = '';
+        }
+        const authorInput = document.getElementById('inputAuthor');
+        if (authorInput) {
+            authorInput.selectedIndex = 0; // 記入者選択を未選択（初期値）に戻す
+        }
+    }
+
+    function getDayOfWeek(dateString) {
+        if (!dateString) return '';
+        const parts = dateString.split(/[-/]/);
+        if (parts.length < 3) return ''; 
+        
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+
+        const dateObj = new Date(year, month, day);
+        if (isNaN(dateObj.getTime())) return '';
+
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        return dayNames[dateObj.getDay()];
+    }
+
+    function formatToWareki(dateString) {
+        if (!dateString) return '';
+        const parts = dateString.split(/[-/]/);
+        if (parts.length < 3) return dateString;
+
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+
+        const dateObj = new Date(year, month, day);
+        if (isNaN(dateObj.getTime())) return dateString;
+
+        const warekiFormatter = new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {
+            era: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        return warekiFormatter.format(dateObj);
+    }
+
+    async function fetchDiaries() {
+        try {
+            const response = await fetch(GAS_URL);
+            diaryData = await response.json();
+            renderCards();
+        } catch (error) {
+            alert("データの取得に失敗しました。");
+        }
+    }
+
+    function formatContent(text) {
+        if (!text) return '';
+        
+        let escaped = escapeHtml(text);
+        
+        let formatted = escaped.replace(/---?\s*(\d{1,2}:\d{2})\s*[\(（](.+?)[\)）]\s*---?/g, (match, time, name) => {
+            return `<span class="section-header">🕒 ${time}（${name}）</span>`;
+        });
+
+        formatted = formatted.replace(/(<\/span>)\r?\n+/g, '$1');
+
+        return formatted.trim();
+    }
+
+    function renderCards() {
+        const container = document.getElementById('diaryContainer');
+        container.innerHTML = '';
+
+        if (diaryData.length === 0) {
+            container.innerHTML = `
+                <div class="diary-card active" style="text-align: center; color: #888; padding: 30px 20px;">
+                    <p style="font-size: 0.9rem; margin: 0;">上のフォームから日誌を投稿すると、ここにカードが表示されます。</p>
+                </div>
+            `;
+            return;
+        }
+
+        diaryData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = `diary-card ${index === currentIndex ? 'active' : ''}`;
+            
+            const warekiDate = formatToWareki(item.date);
+            const dayOfWeek = getDayOfWeek(item.date);
+            const dayStr = dayOfWeek ? ` (${dayOfWeek})` : '';
+
+            const displayDate = `${warekiDate}${dayStr}`;
+
+            card.innerHTML = `
+                <h3>${escapeHtml(displayDate)}</h3>
+                <div class="meta-info">記入者: ${escapeHtml(item.author)} / 最終更新: ${escapeHtml(item.updatedAt)}</div>
+                <div class="content">${formatContent(item.content)}</div>
+            `;
+            container.appendChild(card);
+        });
+
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        const cards = document.querySelectorAll('.diary-card');
+        cards.forEach(card => card.classList.remove('active'));
+        if (cards[currentIndex]) {
+            cards[currentIndex].classList.add('active');
+        }
+
+        document.getElementById('prevBtn').disabled = (currentIndex === diaryData.length - 1 || diaryData.length === 0);
+        document.getElementById('nextBtn').disabled = (currentIndex === 0 || diaryData.length === 0);
+    }
+
+    function changePage(direction) {
+        currentIndex -= direction;
+        if (currentIndex < 0) currentIndex = 0;
+        if (currentIndex >= diaryData.length) currentIndex = diaryData.length - 1;
+        updateDisplay();
+    }
+
+    document.getElementById('diaryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const rawDateValue = document.getElementById('inputDate').value;
+        let cleanDate = rawDateValue;
+        const matches = rawDateValue.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (matches) {
+            const yyyy = matches[1];
+            const mm = ('0' + matches[2]).slice(-2);
+            const dd = ('0' + matches[3]).slice(-2);
+            cleanDate = `${yyyy}-${mm}-${dd}`;
+        }
+        
+        const now = new Date();
+        const hours = ('0' + now.getHours()).slice(-2);
+        const minutes = ('0' + now.getMinutes()).slice(-2);
+        const timeStr = `${hours}:${minutes}`;
+
+        const payload = {
+            date: cleanDate,
+            author: document.getElementById('inputAuthor').value,
+            updatedAt: timeStr,
+            content: document.getElementById('inputContent').value
+        };
+
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            alert("日誌を投稿しました！");
+            resetFormContent();
+            currentIndex = 0; 
+            fetchDiaries();
+        } catch (error) {
+            alert("投稿に失敗しました。");
+        }
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>NHKラジオ全国局プレーヤー（高速版 hls.js）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+body{
+    font-family:sans-serif;
+    background:#f5f5f5;
+    padding:20px;
+}
+.card{
+    max-width:650px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+select{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+}
+audio{
+    width:100%;
+    margin-top:15px;
+}
+#loading{
+    margin-top:10px;
+    color:#0066cc;
+    height:1.2em;
+}
+</style>
+
+<!-- hls.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+</head>
+<body>
+
+<div class="card">
+
+<h2>NHKラジオ全国局プレーヤー（高速版）</h2>
+
+<select id="stationSelect"></select>
+
+<div id="loading"></div>
+
+<audio id="player" controls autoplay></audio>
+
+</div>
+
+<script>
+
+const stations=[
+{name:"札幌 AM",url:"https://simul.drdi.st.nhk/live/6/joined/master.m3u8"},
+{name:"札幌 FM",url:"https://simul.drdi.st.nhk/live/7/joined/master.m3u8"},
+{name:"仙台 AM",url:"https://simul.drdi.st.nhk/live/8/joined/master.m3u8"},
+{name:"仙台 FM",url:"https://simul.drdi.st.nhk/live/9/joined/master.m3u8"},
+{name:"東京 AM",url:"https://simul.drdi.st.nhk/live/3/joined/master.m3u8"},
+{name:"東京 FM",url:"https://simul.drdi.st.nhk/live/5/joined/master.m3u8"},
+{name:"名古屋 AM",url:"https://simul.drdi.st.nhk/live/10/joined/master.m3u8"},
+{name:"名古屋 FM",url:"https://simul.drdi.st.nhk/live/11/joined/master.m3u8"},
+{name:"大阪 AM",url:"https://simul.drdi.st.nhk/live/12/joined/master.m3u8"},
+{name:"大阪 FM",url:"https://simul.drdi.st.nhk/live/13/joined/master.m3u8"},
+{name:"広島 AM",url:"https://simul.drdi.st.nhk/live/14/joined/master.m3u8"},
+{name:"広島 FM",url:"https://simul.drdi.st.nhk/live/15/joined/master.m3u8"},
+{name:"松山 AM",url:"https://simul.drdi.st.nhk/live/16/joined/master.m3u8"},
+{name:"松山 FM",url:"https://simul.drdi.st.nhk/live/17/joined/master.m3u8"},
+{name:"福岡 AM",url:"https://simul.drdi.st.nhk/live/18/joined/master.m3u8"},
+{name:"福岡 FM",url:"https://simul.drdi.st.nhk/live/19/joined/master.m3u8"},
+];
+
+const select=document.getElementById("stationSelect");
+const player=document.getElementById("player");
+const loading=document.getElementById("loading");
+
+stations.forEach(st=>{
+    const o=document.createElement("option");
+    o.textContent=st.name;
+    o.value=st.url;
+    select.appendChild(o);
+});
+
+let hls=null;
+
+function playStation(url){
+
+    loading.textContent="読み込み中...";
+
+    if(hls){
+        hls.destroy();
+        hls=null;
+    }
+
+    if(Hls.isSupported()){
+
+        hls=new Hls({
+
+            enableWorker:true,
+
+            lowLatencyMode:true,
+
+            backBufferLength:0,
+
+            maxBufferLength:5,
+
+            maxMaxBufferLength:10,
+
+            liveSyncDurationCount:1,
+
+            liveMaxLatencyDurationCount:2,
+
+            startLevel:-1,
+
+            capLevelToPlayerSize:false
+
+        });
+
+        hls.loadSource(url);
+
+        hls.attachMedia(player);
+
+        hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+            player.play().catch(()=>{});
+        });
+
+    }
+    else if(player.canPlayType('application/vnd.apple.mpegurl')){
+
+        player.src=url;
+        player.play().catch(()=>{});
+
+    }
+}
+
+select.addEventListener("change",()=>{
+
+    playStation(select.value);
+
+});
+
+player.addEventListener("playing",()=>{
+
+    loading.textContent="";
+
+});
+
+player.addEventListener("waiting",()=>{
+
+    loading.textContent="読み込み中...";
+
+});
+
+player.addEventListener("stalled",()=>{
+
+    loading.textContent="読み込み中...";
+
+});
+
+player.addEventListener("error",()=>{
+
+    loading.textContent="再生エラー";
+
+});
+
+// 初期局
+select.selectedIndex=4;
+playStation(select.value);
+
+</script>
+
+</body>
+</html>

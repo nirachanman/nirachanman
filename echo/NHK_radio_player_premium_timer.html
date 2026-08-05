@@ -1,0 +1,24 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NHK Radio Player Premium</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--a:#38bdf8;--b:#334155;--t:#f1f5f9}
+body{margin:0;background:radial-gradient(circle at top right,#233553,#0f172a);font-family:sans-serif;color:var(--t);display:flex;justify-content:center;align-items:center;min-height:100vh}
+.card{width:min(95%,460px);background:var(--card);padding:22px;border-radius:22px}
+select,audio{width:100%}select{padding:12px;background:#111c2d;color:#fff;border:1px solid var(--b);border-radius:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0}.grid button,#cancel{padding:16px;border:none;border-radius:14px;font-size:16px;background:#233553;color:#fff}button.active{background:var(--a);color:#000;font-weight:bold}
+#cancel{width:100%;margin-top:8px}#count,#loading{text-align:center;margin:8px;color:var(--a)}
+</style></head><body><div class=card><h2>NHK RADIO</h2><select id=s></select><div class=grid>
+<button data-m=30>30分</button><button data-m=60>60分</button><button data-m=90>90分</button>
+<button data-m=120>120分</button><button data-m=0>OFF</button></div>
+<button id=cancel>タイマー解除</button><div id=count>タイマー未設定</div><audio id=p controls autoplay></audio><div id=loading></div></div>
+<script>
+const st=[["東京 AM",3],["東京 FM",5],["札幌 AM",6],["札幌 FM",7],["仙台 AM",8],["仙台 FM",9],["名古屋 AM",10],["名古屋 FM",11],["大阪 AM",12],["大阪 FM",13],["広島 AM",14],["広島 FM",15],["松山 AM",16],["松山 FM",17],["福岡 AM",18],["福岡 FM",19]];
+st.forEach(x=>{let o=document.createElement('option');o.text=x[0];o.value=`https://simul.drdi.st.nhk/live/${x[1]}/joined/master.m3u8`;s.add(o)});
+let h;function play(u){loading.textContent='読み込み中';if(h){h.destroy()}h=new Hls();h.loadSource(u);h.attachMedia(p);h.on(Hls.Events.MANIFEST_PARSED,()=>p.play());}
+s.onchange=()=>play(s.value);s.selectedIndex=0;play(s.value);p.onplaying=()=>loading.textContent='';
+let end=0,intv,tmo;
+function clearT(){clearInterval(intv);clearTimeout(tmo);count.textContent='タイマー未設定';document.querySelectorAll('button[data-m]').forEach(b=>b.classList.remove('active'))}
+cancel.onclick=clearT;
+document.querySelectorAll('button[data-m]').forEach(b=>b.onclick=()=>{clearT();document.querySelectorAll('button[data-m]').forEach(x=>x.classList.remove('active'));b.classList.add('active');let m=+b.dataset.m;if(!m)return;end=Date.now()+m*60000;intv=setInterval(()=>{let r=Math.max(0,end-Date.now()),s=Math.floor(r/1000),mm=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');count.textContent='残り '+mm+':'+ss;if(r<=5000){p.volume=Math.max(0,r/5000)}},250);tmo=setTimeout(()=>{p.pause();p.volume=1;count.textContent='OFFタイマーで停止しました';clearT()},m*60000);});
+</script></body></html>

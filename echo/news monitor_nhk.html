@@ -464,30 +464,58 @@
             }
         }
 
-        async function autoScroll() {
-            if (isPaused) return;
-            const container = document.getElementById('news-container');
-            const items = container.querySelectorAll('.news-item');
-            if (items.length === 0) return;
+// なめらかなスクロールを実現するアニメーション関数
+function smoothScrollTo(element, target, duration = 1000) {
+    const start = element.scrollTop;
+    const change = target - start;
+    const startTime = performance.now();
 
-            // リストの最後まで到達した場合の処理
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 57 || currentItemIndex + 3 >= items.length) {
-                if (currentRadioMode !== 'off') { // ラジオ再生中（AM/FM）
-                    await updateNews();
-                    currentItemIndex = 0;
-                    container.scrollTop = 0;
-                } else { // ラジオOFF時
-                    window.location.reload();
-                }
-                return;
-            }
+    function animateScroll(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
 
-            currentItemIndex += 3;
-            const targetItem = items[currentItemIndex];
-            if (targetItem) {
-                container.scrollTo({ top: targetItem.offsetTop - container.offsetTop, behavior: 'smooth' });
-            }
+        // イージング関数（easeInOutCubic: 滑らかに動き出して滑らかに止まる）
+        const easeInOutCubic = progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        element.scrollTop = start + change * easeInOutCubic;
+
+        if (progress < 1) {
+            requestAnimationFrame(animateScroll);
         }
+    }
+
+    requestAnimationFrame(animateScroll);
+}
+
+// 30秒毎に呼ばれるメイン処理
+async function autoScroll() {
+    if (isPaused) return;
+    const container = document.getElementById('news-container');
+    const items = container.querySelectorAll('.news-item');
+    if (items.length === 0) return;
+
+    // リストの最後まで到達した場合の処理
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
+        if (currentRadioMode !== 'off') { // ラジオ再生中（AM/FM）
+            await updateNews();
+            currentItemIndex = 0;
+            smoothScrollTo(container, 0, 800); // 0.8秒かけて一番上へ戻る
+        } else { // ラジオOFF時
+            window.location.reload();
+        }
+        return;
+    }
+
+    currentItemIndex += 3;
+    const targetItem = items[currentItemIndex];
+    if (targetItem) {
+        const targetTop = targetItem.offsetTop - container.offsetTop;
+        // 1.2秒（1200ms）かけて滑らかに次のカード群へスクロール
+        smoothScrollTo(container, targetTop, 1200); 
+    }
+}
 
         // 初期化処理
         async function init() {

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+<!-- PWA対応の設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <title>川口公民館日誌・引継ぎ簿</title>
     <style>
         /* 基本スタイル（ベース設定） */
@@ -457,6 +461,14 @@
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+// Service Workerの登録
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker 登録成功:', reg.scope))
+                .catch(err => console.log('PWA Service Worker 登録失敗:', err));
+        });
     }
 </script>
 </body>

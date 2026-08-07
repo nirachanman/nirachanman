@@ -1,14 +1,11 @@
-const CACHE_NAME = 'kawaguchi-diary-v1';
-// キャッシュする静的ファイル（オフラインでも表示する画面構成）
+const CACHE_NAME = 'kawaguchi-diary-v2';
+
+// 実際に存在するファイルだけを相対パスでキャッシュ
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './work-diary-kawaguchi.html',
+  './manifest.json'
 ];
 
-// インストール時に静的ファイルをキャッシュ
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -17,18 +14,32 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// リクエスト時のキャッシュ優先＆ネットワークフォールバック制御
 self.addEventListener('fetch', (event) => {
-  // GAS APIへの通信（POST/GETデータ取得）はキャッシュせず常にネットワークを通す
+  // GAS API通信はキャッシュせず常にネットワークを通す
   if (event.request.url.includes('script.google.com')) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // HTMLや画面デザインはキャッシュから超高速読み込み
+  // 静的ファイルはキャッシュを優先
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
+    })
+  );
+});
+
+// 古いキャッシュをクリア
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
     })
   );
 });

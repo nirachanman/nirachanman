@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kawaguchi-diary-v1';
+const CACHE_NAME = '🟩ﾆﾗﾁｬﾝﾏﾝＨＰ-v1';
 // キャッシュする静的ファイル（オフラインでも表示する画面構成）
 const urlsToCache = [
   './',

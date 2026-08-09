@@ -14,7 +14,7 @@ select,audio{width:100%}select{padding:12px;background:#111c2d;color:#fff;border
 <button id=cancel>タイマー解除</button><div id=count>タイマー未設定</div><audio id=p controls autoplay></audio><div id=loading></div></div>
 <script>
 const st=[["東京 AM",3],["東京 FM",5],["札幌 AM",6],["札幌 FM",7],["仙台 AM",8],["仙台 FM",9],["名古屋 AM",10],["名古屋 FM",11],["大阪 AM",12],["大阪 FM",13],["広島 AM",14],["広島 FM",15],["松山 AM",16],["松山 FM",17],["福岡 AM",18],["福岡 FM",19]];
-st.forEach(x=>{let o=document.createElement('option');o.text=x[0];o.value=`https://simul2.drdi.st.nhk/live/${x[1]}/joined/master.m3u8`;s.add(o)});
+st.forEach(x=>{let o=document.createElement('option');o.text=x[0];o.value=`https://simul.drdi.st.nhk/live/${x[1]}/joined/master.m3u8`;s.add(o)});
 let h;function play(u){loading.textContent='読み込み中';if(h){h.destroy()}h=new Hls();h.loadSource(u);h.attachMedia(p);h.on(Hls.Events.MANIFEST_PARSED,()=>p.play());}
 s.onchange=()=>play(s.value);s.selectedIndex=0;play(s.value);p.onplaying=()=>loading.textContent='';
 let end=0,intv,tmo;

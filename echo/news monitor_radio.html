@@ -481,9 +481,14 @@
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
             if (targetItem) {
-                container.scrollTo({ top: targetItem.offsetTop - container.offsetTop, behavior: 'smooth' });
+                const targetTop = targetItem.offsetTop - container.offsetTop;
+                container.scrollTo({
+                      top: targetTop,
+                      behavior: 'smooth'
+                });
             }
         }
+
 
         // 初期化処理
         async function init() {

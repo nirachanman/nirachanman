@@ -25,6 +25,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            padding-bottom: 120px; /* 下部固定パネルと被らないように余白を確保 */
         }
 
         .container {
@@ -35,49 +36,54 @@
             text-align: center;
         }
 
-        /* --- ステータスパネル --- */
+        /* --- ポップアップ（フローティング）ステータスパネル --- */
         .status-panel {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
             background: var(--card-bg);
-            padding: 14px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border-bottom: 4px solid var(--accent-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            
-            position: sticky;
-            top: 10px; 
-            z-index: 100; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            border-top: 3px solid var(--accent-color);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
         }
 
-        .panel-row {
+        /* 常に表示される簡易ヘッダーバー */
+        .panel-header {
             display: flex;
-            justify-content: center;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        .header-info {
+            display: flex;
             align-items: center;
             gap: 10px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .top-row #status-label,
-        .top-row .stop-btn {
             flex: 1;
             min-width: 0;
-            text-align: center;
         }
 
         #status-label {
-            padding: 10px 10px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 0.85rem;
-            border: 2px solid var(--error-color);
+            font-size: 0.75rem;
+            border: 1.5px solid var(--error-color);
             background-color: transparent;
             color: var(--error-color);
             cursor: default;
-            box-sizing: border-box;
+            white-space: nowrap;
             transition: all 0.3s ease;
         }
         
@@ -86,24 +92,61 @@
             color: var(--timer-color);
         }
 
-        /* 【大幅更新】放送局名表示行の高さ・挙動を完全固定 */
         #current-station {
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: bold;
-            margin: 2px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--off-white);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 4px;
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        /* 開閉スライド領域 */
+        .panel-body {
+            max-height: 0;
+            opacity: 0;
+            padding: 0 16px;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* パネル展開時の表示スタイル */
+        .status-panel.open .panel-body {
+            max-height: 200px;
+            opacity: 1;
+            padding: 12px 16px 16px 16px;
+        }
+
+        .status-panel.open .toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        .panel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
             width: 100%;
-            
-            height: 1.5rem;          /* 高さを1行分に固定 */
-            line-height: 1.5rem;     /* 文字の縦位置を中央に安定させる */
-            white-space: nowrap;     /* 絶対に2行に改行させない */
-            overflow: hidden;        /* 枠からはみ出た文字は非表示にする */
-            text-overflow: ellipsis; /* 文字が入り切らない場合は末尾を「...」にする */
             box-sizing: border-box;
         }
 
         /* ボリュームコントロール領域 */
         .volume-row {
-            padding: 2px 5px;
+            padding: 0;
         }
 
         .volume-container {
@@ -111,7 +154,7 @@
             align-items: center;
             gap: 10px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.2);
             padding: 6px 12px;
             border-radius: 30px;
             box-sizing: border-box;
@@ -141,10 +184,6 @@
             height: 16px;
             border-radius: 50%;
             background: var(--timer-color);
-            transition: transform 0.1s;
-        }
-        .volume-slider::-webkit-slider-thumb:active {
-            transform: scale(1.2);
         }
 
         .volume-slider::-moz-range-thumb {
@@ -153,14 +192,9 @@
             border: none;
             border-radius: 50%;
             background: var(--timer-color);
-            transition: transform 0.1s;
-        }
-        .volume-slider::-moz-range-thumb:active {
-            transform: scale(1.2);
         }
 
         .bottom-row {
-            justify-content: space-between;
             border-top: 1px solid #3a3c40;
             padding-top: 10px;
         }
@@ -182,9 +216,7 @@
             cursor: pointer;
             outline: none;
             box-sizing: border-box;
-            transition: all 0.3s ease;
             -webkit-appearance: none;
-            -moz-appearance: none;
             appearance: none;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat;
@@ -199,12 +231,29 @@
         }
 
         #timer-display {
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: var(--timer-color);
             font-weight: bold;
             text-align: right;
             flex: 1;
-            padding-left: 10px;
+        }
+
+        /* --- コントロールボタン群 --- */
+        button.control-btn {
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
+
+        .stop-btn { 
+            background-color: var(--error-color); 
+            color: #1a1c1e;
+            border: 2px solid var(--error-color);
         }
 
         /* --- グリッド（放送局ボタン） --- */
@@ -213,6 +262,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             width: 100%;
+            margin-top: 10px;
         }
 
         .station-btn {
@@ -240,26 +290,8 @@
             border-color: var(--accent-color);
         }
 
-        /* --- コントロールボタン群 --- */
-        button.control-btn {
-            padding: 10px 10px;
-            border-radius: 20px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.85rem;
-            box-sizing: border-box;
-        }
-
-        .stop-btn { 
-            background-color: var(--error-color); 
-            color: #1a1c1e;
-            border: 2px solid var(--error-color);
-        }
-
         @media (max-width: 350px) {
             .grid { grid-template-columns: 1fr; }
-            #current-station { font-size: 1.1rem; }
             .station-btn { height: auto; min-height: 50px; }
         }
     </style>
@@ -267,14 +299,27 @@
 <body>
 
 <div class="container">
-    <div class="status-panel">
-        <div class="panel-row top-row">
+    <div class="grid" id="station-grid"></div>
+</div>
+
+<!-- ポップアッププレイヤー領域 -->
+<div class="status-panel" id="status-panel">
+    <!-- 常時表示ヘッダー -->
+    <div class="panel-header" onclick="togglePanel()">
+        <div class="header-info">
             <div id="status-label">再生停止中</div>
+            <div id="current-station">放送局を選択してください</div>
+        </div>
+        <button class="toggle-btn" id="toggle-btn" aria-label="パネル開閉">▲</button>
+    </div>
+
+    <!-- スライド展開領域 -->
+    <div class="panel-body">
+        <div class="panel-row">
             <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
         </div>
 
-        <div id="current-station">放送局を選択してください</div>
-
+        <!-- ボリュームスライダー（iOS判定で自動非表示） -->
         <div class="panel-row volume-row">
             <div class="volume-container">
                 <span class="volume-icon">🔈</span>
@@ -296,8 +341,6 @@
             <div id="timer-display"></div>
         </div>
     </div>
-
-    <div class="grid" id="station-grid"></div>
 </div>
 
 <audio id="audio-player" preload="none"></audio>
@@ -315,7 +358,6 @@
         { name: "SmoothJazz.com Global Radio", url: "https://smoothjazz.cdnstream1.com/2585_128.mp3" },
         { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
         { name: "J1 GOLD 昭和", url: "https://jenny.torontocast.com:2000/stream/J1GOLD" },
-        { name: "0nlineradio J-POP", url: "https://0nlineradio.stream13.radiohost.de/0r-j-pop?ref=tunein&upd-meta&upd-scheme=https&_art=dD0xNzgxODgzMjE3JmQ9OTY5OTVhMmRiZGVhOTdiNTY2ZjU" },
         { name: "Shonan BeachFM", url: "https://shonanbeachfm.out.airtime.pro:8000/shonanbeachfm_a" },
         { name: "Gold Instrumental", url: "https://centova.svdns.com.br:19373/stream.mp3" },
         { name: "Gold web radio", url: "https://centova.svdns.com.br:19418/stream" },
@@ -330,12 +372,18 @@
     const timerDisplay = document.getElementById('timer-display');
     const timerSelect = document.getElementById('sleep-timer-select');
     const volumeSlider = document.getElementById('volume-slider');
+    const statusPanel = document.getElementById('status-panel');
     
     let hls = null;
     let timerId = null;
     let countdownIntervalId = null;
     let fadeTimerId = null;
     let remainingSeconds = 0;
+
+    // パネル開閉トグル
+    function togglePanel() {
+        statusPanel.classList.toggle('open');
+    }
 
     // iOS環境（iPhone / iPad / iPod）判定
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -372,6 +420,9 @@
         currentStationLabel.innerText = station.name;
         updateStatus("接続中...", true);
         
+        // 再生時はパネルを自動で開く
+        statusPanel.classList.add('open');
+
         document.querySelectorAll('.station-btn').forEach(b => {
             b.classList.toggle('playing', b.innerText === station.name);
         });

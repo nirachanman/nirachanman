@@ -335,7 +335,6 @@
 
     <script>
 // 稼働しているNHK公式RSS URLに変更
-// 稼働しているNHK公式RSS URLに変更
         const RSS_URLS = [
             'https://www3.nhk.or.jp/rss/news/cat0.xml', // 主要
             'https://www3.nhk.or.jp/rss/news/cat1.xml', // 社会
@@ -344,6 +343,7 @@
             'https://www3.nhk.or.jp/rss/news/cat6.xml', // 国際
             'https://www3.nhk.or.jp/rss/news/cat7.xml'  // スポーツ
         ];
+
         // 各局のURLマッピング
         const RADIO_STREAMS = {
             amt: 'https://simul2.drdi.st.nhk/live/3/joined/master.m3u8',
@@ -354,7 +354,7 @@
 
         const radioAudio = new Audio();
         let hls = null;
-        let currentRadioMode = 'off'; // 'off', 'am', 'fm'
+        let currentRadioMode = 'off';
 
         let isPaused = false;
         let currentItemIndex = 0; 
@@ -377,12 +377,10 @@
             currentRadioMode = selectedMode;
 
             if (selectedMode === 'off') {
-                // OFFの場合
                 radioAudio.pause();
                 if (hls) hls.stopLoad();
                 selectEl.classList.remove('playing');
             } else {
-                // AM または FM の場合
                 loadAndPlayStream(RADIO_STREAMS[selectedMode], selectEl);
             }
         }
@@ -407,24 +405,43 @@
             }).catch(err => console.error("再生エラー:", err));
         }
 
+        // 信頼性の高いプロキシ経由でRSSを取得
+        async function fetchRssXml(url) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error('Fetch failed');
+            const text = await res.text();
+            return new DOMParser().parseFromString(text, 'text/xml');
+        }
+
         async function updateNews() {
             let allItems = [];
             for (const url of RSS_URLS) {
                 try {
-                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
-                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-                    for (let item of xml.getElementsByTagName('item')) {
+                    const xml = await fetchRssXml(url);
+                    const items = xml.getElementsByTagName('item');
+                    for (let item of items) {
+                        const titleEl = item.getElementsByTagName('title')[0];
+                        const linkEl = item.getElementsByTagName('link')[0];
                         const descEl = item.getElementsByTagName('description')[0];
-                        allItems.push({
-                            title: item.getElementsByTagName('title')[0].textContent,
-                            link: item.getElementsByTagName('link')[0].textContent,
-                            description: descEl ? descEl.textContent : '',
-                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
-                        });
+                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
+
+                        if (titleEl && linkEl) {
+                            allItems.push({
+                                title: titleEl.textContent,
+                                link: linkEl.textContent,
+                                description: descEl ? descEl.textContent : '',
+                                pubDate: pubDateEl ? new Date(pubDateEl.textContent) : new Date()
+                            });
+                        }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.warn("RSS取得スキップ:", url, e);
+                }
             }
             if (allItems.length === 0) return;
+            
+            // 日付順にソート & 重複除去
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
             refreshMarqueeAndCards(true); 

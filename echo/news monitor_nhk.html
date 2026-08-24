@@ -405,13 +405,37 @@
             }).catch(err => console.error("再生エラー:", err));
         }
 
-        // 信頼性の高いプロキシ経由でRSSを取得
+// 信頼性の高いプロキシ経由でRSSを取得（JSONレスポンスを解析）
         async function fetchRssXml(url) {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
-            const res = await fetch(proxyUrl);
-            if (!res.ok) throw new Error('Fetch failed');
-            const text = await res.text();
-            return new DOMParser().parseFromString(text, 'text/xml');
+            const targetUrl = url + '?t=' + Date.now();
+            
+            // 1. AllOrigins (JSONP/JSON形式で取得)
+            try {
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+                const res = await fetch(proxyUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.contents) {
+                        return new DOMParser().parseFromString(data.contents, 'text/xml');
+                    }
+                }
+            } catch (e) {
+                console.warn("AllOrigins 取得失敗、予備プロキシを試行:", e);
+            }
+
+            // 2. 予備プロキシ (corsproxy.io)
+            try {
+                const proxyUrl2 = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+                const res2 = await fetch(proxyUrl2);
+                if (res2.ok) {
+                    const text = await res2.text();
+                    return new DOMParser().parseFromString(text, 'text/xml');
+                }
+            } catch (e) {
+                console.warn("予備プロキシも失敗:", e);
+            }
+
+            throw new Error('RSS取得失敗');
         }
 
         async function updateNews() {
@@ -436,17 +460,22 @@
                         }
                     }
                 } catch (e) {
-                    console.warn("RSS取得スキップ:", url, e);
+                    console.warn("RSS取得スキップ:", url);
                 }
             }
-            if (allItems.length === 0) return;
+            
+            // データが全く取れなかった場合は何もしない（画面を消さない）
+            if (allItems.length === 0) {
+                console.error("すべてのRSSの取得に失敗しました。");
+                return;
+            }
             
             // 日付順にソート & 重複除去
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
             refreshMarqueeAndCards(true); 
-        }
 
+        }
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             

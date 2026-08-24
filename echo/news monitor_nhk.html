@@ -333,8 +333,8 @@
 
     <main id="news-container"></main>
 
-    <script>
-// 稼働しているNHK公式RSS URLに変更
+<script>
+        // 稼働しているNHK公式RSS URLに変更
         const RSS_URLS = [
             'https://www3.nhk.or.jp/rss/news/cat0.xml', // 主要
             'https://www3.nhk.or.jp/rss/news/cat1.xml', // 社会
@@ -405,40 +405,37 @@
             }).catch(err => console.error("再生エラー:", err));
         }
 
-// ご自身のGASウェブアプリURLを貼り付けてください
+        // ご自身のGASウェブアプリURL
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';
 
         async function fetchRssXml(url) {
-            const targetUrl = GAS_WEB_APP_URL + '?url=' + encodeURIComponent(url);
-            
+            // 1. GAS経由での取得を優先
             try {
+                const targetUrl = GAS_WEB_APP_URL + '?url=' + encodeURIComponent(url);
                 const res = await fetch(targetUrl);
-                if (!res.ok) throw new Error('GAS Fetch Failed');
-                const xmlText = await res.text();
-                
-                // XMLとしてパース
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                
-                // パースエラーチェック
-                if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
-                    throw new Error('XML Parse Error');
+                if (res.ok) {
+                    const xmlText = await res.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    if (xmlDoc.getElementsByTagName('parsererror').length === 0 && xmlDoc.getElementsByTagName('item').length > 0) {
+                        return xmlDoc;
+                    }
                 }
-                
-                return xmlDoc;
             } catch (e) {
-                console.warn("GAS経由での取得エラー:", url, e);
-                throw e;
+                console.warn("GAS経由での取得エラー、予備プロキシを試行:", url, e);
             }
-        }
 
             // 2. 予備プロキシ (corsproxy.io)
             try {
-                const proxyUrl2 = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+                const cacheBustUrl = url + '?t=' + Date.now();
+                const proxyUrl2 = 'https://corsproxy.io/?' + encodeURIComponent(cacheBustUrl);
                 const res2 = await fetch(proxyUrl2);
                 if (res2.ok) {
                     const text = await res2.text();
-                    return new DOMParser().parseFromString(text, 'text/xml');
+                    const xmlDoc2 = new DOMParser().parseFromString(text, 'text/xml');
+                    if (xmlDoc2.getElementsByTagName('parsererror').length === 0) {
+                        return xmlDoc2;
+                    }
                 }
             } catch (e) {
                 console.warn("予備プロキシも失敗:", e);
@@ -483,8 +480,8 @@
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
             refreshMarqueeAndCards(true); 
-
         }
+
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             
@@ -498,13 +495,14 @@
             marqueeHtml += '</span>';
 
             if (force || marqueeHtml !== lastRenderedMarquee) {
-                document.getElementById('marquee').innerHTML = marqueeHtml;
+                const marqueeEl = document.getElementById('marquee');
+                if (marqueeEl) marqueeEl.innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
             }
 
             // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
-            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
+            if (container && (force || currentNewsUniqueItems.length !== lastRenderedNewsLength)) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 57).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
@@ -525,6 +523,7 @@
         async function autoScroll() {
             if (isPaused) return;
             const container = document.getElementById('news-container');
+            if (!container) return;
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 

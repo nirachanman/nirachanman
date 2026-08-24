@@ -446,12 +446,13 @@
             throw new Error('RSS取得失敗');
         }
 
-        async function updateNews() {
-            let allItems = [];
-            for (const url of RSS_URLS) {
+async function updateNews() {
+            // 6つのRSSを同時に並列で取得開始
+            const fetchPromises = RSS_URLS.map(async (url) => {
                 try {
                     const xml = await fetchRssXml(url);
                     const items = xml.getElementsByTagName('item');
+                    const parsedItems = [];
                     for (let item of items) {
                         const titleEl = item.getElementsByTagName('title')[0];
                         const linkEl = item.getElementsByTagName('link')[0];
@@ -459,7 +460,7 @@
                         const pubDateEl = item.getElementsByTagName('pubDate')[0];
 
                         if (titleEl && linkEl) {
-                            allItems.push({
+                            parsedItems.push({
                                 title: titleEl.textContent,
                                 link: linkEl.textContent,
                                 description: descEl ? descEl.textContent : '',
@@ -467,11 +468,19 @@
                             });
                         }
                     }
+                    return parsedItems;
                 } catch (e) {
                     console.warn("RSS取得スキップ:", url);
+                    return [];
                 }
-            }
+            });
+
+            // すべての通信完了を待機（並列処理）
+            const results = await Promise.all(fetchPromises);
             
+            // 取得した全配列をフラットに結合
+            let allItems = results.flat();
+
             // データが全く取れなかった場合は何もしない（画面を消さない）
             if (allItems.length === 0) {
                 console.error("すべてのRSSの取得に失敗しました。");
@@ -554,6 +563,5 @@
             setInterval(autoScroll, 30000); // 30秒毎にスクロール
         }
         init();
-    </script>
-</body>
+    </script></body>
 </html>

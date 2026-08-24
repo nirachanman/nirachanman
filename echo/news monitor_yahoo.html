@@ -247,17 +247,20 @@
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
-<div class="radio-control">
-    <!-- 2局切替用のドロップダウンメニュー -->
-    <select id="radio-station-select" class="radio-select" onchange="changeStation()">
-        <option value="https://simul2.drdi.st.nhk/live/8/joined/master.m3u8">📻 NHK-AM</option>
-        <option value="https://simul2.drdi.st.nhk/live/9/joined/master.m3u8">📻 NHK-FM</option>
-        <option value="https://simul2.drdi.st.nhk/live/3/joined/master.m3u8">📻 東京-AM</option>
-        <option value="https://simul2.drdi.st.nhk/live/5/joined/master.m3u8">📻 東京-FM</option>
-    </select>
-    <button id="radio-toggle-btn" class="radio-btn" onclick="toggleRadio()">OFF</button>
-</div>        </div>
+            <div class="radio-control">
+                <!-- プルダウンメニュー -->
+                <select id="radio-select" class="radio-select" onchange="changeRadio(this.value)">
+                    <option value="off">📻 ラジオ OFF</option>
+                    <option value="amt">📻 NHK-AM東京</option>
+                    <option value="fmt">📻 NHK-FM東京</option>
+                    <option value="ams">📻 NHK-AM仙台</option>
+                    <option value="fms">📻 NHK-FM仙台</option>
+                </select>
+            </div>
+        </div>
     </header>
+
+    <div id="iwate-alert-container"></div>
 
     <main id="news-container"></main>
 
@@ -298,63 +301,38 @@
         let lastRenderedNewsLength = 0;
         let currentNewsUniqueItems = [];
 
-// ラジオのON/OFF切り替え
-function toggleRadio() {
-    const btn = document.getElementById('radio-toggle-btn');
-    const stationSelect = document.getElementById('radio-station-select');
-    const selectedUrl = stationSelect.value;
-    
-    if (!isRadioPlaying) {
-        startStream(selectedUrl, btn);
-    } else {
-        stopStream(btn);
-    }
-}
+        function changeRadio(selectedMode) {
+            const selectEl = document.getElementById('radio-select');
+            currentRadioMode = selectedMode;
 
-// 放送局切替イベント（再生中に局を変えたら自動で切り替える）
-function changeStation() {
-    const btn = document.getElementById('radio-toggle-btn');
-    const stationSelect = document.getElementById('radio-station-select');
-    const selectedUrl = stationSelect.value;
-
-    if (isRadioPlaying) {
-        stopStream(btn);
-        startStream(selectedUrl, btn);
-    }
-}
-
-// ストリーミング再生開始ロジック
-function startStream(streamUrl, btn) {
-    if (Hls.isSupported()) {
-        if (!hls) {
-            hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
+            if (selectedMode === 'off') {
+                radioAudio.pause();
+                if (hls) hls.stopLoad();
+                selectEl.classList.remove('playing');
+            } else {
+                loadAndPlayStream(RADIO_STREAMS[selectedMode], selectEl);
+            }
         }
-        hls.loadSource(streamUrl);
-        hls.attachMedia(radioAudio);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
-    } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-        radioAudio.src = streamUrl;
-        radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
-    }
-}
 
-// 停止ロジック
-function stopStream(btn) {
-    radioAudio.pause();
-    if (hls) hls.stopLoad();
-    isRadioPlaying = false;
-    btn.innerText = "OFF";
-    btn.classList.remove('playing');
-}
+        function loadAndPlayStream(url, selectEl) {
+            if (Hls.isSupported()) {
+                if (!hls) {
+                    hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
+                    hls.attachMedia(radioAudio);
+                }
+                hls.loadSource(url);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(selectEl));
+            } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+                radioAudio.src = url;
+                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(selectEl));
+            }
+        }
 
-// 音声再生ロジック
-function playAudioStream(btn) {
-    radioAudio.play().then(() => {
-        isRadioPlaying = true;
-        btn.innerText = "ON";
-        btn.classList.add('playing');
-    }).catch(err => console.error("再生エラー:", err));
-}
+        function playAudioStream(selectEl) {
+            radioAudio.play().then(() => {
+                selectEl.classList.add('playing');
+            }).catch(err => console.error("再生エラー:", err));
+        }
 
         // ご自身のGASウェブアプリURL
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';

@@ -108,6 +108,7 @@
             flex-shrink: 0;
         }
         
+        /* プルダウンメニュー（select）のスタイル設定 */
         .radio-select {
             background-color: #263238;
             color: #b0bec5;
@@ -121,6 +122,7 @@
             transition: all 0.3s ease;
         }
         
+        /* 再生中（AM/FM選択時）のスタイル */
         .radio-select.playing {
             background-color: #00e676;
             color: #000000;
@@ -137,6 +139,7 @@
 
         #news-container { 
             overflow-y: auto;          
+            scroll-behavior: smooth; 
             display: flex; 
             flex-direction: column; 
             gap: 6px; 
@@ -149,6 +152,43 @@
         
         #news-container::-webkit-scrollbar {
             display: none;
+        }
+        
+        .weather-alert-card {
+            background-color: #2a1215;
+            border: 2px solid #ff3333;
+            border-left: 8px solid #ff3333;
+            padding: 15px;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            box-sizing: border-box;
+            width: 100%;
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: #ff3333; }
+            50% { border-color: #ffaa00; }
+        }
+        .weather-alert-card.special {
+            background-color: #24122a;
+            border: 2px solid #da70d6;
+            border-left: 8px solid #da70d6;
+            animation: pulse-special 1.5s infinite;
+        }
+        @keyframes pulse-special {
+            0%, 100% { border-color: #da70d6; }
+            50% { border-color: #ffffff; }
+        }
+        .weather-alert-title {
+            font-weight: bold;
+            color: #ff5555;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .weather-alert-card.special .weather-alert-title {
+            color: #ff77ff;
         }
 
         .news-item { 
@@ -204,19 +244,80 @@
 
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
+
+        #emergency-alert-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(186, 12, 47, 0.98); 
+            z-index: 99999;
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            box-sizing: border-box;
+            padding: 40px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .alert-flash {
+            animation: blink 1s ease infinite;
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+            color: #fffb00; 
+        }
+        .alert-box {
+            background-color: #000000;
+            border: 4px solid #fffb00;
+            border-radius: 12px;
+            padding: 30px 60px;
+            display: inline-block;
+            max-width: 85%;
+        }
+        .alert-main-info {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #ff3333;
+            margin: 15px 0;
+        }
+        .alert-sub-info {
+            font-size: 1.8rem;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
     </style>
 </head>
 <body>
 
+    <div id="emergency-alert-overlay">
+        <div id="alert-title" class="alert-flash">🚨 緊急速報 🚨</div>
+        <div class="alert-box">
+            <div id="alert-header" style="font-weight: bold; font-size: 2.5rem; color: #ffffff;">情報を解析中...</div>
+            <div id="alert-main" class="alert-main-info">⚠️ 警戒してください</div>
+            <div id="alert-detail" class="alert-sub-info">海岸や川の近くからすぐに離れてください。</div>
+        </div>
+    </div>
+
     <header>
         <div class="header-top">
             <div class="header-left">
-                <a href="https://www3.nhk.or.jp/news/" target="_blank" rel="noopener noreferrer" class="header-link">
+                <a href="https://news.web.nhk/newsweb/pl/news-nwa-latest-nationwide" target="_blank" rel="noopener noreferrer" class="header-link">
                     <h1>NHK新着ニュース</h1>
                 </a>
                 <div class="marquee-container" id="marquee"></div>
             </div>
             <div class="radio-control">
+                <!-- プルダウンメニュー -->
                 <select id="radio-select" class="radio-select" onchange="changeRadio(this.value)">
                     <option value="off">📻 ラジオ OFF</option>
                     <option value="amt">📻 NHK-AM東京</option>
@@ -233,15 +334,17 @@
     <main id="news-container"></main>
 
     <script>
+// 稼働しているNHK公式RSS URLに変更
         const RSS_URLS = [
-            'https://www3.nhk.or.jp/rss/news/cat0.xml',
-            'https://www3.nhk.or.jp/rss/news/cat1.xml',
-            'https://www3.nhk.or.jp/rss/news/cat4.xml',
-            'https://www3.nhk.or.jp/rss/news/cat5.xml',
-            'https://www3.nhk.or.jp/rss/news/cat6.xml',
-            'https://www3.nhk.or.jp/rss/news/cat7.xml'
+            'https://www3.nhk.or.jp/rss/news/cat0.xml', // 主要
+            'https://www3.nhk.or.jp/rss/news/cat1.xml', // 社会
+            'https://www3.nhk.or.jp/rss/news/cat4.xml', // 政治
+            'https://www3.nhk.or.jp/rss/news/cat5.xml', // 経済
+            'https://www3.nhk.or.jp/rss/news/cat6.xml', // 国際
+            'https://www3.nhk.or.jp/rss/news/cat7.xml'  // スポーツ
         ];
 
+        // 各局のURLマッピング
         const RADIO_STREAMS = {
             amt: 'https://simul2.drdi.st.nhk/live/3/joined/master.m3u8',
             fmt: 'https://simul2.drdi.st.nhk/live/5/joined/master.m3u8',
@@ -255,8 +358,17 @@
 
         let isPaused = false;
         let currentItemIndex = 0; 
+        
+        let lastEewId = "";
+        let lastTsunamiId = "";
+        let isTsunamiActive = false;
+        
+        let iwateAlertLevel = 0; 
+        let iwateActiveAlertsText = ""; 
+        let iwateKikikuText = ""; 
 
         let lastRenderedMarquee = "";
+        let lastRenderedIwateKikiku = "";
         let lastRenderedNewsLength = 0;
         let currentNewsUniqueItems = [];
 
@@ -293,44 +405,46 @@
             }).catch(err => console.error("再生エラー:", err));
         }
 
-        // 複数プロキシ対応の堅牢なデータ取得処理
-        async function fetchRssXml(url) {
-            const cacheBustUrl = url + '?t=' + Date.now();
-            
-            // プロキシ候補リスト
-            const proxies = [
-                async (target) => {
-                    const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(target));
-                    if (!res.ok) throw new Error('Proxy 1 failed');
-                    const data = await res.json();
-                    return data.contents;
-                },
-                async (target) => {
-                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(target));
-                    if (!res.ok) throw new Error('Proxy 2 failed');
-                    return await res.text();
-                },
-                async (target) => {
-                    const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target));
-                    if (!res.ok) throw new Error('Proxy 3 failed');
-                    return await res.text();
-                }
-            ];
+// ご自身のGASウェブアプリURLを貼り付けてください
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';
 
-            for (const proxy of proxies) {
-                try {
-                    const xmlText = await proxy(cacheBustUrl);
-                    if (xmlText && xmlText.includes('<rss')) {
-                        const parsedDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-                        if (parsedDoc.getElementsByTagName('item').length > 0) {
-                            return parsedDoc;
-                        }
-                    }
-                } catch (e) {
-                    console.warn('プロキシ切替:', e.message);
+        async function fetchRssXml(url) {
+            const targetUrl = GAS_WEB_APP_URL + '?url=' + encodeURIComponent(url);
+            
+            try {
+                const res = await fetch(targetUrl);
+                if (!res.ok) throw new Error('GAS Fetch Failed');
+                const xmlText = await res.text();
+                
+                // XMLとしてパース
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                
+                // パースエラーチェック
+                if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                    throw new Error('XML Parse Error');
                 }
+                
+                return xmlDoc;
+            } catch (e) {
+                console.warn("GAS経由での取得エラー:", url, e);
+                throw e;
             }
-            throw new Error('全プロキシでの取得に失敗しました');
+        }
+
+            // 2. 予備プロキシ (corsproxy.io)
+            try {
+                const proxyUrl2 = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+                const res2 = await fetch(proxyUrl2);
+                if (res2.ok) {
+                    const text = await res2.text();
+                    return new DOMParser().parseFromString(text, 'text/xml');
+                }
+            } catch (e) {
+                console.warn("予備プロキシも失敗:", e);
+            }
+
+            throw new Error('RSS取得失敗');
         }
 
         async function updateNews() {
@@ -359,16 +473,22 @@
                 }
             }
             
-            if (allItems.length === 0) return;
+            // データが全く取れなかった場合は何もしない（画面を消さない）
+            if (allItems.length === 0) {
+                console.error("すべてのRSSの取得に失敗しました。");
+                return;
+            }
             
+            // 日付順にソート & 重複除去
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
             refreshMarqueeAndCards(true); 
-        }
 
+        }
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             
+            // マーキー（横流れタイトル）の描画ロジック
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
@@ -382,6 +502,7 @@
                 lastRenderedMarquee = marqueeHtml;
             }
 
+            // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
             if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
                 let newsListHtml = currentNewsUniqueItems.slice(0, 57).map(item => `
@@ -401,42 +522,19 @@
             }
         }
 
-        // なめらかなカスタムイージングスクロール関数
-        function smoothScrollTo(element, target, duration = 1200) {
-            const start = element.scrollTop;
-            const change = target - start;
-            const startTime = performance.now();
-
-            function animateScroll(currentTime) {
-                const elapsedTime = currentTime - startTime;
-                const progress = Math.min(elapsedTime / duration, 1);
-                
-                // cubic-bezier相当のスムーズな加減速
-                const easeInOutCubic = progress < 0.5
-                    ? 4 * progress * progress * progress
-                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-                element.scrollTop = start + change * easeInOutCubic;
-
-                if (progress < 1) {
-                    requestAnimationFrame(animateScroll);
-                }
-            }
-            requestAnimationFrame(animateScroll);
-        }
-
         async function autoScroll() {
             if (isPaused) return;
             const container = document.getElementById('news-container');
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 
+            // リストの最後まで到達した場合の処理
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 || currentItemIndex + 3 >= items.length) {
-                if (currentRadioMode !== 'off') { 
+                if (currentRadioMode !== 'off') { // ラジオ再生中（AM/FM）
                     await updateNews();
                     currentItemIndex = 0;
-                    smoothScrollTo(container, 0, 800);
-                } else { 
+                    container.scrollTop = 0;
+                } else { // ラジオOFF時
                     window.location.reload();
                 }
                 return;
@@ -445,14 +543,14 @@
             currentItemIndex += 3;
             const targetItem = items[currentItemIndex];
             if (targetItem) {
-                const targetTop = targetItem.offsetTop - container.offsetTop;
-                smoothScrollTo(container, targetTop, 1200);
+                container.scrollTo({ top: targetItem.offsetTop - container.offsetTop, behavior: 'smooth' });
             }
         }
 
+        // 初期化処理
         async function init() {
             await updateNews();
-            setInterval(autoScroll, 30000);
+            setInterval(autoScroll, 30000); // 30秒毎にスクロール
         }
         init();
     </script>

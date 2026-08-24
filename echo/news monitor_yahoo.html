@@ -298,38 +298,63 @@
         let lastRenderedNewsLength = 0;
         let currentNewsUniqueItems = [];
 
-        function changeRadio(selectedMode) {
-            const selectEl = document.getElementById('radio-select');
-            currentRadioMode = selectedMode;
+// ラジオのON/OFF切り替え
+function toggleRadio() {
+    const btn = document.getElementById('radio-toggle-btn');
+    const stationSelect = document.getElementById('radio-station-select');
+    const selectedUrl = stationSelect.value;
+    
+    if (!isRadioPlaying) {
+        startStream(selectedUrl, btn);
+    } else {
+        stopStream(btn);
+    }
+}
 
-            if (selectedMode === 'off') {
-                radioAudio.pause();
-                if (hls) hls.stopLoad();
-                selectEl.classList.remove('playing');
-            } else {
-                loadAndPlayStream(RADIO_STREAMS[selectedMode], selectEl);
-            }
-        }
+// 放送局切替イベント（再生中に局を変えたら自動で切り替える）
+function changeStation() {
+    const btn = document.getElementById('radio-toggle-btn');
+    const stationSelect = document.getElementById('radio-station-select');
+    const selectedUrl = stationSelect.value;
 
-        function loadAndPlayStream(url, selectEl) {
-            if (Hls.isSupported()) {
-                if (!hls) {
-                    hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
-                    hls.attachMedia(radioAudio);
-                }
-                hls.loadSource(url);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(selectEl));
-            } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-                radioAudio.src = url;
-                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(selectEl));
-            }
-        }
+    if (isRadioPlaying) {
+        stopStream(btn);
+        startStream(selectedUrl, btn);
+    }
+}
 
-        function playAudioStream(selectEl) {
-            radioAudio.play().then(() => {
-                selectEl.classList.add('playing');
-            }).catch(err => console.error("再生エラー:", err));
+// ストリーミング再生開始ロジック
+function startStream(streamUrl, btn) {
+    if (Hls.isSupported()) {
+        if (!hls) {
+            hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
         }
+        hls.loadSource(streamUrl);
+        hls.attachMedia(radioAudio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
+    } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+        radioAudio.src = streamUrl;
+        radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
+    }
+}
+
+// 停止ロジック
+function stopStream(btn) {
+    radioAudio.pause();
+    if (hls) hls.stopLoad();
+    isRadioPlaying = false;
+    btn.innerText = "OFF";
+    btn.classList.remove('playing');
+}
+
+// 音声再生ロジック
+function playAudioStream(btn) {
+    radioAudio.play().then(() => {
+        isRadioPlaying = true;
+        btn.innerText = "ON";
+        btn.classList.add('playing');
+    }).catch(err => console.error("再生エラー:", err));
+}
 
         // ご自身のGASウェブアプリURL
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';

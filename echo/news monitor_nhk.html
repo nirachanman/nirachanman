@@ -404,29 +404,60 @@
             }).catch(err => console.error("再生エラー:", err));
         }
 
-        async function updateNews() {
-            let allItems = [];
-            for (const url of RSS_URLS) {
-                try {
-                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
-                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-                    for (let item of xml.getElementsByTagName('item')) {
-                        const descEl = item.getElementsByTagName('description')[0];
-                        allItems.push({
-                            title: item.getElementsByTagName('title')[0].textContent,
-                            link: item.getElementsByTagName('link')[0].textContent,
-                            description: descEl ? descEl.textContent : '',
-                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
-                        });
-                    }
-                } catch (e) {}
-            }
-            if (allItems.length === 0) return;
-            allItems.sort((a, b) => b.pubDate - a.pubDate);
-            currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
-            refreshMarqueeAndCards(true); 
-        }
+async function fetchWithProxy(url) {
+    // 予備のCORSプロキシ候補一覧
+    const proxies = [
+        u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+        u => `https://corsproxy.io/?${encodeURIComponent(u)}`
+    ];
 
+    for (const proxyFn of proxies) {
+        try {
+            const targetUrl = proxyFn(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+            const res = await fetch(targetUrl);
+            if (res.ok) {
+                const text = await res.text();
+                if (text && text.includes('<rss')) return text;
+            }
+        } catch (e) {
+            console.warn("Proxy failed, trying next...", e);
+        }
+    }
+    return null;
+}
+
+async function updateNews() {
+    let allItems = [];
+    for (const url of RSS_URLS) {
+        try {
+            const xmlText = await fetchWithProxy(url);
+            if (!xmlText) continue;
+
+            const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+            for (let item of xml.getElementsByTagName('item')) {
+                const descEl = item.getElementsByTagName('description')[0];
+                const titleEl = item.getElementsByTagName('title')[0];
+                const linkEl = item.getElementsByTagName('link')[0];
+                const pubDateEl = item.getElementsByTagName('pubDate')[0];
+
+                if (titleEl && linkEl) {
+                    allItems.push({
+                        title: titleEl.textContent,
+                        link: linkEl.textContent,
+                        description: descEl ? descEl.textContent : '',
+                        pubDate: pubDateEl ? new Date(pubDateEl.textContent) : new Date()
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("RSS parse error:", e);
+        }
+    }
+    if (allItems.length === 0) return;
+    allItems.sort((a, b) => b.pubDate - a.pubDate);
+    currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
+    refreshMarqueeAndCards(true); 
+}
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             

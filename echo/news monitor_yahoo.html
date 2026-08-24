@@ -108,7 +108,9 @@
             gap: 8px;
             flex-shrink: 0;
         }
-        .radio-btn {
+        
+        /* プルダウンメニュー（select）のスタイル設定 */
+        .radio-select {
             background-color: #263238;
             color: #b0bec5;
             border: 1px solid #455a64;
@@ -117,12 +119,12 @@
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
+            outline: none;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .radio-btn.playing {
+        
+        /* 再生中（AM/FM選択時）のスタイル */
+        .radio-select.playing {
             background-color: #00e676;
             color: #000000;
             border-color: #00e676;

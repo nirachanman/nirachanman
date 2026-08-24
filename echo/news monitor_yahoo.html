@@ -270,92 +270,148 @@
         'https://news.yahoo.co.jp/rss/media/ibciwatev/all.xml', 'https://news.yahoo.co.jp/rss/media/iat/all.xml'
     ];
 
-    // --- ここに必要な変数宣言を追加 ---
-    let isPaused = false;
-    let currentItemIndex = 0;
-    let lastRenderedMarquee = "";
-    let lastRenderedNewsLength = 0;
-    let currentNewsUniqueItems = [];
+        // 各局のURLマッピング
+        const RADIO_STREAMS = {
+            amt: 'https://simul2.drdi.st.nhk/live/3/joined/master.m3u8',
+            fmt: 'https://simul2.drdi.st.nhk/live/5/joined/master.m3u8',
+            ams: 'https://simul2.drdi.st.nhk/live/8/joined/master.m3u8',
+            fms: 'https://simul2.drdi.st.nhk/live/9/joined/master.m3u8'
+        };
 
-    const radioAudio = new Audio();
-    let hls = null;
-    let isRadioPlaying = false;
+        const radioAudio = new Audio();
+        let hls = null;
+        let currentRadioMode = 'off';
 
-// ラジオのON/OFF切り替え
-function toggleRadio() {
-    const btn = document.getElementById('radio-toggle-btn');
-    const stationSelect = document.getElementById('radio-station-select');
-    const selectedUrl = stationSelect.value;
-    
-    if (!isRadioPlaying) {
-        startStream(selectedUrl, btn);
-    } else {
-        stopStream(btn);
-    }
-}
+        let isPaused = false;
+        let currentItemIndex = 0; 
+        
+        let lastEewId = "";
+        let lastTsunamiId = "";
+        let isTsunamiActive = false;
+        
+        let iwateAlertLevel = 0; 
+        let iwateActiveAlertsText = ""; 
+        let iwateKikikuText = ""; 
 
-// 放送局切替イベント（再生中に局を変えたら自動で切り替える）
-function changeStation() {
-    const btn = document.getElementById('radio-toggle-btn');
-    const stationSelect = document.getElementById('radio-station-select');
-    const selectedUrl = stationSelect.value;
+        let lastRenderedMarquee = "";
+        let lastRenderedIwateKikiku = "";
+        let lastRenderedNewsLength = 0;
+        let currentNewsUniqueItems = [];
 
-    if (isRadioPlaying) {
-        stopStream(btn);
-        startStream(selectedUrl, btn);
-    }
-}
+        function changeRadio(selectedMode) {
+            const selectEl = document.getElementById('radio-select');
+            currentRadioMode = selectedMode;
 
-// ストリーミング再生開始ロジック
-function startStream(streamUrl, btn) {
-    if (Hls.isSupported()) {
-        if (!hls) {
-            hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
-        }
-        hls.loadSource(streamUrl);
-        hls.attachMedia(radioAudio);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(btn));
-    } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
-        radioAudio.src = streamUrl;
-        radioAudio.addEventListener('loadedmetadata', () => playAudioStream(btn));
-    }
-}
-
-// 停止ロジック
-function stopStream(btn) {
-    radioAudio.pause();
-    if (hls) hls.stopLoad();
-    isRadioPlaying = false;
-    btn.innerText = "OFF";
-    btn.classList.remove('playing');
-}
-
-// 音声再生ロジック
-function playAudioStream(btn) {
-    radioAudio.play().then(() => {
-        isRadioPlaying = true;
-        btn.innerText = "ON";
-        btn.classList.add('playing');
-    }).catch(err => console.error("再生エラー:", err));
-}
-        async function updateNews() {
-            let allItems = [];
-            for (const url of RSS_URLS) {
-                try {
-                    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
-                    const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-                    for (let item of xml.getElementsByTagName('item')) {
-                        const descEl = item.getElementsByTagName('description')[0];
-                        allItems.push({
-                            title: item.getElementsByTagName('title')[0].textContent,
-                            link: item.getElementsByTagName('link')[0].textContent,
-                            description: descEl ? descEl.textContent : '',
-                            pubDate: new Date(item.getElementsByTagName('pubDate')[0].textContent)
-                        });
-                    }
-                } catch (e) {}
+            if (selectedMode === 'off') {
+                radioAudio.pause();
+                if (hls) hls.stopLoad();
+                selectEl.classList.remove('playing');
+            } else {
+                loadAndPlayStream(RADIO_STREAMS[selectedMode], selectEl);
             }
-            if (allItems.length === 0) return;
+        }
+
+        function loadAndPlayStream(url, selectEl) {
+            if (Hls.isSupported()) {
+                if (!hls) {
+                    hls = new Hls({ liveDurationInfinity: true, manifestLoadingMaxRetry: 10 });
+                    hls.attachMedia(radioAudio);
+                }
+                hls.loadSource(url);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => playAudioStream(selectEl));
+            } else if (radioAudio.canPlayType('application/vnd.apple.mpegurl')) {
+                radioAudio.src = url;
+                radioAudio.addEventListener('loadedmetadata', () => playAudioStream(selectEl));
+            }
+        }
+
+        function playAudioStream(selectEl) {
+            radioAudio.play().then(() => {
+                selectEl.classList.add('playing');
+            }).catch(err => console.error("再生エラー:", err));
+        }
+
+        // ご自身のGASウェブアプリURL
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';
+
+        async function fetchRssXml(url) {
+            // 1. GAS経由での取得を優先
+            try {
+                const targetUrl = GAS_WEB_APP_URL + '?url=' + encodeURIComponent(url);
+                const res = await fetch(targetUrl);
+                if (res.ok) {
+                    const xmlText = await res.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                    if (xmlDoc.getElementsByTagName('parsererror').length === 0 && xmlDoc.getElementsByTagName('item').length > 0) {
+                        return xmlDoc;
+                    }
+                }
+            } catch (e) {
+                console.warn("GAS経由での取得エラー、予備プロキシを試行:", url, e);
+            }
+
+            // 2. 予備プロキシ (corsproxy.io)
+            try {
+                const cacheBustUrl = url + '?t=' + Date.now();
+                const proxyUrl2 = 'https://corsproxy.io/?' + encodeURIComponent(cacheBustUrl);
+                const res2 = await fetch(proxyUrl2);
+                if (res2.ok) {
+                    const text = await res2.text();
+                    const xmlDoc2 = new DOMParser().parseFromString(text, 'text/xml');
+                    if (xmlDoc2.getElementsByTagName('parsererror').length === 0) {
+                        return xmlDoc2;
+                    }
+                }
+            } catch (e) {
+                console.warn("予備プロキシも失敗:", e);
+            }
+
+            throw new Error('RSS取得失敗');
+        }
+
+async function updateNews() {
+            // 6つのRSSを同時に並列で取得開始
+            const fetchPromises = RSS_URLS.map(async (url) => {
+                try {
+                    const xml = await fetchRssXml(url);
+                    const items = xml.getElementsByTagName('item');
+                    const parsedItems = [];
+                    for (let item of items) {
+                        const titleEl = item.getElementsByTagName('title')[0];
+                        const linkEl = item.getElementsByTagName('link')[0];
+                        const descEl = item.getElementsByTagName('description')[0];
+                        const pubDateEl = item.getElementsByTagName('pubDate')[0];
+
+                        if (titleEl && linkEl) {
+                            parsedItems.push({
+                                title: titleEl.textContent,
+                                link: linkEl.textContent,
+                                description: descEl ? descEl.textContent : '',
+                                pubDate: pubDateEl ? new Date(pubDateEl.textContent) : new Date()
+                            });
+                        }
+                    }
+                    return parsedItems;
+                } catch (e) {
+                    console.warn("RSS取得スキップ:", url);
+                    return [];
+                }
+            });
+
+            // すべての通信完了を待機（並列処理）
+            const results = await Promise.all(fetchPromises);
+            
+            // 取得した全配列をフラットに結合
+            let allItems = results.flat();
+
+            // データが全く取れなかった場合は何もしない（画面を消さない）
+            if (allItems.length === 0) {
+                console.error("すべてのRSSの取得に失敗しました。");
+                return;
+            }
+            
+            // 日付順にソート & 重複除去
             allItems.sort((a, b) => b.pubDate - a.pubDate);
             currentNewsUniqueItems = Array.from(new Map(allItems.map(i => [i.title, i])).values());
             refreshMarqueeAndCards(true); 
@@ -364,7 +420,7 @@ function playAudioStream(btn) {
         function refreshMarqueeAndCards(force = false) {
             if (currentNewsUniqueItems.length === 0) return;
             
-            // マーキー（横流れタイトル）の復活処理
+            // マーキー（横流れタイトル）の描画ロジック
             const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
@@ -374,14 +430,15 @@ function playAudioStream(btn) {
             marqueeHtml += '</span>';
 
             if (force || marqueeHtml !== lastRenderedMarquee) {
-                document.getElementById('marquee').innerHTML = marqueeHtml;
+                const marqueeEl = document.getElementById('marquee');
+                if (marqueeEl) marqueeEl.innerHTML = marqueeHtml;
                 lastRenderedMarquee = marqueeHtml;
             }
 
-            // ニュースリストカードの描画処理（日付表示・時間0埋め対応版）
+            // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
-            if (force || currentNewsUniqueItems.length !== lastRenderedNewsLength) {
-                let newsListHtml = currentNewsUniqueItems.slice(0, 80).map(item => `
+            if (container && (force || currentNewsUniqueItems.length !== lastRenderedNewsLength)) {
+                let newsListHtml = currentNewsUniqueItems.slice(0, 57).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>
@@ -401,6 +458,7 @@ function playAudioStream(btn) {
         async function autoScroll() {
             if (isPaused) return;
             const container = document.getElementById('news-container');
+            if (!container) return;
             const items = container.querySelectorAll('.news-item');
             if (items.length === 0) return;
 

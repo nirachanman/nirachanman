@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>yahoo NEWSモニター</title>
+    <title>yahooニュースモニター</title>
     
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -16,7 +16,7 @@
         :root { 
             --bg-color: #0b0f14;        
             --accent-color: #696969;   
-            --card-bg: #161c24;         
+            --card-bg: #002D33;         
             
             --text-gray-title: #90caf9; 
             --text-gray-desc: #b0bec5;  
@@ -108,7 +108,9 @@
             gap: 8px;
             flex-shrink: 0;
         }
-        .radio-btn {
+        
+        /* プルダウンメニュー（select）のスタイル設定 */
+        .radio-select {
             background-color: #263238;
             color: #b0bec5;
             border: 1px solid #455a64;
@@ -117,17 +119,18 @@
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
+            outline: none;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .radio-btn.playing {
+        
+        /* 再生中（AM/FM選択時）のスタイル */
+        .radio-select.playing {
             background-color: #00e676;
             color: #000000;
             border-color: #00e676;
             box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
         }
+
 
         #news-container { 
             overflow-y: auto;          
@@ -153,8 +156,8 @@
             background-color: var(--card-bg); 
             padding: 12px; 
             border-radius: 4px; 
-            border: 1px solid #a78c5a;     
-            border-left: 4px solid #a78c5a; 
+            border: 1px solid #063944;     
+            border-left: 4px solid #063944; 
             gap: 8px;
             flex-shrink: 0; 
             box-sizing: border-box;         
@@ -201,40 +204,7 @@
         .news-item:nth-child(even) .news-title { color: var(--text-mint-title); }
         .news-item:nth-child(even) .news-desc { color: var(--text-mint-desc); }
 
-.radio-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-.radio-select {
-    background-color: #263238;
-    color: #ffffff;
-    border: 1px solid #455a64;
-    padding: 6px 8px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    outline: none;
-}
-.radio-btn {
-    background-color: #263238;
-    color: #b0bec5;
-    border: 1px solid #455a64;
-    padding: 6px 12px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-.radio-btn.playing {
-    background-color: #00e676;
-    color: #000000;
-    border-color: #00e676;
-    box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
-}
+
     </style>
 </head>
 <body>
@@ -261,6 +231,7 @@
 
     <main id="news-container"></main>
 
+
 <script>
     const RSS_URLS = [
         'https://news.yahoo.co.jp/rss/topics/it.xml', 'https://news.yahoo.co.jp/rss/topics/science.xml',
@@ -269,6 +240,14 @@
         'https://news.yahoo.co.jp/rss/media/tvi/all.xml', 'https://news.yahoo.co.jp/rss/media/abema/all.xml',
         'https://news.yahoo.co.jp/rss/media/ibciwatev/all.xml', 'https://news.yahoo.co.jp/rss/media/iat/all.xml'
     ];
+
+        // 各局のURLマッピング
+        const RADIO_STREAMS = {
+            amt: 'https://simul2.drdi.st.nhk/live/3/joined/master.m3u8',
+            fmt: 'https://simul2.drdi.st.nhk/live/5/joined/master.m3u8',
+            ams: 'https://simul2.drdi.st.nhk/live/8/joined/master.m3u8',
+            fms: 'https://simul2.drdi.st.nhk/live/9/joined/master.m3u8'
+        };
 
     // --- ここに必要な変数宣言を追加 ---
     let isPaused = false;
@@ -338,6 +317,7 @@ function playAudioStream(btn) {
         btn.classList.add('playing');
     }).catch(err => console.error("再生エラー:", err));
 }
+
         // ご自身のGASウェブアプリURL
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxbkDqbxISfiTr82SaqabxoN6TsOGIPn7w6rTY-ZQXP27nfbICEe2BH6deGjGOrEKHQXQ/exec';
 
@@ -445,7 +425,7 @@ async function updateNews() {
             // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
             if (container && (force || currentNewsUniqueItems.length !== lastRenderedNewsLength)) {
-                let newsListHtml = currentNewsUniqueItems.slice(0, 90).map(item => `
+                let newsListHtml = currentNewsUniqueItems.slice(0, 57).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>

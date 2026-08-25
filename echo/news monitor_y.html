@@ -334,7 +334,7 @@ function stopStream(btn) {
 function playAudioStream(btn) {
     radioAudio.play().then(() => {
         isRadioPlaying = true;
-        btn.innerText = "ON";
+        btn.innerText = "ON ";
         btn.classList.add('playing');
     }).catch(err => console.error("再生エラー:", err));
 }

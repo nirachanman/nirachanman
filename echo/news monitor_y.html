@@ -445,7 +445,7 @@ async function updateNews() {
             // ニュースリスト（カード型）の描画ロジック
             const container = document.getElementById('news-container');
             if (container && (force || currentNewsUniqueItems.length !== lastRenderedNewsLength)) {
-                let newsListHtml = currentNewsUniqueItems.slice(0, 57).map(item => `
+                let newsListHtml = currentNewsUniqueItems.slice(0, 80).map(item => `
                     <a href="${item.link}" target="_blank" class="news-item">
                         <div class="news-header-row">
                             <div class="news-title">${item.title}</div>

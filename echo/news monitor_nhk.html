@@ -92,7 +92,7 @@
             top: 0;
             display: inline-block; 
             padding-left: 100%;                  
-            animation: scroll-x 120s linear infinite; 
+            animation: scroll-x 240s linear infinite; 
             font-size: 1.4rem; 
             color: #ffffff; 
         }
@@ -447,7 +447,7 @@
         }
 
 async function updateNews() {
-            // 6つのRSSを同時に並列で取得開始
+            // 8つのRSSを同時に並行取得開始
             const fetchPromises = RSS_URLS.map(async (url) => {
                 try {
                     const xml = await fetchRssXml(url);
@@ -475,10 +475,10 @@ async function updateNews() {
                 }
             });
 
-            // すべての通信完了を待機（並列処理）
+            // 8つすべての通信完了を同時に待機
             const results = await Promise.all(fetchPromises);
             
-            // 取得した全配列をフラットに結合
+            // 取得した配列を1つに統合
             let allItems = results.flat();
 
             // データが全く取れなかった場合は何もしない（画面を消さない）
@@ -497,7 +497,7 @@ async function updateNews() {
             if (currentNewsUniqueItems.length === 0) return;
             
             // マーキー（横流れタイトル）の描画ロジック
-            const marqueeCount = Math.min(currentNewsUniqueItems.length, 15); 
+            const marqueeCount = Math.min(currentNewsUniqueItems.length, 20); 
             let marqueeHtml = '<span class="marquee-text">';
             for(let i = 0; i < marqueeCount; i++) {
                 marqueeHtml += `<a href="${currentNewsUniqueItems[i].link}" target="_blank" style="text-decoration:none; color:#ffffff;">【${i+1}】${currentNewsUniqueItems[i].title}</a>`;
@@ -593,4 +593,3 @@ async function autoScroll() {
     </script>
 </body>
 </html>
-

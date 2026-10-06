@@ -274,6 +274,10 @@ const CALENDAR_ID =
 "31492fb4b39fef411514fef1378eaf68f176de53432052015b21a14223757e1d@group.calendar.google.com";
 const HOLIDAY_CAL_ID = "japanese__ja@holiday.calendar.google.com";
 
+/* ★★★ 別カレンダー（備忘録） ★★★ */
+const SUB_CALENDAR_ID =
+"74bd4b0008f5f74d8a3c75ebbb14c8317b845745ba8ce105cfc9a925dac9e14e@group.calendar.google.com";
+
 /* 年・月プルダウンのセットアップ */
 function setupYMSelectors() {
   const yearSel = document.getElementById("year-selector");
@@ -283,8 +287,7 @@ function setupYMSelectors() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  /* 年プルダウン（過去2年〜未来2年） */
-  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+  for (let y = currentYear - 5; y <= currentYear + 5; y++) {
     const opt = document.createElement("option");
     opt.value = y;
     opt.textContent = `${y}年`;
@@ -292,7 +295,6 @@ function setupYMSelectors() {
     yearSel.appendChild(opt);
   }
 
-  /* 月プルダウン（1〜12） */
   for (let m = 1; m <= 12; m++) {
     const opt = document.createElement("option");
     opt.value = ("0" + m).slice(-2);
@@ -301,7 +303,6 @@ function setupYMSelectors() {
     monthSel.appendChild(opt);
   }
 
-  /* 変更イベント */
   yearSel.addEventListener("change", () => {
     loadCalendar(`${yearSel.value}-${monthSel.value}`);
   });
@@ -320,71 +321,62 @@ function getMonthRange(ym) {
   const [year, month] = ym.split("-").map(Number);
   const start = new Date(year, month - 1, 1);
   const end   = new Date(year, month, 0, 23, 59, 59);
-
-  return {
-    timeMin: start.toISOString(),
-    timeMax: end.toISOString()
-  };
+  return { timeMin: start.toISOString(), timeMax: end.toISOString() };
 }
 
-/* イベント取得 */
+/* メインカレンダー取得 */
 async function fetchEventsForMonth(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
-
   const url =
     `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
     `?calendarId=${encodeURIComponent(CALENDAR_ID)}` +
     `&timeMin=${timeMin}&timeMax=${timeMax}`;
-
   const res = await fetch(url);
   const data = await res.json();
+  return (data.items || []).filter(ev => ev.status !== "cancelled");
+}
 
+/* ★ 別カレンダー取得（備忘録） */
+async function fetchSubCalendarEvents(ym) {
+  const { timeMin, timeMax } = getMonthRange(ym);
+  const url =
+    `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
+    `?calendarId=${encodeURIComponent(SUB_CALENDAR_ID)}` +
+    `&timeMin=${timeMin}&timeMax=${timeMax}`;
+  const res = await fetch(url);
+  const data = await res.json();
   return (data.items || []).filter(ev => ev.status !== "cancelled");
 }
 
 /* 祝日取得 */
 async function fetchHolidays(ym) {
   const { timeMin, timeMax } = getMonthRange(ym);
-
   const url =
     `https://fancy-cell-0698.yajirobe-einstein.workers.dev` +
     `?calendarId=${encodeURIComponent(HOLIDAY_CAL_ID)}` +
     `&timeMin=${timeMin}&timeMax=${timeMax}`;
-
   const res = await fetch(url);
   const data = await res.json();
-
   return data.items || [];
 }
 
 /* 祝日マッピング */
 function mapHolidays(holidayEvents) {
-  const ignoreList = [
-    "銀行休業日","節分","雛祭り","母の日",
-    "七夕","七五三","クリスマス"
-  ];
-
+  const ignoreList = ["銀行休業日","節分","雛祭り","母の日","七夕","七五三","クリスマス"];
   const map = {};
-
   holidayEvents.forEach(ev => {
     const name = ev.summary;
-
     if (ignoreList.some(x => name.includes(x))) return;
-
     const key = toDateKey(ev.start.date || ev.start.dateTime);
     map[key] = name;
   });
-
   return map;
 }
 
 /* 日付キー */
 function toDateKey(dateStr) {
   const d = new Date(dateStr);
-  const y = d.getFullYear();
-  const m = ("0" + (d.getMonth() + 1)).slice(-2);
-  const day = ("0" + d.getDate()).slice(-2);
-  return `${y}-${m}-${day}`;
+  return `${d.getFullYear()}-${("0"+(d.getMonth()+1)).slice(-2)}-${("0"+d.getDate()).slice(-2)}`;
 }
 
 /* 日付表示 */
@@ -392,27 +384,29 @@ function formatDate(dateStr) {
   const d = new Date(dateStr);
   const youbi = ["日","月","火","水","木","金","土"];
   const w = youbi[d.getDay()];
-  return `${d.getMonth() + 1}月${d.getDate()}日 <span class="youbi-badge ${w}">${w}</span>`;
+  return `${d.getMonth()+1}月${d.getDate()}日 <span class="youbi-badge ${w}">${w}</span>`;
 }
 
 /* 時間表示 */
 function formatTime(start, end) {
   if (start.date && !start.dateTime) return "";
-
   const s = new Date(start.dateTime);
   const e = end?.dateTime ? new Date(end.dateTime) : null;
-
-  const pad = n => ("0" + n).slice(-2);
+  const pad = n => ("0"+n).slice(-2);
   const sStr = `${pad(s.getHours())}:${pad(s.getMinutes())}`;
-
   if (!e) return `${sStr}〜`;
-
   const eStr = `${pad(e.getHours())}:${pad(e.getMinutes())}`;
   return sStr === eStr ? sStr : `${sStr}〜${eStr}`;
 }
 
-/* 部屋判定（description + location） */
+/* ★ 部屋判定（別カレンダーは必ず備考欄） */
 function detectRoom(ev) {
+
+  // ★ 別カレンダーは必ず備考欄へ
+  if (ev.organizer?.email === SUB_CALENDAR_ID) {
+    return ["note"];
+  }
+
   const text = (ev.description || "") + " " + (ev.location || "");
   const rooms = [];
 
@@ -421,14 +415,12 @@ function detectRoom(ev) {
   if (text.match(/2fs|小会議室|ミーティング/)) rooms.push("meeting");
 
   if (rooms.length === 0) rooms.push("note");
-
   return rooms;
 }
 
-/* ★ 説明文を純テキスト化（1行目が消えない） */
+/* 説明文を純テキスト化 */
 function toPlainText(text) {
   if (!text) return "";
-
   return text
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<div[^>]*>/gi, "")
@@ -445,7 +437,6 @@ function autoShrinkFont(cell) {
   let size = 13;
   cell.style.fontSize = size + "px";
   cell.style.lineHeight = "1.2";
-
   while (cell.scrollHeight > cell.clientHeight && size > 9) {
     size--;
     cell.style.fontSize = size + "px";
@@ -474,7 +465,6 @@ function render(events, ym, holidayMap) {
     if (!grouped[key]) {
       grouped[key] = { cooking: [], japanese: [], meeting: [], note: [] };
     }
-
     const rooms = detectRoom(ev);
     rooms.forEach(room => grouped[key][room].push(ev));
   });
@@ -482,27 +472,22 @@ function render(events, ym, holidayMap) {
   for (let day = 1; day <= lastDay; day++) {
     const dateObj = new Date(year, month - 1, day);
     const dow = dateObj.getDay();
-    const dateKey = `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`;
+    const dateKey = `${year}-${("0"+month).slice(-2)}-${("0"+day).slice(-2)}`;
     const isHoliday = holidayMap[dateKey] !== undefined;
 
     const tr = document.createElement("tr");
-
     if (dow === 6) tr.classList.add("tr-sat");
     if (dow === 0) tr.classList.add("tr-sun");
     if (isHoliday) tr.classList.add("tr-holiday");
 
-    /* 日付セル */
     const dateTd = document.createElement("td");
     dateTd.className = "date-cell";
-
     if (dow === 6) dateTd.classList.add("date-sat");
     if (dow === 0) dateTd.classList.add("date-sun");
     if (isHoliday) dateTd.classList.add("date-holiday");
-
     dateTd.innerHTML = formatDate(dateKey);
     tr.appendChild(dateTd);
 
-    /* イベントセル */
     const dayEvents = grouped[dateKey] || {
       cooking: [], japanese: [], meeting: [], note: []
     };
@@ -513,13 +498,11 @@ function render(events, ym, holidayMap) {
       dayEvents[room].forEach(ev => {
         const div = document.createElement("div");
 
-        /* ★ セルにはタイトルだけ */
         const textSpan = document.createElement("span");
         textSpan.textContent = `${formatTime(ev.start, ev.end)} ${ev.summary}`;
         textSpan.classList.add(`event-${room}`);
         div.appendChild(textSpan);
 
-        /* ★ ツールチップ内容（説明: の後に改行を入れない） */
         const tooltipText =
           `開始: ${formatTime(ev.start, ev.end)}\n` +
           `タイトル: ${ev.summary}\n` +
@@ -531,23 +514,17 @@ function render(events, ym, holidayMap) {
           tooltip.style.opacity = 1;
         });
 
-        /* ★ ツールチップが画面外に出ないように調整 */
         div.addEventListener("mousemove", e => {
           const tooltipWidth  = tooltip.offsetWidth;
           const tooltipHeight = tooltip.offsetHeight;
-
           let x = e.clientX - tooltipWidth / 2;
           let y = e.clientY - tooltipHeight - 12;
-
           const vw = window.innerWidth;
           const vh = window.innerHeight;
-
           if (x < 0) x = 4;
           if (x + tooltipWidth > vw) x = vw - tooltipWidth - 4;
-
           if (y < 0) y = e.clientY + 12;
           if (y + tooltipHeight > vh) y = vh - tooltipHeight - 4;
-
           tooltip.style.left = `${x}px`;
           tooltip.style.top  = `${y}px`;
         });
@@ -577,20 +554,22 @@ function render(events, ym, holidayMap) {
 
 /* 読み込み */
 async function loadCalendar(ym) {
-  const events = await fetchEventsForMonth(ym);
+  const eventsMain = await fetchEventsForMonth(ym);
+  const eventsSub  = await fetchSubCalendarEvents(ym);
   const holidayEvents = await fetchHolidays(ym);
   const holidayMap = mapHolidays(holidayEvents);
 
-  render(events, ym, holidayMap);
+  /* ★ メイン＋サブを結合して描画 */
+  const allEvents = [...eventsMain, ...eventsSub];
+
+  render(allEvents, ym, holidayMap);
 }
 
 /* 初期化 */
 (async function init() {
   setupYMSelectors();
-
   const yearSel = document.getElementById("year-selector");
   const monthSel = document.getElementById("month-selector");
-
   loadCalendar(`${yearSel.value}-${monthSel.value}`);
 })();
 </script>

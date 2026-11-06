@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Web Portal</title>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --focus:#2563eb;
+  --text:#fff;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:sans-serif;
+  padding:20px;
+}
+
+h1{
+  margin-bottom:30px;
+}
+
+.section{
+  margin-bottom:40px;
+}
+
+.section h2{
+  margin-bottom:12px;
+}
+
+.row{
+  display:flex;
+  gap:16px;
+  overflow-x:auto;
+  padding-bottom:8px;
+  scroll-behavior:smooth;
+}
+
+.row::-webkit-scrollbar{
+  height:8px;
+}
+
+.row::-webkit-scrollbar-thumb{
+  background:#475569;
+  border-radius:20px;
+}
+
+.card{
+  min-width:260px;
+  height:150px;
+
+  background:var(--card);
+
+  border-radius:16px;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  text-decoration:none;
+  color:white;
+
+  transition:.2s;
+}
+
+.card:hover{
+  transform:scale(1.05);
+  background:var(--focus);
+}
+
+.card.focused{
+  background:var(--focus);
+  transform:scale(1.08);
+  box-shadow:0 0 20px rgba(37,99,235,.8);
+}
+
+.card img{
+  width:48px;
+  height:48px;
+  margin-bottom:10px;
+}
+
+.card-title{
+  text-align:center;
+  padding:0 10px;
+}
+
+@media(min-width:1200px){
+
+  .card{
+    min-width:340px;
+    height:190px;
+  }
+
+  body.tv-mode .card{
+    min-width:400px;
+    height:230px;
+  }
+
+}
+</style>
+</head>
+<body>
+
+<h1>MY WEB PORTAL</h1>
+
+<div id="portal"></div>
+
+<script>
+
+function favicon(url){
+
+  try{
+
+    const host =
+      new URL(url).hostname;
+
+    return `https://www.google.com/s2/favicons?domain=${host}&sz=128`;
+
+  }catch{
+
+    return "";
+
+  }
+
+}
+
+fetch("bookmarks.json")
+.then(r => r.json())
+.then(data => {
+
+  const portal =
+    document.getElementById("portal");
+
+  data.categories.forEach(category => {
+
+    const section =
+      document.createElement("section");
+
+    section.className = "section";
+
+    section.innerHTML = `
+      <h2>${category.name}</h2>
+
+      <div class="row">
+
+        ${category.items.map(item => `
+
+          <a
+            class="card"
+            href="${item.url}"
+            target="_blank"
+            rel="noopener noreferrer">
+
+            <img
+              src="${favicon(item.url)}"
+              alt="favicon">
+
+            <div class="card-title">
+              ${item.title}
+            </div>
+
+          </a>
+
+        `).join("")}
+
+      </div>
+    `;
+
+    portal.appendChild(section);
+
+  });
+
+  initTVNavigation();
+
+});
+
+function initTVNavigation(){
+
+  const cards =
+    document.querySelectorAll(".card");
+
+  if(!cards.length) return;
+
+  let current = 0;
+
+  cards[current].classList.add(
+    "focused"
+  );
+
+  document.addEventListener(
+    "keydown",
+    e => {
+
+      switch(e.key){
+
+        case "ArrowRight":
+          current++;
+          break;
+
+        case "ArrowLeft":
+          current--;
+          break;
+
+        case "Enter":
+
+          cards[current].click();
+
+          return;
+
+        default:
+          return;
+
+      }
+
+      if(current < 0){
+        current = 0;
+      }
+
+      if(current >= cards.length){
+        current = cards.length - 1;
+      }
+
+      cards.forEach(card =>
+        card.classList.remove(
+          "focused"
+        )
+      );
+
+      cards[current]
+        .classList.add(
+          "focused"
+        );
+
+      cards[current]
+        .scrollIntoView({
+          behavior:"smooth",
+          inline:"center"
+        });
+
+    }
+  );
+
+}
+
+if(
+  /AFT|Fire TV/i.test(
+    navigator.userAgent
+  )
+){
+  document.body.classList.add(
+    "tv-mode"
+  );
+}
+
+</script>
+
+</body>
+</html>

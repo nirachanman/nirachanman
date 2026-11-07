@@ -157,8 +157,8 @@
     // ★★★★ GitHub設定 ★★★★
     const GITHUB_USER = 'nirachanman';
     const GITHUB_REPO = 'nirachanman';
-    const GITHUB_TOKEN = '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'; // 例: ghp_xxxxxxxxxxxx
-    const FILE_PATH = 'web_portal/bookmarks.json'; // フォルダパスを含むファイル名
+    const GITHUB_TOKEN = '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';
+    const FILE_PATH = 'web_portal/bookmarks.json';
 
     let bookmarks = [];
     let selectedCategory = 'すべて';
@@ -178,8 +178,9 @@
       status.innerText = 'GitHubから同期中...';
       try {
         const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+        // Bearer 認証に変更
         const res = await fetch(url, {
-          headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+          headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -208,8 +209,9 @@
         
         let currentSha = window.fileSha;
         if (!currentSha) {
+          // Bearer 認証に変更
           const getRes = await fetch(url, {
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
           });
           if (getRes.ok) {
             const getData = await getRes.json();
@@ -223,10 +225,11 @@
         };
         if (currentSha) bodyData.sha = currentSha;
 
+        // Bearer 認証に変更
         const res = await fetch(url, {
           method: 'PUT',
           headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(bodyData)

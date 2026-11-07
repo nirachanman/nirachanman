@@ -50,8 +50,7 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- 同期ステータス表示 -->
-        <span id="syncStatus" class="text-xs text-gray-400 hidden sm:inline">同期中...</span>
+        <span id="syncStatus" class="text-xs text-gray-400 hidden sm:inline">同期待機中...</span>
 
         <button onclick="openModal()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm px-3.5 py-2 rounded-xl transition shadow-sm">
           <i class="fa-solid fa-plus text-xs"></i>
@@ -105,7 +104,7 @@
     </section>
   </main>
 
-  <!-- モーダル・トースト等省略 (基本構造は維持) -->
+  <!-- モーダル -->
   <div id="modalBackdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-700 w-full max-w-md overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
@@ -155,11 +154,11 @@
   </div>
 
   <script>
-    // ★★★★ GitHub設定（ご自身のアカウント情報に書き換えてください） ★★★★
+    // ★★★★ GitHub設定 ★★★★
     const GITHUB_USER = 'nirachanman';
     const GITHUB_REPO = 'nirachanman';
-    const GITHUB_TOKEN = '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';
-    const FILE_PATH = 'web_portal/bookmarks.json'; // リポジトリ内に保存されるファイル名
+    const GITHUB_TOKEN = 'ここに発行したGitHubトークンを貼り付けてください'; // 例: ghp_xxxxxxxxxxxx
+    const FILE_PATH = 'web_portal/bookmarks.json'; // フォルダパスを含むファイル名
 
     let bookmarks = [];
     let selectedCategory = 'すべて';
@@ -174,7 +173,6 @@
       renderApp();
     };
 
-    // GitHubからデータを取得
     async function loadFromGitHub() {
       const status = document.getElementById('syncStatus');
       status.innerText = 'GitHubから同期中...';
@@ -185,13 +183,12 @@
         });
         if (res.ok) {
           const data = await res.json();
-          // GitHubのAPIはBase64エンコードされて返ってくるためデコードする
           const decoded = decodeURIComponent(escape(atob(data.content)));
           bookmarks = JSON.parse(decoded);
-          window.fileSha = data.sha; // 更新（Commit）時に必要になるSHA
+          window.fileSha = data.sha;
           status.innerText = '同期完了 (最新)';
         } else {
-          status.innerText = '新規ファイルとして開始';
+          status.innerText = 'ファイル未検出';
           bookmarks = [];
         }
       } catch (err) {
@@ -202,7 +199,6 @@
       }
     }
 
-    // GitHubへデータを保存（自動同期）
     async function syncToGitHub() {
       const status = document.getElementById('syncStatus');
       status.innerText = 'GitHubへ同期中...';
@@ -210,11 +206,22 @@
         const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
         const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(bookmarks, null, 2))));
         
+        let currentSha = window.fileSha;
+        if (!currentSha) {
+          const getRes = await fetch(url, {
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+          });
+          if (getRes.ok) {
+            const getData = await getRes.json();
+            currentSha = getData.sha;
+          }
+        }
+
         const bodyData = {
           message: 'Update bookmarks via WebBookmark App',
           content: contentEncoded,
-          sha: window.fileSha // 前回取得したSHAがないとGitHub APIで弾かれます
         };
+        if (currentSha) bodyData.sha = currentSha;
 
         const res = await fetch(url, {
           method: 'PUT',
@@ -227,11 +234,13 @@
 
         if (res.ok) {
           const resData = await res.json();
-          window.fileSha = resData.content.sha; // 新しいSHAを保持
+          window.fileSha = resData.content.sha;
           status.innerText = '同期完了！';
           setTimeout(() => status.innerText = '最新状態', 2000);
         } else {
-          status.innerText = '同期エラー';
+          const errText = await res.text();
+          console.error('GitHub Sync Error:', errText);
+          status.innerText = '同期エラー (401等確認)';
         }
       } catch (err) {
         console.error(err);
@@ -241,7 +250,7 @@
 
     function saveToLocalStorage() {
       localStorage.setItem('my_web_bookmarks_ja', JSON.stringify(bookmarks));
-      syncToGitHub(); // データ変更時に自動でGitHubへ同期
+      syncToGitHub();
     }
 
     function toggleTheme() {

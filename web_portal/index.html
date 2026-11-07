@@ -33,6 +33,11 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.4); border-radius: 20px; }
+    /* ドラッグ中のスタイル */
+    .dragging {
+      opacity: 0.4;
+      border: 2px dashed #6366f1 !important;
+    }
   </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-200 flex flex-col">
@@ -53,13 +58,12 @@
 
       <!-- アクションボタン -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- 追加ボタン -->
         <button onclick="openModal()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm px-3.5 py-2 rounded-xl transition shadow-sm hover:shadow-md active:scale-95">
           <i class="fa-solid fa-plus text-xs"></i>
           <span class="hidden sm:inline">ブックマーク追加</span>
         </button>
 
-        <!-- インポート・エクスポート（改善版：ホバー領域を拡張して消えにくく修正） -->
+        <!-- インポート・エクスポート -->
         <div class="relative group py-2">
           <button class="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition block" title="バックアップと復元">
             <i class="fa-solid fa-ellipsis-vertical text-base"></i>
@@ -75,7 +79,6 @@
           </div>
         </div>
 
-        <!-- ダークモード切り替え -->
         <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
           <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
         </button>
@@ -86,7 +89,6 @@
   <!-- メインコンテンツ -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col md:flex-row gap-6">
 
-    <!-- サイドバー：カテゴリ＆検索 -->
     <aside class="w-full md:w-64 shrink-0 space-y-6">
       <!-- 検索バー -->
       <div class="relative">
@@ -102,24 +104,23 @@
           <span id="totalCount" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full font-medium">0</span>
         </div>
         <nav id="categoryList" class="space-y-1">
-          <!-- JSで動的に動くカテゴリ項目 -->
         </nav>
       </div>
     </aside>
 
-    <!-- ブックマーク表示部分 -->
     <section class="flex-1 space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 id="activeCategoryTitle" class="text-lg font-bold text-gray-900 dark:text-white">すべて</h2>
+      <!-- タイトルと手動並び替えの案内 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 id="activeCategoryTitle" class="text-lg font-bold text-gray-900 dark:text-white">すべて</h2>
+          <p class="text-xs text-gray-400 mt-0.5">※カードをドラッグ＆ドロップして自由に並び替えできます</p>
+        </div>
         <div class="text-sm text-gray-500 dark:text-gray-400" id="resultStats">0 件表示中</div>
       </div>
 
-      <!-- グリッドカード一覧 -->
       <div id="bookmarksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- JSでカードを動的に生成 -->
       </div>
 
-      <!-- 空の状態（検索結果が0件のとき） -->
       <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-8">
         <div class="w-16 h-16 rounded-full bg-brand-50 dark:bg-gray-700 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 text-2xl">
           <i class="fa-solid fa-folder-open"></i>
@@ -133,7 +134,7 @@
     </section>
   </main>
 
-  <!-- モーダル（追加/編集フォーム） -->
+  <!-- モーダル -->
   <div id="modalBackdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden transition-opacity flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md overflow-hidden transform transition-all">
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
@@ -194,13 +195,11 @@
     </div>
   </div>
 
-  <!-- 通知トースト -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-medium pointer-events-none">
     <i id="toastIcon" class="fa-solid fa-circle-check text-green-400 dark:text-green-600"></i>
     <span id="toastMessage">保存しました</span>
   </div>
 
-  <!-- JavaScript制御ロジック -->
   <script>
     const defaultBookmarks = [
       { id: '1', title: 'GitHub', url: 'https://github.com', category: 'プログラミング', tag: 'コード', note: '世界最大の開発者向けプラットフォーム', createdAt: Date.now() - 500000 },
@@ -273,6 +272,7 @@
       }).join('');
     }
 
+    // フィルタリングとドラッグ＆ドロップ対応カードの生成
     function renderBookmarks() {
       const grid = document.getElementById('bookmarksGrid');
       const emptyState = document.getElementById('emptyState');
@@ -309,29 +309,36 @@
         const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
         
         return `
-          <div class="group bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700/70 shadow-sm hover:shadow-md transition flex flex-col justify-between relative">
-            <div>
-              <div class="flex items-start justify-between gap-3 mb-2">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
-                    <img src="${faviconUrl}" alt="${b.title}" class="w-5 h-5 object-contain" onerror="this.src='https://placehold.co/32x32/6366f1/ffffff?text=B'">
+          <div draggable="true" 
+               ondragstart="onDragStart(event, '${b.id}')" 
+               ondragover="onDragOver(event)" 
+               ondrop="onDrop(event, '${b.id}')"
+               ondragend="onDragEnd(event)"
+               class="group bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700/70 shadow-sm hover:shadow-md hover:border-brand-500/50 transition flex flex-col justify-between relative cursor-grab active:cursor-grabbing">
+            <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="no-underline block">
+              <div>
+                <div class="flex items-start justify-between gap-3 mb-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
+                      <img src="${faviconUrl}" alt="${b.title}" class="w-5 h-5 object-contain" onerror="this.src='https://placehold.co/32x32/6366f1/ffffff?text=B'">
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">${escapeHtml(b.title)}</h3>
+                      <p class="text-xs text-gray-400 line-clamp-1">${domain}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">${escapeHtml(b.title)}</h3>
-                    <p class="text-xs text-gray-400 line-clamp-1">${domain}</p>
+                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition z-10">
+                    <button onclick="event.preventDefault(); event.stopPropagation(); editBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="編集">
+                      <i class="fa-solid fa-pen text-xs"></i>
+                    </button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); deleteBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="削除">
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
                   </div>
                 </div>
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button onclick="editBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="編集">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                  </button>
-                  <button onclick="deleteBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="削除">
-                    <i class="fa-solid fa-trash text-xs"></i>
-                  </button>
-                </div>
+                ${b.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
               </div>
-              ${b.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
-            </div>
+            </a>
 
             <div class="pt-3 mt-2 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
               <div class="flex items-center gap-1.5">
@@ -345,6 +352,39 @@
           </div>
         `;
       }).join('');
+    }
+
+    // --- ドラッグ＆ドロップ用ロジック ---
+    let draggedId = null;
+
+    function onDragStart(e, id) {
+      draggedId = id;
+      e.target.classList.add('dragging');
+    }
+
+    function onDragOver(e) {
+      e.preventDefault(); // ドロップを許可するために必須
+    }
+
+    function onDrop(e, targetId) {
+      e.preventDefault();
+      if (draggedId === targetId) return;
+
+      const oldIndex = bookmarks.findIndex(b => b.id === draggedId);
+      const newIndex = bookmarks.findIndex(b => b.id === targetId);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const [movedItem] = bookmarks.splice(oldIndex, 1);
+        bookmarks.splice(newIndex, 0, movedItem);
+        saveToLocalStorage();
+        renderApp();
+        showToast('並び替えを保存しました');
+      }
+    }
+
+    function onDragEnd(e) {
+      e.target.classList.remove('dragging');
+      draggedId = null;
     }
 
     function selectCategory(cat) {

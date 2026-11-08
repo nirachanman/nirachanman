@@ -173,32 +173,31 @@
       renderApp();
     };
 
-    async function loadFromGitHub() {
-      const status = document.getElementById('syncStatus');
-      status.innerText = 'GitHubから同期中...';
-      try {
-        const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-        // token 認証に変更
-        const res = await fetch(url, {
-          headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const decoded = decodeURIComponent(escape(atob(data.content)));
-          bookmarks = JSON.parse(decoded);
-          window.fileSha = data.sha;
-          status.innerText = '同期完了 (最新)';
-        } else {
-          status.innerText = 'ファイル未検出';
-          bookmarks = [];
-        }
-      } catch (err) {
-        console.error(err);
-        status.innerText = '同期失敗(ローカル表示)';
-        const stored = localStorage.getItem('my_web_bookmarks_ja');
-        if (stored) bookmarks = JSON.parse(stored);
-      }
+async function loadFromGitHub() {
+  const status = document.getElementById('syncStatus');
+  status.innerText = 'GitHubから同期中...';
+  try {
+    // 公開リポジトリであればトークンなし（ヘッダーなし）で直接GETできます
+    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+    const res = await fetch(url); // ← 認証ヘッダーをあえて外してみる
+
+    if (res.ok) {
+      const data = await res.json();
+      const decoded = decodeURIComponent(escape(atob(data.content)));
+      bookmarks = JSON.parse(decoded);
+      window.fileSha = data.sha;
+      status.innerText = '同期完了 (最新)';
+    } else {
+      status.innerText = 'ファイル未検出';
+      bookmarks = [];
     }
+  } catch (err) {
+    console.error(err);
+    status.innerText = '同期失敗(ローカル表示)';
+    const stored = localStorage.getItem('my_web_bookmarks_ja');
+    if (stored) bookmarks = JSON.parse(stored);
+  }
+}
 
     async function syncToGitHub() {
       const status = document.getElementById('syncStatus');

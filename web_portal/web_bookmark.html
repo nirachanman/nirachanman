@@ -85,13 +85,13 @@
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
         <input type="text" id="searchInput" oninput="handleSearch()" placeholder="検索..." 
-          class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+          class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-gray-900 dark:text-white">
       </div>
 
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700/60 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">カテゴリ</h2>
-          <span id="totalCount" class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full font-medium">0</span>
+          <span id="totalCount" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full font-medium">0</span>
         </div>
         <nav id="categoryList" class="space-y-1"></nav>
       </div>
@@ -103,42 +103,42 @@
           <h2 id="activeCategoryTitle" class="text-lg font-bold text-gray-900 dark:text-white">すべて</h2>
           <p class="text-xs text-gray-400 mt-0.5">ドラッグ＆ドロップで並び替え可能</p>
         </div>
-        <div class="text-sm text-gray-500" id="resultStats">0 件</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400" id="resultStats">0 件</div>
       </div>
 
       <div id="bookmarksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-700 p-8">
-        <div class="w-16 h-16 rounded-full bg-brand-50 dark:bg-gray-700 text-brand-600 flex items-center justify-center mb-4 text-2xl">
+      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-8">
+        <div class="w-16 h-16 rounded-full bg-brand-50 dark:bg-gray-700 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 text-2xl">
           <i class="fa-solid fa-folder-open"></i>
         </div>
-        <h3 class="text-base font-semibold text-white">ブックマークがありません</h3>
-        <button onclick="openModal()" class="mt-4 text-sm font-medium text-brand-400 hover:underline">追加する</button>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white">ブックマークがありません</h3>
+        <button onclick="openModal()" class="mt-4 text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">追加する</button>
       </div>
     </section>
   </main>
 
   <!-- モーダル -->
   <div id="modalBackdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-700 w-full max-w-md overflow-hidden">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700">
-        <h3 id="modalTitle" class="font-bold text-white">ブックマーク追加</h3>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 id="modalTitle" class="font-bold text-gray-900 dark:text-white">ブックマーク追加</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="bookmarkForm" onsubmit="saveBookmark(event)" class="p-6 space-y-4">
         <input type="hidden" id="bookmarkId">
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">URL *</label>
-          <input type="url" id="formUrl" required placeholder="https://example.com" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
+          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">URL *</label>
+          <input type="url" id="formUrl" required placeholder="https://example.com" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">タイトル *</label>
-          <input type="text" id="formTitle" required placeholder="タイトル" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
+          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">タイトル *</label>
+          <input type="text" id="formTitle" required placeholder="タイトル" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">カテゴリ</label>
-            <select id="formCategory" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
+            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">カテゴリ</label>
+            <select id="formCategory" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
               <option value="Fire TV Stick">Fire TV Stick</option>
               <option value="情報">情報</option>
               <option value="インターネット">インターネット</option>
@@ -150,23 +150,23 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">タグ</label>
-            <input type="text" id="formTag" placeholder="タグ" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
+            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">タグ</label>
+            <input type="text" id="formTag" placeholder="タグ" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">メモ</label>
-          <textarea id="formNote" rows="2" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white resize-none"></textarea>
+          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">メモ</label>
+          <textarea id="formNote" rows="2" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white resize-none"></textarea>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-300">キャンセル</button>
-          <button type="submit" class="px-5 py-2 bg-brand-600 text-white font-medium text-sm rounded-xl">保存</button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">キャンセル</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 text-white font-medium text-sm rounded-xl hover:bg-brand-700">保存</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 dark:bg-gray-800 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium border border-gray-700">
     <span id="toastMessage">保存しました</span>
   </div>
 
@@ -211,14 +211,12 @@
       menu.classList.toggle('hidden');
     }
 
-    // メニュー外クリックで閉じる
     window.onclick = function(event) {
       if (!event.target.closest('button[onclick="toggleMenu()"]') && !event.target.closest('#backupMenu')) {
         document.getElementById('backupMenu').classList.add('hidden');
       }
     }
 
-    // JSONエクスポート（手動バックアップ保存）
     function exportJson() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bookmarks, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -231,7 +229,6 @@
       showToast('bookmarks.jsonをダウンロードしました');
     }
 
-    // JSONインポート（別端末からのデータ復元）
     function importJson(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -260,7 +257,7 @@
       renderBookmarks();
     }
 
-function renderCategories() {
+    function renderCategories() {
       const categories = ['すべて', 'Fire TV Stick', '情報', 'インターネット', '日常', '学習|プログラミング', 'エンタメ', '趣味', '後で読む'];
       const categoryList = document.getElementById('categoryList');
       document.getElementById('totalCount').innerText = bookmarks.length;
@@ -272,8 +269,8 @@ function renderCategories() {
           <button onclick="selectCategory('${cat}')" 
             class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${
               isActive 
-                ? 'bg-brand-600 text-white font-semibold shadow-sm' // 選択中：鮮やかなブランドカラーの背景 ＋ 白文字でクッキリ表示
-                : 'text-gray-400 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' // 未選択時
+                ? 'bg-brand-600 text-white font-semibold shadow-sm' 
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             }">
             <span>${cat}</span>
             <span class="text-xs ${isActive ? 'bg-brand-700 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded-full">${count}</span>
@@ -281,6 +278,7 @@ function renderCategories() {
         `;
       }).join('');
     }
+
     function renderBookmarks() {
       const grid = document.getElementById('bookmarksGrid');
       const emptyState = document.getElementById('emptyState');
@@ -313,30 +311,30 @@ function renderCategories() {
         
         return `
           <div draggable="true" ondragstart="onDragStart(event, '${b.id}')" ondragover="onDragOver(event)" ondrop="onDrop(event, '${b.id}')" ondragend="onDragEnd(event)"
-               class="group bg-gray-800 rounded-2xl p-4 border border-gray-700 shadow-sm hover:border-brand-500/50 transition flex flex-col justify-between relative cursor-grab">
+               class="group bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-brand-500/50 transition flex flex-col justify-between relative cursor-grab">
             <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="no-underline block">
               <div>
                 <div class="flex items-start justify-between gap-3 mb-2">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
                       <img src="${faviconUrl}" alt="" class="w-5 h-5 object-contain" onerror="this.src='https://placehold.co/32x32/6366f1/ffffff?text=B'">
                     </div>
                     <div>
-                      <h3 class="font-semibold text-white text-sm line-clamp-1 group-hover:text-brand-400">${escapeHtml(b.title)}</h3>
-                      <p class="text-xs text-gray-400 line-clamp-1">${domain}</p>
+                      <h3 class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400">${escapeHtml(b.title)}</h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">${domain}</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition z-10">
-                    <button onclick="event.preventDefault(); event.stopPropagation(); editBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"><i class="fa-solid fa-pen text-xs"></i></button>
-                    <button onclick="event.preventDefault(); event.stopPropagation(); deleteBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-700"><i class="fa-solid fa-trash text-xs"></i></button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); editBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-pen text-xs"></i></button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); deleteBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-trash text-xs"></i></button>
                   </div>
                 </div>
-                ${b.note ? `<p class="text-xs text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
+                ${b.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
               </div>
             </a>
-            <div class="pt-3 mt-2 border-t border-gray-700/50 flex items-center justify-between">
-              <span class="text-[11px] font-medium bg-gray-700 text-gray-300 px-2 py-0.5 rounded-md">${b.category}</span>
-              <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-400 hover:underline">開く <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+            <div class="pt-3 mt-2 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+              <span class="text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md">${b.category}</span>
+              <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-600 dark:text-brand-400 hover:underline">開く <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
             </div>
           </div>
         `;

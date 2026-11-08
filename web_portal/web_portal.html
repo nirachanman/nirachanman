@@ -178,9 +178,9 @@
       status.innerText = 'GitHubから同期中...';
       try {
         const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-        // Bearer 認証に変更
+        // token 認証に変更
         const res = await fetch(url, {
-          headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+          headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -209,9 +209,9 @@
         
         let currentSha = window.fileSha;
         if (!currentSha) {
-          // Bearer 認証に変更
+          // token 認証に変更
           const getRes = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
           });
           if (getRes.ok) {
             const getData = await getRes.json();
@@ -225,11 +225,11 @@
         };
         if (currentSha) bodyData.sha = currentSha;
 
-        // Bearer 認証に変更
+        // token 認証に変更
         const res = await fetch(url, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Authorization': `token ${GITHUB_TOKEN}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(bodyData)

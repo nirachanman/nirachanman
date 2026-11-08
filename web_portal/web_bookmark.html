@@ -139,6 +139,7 @@
           <div>
             <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">カテゴリ</label>
             <select id="formCategory" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
+              <option value="Fire TV Stick">Fire TV Stick</option>
               <option value="情報">情報</option>
               <option value="インターネット">インターネット</option>
               <option value="日常">日常</option>
@@ -260,7 +261,7 @@
     }
 
 function renderCategories() {
-      const categories = ['すべて', '情報', 'インターネット', '日常', '学習|プログラミング', 'エンタメ', '趣味', '後で読む'];
+      const categories = ['すべて', 'Fire TV Stick', '情報', 'インターネット', '日常', '学習|プログラミング', 'エンタメ', '趣味', '後で読む'];
       const categoryList = document.getElementById('categoryList');
       document.getElementById('totalCount').innerText = bookmarks.length;
 

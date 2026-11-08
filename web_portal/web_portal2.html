@@ -139,9 +139,11 @@
           <div>
             <label class="block text-xs font-semibold uppercase text-gray-400 mb-1">カテゴリ</label>
             <select id="formCategory" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white">
-              <option value="仕事">仕事</option>
-              <option value="プログラミング">プログラミング</option>
-              <option value="デザイン">デザイン</option>
+              <option value="情報">情報</option>
+              <option value="インターネット">インターネット</option>
+              <option value="日常">日常</option>
+              <option value="学習|プログラミング">学習|プログラミング</option>
+              <option value="エンタメ">エンタメ</option>
               <option value="趣味">趣味</option>
               <option value="後で読む">後で読む</option>
             </select>
@@ -257,8 +259,8 @@
       renderBookmarks();
     }
 
-    function renderCategories() {
-      const categories = ['すべて', '仕事', 'プログラミング', 'デザイン', '趣味', '後で読む'];
+function renderCategories() {
+      const categories = ['すべて', '情報', 'インターネット', '日常', '学習|プログラミング', 'エンタメ', '趣味', '後で読む'];
       const categoryList = document.getElementById('categoryList');
       document.getElementById('totalCount').innerText = bookmarks.length;
 
@@ -268,15 +270,16 @@
         return `
           <button onclick="selectCategory('${cat}')" 
             class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${
-              isActive ? 'bg-brand-50 dark:bg-brand-900/30 text-brand-400' : 'text-gray-400 hover:bg-gray-800'
+              isActive 
+                ? 'bg-brand-600 text-white font-semibold shadow-sm' // 選択中：鮮やかなブランドカラーの背景 ＋ 白文字でクッキリ表示
+                : 'text-gray-400 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' // 未選択時
             }">
             <span>${cat}</span>
-            <span class="text-xs bg-gray-700 px-2 py-0.5 rounded-full">${count}</span>
+            <span class="text-xs ${isActive ? 'bg-brand-700 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded-full">${count}</span>
           </button>
         `;
       }).join('');
     }
-
     function renderBookmarks() {
       const grid = document.getElementById('bookmarksGrid');
       const emptyState = document.getElementById('emptyState');

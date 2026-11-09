@@ -27,41 +27,42 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
+  <style>
     body { font-family: 'Inter', sans-serif; }
-    html { overflow-y: scroll; /* ← 常にスクロールバー領域を確保し、ガタつきを防ぐ */ }
+    html { overflow-y: scroll; /* 常にスクロールバー領域を確保し、ガタつきを防ぐ */ }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.4); border-radius: 20px; }
     .dragging { opacity: 0.4; border: 2px dashed #6366f1 !important; }
-  </style></head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-200 flex flex-col">
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-gray-900 text-slate-700 dark:text-gray-100 min-h-screen transition-colors duration-200 flex flex-col">
 
   <!-- ヘッダーエリア -->
-  <header class="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+  <header class="sticky top-0 z-30 bg-slate-200/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-slate-300 dark:border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
           <i class="fa-solid fa-bookmark text-lg"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight tracking-tight text-gray-900 dark:text-white">WebBookmark</h1>
-          <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Cloudflare同期版</p>
+          <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-800 dark:text-white">WebBookmark</h1>
+          <p class="text-xs text-slate-500 dark:text-gray-400 hidden sm:block">Cloudflare同期版</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <span id="syncStatus" class="text-xs text-gray-400 hidden sm:inline">同期待機中...</span>
+        <span id="syncStatus" class="text-xs text-slate-500 dark:text-gray-400 hidden sm:inline">同期待機中...</span>
 
         <!-- バックアップ・復元メニュー -->
         <div class="relative">
-          <button onclick="toggleMenu()" class="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="バックアップ・復元">
+          <button onclick="toggleMenu()" class="p-2 rounded-xl text-slate-600 dark:text-gray-300 hover:bg-slate-300/60 dark:hover:bg-gray-800 transition" title="バックアップ・復元">
             <i class="fa-solid fa-ellipsis-vertical text-base"></i>
           </button>
-          <div id="backupMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
-            <button onclick="exportJson()" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+          <div id="backupMenu" class="hidden absolute right-0 mt-2 w-48 bg-slate-50 dark:bg-gray-800 rounded-xl shadow-xl border border-slate-300 dark:border-gray-700 py-1 z-50">
+            <button onclick="exportJson()" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-200 hover:bg-slate-200 dark:hover:bg-gray-700 flex items-center gap-2">
               <i class="fa-solid fa-download text-xs"></i> JSON保存 (エクスポート)
             </button>
-            <label class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer">
+            <label class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-gray-200 hover:bg-slate-200 dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer">
               <i class="fa-solid fa-upload text-xs"></i> JSON読込 (インポート)
               <input type="file" accept=".json" onchange="importJson(event)" class="hidden">
             </label>
@@ -73,7 +74,7 @@
           <span class="hidden sm:inline">追加</span>
         </button>
 
-        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl text-slate-600 dark:text-gray-300 hover:bg-slate-300/60 dark:hover:bg-gray-800 transition">
           <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
         </button>
       </div>
@@ -85,15 +86,15 @@
 
     <aside class="w-full md:w-64 shrink-0 space-y-6">
       <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
         <input type="text" id="searchInput" oninput="handleSearch()" placeholder="検索..." 
-          class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-gray-900 dark:text-white">
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-200/70 dark:bg-gray-800 border border-slate-300 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-slate-800 dark:text-white placeholder-slate-400">
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700/60 shadow-sm">
+      <div class="bg-slate-200/50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-300 dark:border-gray-700/60 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">カテゴリ</h2>
-          <span id="totalCount" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full font-medium">0</span>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-gray-400">カテゴリ</h2>
+          <span id="totalCount" class="text-xs bg-slate-300 dark:bg-gray-700 text-slate-700 dark:text-gray-300 px-2 py-0.5 rounded-full font-medium">0</span>
         </div>
         <nav id="categoryList" class="space-y-1"></nav>
       </div>
@@ -102,45 +103,45 @@
     <section class="flex-1 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 id="activeCategoryTitle" class="text-lg font-bold text-gray-900 dark:text-white">情報</h2>
-          <p class="text-xs text-gray-400 mt-0.5">ドラッグ＆ドロップで並び替え可能</p>
+          <h2 id="activeCategoryTitle" class="text-lg font-bold text-slate-800 dark:text-white">情報</h2>
+          <p class="text-xs text-slate-500 dark:text-gray-400 mt-0.5">ドラッグ＆ドロップで並び替え可能</p>
         </div>
-        <div class="text-sm text-gray-500 dark:text-gray-400" id="resultStats">0 件</div>
+        <div class="text-sm text-slate-500 dark:text-gray-400" id="resultStats">0 件</div>
       </div>
 
       <div id="bookmarksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-8">
-        <div class="w-16 h-16 rounded-full bg-brand-50 dark:bg-gray-700 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 text-2xl">
+      <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-slate-200/50 dark:bg-gray-800 rounded-2xl border border-dashed border-slate-300 dark:border-gray-700 p-8">
+        <div class="w-16 h-16 rounded-full bg-brand-100 dark:bg-gray-700 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 text-2xl">
           <i class="fa-solid fa-folder-open"></i>
         </div>
-        <h3 class="text-base font-semibold text-gray-800 dark:text-white">ブックマークがありません</h3>
+        <h3 class="text-base font-semibold text-slate-700 dark:text-white">ブックマークがありません</h3>
         <button onclick="openModal()" class="mt-4 text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">追加する</button>
       </div>
     </section>
   </main>
 
   <!-- モーダル -->
-  <div id="modalBackdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-md overflow-hidden">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 id="modalTitle" class="font-bold text-gray-900 dark:text-white">ブックマーク追加</h3>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-100 dark:bg-gray-800 rounded-2xl shadow-xl border border-slate-300 dark:border-gray-700 w-full max-w-md overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-gray-700 bg-slate-200/50 dark:bg-gray-800">
+        <h3 id="modalTitle" class="font-bold text-slate-800 dark:text-white">ブックマーク追加</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="bookmarkForm" onsubmit="saveBookmark(event)" class="p-6 space-y-4">
         <input type="hidden" id="bookmarkId">
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">URL *</label>
-          <input type="url" id="formUrl" required placeholder="https://example.com" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-gray-400 mb-1">URL *</label>
+          <input type="url" id="formUrl" required placeholder="https://example.com" class="w-full px-3 py-2 bg-slate-200/70 dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-xl text-sm text-slate-800 dark:text-white">
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">タイトル *</label>
-          <input type="text" id="formTitle" required placeholder="タイトル" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-gray-400 mb-1">タイトル *</label>
+          <input type="text" id="formTitle" required placeholder="タイトル" class="w-full px-3 py-2 bg-slate-200/70 dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-xl text-sm text-slate-800 dark:text-white">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">カテゴリ</label>
-            <select id="formCategory" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
+            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-gray-400 mb-1">カテゴリ</label>
+            <select id="formCategory" class="w-full px-3 py-2 bg-slate-200/70 dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-xl text-sm text-slate-800 dark:text-white">
               <option value="情報">情報</option>
               <option value="インターネット">インターネット</option>
               <option value="仕事">仕事</option>
@@ -153,23 +154,23 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">タグ</label>
-            <input type="text" id="formTag" placeholder="タグ" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white">
+            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-gray-400 mb-1">タグ</label>
+            <input type="text" id="formTag" placeholder="タグ" class="w-full px-3 py-2 bg-slate-200/70 dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-xl text-sm text-slate-800 dark:text-white">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">メモ</label>
-          <textarea id="formNote" rows="2" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white resize-none"></textarea>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-gray-400 mb-1">メモ</label>
+          <textarea id="formNote" rows="2" class="w-full px-3 py-2 bg-slate-200/70 dark:bg-gray-900 border border-slate-300 dark:border-gray-700 rounded-xl text-sm text-slate-800 dark:text-white resize-none"></textarea>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">キャンセル</button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm text-slate-600 dark:text-gray-300">キャンセル</button>
           <button type="submit" class="px-5 py-2 bg-brand-600 text-white font-medium text-sm rounded-xl hover:bg-brand-700">保存</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 dark:bg-gray-800 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium border border-gray-700">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 dark:bg-gray-800 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium border border-slate-700">
     <span id="toastMessage">保存しました</span>
   </div>
 
@@ -178,7 +179,7 @@
     const WORKER_URL = 'https://dawn-pine-9503.yajirobe-einstein.workers.dev';
 
     let bookmarks = [];
-    let selectedCategory = '情報'; // ★初期表示を「情報」に設定★
+    let selectedCategory = '情報';
     let searchQuery = '';
 
     window.onload = async function() {
@@ -319,10 +320,10 @@
             class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition ${
               isActive 
                 ? 'bg-brand-600 text-white font-semibold shadow-sm' 
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                : 'text-slate-600 dark:text-gray-300 hover:bg-slate-300/50 dark:hover:bg-gray-800'
             }">
             <span>${cat}</span>
-            <span class="text-xs ${isActive ? 'bg-brand-700 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'} px-2 py-0.5 rounded-full">${count}</span>
+            <span class="text-xs ${isActive ? 'bg-brand-700 text-white' : 'bg-slate-300 dark:bg-gray-700 text-slate-700 dark:text-gray-300'} px-2 py-0.5 rounded-full">${count}</span>
           </button>
         `;
       }).join('');
@@ -360,29 +361,29 @@
         
         return `
           <div draggable="true" ondragstart="onDragStart(event, '${b.id}')" ondragover="onDragOver(event)" ondrop="onDrop(event, '${b.id}')" ondragend="onDragEnd(event)"
-               class="group bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-brand-500/50 transition flex flex-col justify-between relative cursor-grab">
+               class="group bg-slate-200/50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-300/80 dark:border-gray-700 shadow-sm hover:border-brand-500/50 transition flex flex-col justify-between relative cursor-grab">
             <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="no-underline block">
               <div>
                 <div class="flex items-start justify-between gap-3 mb-2">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-slate-300/60 dark:bg-gray-700 p-1.5 flex items-center justify-center shrink-0">
                       <img src="${faviconUrl}" alt="" class="w-5 h-5 object-contain" onerror="this.src='https://placehold.co/32x32/6366f1/ffffff?text=B'">
                     </div>
                     <div class="overflow-hidden">
-                      <h3 class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400">${escapeHtml(b.title)}</h3>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 leading-normal py-0.5">${domain}</p>
+                      <h3 class="font-semibold text-slate-800 dark:text-white text-sm line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400">${escapeHtml(b.title)}</h3>
+                      <p class="text-xs text-slate-500 dark:text-gray-400 line-clamp-1 leading-normal py-0.3">${domain}</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition z-10">
-                    <button onclick="event.preventDefault(); event.stopPropagation(); editBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-pen text-xs"></i></button>
-                    <button onclick="event.preventDefault(); event.stopPropagation(); deleteBookmark('${b.id}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"><i class="fa-solid fa-trash text-xs"></i></button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); editBookmark('${b.id}')" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg hover:bg-slate-300/60 dark:hover:bg-gray-700"><i class="fa-solid fa-pen text-xs"></i></button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); deleteBookmark('${b.id}')" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-300/60 dark:hover:bg-gray-700"><i class="fa-solid fa-trash text-xs"></i></button>
                   </div>
                 </div>
-                ${b.note ? `<p class="text-xs text-gray-600 dark:text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
+                ${b.note ? `<p class="text-xs text-slate-600 dark:text-gray-300 my-2 line-clamp-2">${escapeHtml(b.note)}</p>` : ''}
               </div>
             </a>
-            <div class="pt-3 mt-2 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
-              <span class="text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md">${b.category}</span>
+            <div class="pt-3 mt-2 border-t border-slate-300/60 dark:border-gray-700/50 flex items-center justify-between">
+              <span class="text-[11px] font-medium bg-slate-300/60 dark:bg-gray-700 text-slate-600 dark:text-gray-300 px-2 py-0.5 rounded-md">${b.category}</span>
               <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-brand-600 dark:text-brand-400 hover:underline">開く <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
             </div>
           </div>

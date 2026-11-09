@@ -63,6 +63,15 @@
     "createdAt": 1794195354116
   },
   {
+    "id": "4",
+    "title": "Notion",
+    "url": "https://notion.so",
+    "category": "学習|プログラミング",
+    "tag": "生産性",
+    "note": "メモ・ドキュメント・タスクをまとめる万能ワークスペース",
+    "createdAt": 1793978534973
+  },
+  {
     "id": "2",
     "title": "Tailwind CSS",
     "url": "https://tailwindcss.com",
@@ -79,14 +88,5 @@
     "tag": "UI/UX",
     "note": "ブラウザで動くリアルタイムデザインツール",
     "createdAt": 1793978434973
-  },
-  {
-    "id": "4",
-    "title": "Notion",
-    "url": "https://notion.so",
-    "category": "学習|プログラミング",
-    "tag": "生産性",
-    "note": "メモ・ドキュメント・タスクをまとめる万能ワークスペース",
-    "createdAt": 1793978534973
   }
 ]

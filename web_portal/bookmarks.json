@@ -9,6 +9,15 @@
     "createdAt": 1794375944708
   },
   {
+    "id": "1794375592810",
+    "title": "日テレNEWS NNN",
+    "url": "https://news.ntv.co.jp/",
+    "category": "情報",
+    "tag": "",
+    "note": "日本テレビ系NNN30局のニュースサイト",
+    "createdAt": 1794375592810
+  },
+  {
     "id": "1794376031818",
     "title": "TBS NEWS DIG | TBS/JNNのニュースサイト",
     "url": "https://newsdig.tbs.co.jp/",
@@ -34,15 +43,6 @@
     "tag": "",
     "note": "政治・経済・社会・国際・スポーツ・エンタメなど、様々な分野のニュースをいち早く、正確にお伝えします。",
     "createdAt": 1794375690241
-  },
-  {
-    "id": "1794375592810",
-    "title": "日テレNEWS NNN",
-    "url": "https://news.ntv.co.jp/",
-    "category": "情報",
-    "tag": "",
-    "note": "日本テレビ系NNN30局のニュースサイト",
-    "createdAt": 1794375592810
   },
   {
     "id": "1794373091779",

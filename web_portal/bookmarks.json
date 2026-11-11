@@ -1,5 +1,14 @@
 [
   {
+    "id": "1794376487736",
+    "title": "TVer",
+    "url": "https://tver.jp/categories/news",
+    "category": "情報",
+    "tag": "",
+    "note": "民放5局公式,無料動画配信キャッチアップサービス,日本テレビ,テレビ朝日,TBS,テレビ東京,フジテレビ",
+    "createdAt": 1794376487736
+  },
+  {
     "id": "1794375944708",
     "title": "ABEMA",
     "url": "https://abema.tv/",

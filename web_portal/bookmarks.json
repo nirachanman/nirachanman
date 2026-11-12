@@ -189,15 +189,6 @@
     "createdAt": 1794024350981
   },
   {
-    "id": "1794465948237",
-    "title": "今日の Googleニュース",
-    "url": "https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja",
-    "category": "情報",
-    "tag": "",
-    "note": "ニュース  ショーケース 日本 世界 ローカル ビジネス 科学＆テクノロジー エンタメ スポーツ",
-    "createdAt": 1794465948237
-  },
-  {
     "id": "1793978928280",
     "title": "NHK ONE らじる★らじる",
     "url": "https://www.nhk.or.jp/radio/",
@@ -205,6 +196,15 @@
     "tag": "NHK/ニュース",
     "note": "NHK AM・NHK FM 放送の音声をライブストリーミングで同時提供。聴き逃しても配信で楽しめます。",
     "createdAt": 1793978928280
+  },
+  {
+    "id": "1794465948237",
+    "title": "今日の Googleニュース",
+    "url": "https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja",
+    "category": "情報",
+    "tag": "",
+    "note": "ニュース  ショーケース 日本 世界 ローカル ビジネス 科学＆テクノロジー エンタメ スポーツ",
+    "createdAt": 1794465948237
   },
   {
     "id": "1794195354116",

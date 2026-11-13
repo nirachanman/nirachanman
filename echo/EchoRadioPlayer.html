@@ -25,7 +25,6 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-bottom: 120px; /* 下部固定パネルと被らないように余白を確保 */
         }
 
         .container {
@@ -36,54 +35,72 @@
             text-align: center;
         }
 
-        /* --- ポップアップ（フローティング）ステータスパネル --- */
+        /* --- ステータスパネル --- */
         .status-panel {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 600px;
             background: var(--card-bg);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            border-top: 3px solid var(--accent-color);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            box-sizing: border-box;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            overflow: hidden;
+            padding: 14px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-bottom: 4px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            
+            position: sticky;
+            top: 10px; 
+            z-index: 100; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
         }
 
-        /* 常に表示される簡易ヘッダーバー */
-        .panel-header {
+        /* 【新設】年月日・現在時刻の表示行 */
+        .datetime-row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            cursor: pointer;
-            background: rgba(0, 0, 0, 0.2);
-            user-select: none;
+            align-items: baseline;
+            padding: 0 4px 6px 4px;
+            border-bottom: 1px solid #3a3c40;
+            font-variant-numeric: tabular-nums;
         }
 
-        .header-info {
+        #date-display {
+            font-size: 0.95rem;
+            color: var(--off-white);
+            font-weight: bold;
+        }
+
+        #time-display {
+            font-size: 1.35rem;
+            color: var(--text-color);
+            font-weight: bold;
+            letter-spacing: 0.04em;
+        }
+
+        .panel-row {
             display: flex;
+            justify-content: center;
             align-items: center;
             gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .top-row #status-label,
+        .top-row .stop-btn {
             flex: 1;
             min-width: 0;
+            text-align: center;
         }
 
         #status-label {
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 10px 10px;
+            border-radius: 20px;
             font-weight: bold;
-            font-size: 0.75rem;
-            border: 1.5px solid var(--error-color);
+            font-size: 0.85rem;
+            border: 2px solid var(--error-color);
             background-color: transparent;
             color: var(--error-color);
             cursor: default;
-            white-space: nowrap;
+            box-sizing: border-box;
             transition: all 0.3s ease;
         }
         
@@ -92,61 +109,48 @@
             color: var(--timer-color);
         }
 
-        #current-station {
-            font-size: 1rem;
+        /* 放送局名表示兼ポップアップトリガーボタン */
+        #current-station-btn {
+            font-size: 1.15rem;
             font-weight: bold;
+            margin: 2px 0;
+            width: 100%;
+            height: 2.4rem;
+            padding: 0 14px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid #3a3c40;
+            border-radius: 10px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        #current-station-btn:active {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+
+        #current-station-text {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-align: left;
             flex: 1;
+            text-align: center;
         }
 
-        .toggle-btn {
-            background: transparent;
-            border: none;
+        .dropdown-arrow {
+            font-size: 0.8rem;
             color: var(--off-white);
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 0 4px;
             margin-left: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        /* 開閉スライド領域 */
-        .panel-body {
-            max-height: 0;
-            opacity: 0;
-            padding: 0 16px;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* パネル展開時の表示スタイル */
-        .status-panel.open .panel-body {
-            max-height: 200px;
-            opacity: 1;
-            padding: 12px 16px 16px 16px;
-        }
-
-        .status-panel.open .toggle-btn {
-            transform: rotate(180deg);
-        }
-
-        .panel-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            box-sizing: border-box;
         }
 
         /* ボリュームコントロール領域 */
         .volume-row {
-            padding: 0;
+            padding: 2px 5px;
         }
 
         .volume-container {
@@ -154,7 +158,7 @@
             align-items: center;
             gap: 10px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.15);
             padding: 6px 12px;
             border-radius: 30px;
             box-sizing: border-box;
@@ -184,6 +188,10 @@
             height: 16px;
             border-radius: 50%;
             background: var(--timer-color);
+            transition: transform 0.1s;
+        }
+        .volume-slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
         }
 
         .volume-slider::-moz-range-thumb {
@@ -192,9 +200,14 @@
             border: none;
             border-radius: 50%;
             background: var(--timer-color);
+            transition: transform 0.1s;
+        }
+        .volume-slider::-moz-range-thumb:active {
+            transform: scale(1.2);
         }
 
         .bottom-row {
+            justify-content: space-between;
             border-top: 1px solid #3a3c40;
             padding-top: 10px;
         }
@@ -216,7 +229,9 @@
             cursor: pointer;
             outline: none;
             box-sizing: border-box;
+            transition: all 0.3s ease;
             -webkit-appearance: none;
+            -moz-appearance: none;
             appearance: none;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat;
@@ -231,29 +246,98 @@
         }
 
         #timer-display {
-            font-size: 1rem;
+            font-size: 1.05rem;
             color: var(--timer-color);
             font-weight: bold;
             text-align: right;
             flex: 1;
+            padding-left: 10px;
         }
 
-        /* --- コントロールボタン群 --- */
-        button.control-btn {
-            padding: 6px 14px;
-            border-radius: 16px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.8rem;
+        /* --- ポップアップリスト（モーダル） --- */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
             box-sizing: border-box;
-            white-space: nowrap;
         }
 
-        .stop-btn { 
-            background-color: var(--error-color); 
-            color: #1a1c1e;
-            border: 2px solid var(--error-color);
+        .popup-overlay.open {
+            display: flex;
+        }
+
+        .popup-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 480px;
+            max-height: 75vh;
+            border-radius: 16px;
+            border: 1px solid #3a3c40;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid #3a3c40;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .popup-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--off-white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+
+        .popup-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .popup-item {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333538;
+            color: var(--off-white);
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .popup-item:last-child {
+            border-bottom: none;
+        }
+
+        .popup-item:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .popup-item.playing {
+            background: var(--accent-color);
+            color: #e0e0e0;
+            font-weight: bold;
         }
 
         /* --- グリッド（放送局ボタン） --- */
@@ -262,7 +346,6 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             width: 100%;
-            margin-top: 10px;
         }
 
         .station-btn {
@@ -290,34 +373,52 @@
             border-color: var(--accent-color);
         }
 
+        /* --- コントロールボタン群 --- */
+        button.control-btn {
+            padding: 10px 10px;
+            border-radius: 20px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        .stop-btn { 
+            background-color: var(--error-color); 
+            color: #1a1c1e;
+            border: 2px solid var(--error-color);
+        }
+
         @media (max-width: 350px) {
             .grid { grid-template-columns: 1fr; }
+            #current-station-btn { font-size: 1rem; }
             .station-btn { height: auto; min-height: 50px; }
+            #date-display { font-size: 0.85rem; }
+            #time-display { font-size: 1.15rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="grid" id="station-grid"></div>
-</div>
-
-<!-- ポップアッププレイヤー領域 -->
-<div class="status-panel" id="status-panel">
-    <!-- 常時表示ヘッダー -->
-    <div class="panel-header" onclick="togglePanel()">
-        <div class="header-info">
-            <div id="status-label">再生停止中</div>
-            <div id="current-station">放送局を選択してください</div>
+    <div class="status-panel">
+        <!-- 年月日と現在時刻の表示行 -->
+        <div class="datetime-row">
+            <span id="date-display">----年--月--日(-)</span>
+            <span id="time-display">--:--:--</span>
         </div>
-        <button class="toggle-btn" id="toggle-btn" aria-label="パネル開閉">▲</button>
-    </div>
 
-    <!-- スライド展開領域 -->
-    <div class="panel-body">
-        <div class="panel-row">
+        <div class="panel-row top-row">
+            <div id="status-label">再生停止中</div>
             <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
         </div>
+
+        <!-- タップでポップアップリストを開く放送局表示ボタン -->
+        <button id="current-station-btn" onclick="openStationPopup()" aria-label="放送局リストを開く">
+            <span id="current-station-text">放送局を選択してください</span>
+            <span class="dropdown-arrow">▼</span>
+        </button>
 
         <!-- ボリュームスライダー（iOS判定で自動非表示） -->
         <div class="panel-row volume-row">
@@ -340,6 +441,19 @@
             </div>
             <div id="timer-display"></div>
         </div>
+    </div>
+
+    <div class="grid" id="station-grid"></div>
+</div>
+
+<!-- 放送局選択ポップアップリスト -->
+<div class="popup-overlay" id="station-popup" onclick="closeStationPopupOnOverlay(event)">
+    <div class="popup-content">
+        <div class="popup-header">
+            <span>放送局一覧</span>
+            <button class="popup-close-btn" onclick="closeStationPopup()" aria-label="閉じる">✕</button>
+        </div>
+        <div class="popup-list" id="popup-station-list"></div>
     </div>
 </div>
 
@@ -367,12 +481,15 @@
 
     const audio = document.getElementById('audio-player');
     const stationGrid = document.getElementById('station-grid');
-    const currentStationLabel = document.getElementById('current-station');
+    const popupStationList = document.getElementById('popup-station-list');
+    const stationPopup = document.getElementById('station-popup');
+    const currentStationText = document.getElementById('current-station-text');
     const statusLabel = document.getElementById('status-label');
     const timerDisplay = document.getElementById('timer-display');
     const timerSelect = document.getElementById('sleep-timer-select');
     const volumeSlider = document.getElementById('volume-slider');
-    const statusPanel = document.getElementById('status-panel');
+    const dateDisplay = document.getElementById('date-display');
+    const timeDisplay = document.getElementById('time-display');
     
     let hls = null;
     let timerId = null;
@@ -380,10 +497,26 @@
     let fadeTimerId = null;
     let remainingSeconds = 0;
 
-    // パネル開閉トグル
-    function togglePanel() {
-        statusPanel.classList.toggle('open');
+    // 年月日と現在時刻の更新処理
+    function updateDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayStr = days[now.getDay()];
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        dateDisplay.innerText = `${year}年${month}月${date}日(${dayStr})`;
+        timeDisplay.innerText = `${hours}:${minutes}:${seconds}`;
     }
+
+    // 初回実行および1秒ごとの更新開始
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
 
     // iOS環境（iPhone / iPad / iPod）判定
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -394,13 +527,37 @@
         }
     }
 
+    // グリッドボタンとポップアップリストの両方を生成
     stations.forEach(station => {
         const btn = document.createElement('button');
         btn.className = 'station-btn';
         btn.innerText = station.name;
         btn.onclick = () => playAudio(station);
         stationGrid.appendChild(btn);
+
+        const listItem = document.createElement('button');
+        listItem.className = 'popup-item';
+        listItem.innerText = station.name;
+        listItem.onclick = () => {
+            playAudio(station);
+            closeStationPopup();
+        };
+        popupStationList.appendChild(listItem);
     });
+
+    function openStationPopup() {
+        stationPopup.classList.add('open');
+    }
+
+    function closeStationPopup() {
+        stationPopup.classList.remove('open');
+    }
+
+    function closeStationPopupOnOverlay(event) {
+        if (event.target === stationPopup) {
+            closeStationPopup();
+        }
+    }
 
     function updateStatus(text, isActive = false) {
         statusLabel.innerText = text;
@@ -417,14 +574,11 @@
 
     function playAudio(station) {
         resetAudioSystem();
-        currentStationLabel.innerText = station.name;
+        currentStationText.innerText = station.name;
         updateStatus("接続中...", true);
         
-        // 再生時はパネルを自動で開く
-        statusPanel.classList.add('open');
-
-        document.querySelectorAll('.station-btn').forEach(b => {
-            b.classList.toggle('playing', b.innerText === station.name);
+        document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
+            el.classList.toggle('playing', el.innerText === station.name);
         });
 
         const secureUrl = station.url.replace("http://", "https://");
@@ -469,8 +623,8 @@
     function stopAudio() {
         resetAudioSystem();
         clearTimers();
-        currentStationLabel.innerText = "放送局を選択してください";
-        document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
+        currentStationText.innerText = "放送局を選択してください";
+        document.querySelectorAll('.station-btn, .popup-item').forEach(el => el.classList.remove('playing'));
     }
 
     function clearTimers() {

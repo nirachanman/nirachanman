@@ -14,6 +14,11 @@
             --off-white: #8e9297;
             --error-color: #cf6679;
             --timer-color: #7da87b; 
+            
+            /* 【新設】停止ボタン用の落ち着いたカラー */
+            --stop-bg: #454950;
+            --stop-border: #5c616a;
+            --stop-text: #e0e0e0;
         }
 
         body {
@@ -52,7 +57,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
         }
 
-        /* 【新設】年月日・現在時刻の表示行 */
+        /* 年月日・現在時刻の表示行 */
         .datetime-row {
             display: flex;
             justify-content: space-between;
@@ -91,14 +96,15 @@
             text-align: center;
         }
 
+        /* ステータス表示（停止ボタンと揃えた四角いデザイン） */
         #status-label {
             padding: 10px 10px;
-            border-radius: 20px;
+            border-radius: 8px;
             font-weight: bold;
             font-size: 0.85rem;
-            border: 2px solid var(--error-color);
+            border: 2px solid #555;
             background-color: transparent;
-            color: var(--error-color);
+            color: var(--off-white);
             cursor: default;
             box-sizing: border-box;
             transition: all 0.3s ease;
@@ -373,21 +379,27 @@
             border-color: var(--accent-color);
         }
 
-        /* --- コントロールボタン群 --- */
+        /* --- 【更新】コントロールボタン群（四角いデザイン＆配色変更） --- */
         button.control-btn {
             padding: 10px 10px;
-            border-radius: 20px;
+            border-radius: 8px; /* 四角い形（角丸8px）に変更 */
             border: none;
             font-weight: bold;
             cursor: pointer;
             font-size: 0.85rem;
             box-sizing: border-box;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
         .stop-btn { 
-            background-color: var(--error-color); 
-            color: #1a1c1e;
-            border: 2px solid var(--error-color);
+            background-color: var(--stop-bg); 
+            color: var(--stop-text);
+            border: 2px solid var(--stop-border);
+        }
+
+        .stop-btn:active {
+            background-color: #36393f;
+            transform: scale(0.98);
         }
 
         @media (max-width: 350px) {
@@ -514,7 +526,6 @@
         timeDisplay.innerText = `${hours}:${minutes}:${seconds}`;
     }
 
-    // 初回実行および1秒ごとの更新開始
     updateDateTime();
     setInterval(updateDateTime, 1000);
 

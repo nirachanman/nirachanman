@@ -40,13 +40,13 @@
             text-align: center;
         }
 
-        /* --- 【更新】ステータスパネル全体を青い枠で囲む --- */
+        /* --- ステータスパネル全体を青い枠で囲む --- */
         .status-panel {
             background: var(--card-bg);
             padding: 14px;
             border-radius: 15px;
             margin-bottom: 15px;
-            border: 2px solid var(--accent-color); /* 4辺すべてを青枠で囲む */
+            border: 2px solid var(--accent-color);
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -340,9 +340,10 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
+        /* 【更新】ポップアップリスト内の選択中ハイライト色を再生中と同じ緑色に変更 */
         .popup-item.playing {
-            background: var(--accent-color);
-            color: #e0e0e0;
+            background: var(--timer-color);
+            color: #1a1c1e;
             font-weight: bold;
         }
 
@@ -372,11 +373,13 @@
             word-break: break-all;
         }
 
+        /* 【更新】選択中の局カードハイライト色を再生中と同じ緑色に変更 */
         .station-btn:active, .station-btn.playing {
-            background: var(--accent-color);
-            color: #e0e0e0;
+            background: var(--timer-color);
+            color: #1a1c1e;
+            font-weight: bold;
             transform: scale(0.97);
-            border-color: var(--accent-color);
+            border-color: var(--timer-color);
         }
 
         /* --- コントロールボタン群（四角いデザイン＆配色） --- */

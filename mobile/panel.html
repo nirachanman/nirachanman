@@ -12,14 +12,17 @@
   --primary-light: #e8f1fc;
   --primary-hover: #003d80;
   --bg-page: #f1f5f9;
+  --bg-panel: #ffffff;        /* ステータスパネル（プレイヤー領域）の背景色 */
+  --bg-control: #f0f7ff;      /* タイトル・プレイヤー枠の背景色 */
+  --bg-list-area: #e2e8f0;    /* ニュースリストの背景色 */
   --bg-card: #ffffff;
   --text-main: #0f172a;
   --text-sub: #475569;
-  --border-color: #e2e8f0;
+  --border-color: #cbd5e1;
   --active-bg: #eff6ff;
   --active-border: #3b82f6;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 /* -------------------------
@@ -70,10 +73,10 @@ body {
 }
 
 /* -------------------------
-   プレイヤーコンテナ
+   プレイヤーコンテナ（ステータスパネル領域）
 ------------------------- */
 .player-container {
-  background: var(--bg-card);
+  background: var(--bg-panel);
   border-radius: 16px;
   padding: 12px;
   box-shadow: var(--shadow-md);
@@ -82,7 +85,7 @@ body {
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  min-height: 0; /* Flex内スクロール用 */
+  min-height: 0;
 }
 
 /* -------------------------
@@ -97,7 +100,8 @@ body {
 
 .title-box {
   flex: 1;
-  background: var(--bg-page);
+  background: var(--bg-control);
+  border: 1px solid #dbeafe;
   padding: 8px 12px;
   border-radius: 10px;
   text-align: center;
@@ -106,7 +110,7 @@ body {
 
 .title {
   font-size: 14px;
-  color: var(--text-main);
+  color: var(--primary);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -151,10 +155,10 @@ button:disabled {
    プレイヤーカード
 ------------------------- */
 .player-card {
-  background: var(--bg-page);
+  background: var(--bg-control);
   border-radius: 12px;
   padding: 6px 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #dbeafe;
   transition: all 0.2s ease;
 }
 
@@ -167,9 +171,9 @@ button:disabled {
 
 /* 再生中ハイライト */
 .player-card.active {
-  background: var(--active-bg);
+  background: #dbeafe;
   border-color: var(--active-border);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 
 /* -------------------------
@@ -225,18 +229,19 @@ button:disabled {
 }
 
 /* -------------------------
-   ニュース一覧
+   ニュース一覧（背景色を区別）
 ------------------------- */
 .list {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg-page);
+  background: var(--bg-list-area);
   border-radius: 12px;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #cbd5e1;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.04);
 }
 
 /* カスタムスクロールバー */
@@ -247,11 +252,11 @@ button:disabled {
   background: transparent;
 }
 .list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #94a3b8;
   border-radius: 999px;
 }
 .list::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 .news-item {
@@ -261,14 +266,14 @@ button:disabled {
   padding: 10px 12px;
   background: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e2e8f0;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .news-item:hover {
-  border-color: #93c5fd;
+  border-color: #60a5fa;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }

@@ -154,62 +154,104 @@
             margin-left: 8px;
         }
 
-        /* ボリュームコントロール領域 */
-        .volume-row {
-            padding: 2px 5px;
+        /* --- 画像参考：ピル型メディアコントロールバー（再生/一時停止・時間・シーク・ミュート） --- */
+        .media-bar-row {
+            padding: 2px 0;
         }
 
-        .volume-container {
+        .media-bar {
             display: flex;
             align-items: center;
             gap: 10px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 6px 12px;
-            border-radius: 30px;
+            background: #141618;
+            border: 1px solid #33363b;
+            padding: 7px 14px;
+            border-radius: 999px;
             box-sizing: border-box;
         }
 
-        .volume-icon {
-            font-size: 0.9rem;
-            color: var(--off-white);
-            user-select: none;
+        .media-icon-btn {
+            background: transparent;
+            border: none;
+            color: #d8dadc;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+            flex-shrink: 0;
         }
 
-        .volume-slider {
+        .media-icon-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.92);
+        }
+
+        .media-icon-btn.muted {
+            color: var(--error-color);
+        }
+
+        .media-icon-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            display: block;
+        }
+
+        .media-time-text {
+            font-size: 0.82rem;
+            color: #c8cacd;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .seek-slider {
             flex: 1;
+            min-width: 40px;
             -webkit-appearance: none;
             appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: #444;
+            height: 4px;
+            border-radius: 2px;
+            background: #484b51;
             outline: none;
             cursor: pointer;
         }
 
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--timer-color);
-            transition: transform 0.1s;
-        }
-        .volume-slider::-webkit-slider-thumb:active {
-            transform: scale(1.2);
+        .seek-slider:disabled {
+            opacity: 0.45;
+            cursor: default;
         }
 
-        .volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+        .seek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: transform 0.1s, background-color 0.15s;
+        }
+        .seek-slider:not(:disabled)::-webkit-slider-thumb:active {
+            transform: scale(1.25);
+            background: var(--timer-color);
+        }
+
+        .seek-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
             border: none;
             border-radius: 50%;
-            background: var(--timer-color);
-            transition: transform 0.1s;
+            background: #e0e0e0;
+            transition: transform 0.1s, background-color 0.15s;
         }
-        .volume-slider::-moz-range-thumb:active {
-            transform: scale(1.2);
+        .seek-slider:not(:disabled)::-moz-range-thumb:active {
+            transform: scale(1.25);
+            background: var(--timer-color);
         }
 
         .bottom-row {
@@ -340,7 +382,6 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        /* 【更新】ポップアップリスト内の選択中ハイライト色を再生中と同じ緑色に変更 */
         .popup-item.playing {
             background: var(--timer-color);
             color: #1a1c1e;
@@ -373,7 +414,6 @@
             word-break: break-all;
         }
 
-        /* 【更新】選択中の局カードハイライト色を再生中と同じ緑色に変更 */
         .station-btn:active, .station-btn.playing {
             background: var(--timer-color);
             color: #1a1c1e;
@@ -411,6 +451,8 @@
             .station-btn { height: auto; min-height: 50px; }
             #date-display { font-size: 0.85rem; }
             #time-display { font-size: 1.15rem; }
+            .media-bar { padding: 6px 10px; gap: 6px; }
+            .media-time-text { font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -435,12 +477,29 @@
             <span class="dropdown-arrow">▼</span>
         </button>
 
-        <!-- ボリュームスライダー（iOS判定で自動非表示） -->
-        <div class="panel-row volume-row">
-            <div class="volume-container">
-                <span class="volume-icon">🔈</span>
-                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1" oninput="changeVolume(this.value)">
-                <span class="volume-icon">🔊</span>
+        <!-- 画像参考：再生/一時停止・時間・スライダー・ミュートをまとめたピル型バー -->
+        <div class="panel-row media-bar-row">
+            <div class="media-bar">
+                <!-- 再生・一時停止ボタン -->
+                <button id="play-pause-btn" class="media-icon-btn" onclick="togglePlayPause()" aria-label="再生 / 一時停止">
+                    <svg id="play-pause-icon" viewBox="0 0 24 24">
+                        <polygon points="6,4 20,12 6,20"></polygon>
+                    </svg>
+                </button>
+
+                <!-- 経過時間 / 全体時間表示 -->
+                <span id="media-time-display" class="media-time-text">00:00 / LIVE</span>
+
+                <!-- 再生スライダー -->
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" step="0.1" value="0" disabled
+                       oninput="onSeekInput(this.value)" onchange="onSeekChange(this.value)">
+
+                <!-- ミュート（消音）ボタン -->
+                <button id="mute-btn" class="media-icon-btn" onclick="toggleMute()" aria-label="ミュート切替">
+                    <svg id="mute-icon" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -502,7 +561,11 @@
     const statusLabel = document.getElementById('status-label');
     const timerDisplay = document.getElementById('timer-display');
     const timerSelect = document.getElementById('sleep-timer-select');
-    const volumeSlider = document.getElementById('volume-slider');
+    const seekSlider = document.getElementById('seek-slider');
+    const mediaTimeDisplay = document.getElementById('media-time-display');
+    const playPauseIcon = document.getElementById('play-pause-icon');
+    const muteBtn = document.getElementById('mute-btn');
+    const muteIcon = document.getElementById('mute-icon');
     const dateDisplay = document.getElementById('date-display');
     const timeDisplay = document.getElementById('time-display');
     
@@ -511,6 +574,14 @@
     let countdownIntervalId = null;
     let fadeTimerId = null;
     let remainingSeconds = 0;
+    let isSeeking = false;
+    let currentStation = null;
+
+    // SVGアイコン定義
+    const SVG_PLAY = '<polygon points="6,4 20,12 6,20"></polygon>';
+    const SVG_PAUSE = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+    const SVG_VOL_ON = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>';
+    const SVG_VOL_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>';
 
     // 年月日と現在時刻の更新処理
     function updateDateTime() {
@@ -532,13 +603,105 @@
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
-    // iOS環境（iPhone / iPad / iPod）判定
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isIOS) {
-        const volumeRow = document.querySelector('.volume-row');
-        if (volumeRow) {
-            volumeRow.style.display = 'none';
+    // 再生・一時停止ボタンのアイコン同期
+    function updatePlayPauseUI(isPlaying) {
+        playPauseIcon.innerHTML = isPlaying ? SVG_PAUSE : SVG_PLAY;
+    }
+
+    // 再生 / 一時停止トグル処理
+    function togglePlayPause() {
+        if (!currentStation) {
+            // 未選択時は先頭の放送局を再生
+            if (stations.length > 0) {
+                playAudio(stations[0]);
+            }
+            return;
         }
+
+        if (audio.paused) {
+            audio.play().catch(() => {
+                // ストリーム切断後などで再開できない場合は再接続
+                playAudio(currentStation);
+            });
+        } else {
+            audio.pause();
+        }
+    }
+
+    // ミュート（消音）トグル処理
+    function toggleMute() {
+        audio.muted = !audio.muted;
+        if (audio.muted) {
+            muteBtn.classList.add('muted');
+            muteIcon.innerHTML = SVG_VOL_MUTE;
+        } else {
+            muteBtn.classList.remove('muted');
+            muteIcon.innerHTML = SVG_VOL_ON;
+        }
+    }
+
+    // 秒数を MM:SS または HH:MM:SS にフォーマット
+    function formatTime(sec) {
+        if (!isFinite(sec) || sec < 0) return "00:00";
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = Math.floor(sec % 60);
+        if (h > 0) {
+            return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // 再生進行に合わせてシークバーと時間表示を更新
+    audio.addEventListener('timeupdate', () => {
+        if (isSeeking) return;
+        const current = audio.currentTime || 0;
+        const currentStr = formatTime(current);
+        let durationStr = "LIVE";
+
+        if (audio.seekable && audio.seekable.length > 0) {
+            const start = audio.seekable.start(0);
+            const end = audio.seekable.end(audio.seekable.length - 1);
+            if (end > start) {
+                seekSlider.disabled = false;
+                seekSlider.min = start;
+                seekSlider.max = end;
+                seekSlider.value = current;
+                if (isFinite(audio.duration) && audio.duration > 0) {
+                    durationStr = formatTime(audio.duration);
+                }
+            }
+        } else if (isFinite(audio.duration) && audio.duration > 0) {
+            seekSlider.disabled = false;
+            seekSlider.min = 0;
+            seekSlider.max = audio.duration;
+            seekSlider.value = current;
+            durationStr = formatTime(audio.duration);
+        } else {
+            seekSlider.disabled = true;
+            seekSlider.min = 0;
+            seekSlider.max = Math.max(1, current);
+            seekSlider.value = current;
+        }
+
+        mediaTimeDisplay.innerText = `${currentStr} / ${durationStr}`;
+    });
+
+    // スライダー操作中（ドラッグ中）の表示更新
+    function onSeekInput(val) {
+        isSeeking = true;
+        const currentStr = formatTime(parseFloat(val));
+        const durationStr = (isFinite(audio.duration) && audio.duration > 0) ? formatTime(audio.duration) : "LIVE";
+        mediaTimeDisplay.innerText = `${currentStr} / ${durationStr}`;
+    }
+
+    // スライダーを離したときに再生位置を確定
+    function onSeekChange(val) {
+        const targetTime = parseFloat(val);
+        if (isFinite(targetTime)) {
+            audio.currentTime = targetTime;
+        }
+        isSeeking = false;
     }
 
     // グリッドボタンとポップアップリストの両方を生成
@@ -582,14 +745,12 @@
         }
     }
 
-    function changeVolume(val) {
-        audio.volume = parseFloat(val);
-    }
-
     function playAudio(station) {
         resetAudioSystem();
+        currentStation = station;
         currentStationText.innerText = station.name;
         updateStatus("接続中...", true);
+        updatePlayPauseUI(true);
         
         document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
             el.classList.toggle('playing', el.innerText === station.name);
@@ -598,29 +759,49 @@
         const secureUrl = station.url.replace("http://", "https://");
         const isHls = secureUrl.includes('.m3u8');
 
-        const currentVol = parseFloat(volumeSlider.value);
-
         if (isHls) {
             if (Hls.isSupported()) {
                 hls = new Hls({ enableWorker: true, lowLatencyMode: true });
                 hls.loadSource(secureUrl);
                 hls.attachMedia(audio);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = currentVol; audio.play(); });
-                hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) updateStatus("再生エラー"); });
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = 1.0; audio.play(); });
+                hls.on(Hls.Events.ERROR, (e, data) => {
+                    if (data.fatal) {
+                        updateStatus("再生エラー");
+                        updatePlayPauseUI(false);
+                    }
+                });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = secureUrl;
-                audio.volume = currentVol;
+                audio.volume = 1.0;
                 audio.play();
             }
         } else {
             audio.src = secureUrl;
-            audio.volume = currentVol;
-            audio.play().catch(() => { updateStatus("再生エラー"); });
+            audio.volume = 1.0;
+            audio.play().catch(() => {
+                updateStatus("再生エラー");
+                updatePlayPauseUI(false);
+            });
         }
-
-        audio.onplaying = () => { updateStatus("再生中", true); };
-        audio.onwaiting = () => { updateStatus("読込中...", true); };
     }
+
+    // audio要素の再生・一時停止・待機イベント連動
+    audio.onplaying = () => {
+        updateStatus("再生中", true);
+        updatePlayPauseUI(true);
+    };
+
+    audio.onpause = () => {
+        if (currentStation) {
+            updateStatus("一時停止中", false);
+        }
+        updatePlayPauseUI(false);
+    };
+
+    audio.onwaiting = () => {
+        updateStatus("読込中...", true);
+    };
 
     function resetAudioSystem() {
         audio.pause();
@@ -631,10 +812,20 @@
             hls.destroy();
             hls = null;
         }
+        // 再生スライダーとアイコンを初期状態にリセット
+        isSeeking = false;
+        seekSlider.disabled = true;
+        seekSlider.min = 0;
+        seekSlider.max = 100;
+        seekSlider.value = 0;
+        mediaTimeDisplay.innerText = "00:00 / LIVE";
+        updatePlayPauseUI(false);
+
         updateStatus("再生停止中");
     }
 
     function stopAudio() {
+        currentStation = null;
         resetAudioSystem();
         clearTimers();
         currentStationText.innerText = "放送局を選択してください";
@@ -653,7 +844,7 @@
         timerSelect.value = "0";
         timerSelect.classList.remove('active');
         
-        audio.volume = parseFloat(volumeSlider.value);
+        audio.volume = 1.0;
     }
 
     function handleTimerChange(minutes) {

@@ -40,7 +40,7 @@
             text-align: center;
         }
 
-        /* --- 【更新】ステータスパネル全体を5pxの青い枠で囲む --- */
+        /* --- ステータスパネル全体を5pxの青い枠で囲む --- */
         .status-panel {
             background: var(--card-bg);
             padding: 14px;
@@ -96,9 +96,13 @@
             text-align: center;
         }
 
-        /* ステータス表示（停止ボタンと揃えた四角いデザイン） */
+        /* ステータス表示（停止ボタンと揃えた四角いデザイン＋右端イコライザー配置用） */
         #status-label {
-            padding: 10px 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 26px;
             border-radius: 8px;
             font-weight: bold;
             font-size: 0.85rem;
@@ -113,6 +117,46 @@
         #status-label.active {
             border-color: var(--timer-color);
             color: var(--timer-color);
+        }
+
+        /* ステータス表示右端のイコライザーバー */
+        .status-eq-bars {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+            pointer-events: none;
+        }
+
+        #status-label.active .status-eq-bars {
+            display: flex;
+        }
+
+        .status-eq-bars span {
+            display: block;
+            width: 2.5px;
+            background-color: var(--timer-color);
+            border-radius: 1px;
+            animation: eqBounce 0.8s infinite ease-in-out;
+        }
+
+        .status-eq-bars span:nth-child(1) {
+            height: 5px;
+            animation-delay: 0s;
+        }
+
+        .status-eq-bars span:nth-child(2) {
+            height: 11px;
+            animation-delay: 0.2s;
+        }
+
+        .status-eq-bars span:nth-child(3) {
+            height: 7px;
+            animation-delay: 0.4s;
         }
 
         /* 放送局名表示兼ポップアップトリガーボタン */
@@ -397,10 +441,11 @@
         }
 
         .station-btn {
+            position: relative;
             background: var(--card-bg);
             border: 2px solid #3a3c40;
             color: var(--off-white);
-            padding: 6px 8px;
+            padding: 6px 22px;
             border-radius: 10px;
             font-size: 0.9rem;
             cursor: pointer;
@@ -414,12 +459,85 @@
             word-break: break-all;
         }
 
-        .station-btn:active, .station-btn.playing {
+        .station-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 選択中・再生中カードのハイライト＆パルス発光アニメーション */
+        .station-btn.playing {
             background: var(--timer-color);
             color: #1a1c1e;
             font-weight: bold;
-            transform: scale(0.97);
             border-color: var(--timer-color);
+            animation: cardPulse 2.2s infinite ease-in-out;
+        }
+
+        /* 一時停止中は発光アニメーションを停止 */
+        .station-btn.playing.paused {
+            animation: none;
+        }
+
+        @keyframes cardPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(125, 168, 123, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 12px 2px rgba(125, 168, 123, 0.65);
+            }
+        }
+
+        /* --- 再生中カード右端のイコライザー（音波）アニメーション --- */
+        .eq-bars {
+            display: none;
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+            pointer-events: none;
+        }
+
+        .station-btn.playing .eq-bars {
+            display: flex;
+        }
+
+        .eq-bars span {
+            display: block;
+            width: 2.5px;
+            background-color: #1a1c1e;
+            border-radius: 1px;
+            animation: eqBounce 0.8s infinite ease-in-out;
+        }
+
+        .eq-bars span:nth-child(1) {
+            height: 5px;
+            animation-delay: 0s;
+        }
+
+        .eq-bars span:nth-child(2) {
+            height: 11px;
+            animation-delay: 0.2s;
+        }
+
+        .eq-bars span:nth-child(3) {
+            height: 7px;
+            animation-delay: 0.4s;
+        }
+
+        /* 一時停止中はバーの高さを揃えて動きを止める */
+        .station-btn.playing.paused .eq-bars span {
+            animation-play-state: paused;
+            height: 4px;
+        }
+
+        @keyframes eqBounce {
+            0%, 100% {
+                height: 3px;
+            }
+            50% {
+                height: 12px;
+            }
         }
 
         /* --- コントロールボタン群（四角いデザイン＆配色） --- */
@@ -467,7 +585,10 @@
         </div>
 
         <div class="panel-row top-row">
-            <div id="status-label">再生停止中</div>
+            <div id="status-label">
+                <span id="status-text">再生停止中</span>
+                <span class="status-eq-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+            </div>
             <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
         </div>
 
@@ -559,6 +680,7 @@
     const stationPopup = document.getElementById('station-popup');
     const currentStationText = document.getElementById('current-station-text');
     const statusLabel = document.getElementById('status-label');
+    const statusText = document.getElementById('status-text');
     const timerDisplay = document.getElementById('timer-display');
     const timerSelect = document.getElementById('sleep-timer-select');
     const seekSlider = document.getElementById('seek-slider');
@@ -603,9 +725,12 @@
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
-    // 再生・一時停止ボタンのアイコン同期
+    // 再生・一時停止ボタンとカードのアニメーション状態同期
     function updatePlayPauseUI(isPlaying) {
         playPauseIcon.innerHTML = isPlaying ? SVG_PAUSE : SVG_PLAY;
+        document.querySelectorAll('.station-btn.playing').forEach(btn => {
+            btn.classList.toggle('paused', !isPlaying);
+        });
     }
 
     // 再生 / 一時停止トグル処理
@@ -706,12 +831,25 @@
     stations.forEach(station => {
         const btn = document.createElement('button');
         btn.className = 'station-btn';
-        btn.innerText = station.name;
+        btn.dataset.stationName = station.name;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = station.name;
+        btn.appendChild(nameSpan);
+
+        // イコライザーアニメーション用バーを追加
+        const eq = document.createElement('span');
+        eq.className = 'eq-bars';
+        eq.setAttribute('aria-hidden', 'true');
+        eq.innerHTML = '<span></span><span></span><span></span>';
+        btn.appendChild(eq);
+
         btn.onclick = () => playAudio(station);
         stationGrid.appendChild(btn);
 
         const listItem = document.createElement('button');
         listItem.className = 'popup-item';
+        listItem.dataset.stationName = station.name;
         listItem.innerText = station.name;
         listItem.onclick = () => {
             playAudio(station);
@@ -735,7 +873,7 @@
     }
 
     function updateStatus(text, isActive = false) {
-        statusLabel.innerText = text;
+        statusText.innerText = text;
         if (isActive) {
             statusLabel.classList.add('active');
         } else {
@@ -748,11 +886,13 @@
         currentStation = station;
         currentStationText.innerText = station.name;
         updateStatus("接続中...", true);
-        updatePlayPauseUI(true);
         
         document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
-            el.classList.toggle('playing', el.innerText === station.name);
+            const isMatch = el.dataset.stationName === station.name;
+            el.classList.toggle('playing', isMatch);
+            el.classList.remove('paused');
         });
+        updatePlayPauseUI(true);
 
         const secureUrl = station.url.replace("http://", "https://");
         const isHls = secureUrl.includes('.m3u8');
@@ -827,7 +967,10 @@
         resetAudioSystem();
         clearTimers();
         currentStationText.innerText = "放送局を選択してください";
-        document.querySelectorAll('.station-btn, .popup-item').forEach(el => el.classList.remove('playing'));
+        document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
+            el.classList.remove('playing');
+            el.classList.remove('paused');
+        });
     }
 
     function clearTimers() {

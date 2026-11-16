@@ -40,13 +40,13 @@
             text-align: center;
         }
 
-        /* --- ステータスパネル全体を青い枠で囲む --- */
+        /* --- 【更新】ステータスパネル全体を5pxの青い枠で囲む --- */
         .status-panel {
             background: var(--card-bg);
             padding: 14px;
             border-radius: 15px;
             margin-bottom: 15px;
-            border: 2px solid var(--accent-color);
+            border: 5px solid var(--accent-color);
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -154,7 +154,7 @@
             margin-left: 8px;
         }
 
-        /* --- 画像参考：ピル型メディアコントロールバー（再生/一時停止・時間・シーク・ミュート） --- */
+        /* --- ピル型メディアコントロールバー（再生/一時停止・時間・シーク・ミュート） --- */
         .media-bar-row {
             padding: 2px 0;
         }
@@ -477,7 +477,7 @@
             <span class="dropdown-arrow">▼</span>
         </button>
 
-        <!-- 画像参考：再生/一時停止・時間・スライダー・ミュートをまとめたピル型バー -->
+        <!-- 再生/一時停止・時間・スライダー・ミュートをまとめたピル型バー -->
         <div class="panel-row media-bar-row">
             <div class="media-bar">
                 <!-- 再生・一時停止ボタン -->
@@ -611,7 +611,6 @@
     // 再生 / 一時停止トグル処理
     function togglePlayPause() {
         if (!currentStation) {
-            // 未選択時は先頭の放送局を再生
             if (stations.length > 0) {
                 playAudio(stations[0]);
             }
@@ -620,7 +619,6 @@
 
         if (audio.paused) {
             audio.play().catch(() => {
-                // ストリーム切断後などで再開できない場合は再接続
                 playAudio(currentStation);
             });
         } else {

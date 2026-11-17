@@ -16,10 +16,10 @@
             --error-color: #cf6679;
             --timer-color: #7da87b; 
             
-            /* 停止ボタン用の落ち着いたカラー */
-            --stop-bg: #454950;
-            --stop-border: #5c616a;
-            --stop-text: #e0e0e0;
+            /* 停止ボタン用：背景は透過・枠線と文字色のみ落ち着いた赤系 */
+            --stop-bg: transparent;
+            --stop-border: #cf6679;
+            --stop-text: #cf6679;
         }
 
         body {
@@ -541,7 +541,7 @@
             }
         }
 
-        /* --- コントロールボタン群（四角いデザイン＆配色） --- */
+        /* --- コントロールボタン群（枠線と文字色のみ赤系のアウトラインスタイル） --- */
         button.control-btn {
             padding: 10px 10px;
             border-radius: 8px;
@@ -554,13 +554,13 @@
         }
 
         .stop-btn { 
-            background-color: var(--stop-bg); 
+            background-color: rgba(0, 0, 0, 0.2); 
             color: var(--stop-text);
             border: 2px solid var(--stop-border);
         }
 
         .stop-btn:active {
-            background-color: #36393f;
+            background-color: rgba(207, 102, 121, 0.18);
             transform: scale(0.98);
         }
 

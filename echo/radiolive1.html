@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Blue Radio - Dual Color Clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Deep Blue Radio - Echo Show 8 Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -13,12 +13,20 @@
             --soft-blue: #94a3b8;
             --highlight-blue: #38bdf8;
             --white-blue: #f1f5f9;
-            /* 時計用の別々のカラー */
-            --date-color: #cbd5e1;     /* 日付：落ち着いたライトグレー */
-            --time-color: #fde047;     /* 時刻：鮮やかなライトゴールド */
+            --date-color: #cbd5e1;
+            --time-color: #fde047;
         }
 
-        body {
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* スクロールを防止 */
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--midnight-blue);
             background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
@@ -26,143 +34,95 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
 
+        /* Echo Show 8 (1280x800) にフィットする横長カード */
         .player-card {
             background: var(--deep-navy);
-            width: 90%;
-            max-width: 400px;
-            padding: 30px;
-            border-radius: 24px;
+            width: 94vw;
+            max-width: 1180px;
+            height: 86vh;
+            max-height: 680px;
+            padding: 32px 44px;
+            border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-blue);
-            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        /* 左カラム：タイトル・時計・ステータス */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 10px 0;
+            border-right: 1px solid rgba(51, 65, 85, 0.6);
+            padding-right: 36px;
         }
 
         h1 {
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             font-weight: 400;
-            letter-spacing: 0.2rem;
-            margin-bottom: 8px;
+            letter-spacing: 0.25rem;
+            margin: 0;
             color: var(--soft-blue);
             text-transform: uppercase;
         }
 
-        /* 時計全体のラッパースタイル */
         .live-clock {
-            font-size: 1.4rem;
-            margin-bottom: 30px;
-            font-weight: 300;
-            letter-spacing: 0.05rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: auto 0;
         }
 
-        /* 日付部分の個別スタイル */
         .clock-date {
             color: var(--date-color);
-            margin-right: 8px;
-            font-size: 1.2rem; /* 日付を少しだけ小さくして時刻を引き立てる */
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 0.1rem;
+            margin-bottom: 8px;
         }
 
-        /* 時刻部分の個別スタイル */
         .clock-time {
             color: var(--time-color);
-            text-shadow: 0 0 12px rgba(253, 224, 71, 0.25);
+            font-size: 4.6rem;
+            line-height: 1.1;
+            text-shadow: 0 0 18px rgba(253, 224, 71, 0.25);
             font-weight: 400;
+            font-variant-numeric: tabular-nums;
         }
 
-        .select-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--soft-blue);
-            margin-bottom: 8px;
-            margin-left: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.05rem;
-        }
-
-        .select-container {
-            position: relative;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: var(--midnight-blue);
-            border: 1px solid var(--border-blue);
-            border-radius: 14px;
-            color: var(--white-blue);
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        select:focus {
-            border-color: var(--highlight-blue);
-        }
-
-        .select-container::after {
-            content: '↓';
-            font-size: 0.8rem;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--soft-blue);
-            pointer-events: none;
-        }
-
-        .audio-wrapper {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 15px;
-            border-radius: 20px;
-            margin: 25px 0 15px 0;
-        }
-
-        audio {
-            width: 100%;
-            height: 35px;
-            filter: invert(100%) hue-rotate(190deg) brightness(1.2);
-            opacity: 0.7;
-        }
-
-        .timer-display {
-            font-size: 0.85rem;
-            color: var(--highlight-blue);
-            min-height: 1.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
+        .status-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.75rem;
+            gap: 10px;
+            font-size: 0.95rem;
             color: var(--soft-blue);
             text-transform: uppercase;
             letter-spacing: 0.1rem;
         }
 
         .dot {
-            width: 6px;
-            height: 6px;
+            width: 10px;
+            height: 10px;
             background-color: var(--soft-blue);
             border-radius: 50%;
         }
 
         .playing .dot {
             background-color: var(--highlight-blue);
-            box-shadow: 0 0 8px var(--highlight-blue);
+            box-shadow: 0 0 10px var(--highlight-blue);
             animation: pulse 2s infinite;
         }
 
@@ -171,83 +131,196 @@
             50% { opacity: 0.4; }
         }
 
-        .footer-note {
-            font-size: 0.7rem;
+        .timer-display {
+            font-size: 1rem;
+            color: var(--highlight-blue);
+            min-height: 1.4rem;
+            font-weight: 400;
+        }
+
+        /* 右カラム：選局・タイマー・プレーヤー */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 22px;
+            height: 100%;
+        }
+
+        .select-group {
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
             color: var(--soft-blue);
-            margin-top: 20px;
+            margin-bottom: 8px;
+            margin-left: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08rem;
+        }
+
+        .select-container {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            padding: 16px 20px;
+            background-color: var(--midnight-blue);
+            border: 1px solid var(--border-blue);
+            border-radius: 16px;
+            color: var(--white-blue);
+            font-size: 1.15rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            transition: border-color 0.2s ease;
+        }
+
+        select:focus {
+            border-color: var(--highlight-blue);
+        }
+
+        .select-container::after {
+            content: '▼';
+            font-size: 0.9rem;
+            position: absolute;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--soft-blue);
+            pointer-events: none;
+        }
+
+        .audio-wrapper {
+            background: rgba(15, 23, 42, 0.65);
+            padding: 18px 20px;
+            border-radius: 20px;
+            margin-top: 6px;
+        }
+
+        audio {
+            width: 100%;
+            height: 46px;
+            filter: invert(100%) hue-rotate(190deg) brightness(1.2);
+            opacity: 0.8;
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            color: var(--soft-blue);
+            margin: 0;
+            text-align: right;
             opacity: 0.5;
+        }
+
+        /* 縦画面やスマホで開いた場合のフォールバック */
+        @media (max-width: 760px) {
+            html, body {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+            .player-card {
+                grid-template-columns: 1fr;
+                height: auto;
+                max-height: none;
+                padding: 28px;
+                gap: 24px;
+                margin: 20px 0;
+            }
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+                padding-right: 0;
+                padding-bottom: 20px;
+                text-align: center;
+                align-items: center;
+            }
+            .clock-time {
+                font-size: 3rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="player-card">
-    <h1>📻Deep Blue Radio</h1>
-    
-    <div id="liveClock" class="live-clock">
-        <span id="clockDate" class="clock-date">----/--/--</span>
-        <span id="clockTime" class="clock-time">--:--:--</span>
-    </div>
-    
-    <div class="select-group">
-        <label>Station</label>
-        <div class="select-container">
-            <select id="channelSelector">
-                <option value="">放送局を選択してください</option>
-                <optgroup label="ニュース・公共放送">
-                    <option value="https://simul2.drdi.st.nhk/live/3/joined/master.m3u8">NHK AM（東京）</option>
-                    <option value="https://simul2.drdi.st.nhk/live/5/joined/master.m3u8">NHK FM（東京）</option>
-                    <option value="https://simul2.drdi.st.nhk/live/8/joined/master.m3u8">NHK AM（仙台）</option>
-                    <option value="https://simul2.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（仙台）</option>
-                </optgroup>
-                <optgroup label="SmoothJazz・リラックス">
-                    <option value="https://bcast.vigormultimedia.com:48888/sjcompl192aac">smoothjazz.com.pl</option>
-                    <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
-                    <option value="https://ais-edge89-dal02.cdnstream.com/b48071_128mp3">101 Smooth Jazz Mellow Mix</option>
-                    <option value="https://ais-edge89-dal02.cdnstream.com/2124_128.mp3">smooth-jazz-247</option>
-                    <option value="https://das-edge62-live365-dal03.cdnstream.com/a49349">Smooth Jazz Mix New York</option>
-                    <option value="https://cast1.torontocast.com:4490/;">SMOOTH JAZZ DELUXE</option>
-                    <option value="https://centova2.svdns.com.br:20038/stream">Gold Instrumental</option>
-                    <option value="https://centova2.svdns.com.br:20056/stream">Gold web radio</option>
-                    <option value="https://smoothjazz.cdnstream1.com/2585_128.mp3">SmoothJazz.com Global Radio</option>
-                    <option value="https://shonanbeachfm.out.airtime.pro:8000/shonanbeachfm_a">Shonan BeachFM</option>
-                    <option value="https://pianosolo.streamguys1.com/live">Solo Piano Radio</option>
-                    <option value="https://az1.mediacp.eu/listen/natureradiosleep/radio.mp3">NATURE RADIO SLEEP(自然音)</option> 
-                </optgroup>
-                <optgroup label="J-Pop">
-                    <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
-                    <option value="https://jenny.torontocast.com:2000/stream/J1GOLD">J1 GOLD 昭和</option>
-                    <option value="https://0nlineradio.stream13.radiohost.de/0r-j-pop?ref=tunein&upd-meta&upd-scheme=https&_art=dD0xNzgxODgzMjE3JmQ9OTY5OTVhMmRiZGVhOTdiNTY2ZjU">0nlineradio J-POP</option>
-                </optgroup>
-            </select>
+    <!-- 左パネル：時計とステータス -->
+    <div class="left-panel">
+        <h1>📻 Deep Blue Radio</h1>
+        
+        <div id="liveClock" class="live-clock">
+            <span id="clockDate" class="clock-date">----/--/--</span>
+            <span id="clockTime" class="clock-time">--:--:--</span>
+        </div>
+
+        <div class="status-box">
+            <div id="statusContainer" class="status-indicator">
+                <div class="dot"></div>
+                <span id="statusText">スタンバイ</span>
+            </div>
+            <div id="timerDisplay" class="timer-display"></div>
         </div>
     </div>
 
-    <div class="select-group">
-        <label>Sleep Timer</label>
-        <div class="select-container">
-            <select id="timerSelector">
-                <option value="0">OFF (タイマーなし)</option>
-                <option value="15">15 Minutes</option>
-                <option value="30">30 Minutes</option>
-                <option value="60">60 Minutes</option>
-                <option value="90">90 Minutes</option>
-            </select>
+    <!-- 右パネル：選局とコントロール -->
+    <div class="right-panel">
+        <div class="select-group">
+            <label for="channelSelector">Station</label>
+            <div class="select-container">
+                <select id="channelSelector">
+                    <option value="">放送局を選択してください</option>
+                    <optgroup label="ニュース・公共放送">
+                        <option value="https://simul2.drdi.st.nhk/live/3/joined/master.m3u8">NHK AM（東京）</option>
+                        <option value="https://simul2.drdi.st.nhk/live/5/joined/master.m3u8">NHK FM（東京）</option>
+                        <option value="https://simul2.drdi.st.nhk/live/8/joined/master.m3u8">NHK AM（仙台）</option>
+                        <option value="https://simul2.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（仙台）</option>
+                    </optgroup>
+                    <optgroup label="SmoothJazz・リラックス">
+                        <option value="https://bcast.vigormultimedia.com:48888/sjcompl192aac">smoothjazz.com.pl</option>
+                        <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
+                        <option value="https://ais-edge89-dal02.cdnstream.com/b48071_128mp3">101 Smooth Jazz Mellow Mix</option>
+                        <option value="https://ais-edge89-dal02.cdnstream.com/2124_128.mp3">smooth-jazz-247</option>
+                        <option value="https://das-edge62-live365-dal03.cdnstream.com/a49349">Smooth Jazz Mix New York</option>
+                        <option value="https://cast1.torontocast.com:4490/;">SMOOTH JAZZ DELUXE</option>
+                        <option value="https://centova2.svdns.com.br:20038/stream">Gold Instrumental</option>
+                        <option value="https://centova2.svdns.com.br:20056/stream">Gold web radio</option>
+                        <option value="https://smoothjazz.cdnstream1.com/2585_128.mp3">SmoothJazz.com Global Radio</option>
+                        <option value="https://shonanbeachfm.out.airtime.pro:8000/shonanbeachfm_a">Shonan BeachFM</option>
+                        <option value="https://pianosolo.streamguys1.com/live">Solo Piano Radio</option>
+                        <option value="https://az1.mediacp.eu/listen/natureradiosleep/radio.mp3">NATURE RADIO SLEEP(自然音)</option> 
+                    </optgroup>
+                    <optgroup label="J-Pop">
+                        <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
+                        <option value="https://jenny.torontocast.com:2000/stream/J1GOLD">J1 GOLD 昭和</option>
+                        <option value="https://0nlineradio.stream13.radiohost.de/0r-j-pop?ref=tunein&upd-meta&upd-scheme=https&_art=dD0xNzgxODgzMjE3JmQ9OTY5OTVhMmRiZGVhOTdiNTY2ZjU">0nlineradio J-POP</option>
+                    </optgroup>
+                </select>
+            </div>
         </div>
-    </div>
 
-    <div class="audio-wrapper">
-        <audio id="player" controls></audio>
-    </div>
+        <div class="select-group">
+            <label for="timerSelector">Sleep Timer</label>
+            <div class="select-container">
+                <select id="timerSelector">
+                    <option value="0">OFF (タイマーなし)</option>
+                    <option value="15">15 Minutes</option>
+                    <option value="30">30 Minutes</option>
+                    <option value="60">60 Minutes</option>
+                    <option value="90">90 Minutes</option>
+                </select>
+            </div>
+        </div>
 
-    <div id="timerDisplay" class="timer-display"></div>
+        <div class="audio-wrapper">
+            <audio id="player" controls></audio>
+        </div>
 
-    <div id="statusContainer" class="status-indicator">
-        <div class="dot"></div>
-        <span id="statusText">スタンバイ</span>
+        <p class="footer-note">Echo Show 8 Optimized</p>
     </div>
-    
-    <p class="footer-note">GitHub Pages 対応版</p>
 </div>
 
 <script>
@@ -264,7 +337,7 @@
     let sleepTimer = null;
     let remainingTime = 0;
 
-    // リアルタイム時計機能（分割して流し込み）
+    // リアルタイム時計機能
     function updateClock() {
         const now = new Date();
         const yyyy = now.getFullYear();

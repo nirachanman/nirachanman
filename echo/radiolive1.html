@@ -15,6 +15,10 @@
             --white-blue: #f1f5f9;
             --date-color: #cbd5e1;
             --time-color: #fde047;
+            /* 目に優しい落ち着いたローズ系レッド */
+            --stop-red: #e29595;
+            --stop-red-border: rgba(226, 149, 149, 0.55);
+            --stop-red-bg: rgba(226, 149, 149, 0.12);
         }
 
         * {
@@ -26,7 +30,7 @@
             height: 100vh;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* スクロールを防止 */
+            overflow: hidden;
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--midnight-blue);
             background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
@@ -59,9 +63,8 @@
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
-            padding: 10px 0;
+            padding: 10px 36px 10px 0;
             border-right: 1px solid rgba(51, 65, 85, 0.6);
-            padding-right: 36px;
         }
 
         h1 {
@@ -143,7 +146,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 22px;
+            gap: 20px;
             height: 100%;
         }
 
@@ -194,11 +197,56 @@
             pointer-events: none;
         }
 
-        .audio-wrapper {
+        /* 再生・停止ボタン＋オーディオプレーヤーエリア */
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
             background: rgba(15, 23, 42, 0.65);
-            padding: 18px 20px;
+            padding: 16px 20px;
             border-radius: 20px;
-            margin-top: 6px;
+            margin-top: 4px;
+            border: 1px solid rgba(51, 65, 85, 0.4);
+        }
+
+        .play-toggle-btn {
+            flex-shrink: 0;
+            min-width: 124px;
+            height: 54px;
+            padding: 0 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(56, 189, 248, 0.65);
+            background-color: rgba(56, 189, 248, 0.12);
+            color: var(--highlight-blue);
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.05rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .play-toggle-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 再生中のボタンスタイル（目に優しいソフトレッド） */
+        .play-toggle-btn.is-playing {
+            border-color: var(--stop-red-border);
+            background-color: var(--stop-red-bg);
+            color: var(--stop-red);
+        }
+
+        .play-toggle-btn:disabled {
+            border-color: var(--border-blue);
+            background-color: rgba(30, 41, 59, 0.5);
+            color: var(--soft-blue);
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         audio {
@@ -241,6 +289,12 @@
             }
             .clock-time {
                 font-size: 3rem;
+            }
+            .control-row {
+                flex-direction: column;
+            }
+            .play-toggle-btn {
+                width: 100%;
             }
         }
     </style>
@@ -315,7 +369,8 @@
             </div>
         </div>
 
-        <div class="audio-wrapper">
+        <div class="control-row">
+            <button id="playToggleBtn" class="play-toggle-btn" disabled>▶ 再生</button>
             <audio id="player" controls></audio>
         </div>
 
@@ -332,10 +387,12 @@
     const statusContainer = document.getElementById('statusContainer');
     const clockDate = document.getElementById('clockDate');
     const clockTime = document.getElementById('clockTime');
+    const playToggleBtn = document.getElementById('playToggleBtn');
     
     let hls = null;
     let sleepTimer = null;
     let remainingTime = 0;
+    let currentStreamType = "";
 
     // リアルタイム時計機能
     function updateClock() {
@@ -353,9 +410,26 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 放送局切り替え処理
-    selector.addEventListener('change', function() {
-        const url = this.value;
+    // ボタンの表示状態を更新するヘルパー
+    function updateButtonState(isPlaying) {
+        if (!selector.value) {
+            playToggleBtn.disabled = true;
+            playToggleBtn.textContent = "▶ 再生";
+            playToggleBtn.classList.remove('is-playing');
+            return;
+        }
+        playToggleBtn.disabled = false;
+        if (isPlaying) {
+            playToggleBtn.textContent = "■ 停止";
+            playToggleBtn.classList.add('is-playing');
+        } else {
+            playToggleBtn.textContent = "▶ 再生";
+            playToggleBtn.classList.remove('is-playing');
+        }
+    }
+
+    // ストリーム読み込み・再生処理
+    function loadAndPlay(url) {
         if (hls) { hls.destroy(); hls = null; }
         audio.pause();
         audio.src = "";
@@ -363,28 +437,69 @@
 
         if (!url) {
             statusText.textContent = "スタンバイ";
+            currentStreamType = "";
+            updateButtonState(false);
             return;
         }
 
         statusText.textContent = "接続中...";
+        playToggleBtn.disabled = false;
 
         if (url.includes('.m3u8')) {
+            currentStreamType = "HLS";
             if (Hls.isSupported()) {
                 hls = new Hls();
                 hls.loadSource(url);
                 hls.attachMedia(audio);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    audio.play();
-                    onPlaySuccess("HLS");
+                    audio.play().then(() => onPlaySuccess("HLS")).catch(onPlayError);
+                });
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal) onPlayError();
                 });
             } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
                 audio.src = url;
-                audio.play();
-                onPlaySuccess("HLS");
+                audio.play().then(() => onPlaySuccess("HLS")).catch(onPlayError);
             }
         } else {
+            currentStreamType = "MP3";
             audio.src = url;
             audio.play().then(() => onPlaySuccess("MP3")).catch(onPlayError);
+        }
+    }
+
+    // 放送局切り替え処理
+    selector.addEventListener('change', function() {
+        loadAndPlay(this.value);
+    });
+
+    // 再生 / 停止ボタンのクリック処理
+    playToggleBtn.addEventListener('click', function() {
+        const url = selector.value;
+        if (!url) return;
+
+        if (audio.paused) {
+            loadAndPlay(url);
+        } else {
+            audio.pause();
+            statusText.textContent = "停止中";
+            statusContainer.classList.remove('playing');
+            updateButtonState(false);
+        }
+    });
+
+    // ブラウザ標準プレーヤー側の操作とも同期
+    audio.addEventListener('play', () => {
+        if (currentStreamType) {
+            onPlaySuccess(currentStreamType);
+        }
+    });
+
+    audio.addEventListener('pause', () => {
+        if (selector.value && statusText.textContent !== "エラー: 再生できません") {
+            statusText.textContent = "停止中";
+            statusContainer.classList.remove('playing');
+            updateButtonState(false);
         }
     });
 
@@ -409,7 +524,9 @@
                 clearInterval(sleepTimer);
                 audio.pause();
                 timerDisplay.textContent = "タイマー完了: 停止しました";
+                statusText.textContent = "停止中";
                 statusContainer.classList.remove('playing');
+                updateButtonState(false);
                 timerSelector.value = "0";
             }
         }, 1000);
@@ -424,11 +541,13 @@
     function onPlaySuccess(type) {
         statusText.textContent = `再生中 (${type})`;
         statusContainer.classList.add('playing');
+        updateButtonState(true);
     }
 
     function onPlayError() {
         statusText.textContent = "エラー: 再生できません";
         statusContainer.classList.remove('playing');
+        updateButtonState(false);
     }
 
     audio.addEventListener('error', onPlayError);

@@ -35,6 +35,13 @@
             min-height: 100vh;
         }
 
+        /* 全画面表示時の背景色保証 */
+        :fullscreen,
+        :-webkit-full-screen {
+            background-color: var(--bg-color);
+            overflow-y: auto;
+        }
+
         .container {
             width: 100%;
             max-width: 600px;
@@ -758,12 +765,47 @@
     let remainingSeconds = 0;
     let isSeeking = false;
     let currentStation = null;
+    let hasTriggeredFullscreen = false; // 初回全画面化の実行フラグ
 
     // SVGアイコン定義
     const SVG_PLAY = '<polygon points="6,4 20,12 6,20"></polygon>';
     const SVG_PAUSE = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
     const SVG_VOL_ON = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>';
     const SVG_VOL_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>';
+
+    // 初回操作時に全画面モードへ切り替える関数
+    function enterFullscreenOnce() {
+        if (hasTriggeredFullscreen) return;
+        hasTriggeredFullscreen = true;
+
+        const elem = document.documentElement;
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+        if (isFullscreen) return;
+
+        try {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+        } catch (e) {
+            // 非対応ブラウザ（iOS Safariなど）では無視して通常再生を継続
+        }
+    }
+
+    // 全画面表示中の場合に解除する関数
+    function exitFullscreenIfActive() {
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!isFullscreen) return;
+
+        try {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        } catch (e) {}
+    }
 
     // 年月日と現在時刻の更新処理
     function updateDateTime() {
@@ -795,6 +837,8 @@
 
     // 再生 / 一時停止トグル処理
     function togglePlayPause() {
+        enterFullscreenOnce();
+
         if (!currentStation) {
             if (stations.length > 0) {
                 playAudio(stations[0]);
@@ -942,6 +986,7 @@
     }
 
     function playAudio(station) {
+        enterFullscreenOnce();
         resetAudioSystem();
         currentStation = station;
         currentStationText.innerText = station.name;
@@ -1026,6 +1071,8 @@
         currentStation = null;
         resetAudioSystem();
         clearTimers();
+        exitFullscreenIfActive();
+        hasTriggeredFullscreen = false; // 次回再生時に再び全画面化できるようリセット
         currentStationText.innerText = "放送局を選択してください";
         document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
             el.classList.remove('playing');

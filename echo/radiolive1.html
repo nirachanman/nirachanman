@@ -40,6 +40,14 @@
             align-items: center;
         }
 
+        /* 全画面表示時の背景色保証 */
+        :fullscreen, ::backdrop {
+            background-color: var(--midnight-blue);
+        }
+        :-webkit-full-screen {
+            background-color: var(--midnight-blue);
+        }
+
         /* Echo Show 8 (1280x800) にフィットする横長カード */
         .player-card {
             background: var(--deep-navy);
@@ -394,6 +402,20 @@
     let remainingTime = 0;
     let currentStreamType = "";
 
+    // 全画面モードへ切り替える処理
+    function enterFullscreen() {
+        const docEl = document.documentElement;
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+        
+        if (!isFullscreen) {
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(() => {});
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            }
+        }
+    }
+
     // リアルタイム時計機能
     function updateClock() {
         const now = new Date();
@@ -468,17 +490,21 @@
         }
     }
 
-    // 放送局切り替え処理
+    // 放送局切り替え処理（選択時に全画面化を実行）
     selector.addEventListener('change', function() {
+        if (this.value) {
+            enterFullscreen();
+        }
         loadAndPlay(this.value);
     });
 
-    // 再生 / 停止ボタンのクリック処理
+    // 再生 / 停止ボタンのクリック処理（再生開始時に全画面化を実行）
     playToggleBtn.addEventListener('click', function() {
         const url = selector.value;
         if (!url) return;
 
         if (audio.paused) {
+            enterFullscreen();
             loadAndPlay(url);
         } else {
             audio.pause();

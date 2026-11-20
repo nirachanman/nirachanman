@@ -77,10 +77,10 @@ html, body {
 }
 
 body {
-  padding: 10px;
+  padding: 0 10px 10px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* -------------------------
@@ -91,9 +91,8 @@ body {
   top: 0;
   z-index: 100;
   background: var(--bg-page);
-  padding-top: 2px;
+  padding-top: 10px;
   padding-bottom: 4px;
-  margin-top: -2px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -454,7 +453,10 @@ button:disabled {
 ------------------------- */
 @media (min-width: 800px) {
   body {
-    padding: 12px;
+    padding: 0 12px 12px 12px;
+  }
+  .sticky-top-area {
+    padding-top: 12px;
   }
   .header {
     font-size: 20px;

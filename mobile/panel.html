@@ -19,10 +19,45 @@
   --text-main: #0f172a;
   --text-sub: #475569;
   --border-color: #cbd5e1;
+  --control-border: #dbeafe;
+  --btn-sec-border: #bfdbfe;
+  --select-bg: #ffffff;
+  --select-arrow: "%230051a8";
   --active-bg: #eff6ff;
+  --active-player-bg: #dbeafe;
   --active-border: #3b82f6;
+  --scrollbar-thumb: #94a3b8;
+  --scrollbar-hover: #64748b;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* -------------------------
+   ダークモード配色定義
+------------------------- */
+[data-theme="dark"] {
+  --primary: #38bdf8;
+  --primary-light: #1e3a5f;
+  --primary-hover: #7dd3fc;
+  --bg-page: #070d19;
+  --bg-panel: #1e293b;        /* ステータスパネル（プレイヤー領域）の背景色 */
+  --bg-control: #0f172a;      /* タイトル・プレイヤー枠の背景色 */
+  --bg-list-area: #0b1120;    /* ニュースリストの背景色（パネルと明確に区別） */
+  --bg-card: #1e293b;
+  --text-main: #f1f5f9;
+  --text-sub: #94a3b8;
+  --border-color: #334155;
+  --control-border: #334155;
+  --btn-sec-border: #2563eb;
+  --select-bg: #0f172a;
+  --select-arrow: "%2338bdf8";
+  --active-bg: #172554;
+  --active-player-bg: #1e3a8a;
+  --active-border: #38bdf8;
+  --scrollbar-thumb: #475569;
+  --scrollbar-hover: #64748b;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* -------------------------
@@ -44,25 +79,32 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* -------------------------
-   ヘッダー
+   ヘッダー（右端に切替スイッチ配置）
 ------------------------- */
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   background: linear-gradient(135deg, #0051a8 0%, #0284c7 100%);
   color: #ffffff;
-  padding: 10px 14px;
+  padding: 10px 48px;
   font-weight: 700;
-  font-size: 18px; /* 16px -> 18px */
+  font-size: 18px;
   letter-spacing: 0.03em;
   border-radius: 12px;
   box-shadow: var(--shadow-md);
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  border: 1px solid #334155;
 }
 
 .header-icon {
@@ -70,6 +112,32 @@ body {
   height: 26px;
   object-fit: contain;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+
+.theme-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+}
+
+.theme-toggle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%);
+}
+
+.theme-toggle:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
 }
 
 /* -------------------------
@@ -86,6 +154,7 @@ body {
   gap: 10px;
   flex: 1;
   min-height: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* -------------------------
@@ -101,15 +170,16 @@ body {
 .title-box {
   flex: 1;
   background: var(--bg-control);
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--control-border);
   padding: 8px 12px;
   border-radius: 10px;
   text-align: center;
   overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .title {
-  font-size: 16.5px; /* 14px -> 16.5px */
+  font-size: 16.5px;
   line-height: 1.25;
   color: var(--primary);
   font-weight: 700;
@@ -128,13 +198,18 @@ button {
   border: none;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 15px; /* 13px -> 15px */
+  font-size: 15px;
   line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
+}
+
+[data-theme="dark"] .controls button {
+  color: #0f172a;
+  font-weight: 700;
 }
 
 button:hover:not(:disabled) {
@@ -153,6 +228,11 @@ button:disabled {
   box-shadow: none;
 }
 
+[data-theme="dark"] button:disabled {
+  background: #334155;
+  color: #64748b;
+}
+
 /* -------------------------
    プレイヤーカード
 ------------------------- */
@@ -160,7 +240,7 @@ button:disabled {
   background: var(--bg-control);
   border-radius: 12px;
   padding: 6px 10px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--control-border);
   transition: all 0.2s ease;
 }
 
@@ -171,11 +251,15 @@ button:disabled {
   display: block;
 }
 
+[data-theme="dark"] .player-card audio {
+  color-scheme: dark;
+}
+
 /* 再生中ハイライト */
 .player-card.active {
-  background: #dbeafe;
+  background: var(--active-player-bg);
   border-color: var(--active-border);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /* -------------------------
@@ -200,31 +284,35 @@ button:disabled {
 .btn-secondary {
   background: var(--primary-light);
   color: var(--primary);
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--btn-sec-border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #dbeafe;
+  background: var(--active-player-bg);
   color: var(--primary-hover);
 }
 
 .date-select {
   appearance: none;
-  background-color: #ffffff;
+  background-color: var(--select-bg);
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230051a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 15px;
   color: var(--primary);
   font-weight: 700;
-  font-size: 15px; /* 13px -> 15px */
+  font-size: 15px;
   line-height: 1.2;
   padding: 7px 32px 7px 12px;
   border-radius: 10px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--border-color);
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background-color 0.2s;
+}
+
+[data-theme="dark"] .date-select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 .date-select:focus, .date-select:hover {
@@ -243,8 +331,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  border: 1px solid #cbd5e1;
-  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.06);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 /* カスタムスクロールバー */
@@ -255,11 +344,11 @@ button:disabled {
   background: transparent;
 }
 .list::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
 }
 .list::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: var(--scrollbar-hover);
 }
 
 .news-item {
@@ -269,14 +358,14 @@ button:disabled {
   padding: 10px 12px;
   background: var(--bg-card);
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .news-item:hover {
-  border-color: #60a5fa;
+  border-color: var(--active-border);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -299,6 +388,10 @@ button:disabled {
   color: #ffffff;
 }
 
+[data-theme="dark"] .news-item:hover .play-icon-wrap {
+  color: #0f172a;
+}
+
 .news-content {
   display: flex;
   flex-direction: column;
@@ -310,7 +403,7 @@ button:disabled {
 .source-badge {
   display: inline-block;
   align-self: flex-start;
-  font-size: 12.5px; /* 11px -> 12.5px */
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--primary);
   background: var(--primary-light);
@@ -323,7 +416,7 @@ button:disabled {
 }
 
 .news-title {
-  font-size: 15.5px; /* 13.5px -> 15.5px */
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--text-main);
   line-height: 1.45;
@@ -341,6 +434,10 @@ button:disabled {
   color: #ffffff;
 }
 
+[data-theme="dark"] .news-item.active .play-icon-wrap {
+  color: #0f172a;
+}
+
 .news-item.active .news-title {
   color: var(--primary);
   font-weight: 700;
@@ -354,19 +451,23 @@ button:disabled {
     padding: 12px;
   }
   .header {
-    font-size: 20px; /* 18px -> 20px */
-    padding: 10px;
+    font-size: 20px;
+    padding: 10px 56px;
+  }
+  .theme-toggle {
+    font-size: 16px;
+    padding: 6px 12px;
   }
   button {
-    font-size: 18px; /* 16px -> 18px */
+    font-size: 18px;
     padding: 10px 16px;
   }
   .date-select {
-    font-size: 18px; /* 16px -> 18px */
+    font-size: 18px;
     padding: 9px 36px 9px 14px;
   }
   .title {
-    font-size: 19.5px; /* 17px -> 19.5px */
+    font-size: 19.5px;
   }
   .player-card audio {
     height: 40px;
@@ -375,10 +476,10 @@ button:disabled {
     padding: 12px 16px;
   }
   .source-badge {
-    font-size: 14.5px; /* 13px -> 14.5px */
+    font-size: 14.5px;
   }
   .news-title {
-    font-size: 20.5px; /* 18px -> 20.5px */
+    font-size: 20.5px;
   }
 }
 </style>
@@ -388,6 +489,7 @@ button:disabled {
 <div class="header">
   <img src="podcast.png" alt="podcast" class="header-icon" onerror="this.style.display='none'">
   <span>NHKラジオニュース 連続再生</span>
+  <button id="themeToggle" class="theme-toggle" title="ダークモード切替" aria-label="ダークモード切替">🌙</button>
 </div>
 
 <div class="player-container">
@@ -426,6 +528,34 @@ let items = [];
 let index = -1;
 let disabled = false;
 let liveWindow = null;
+
+/* -------------------------
+   ダークモード切替処理
+------------------------- */
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('nhk-news-theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️';
+    themeToggle.title = 'ライトモードに切替';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    themeToggle.textContent = '🌙';
+    themeToggle.title = 'ダークモードに切替';
+  }
+}
+
+applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+themeToggle.onclick = () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const nextTheme = isDark ? 'light' : 'dark';
+  localStorage.setItem('nhk-news-theme', nextTheme);
+  applyTheme(nextTheme);
+};
 
 /* -------------------------
    日付キー生成

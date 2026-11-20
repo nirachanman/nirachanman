@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Deep Blue Radio - Echo Show 8 Edition</title>
+    <title>Deep Blue Radio - Echo Show 8 Large Font Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
-            --midnight-blue: #0f172a;
-            --deep-navy: #1e293b;
-            --border-blue: #334155;
-            --soft-blue: #94a3b8;
+            --midnight-blue: #0b1120;
+            --deep-navy: #162032;
+            --border-blue: #3b4d6b;
+            --soft-blue: #cbd5e1;
             --highlight-blue: #38bdf8;
-            --white-blue: #f1f5f9;
-            --date-color: #cbd5e1;
+            --white-blue: #ffffff;
+            --date-color: #f1f5f9;
             --time-color: #fde047;
-            --stop-red: #e29595;
-            --stop-red-border: rgba(226, 149, 149, 0.55);
-            --stop-red-bg: rgba(226, 149, 149, 0.12);
+            --stop-red: #fca5a5;
+            --stop-red-border: rgba(252, 165, 165, 0.7);
+            --stop-red-bg: rgba(248, 113, 113, 0.18);
         }
 
         * {
@@ -30,9 +30,8 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', -apple-system, sans-serif;
             background-color: var(--midnight-blue);
-            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
             color: var(--white-blue);
             display: flex;
             justify-content: center;
@@ -46,38 +45,37 @@
             background-color: var(--midnight-blue);
         }
 
+        /* 画面いっぱいに広がる横長カード */
         .player-card {
             background: var(--deep-navy);
-            width: 94vw;
-            max-width: 1180px;
-            height: 86vh;
-            max-height: 680px;
-            padding: 32px 44px;
-            border-radius: 28px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-blue);
+            width: 97vw;
+            height: 94vh;
+            padding: 24px 32px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--border-blue);
             display: grid;
-            grid-template-columns: 1fr 1.15fr;
-            gap: 40px;
+            grid-template-columns: 1.05fr 1.15fr;
+            gap: 32px;
             align-items: center;
         }
 
+        /* 左カラム：タイトル・時計・天気・ステータス */
         .left-panel {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
-            padding: 10px 36px 10px 0;
-            border-right: 1px solid rgba(51, 65, 85, 0.6);
+            padding-right: 28px;
+            border-right: 2px solid rgba(59, 77, 107, 0.7);
         }
 
         h1 {
-            font-size: 1.1rem;
-            font-weight: 400;
-            letter-spacing: 0.25rem;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.15rem;
             margin: 0;
-            color: var(--soft-blue);
-            text-transform: uppercase;
+            color: var(--highlight-blue);
         }
 
         .clock-weather-group {
@@ -85,7 +83,7 @@
             flex-direction: column;
             justify-content: center;
             margin: auto 0;
-            gap: 18px;
+            gap: 20px;
         }
 
         .live-clock {
@@ -96,33 +94,35 @@
 
         .clock-date {
             color: var(--date-color);
-            font-size: 1.7rem;
-            font-weight: 300;
-            letter-spacing: 0.1rem;
+            font-size: 2.15rem;
+            font-weight: 600;
+            letter-spacing: 0.06rem;
             margin-bottom: 6px;
         }
 
         .clock-time {
             color: var(--time-color);
-            font-size: 4.4rem;
-            line-height: 1.05;
-            text-shadow: 0 0 18px rgba(253, 224, 71, 0.25);
-            font-weight: 400;
+            font-size: 5.4rem;
+            line-height: 1.0;
+            text-shadow: 0 0 20px rgba(253, 224, 71, 0.25);
+            font-weight: 700;
             font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
         }
 
+        /* 大きく見やすいお天気ボックス */
         .weather-box {
             display: flex;
             align-items: center;
-            gap: 14px;
-            background: rgba(15, 23, 42, 0.55);
-            border: 1px solid rgba(51, 65, 85, 0.55);
-            border-radius: 16px;
-            padding: 12px 18px;
+            gap: 16px;
+            background: rgba(11, 17, 32, 0.7);
+            border: 1.5px solid var(--border-blue);
+            border-radius: 18px;
+            padding: 16px 20px;
         }
 
         .weather-icon {
-            font-size: 2rem;
+            font-size: 2.8rem;
             line-height: 1;
             flex-shrink: 0;
         }
@@ -130,28 +130,30 @@
         .weather-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 6px;
         }
 
         .weather-main {
             display: flex;
             align-items: baseline;
-            gap: 10px;
-            font-size: 1.25rem;
-            font-weight: 500;
+            gap: 14px;
+            font-size: 1.65rem;
+            font-weight: 700;
             color: var(--white-blue);
         }
 
         .weather-temp {
             color: var(--highlight-blue);
-            font-weight: 600;
+            font-size: 1.85rem;
+            font-weight: 700;
             font-variant-numeric: tabular-nums;
         }
 
         .weather-sub {
-            font-size: 0.85rem;
+            font-size: 1.2rem;
+            font-weight: 500;
             color: var(--soft-blue);
-            letter-spacing: 0.03rem;
+            letter-spacing: 0.02rem;
         }
 
         .status-box {
@@ -163,24 +165,29 @@
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
             color: var(--soft-blue);
-            text-transform: uppercase;
-            letter-spacing: 0.1rem;
+            letter-spacing: 0.06rem;
         }
 
         .dot {
-            width: 10px;
-            height: 10px;
+            width: 14px;
+            height: 14px;
             background-color: var(--soft-blue);
             border-radius: 50%;
+            flex-shrink: 0;
         }
 
         .playing .dot {
             background-color: var(--highlight-blue);
-            box-shadow: 0 0 10px var(--highlight-blue);
+            box-shadow: 0 0 12px var(--highlight-blue);
             animation: pulse 2s infinite;
+        }
+
+        .playing #statusText {
+            color: var(--white-blue);
         }
 
         @keyframes pulse {
@@ -189,18 +196,19 @@
         }
 
         .timer-display {
-            font-size: 1rem;
-            color: var(--highlight-blue);
-            min-height: 1.4rem;
-            font-weight: 400;
+            font-size: 1.3rem;
+            color: var(--time-color);
+            min-height: 1.6rem;
+            font-weight: 700;
         }
 
+        /* 右カラム：選局・タイマー・プレーヤー */
         .right-panel {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 20px;
+            justify-content: space-between;
             height: 100%;
+            padding: 4px 0;
         }
 
         .select-group {
@@ -209,12 +217,12 @@
 
         label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 1.15rem;
+            font-weight: 700;
             color: var(--soft-blue);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             margin-left: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.08rem;
+            letter-spacing: 0.06rem;
         }
 
         .select-container {
@@ -223,12 +231,13 @@
 
         select {
             width: 100%;
-            padding: 16px 20px;
+            padding: 18px 46px 18px 20px;
             background-color: var(--midnight-blue);
-            border: 1px solid var(--border-blue);
-            border-radius: 16px;
+            border: 2px solid var(--border-blue);
+            border-radius: 18px;
             color: var(--white-blue);
-            font-size: 1.15rem;
+            font-size: 1.45rem;
+            font-weight: 700;
             outline: none;
             cursor: pointer;
             appearance: none;
@@ -241,37 +250,37 @@
 
         .select-container::after {
             content: '▼';
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             position: absolute;
-            right: 22px;
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--soft-blue);
+            color: var(--highlight-blue);
             pointer-events: none;
         }
 
+        /* 大きな再生・停止ボタン＋オーディオプレーヤーエリア */
         .control-row {
             display: flex;
             align-items: center;
             gap: 16px;
-            background: rgba(15, 23, 42, 0.65);
-            padding: 16px 20px;
+            background: rgba(11, 17, 32, 0.75);
+            padding: 16px 18px;
             border-radius: 20px;
-            margin-top: 4px;
-            border: 1px solid rgba(51, 65, 85, 0.4);
+            border: 1.5px solid var(--border-blue);
         }
 
         .play-toggle-btn {
             flex-shrink: 0;
-            min-width: 124px;
-            height: 54px;
-            padding: 0 20px;
-            border-radius: 14px;
-            border: 1px solid rgba(56, 189, 248, 0.65);
-            background-color: rgba(56, 189, 248, 0.12);
+            min-width: 155px;
+            height: 66px;
+            padding: 0 22px;
+            border-radius: 16px;
+            border: 2px solid var(--highlight-blue);
+            background-color: rgba(56, 189, 248, 0.16);
             color: var(--highlight-blue);
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.35rem;
+            font-weight: 700;
             letter-spacing: 0.05rem;
             cursor: pointer;
             display: flex;
@@ -286,6 +295,7 @@
             transform: scale(0.97);
         }
 
+        /* 再生中のボタンスタイル（目に優しいソフトレッド） */
         .play-toggle-btn.is-playing {
             border-color: var(--stop-red-border);
             background-color: var(--stop-red-bg);
@@ -302,20 +312,23 @@
 
         audio {
             width: 100%;
-            height: 46px;
-            filter: invert(100%) hue-rotate(190deg) brightness(1.2);
-            opacity: 0.8;
+            height: 52px;
+            filter: invert(100%) hue-rotate(190deg) brightness(1.25);
+            opacity: 0.85;
         }
 
         .footer-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--soft-blue);
-            opacity: 0.6;
+            opacity: 0.85;
+            padding: 0 4px;
         }
 
+        /* 縦画面やスマホで開いた場合のフォールバック */
         @media (max-width: 760px) {
             html, body {
                 height: auto;
@@ -325,21 +338,20 @@
             .player-card {
                 grid-template-columns: 1fr;
                 height: auto;
-                max-height: none;
-                padding: 28px;
+                padding: 24px;
                 gap: 24px;
-                margin: 20px 0;
+                margin: 16px 0;
             }
             .left-panel {
                 border-right: none;
-                border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+                border-bottom: 2px solid var(--border-blue);
                 padding-right: 0;
                 padding-bottom: 20px;
                 text-align: center;
                 align-items: center;
             }
             .clock-time {
-                font-size: 3rem;
+                font-size: 3.6rem;
             }
             .weather-box {
                 justify-content: center;
@@ -391,7 +403,7 @@
     <!-- 右パネル：選局とコントロール -->
     <div class="right-panel">
         <div class="select-group">
-            <label for="channelSelector">Station</label>
+            <label for="channelSelector">放送局 (Station)</label>
             <div class="select-container">
                 <select id="channelSelector">
                     <option value="">放送局を選択してください</option>
@@ -425,14 +437,14 @@
         </div>
 
         <div class="select-group">
-            <label for="timerSelector">Sleep Timer</label>
+            <label for="timerSelector">スリープタイマー (Sleep Timer)</label>
             <div class="select-container">
                 <select id="timerSelector">
                     <option value="0">OFF (タイマーなし)</option>
-                    <option value="15">15 Minutes</option>
-                    <option value="30">30 Minutes</option>
-                    <option value="60">60 Minutes</option>
-                    <option value="90">90 Minutes</option>
+                    <option value="15">15 分</option>
+                    <option value="30">30 分</option>
+                    <option value="60">60 分</option>
+                    <option value="90">90 分</option>
                 </select>
             </div>
         </div>
@@ -444,7 +456,7 @@
 
         <div class="footer-row">
             <span id="keepAwakeStatus">画面維持: 待機中</span>
-            <span>Echo Show 8 Optimized</span>
+            <span>Echo Show 8 見やすい特大表示</span>
         </div>
     </div>
 </div>
@@ -486,11 +498,9 @@
     // 画面スリープ防止（Wake Lock + 無音ループ再生）を有効化
     async function enableKeepAwake() {
         keepAwakeEnabled = true;
-        // 1. 無音オーディオのループ開始
         silentKeeper.volume = 0.01;
         silentKeeper.play().catch(() => {});
 
-        // 2. Screen Wake Lock API のリクエスト
         if ('wakeLock' in navigator) {
             try {
                 if (!wakeLock) {
@@ -515,7 +525,6 @@
         keepAwakeStatus.textContent = "画面維持: OFF";
     }
 
-    // タブ復帰時にWake Lockを再取得
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && keepAwakeEnabled) {
             enableKeepAwake();
@@ -565,7 +574,7 @@
         if (code >= 61 && code <= 67) return { icon: "🌧️", text: "雨" };
         if (code >= 71 && code <= 77) return { icon: "❄️", text: "雪" };
         if (code >= 80 && code <= 82) return { icon: "☔", text: "にわか雨" };
-        if (code === 85 || code === 86) return { icon: "🌨️", text: "にわか雪" };
+        if (code >= 85 && code === 86) return { icon: "🌨️", text: "にわか雪" };
         if (code >= 95) return { icon: "⛈️", text: "雷雨" };
         return { icon: "🌡️", text: "不明" };
     }
@@ -588,7 +597,7 @@
 
             const maxT = Math.round(daily.temperature_2m_max[0]);
             const minT = Math.round(daily.temperature_2m_min[0]);
-            weatherSub.textContent = `${WEATHER_CONFIG.name} 最高 ${maxT}°C / 最低 ${minT}°C`;
+            weatherSub.textContent = `${WEATHER_CONFIG.name} 最高 ${maxT}° / 最低 ${minT}°`;
         } catch (e) {
             weatherDesc.textContent = "取得エラー";
             weatherSub.textContent = `${WEATHER_CONFIG.name}（再試行待ち）`;
@@ -678,7 +687,6 @@
             statusText.textContent = "停止中";
             statusContainer.classList.remove('playing');
             updateButtonState(false);
-            // 手動停止時は画面維持を継続（時計・天気表示を保つため）
             enableKeepAwake();
         }
     });
@@ -719,7 +727,6 @@
             if (remainingTime <= 0) {
                 clearInterval(sleepTimer);
                 audio.pause();
-                // タイマー終了時はスリープを許可するために画面維持を解除
                 disableKeepAwake();
                 timerDisplay.textContent = "タイマー完了: 停止しました";
                 statusText.textContent = "停止中";
@@ -733,7 +740,7 @@
     function updateTimerDisplay() {
         const m = Math.floor(remainingTime / 60);
         const s = remainingTime % 60;
-        timerDisplay.textContent = `Sleep Timer: ${m}:${s.toString().padStart(2, '0')}`;
+        timerDisplay.textContent = `タイマー残り: ${m}分${s.toString().padStart(2, '0')}秒`;
     }
 
     function onPlaySuccess(type) {

@@ -38,7 +38,7 @@ body {
   background: var(--bg-page);
   color: var(--text-main);
   padding: 10px;
-  font-size: 14px;
+  font-size: 16px;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -58,7 +58,7 @@ body {
   color: #ffffff;
   padding: 10px 14px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px; /* 16px -> 18px */
   letter-spacing: 0.03em;
   border-radius: 12px;
   box-shadow: var(--shadow-md);
@@ -109,7 +109,8 @@ body {
 }
 
 .title {
-  font-size: 14px;
+  font-size: 16.5px; /* 14px -> 16.5px */
+  line-height: 1.25;
   color: var(--primary);
   font-weight: 700;
   white-space: nowrap;
@@ -127,7 +128,8 @@ button {
   border: none;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 15px; /* 13px -> 15px */
+  line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -212,10 +214,11 @@ button:disabled {
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230051a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 10px center;
-  background-size: 14px;
+  background-size: 15px;
   color: var(--primary);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 15px; /* 13px -> 15px */
+  line-height: 1.2;
   padding: 7px 32px 7px 12px;
   border-radius: 10px;
   border: 1.5px solid #cbd5e1;
@@ -307,7 +310,7 @@ button:disabled {
 .source-badge {
   display: inline-block;
   align-self: flex-start;
-  font-size: 11px;
+  font-size: 12.5px; /* 11px -> 12.5px */
   font-weight: 700;
   color: var(--primary);
   background: var(--primary-light);
@@ -320,10 +323,10 @@ button:disabled {
 }
 
 .news-title {
-  font-size: 13.5px;
+  font-size: 15.5px; /* 13.5px -> 15.5px */
   font-weight: 600;
   color: var(--text-main);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 /* 再生中のリストアイテム */
@@ -351,19 +354,19 @@ button:disabled {
     padding: 12px;
   }
   .header {
-    font-size: 18px;
+    font-size: 20px; /* 18px -> 20px */
     padding: 10px;
   }
   button {
-    font-size: 16px;
+    font-size: 18px; /* 16px -> 18px */
     padding: 10px 16px;
   }
   .date-select {
-    font-size: 16px;
+    font-size: 18px; /* 16px -> 18px */
     padding: 9px 36px 9px 14px;
   }
   .title {
-    font-size: 17px;
+    font-size: 19.5px; /* 17px -> 19.5px */
   }
   .player-card audio {
     height: 40px;
@@ -372,10 +375,10 @@ button:disabled {
     padding: 12px 16px;
   }
   .source-badge {
-    font-size: 13px;
+    font-size: 14.5px; /* 13px -> 14.5px */
   }
   .news-title {
-    font-size: 18px;
+    font-size: 20.5px; /* 18px -> 20.5px */
   }
 }
 </style>
@@ -390,7 +393,7 @@ button:disabled {
 <div class="player-container">
   <div class="controls">
     <button id="prev" title="古いニュースへ">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       前へ
     </button>
     <div class="title-box">
@@ -398,7 +401,7 @@ button:disabled {
     </div>
     <button id="next" title="新しいニュースへ">
       次へ
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
     </button>
   </div>
 

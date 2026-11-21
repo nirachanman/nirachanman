@@ -43,7 +43,7 @@
             text-align: center;
         }
 
-        /* --- ステータスパネル全体を青い枠で囲む（余白を詰めて文字を拡大） --- */
+        /* --- ステータスパネル全体を青い枠で囲む --- */
         .status-panel {
             background: var(--panel-bg);
             padding: 10px 12px;
@@ -93,7 +93,7 @@
         .panel-row {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: stretch;
             gap: 8px;
             width: 100%;
             box-sizing: border-box;
@@ -106,16 +106,17 @@
             text-align: center;
         }
 
-        /* ステータス表示（停止ボタンと揃えた四角いデザイン＋右端イコライザー配置用） */
+        /* ステータス表示（停止ボタンと高さを揃えたデザイン＋右端イコライザー配置用） */
         #status-label {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 24px;
-            border-radius: 8px;
+            min-height: 48px;
+            padding: 10px 26px;
+            border-radius: 10px;
             font-weight: bold;
-            font-size: 1.15rem;
+            font-size: 1.18rem;
             border: 2px solid #465870;
             background-color: rgba(0, 0, 0, 0.2);
             color: var(--off-white);
@@ -220,7 +221,7 @@
             width: 100%;
             background: #101722;
             border: 1px solid #2b3a4f;
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 999px;
             box-sizing: border-box;
         }
@@ -230,7 +231,9 @@
             border: none;
             color: #e2e4e6;
             cursor: pointer;
-            padding: 3px;
+            width: 40px;
+            height: 40px;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -240,7 +243,7 @@
         }
 
         .media-icon-btn:active {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.14);
             transform: scale(0.92);
         }
 
@@ -249,10 +252,22 @@
         }
 
         .media-icon-btn svg {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             fill: currentColor;
             display: block;
+        }
+
+        /* 再生・一時停止ボタンをさらに大きく押しやすく */
+        #play-pause-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #play-pause-btn svg {
+            width: 30px;
+            height: 30px;
         }
 
         .media-time-text {
@@ -310,6 +325,7 @@
         }
 
         .bottom-row {
+            align-items: center;
             justify-content: space-between;
             border-top: 1px solid #2b3a4f;
             padding-top: 6px;
@@ -555,30 +571,34 @@
             }
         }
 
-        /* --- コントロールボタン群（枠線と文字色のみ赤系のアウトラインスタイル） --- */
+        /* --- コントロールボタン群（大きく押しやすいサイズ） --- */
         button.control-btn {
-            padding: 8px 10px;
-            border-radius: 8px;
+            min-height: 48px;
+            padding: 10px 12px;
+            border-radius: 10px;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
         .stop-btn { 
             background-color: rgba(0, 0, 0, 0.2); 
             color: var(--stop-text);
-            border: 2px solid var(--stop-border);
+            border: 2.5px solid var(--stop-border);
         }
 
         .stop-btn:active {
-            background-color: rgba(207, 102, 121, 0.18);
+            background-color: rgba(207, 102, 121, 0.22);
             transform: scale(0.98);
         }
 
-        /* --- Echo Show 8（横画面）：左パネル固定（極小余白＆特大フォント）＋右エリア2列・縦スクロール --- */
+        /* --- Echo Show 8（横画面）：左パネル固定＋右エリア2列・縦スクロール --- */
         @media (min-width: 768px) {
             body {
                 height: 100vh;
@@ -598,7 +618,7 @@
                 gap: 10px;
             }
 
-            /* 左側：ステータスパネル（上下余白を極限まで詰めて特大フォントを配置） */
+            /* 左側：ステータスパネル */
             .status-panel {
                 flex: 0 0 41%;
                 min-width: 360px;
@@ -635,19 +655,22 @@
                 gap: 6px;
             }
 
-            #status-label,
-            button.control-btn {
-                padding: 6px 8px;
-                font-size: 1.2rem;
+            #status-label {
+                min-height: 46px;
+                padding: 8px 26px 8px 8px;
+                font-size: 1.22rem;
                 line-height: 1.15;
             }
 
-            #status-label {
-                padding-right: 26px;
+            button.control-btn {
+                min-height: 46px;
+                padding: 8px 10px;
+                font-size: 1.4rem;
+                line-height: 1.15;
             }
 
             #current-station-btn {
-                height: 3.15rem;
+                height: 3.1rem;
                 font-size: 1.5rem;
                 padding: 0 10px;
                 margin: 0;
@@ -658,17 +681,28 @@
             }
 
             .media-bar {
-                padding: 5px 10px;
+                padding: 4px 10px;
                 gap: 7px;
             }
 
             .media-icon-btn {
-                padding: 2px;
+                width: 40px;
+                height: 40px;
             }
 
             .media-icon-btn svg {
-                width: 24px;
-                height: 24px;
+                width: 26px;
+                height: 26px;
+            }
+
+            #play-pause-btn {
+                width: 44px;
+                height: 44px;
+            }
+
+            #play-pause-btn svg {
+                width: 30px;
+                height: 30px;
             }
 
             .media-time-text {
@@ -739,7 +773,7 @@
             .station-btn { height: auto; min-height: 56px; font-size: 1.05rem; }
             #date-display { font-size: 1.0rem; }
             #time-display { font-size: 1.7rem; }
-            .media-bar { padding: 6px 10px; gap: 6px; }
+            .media-bar { padding: 5px 8px; gap: 5px; }
             .media-time-text { font-size: 0.92rem; }
         }
     </style>

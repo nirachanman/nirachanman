@@ -568,7 +568,7 @@
             transform: scale(0.98);
         }
 
-        /* --- Echo Show 8（横画面 1280x800 / Silkブラウザ表示領域）左右2カラム分割レイアウト --- */
+        /* --- Echo Show 8（横画面・Silkメニューバー表示時でも1画面フィット）左右2カラム分割レイアウト --- */
         @media (min-width: 768px) {
             body {
                 height: 100vh;
@@ -579,14 +579,14 @@
             .container {
                 max-width: 1280px;
                 height: 100%;
-                padding: 12px 16px;
+                padding: 8px 12px;
                 display: flex;
                 flex-direction: row;
                 align-items: stretch;
-                gap: 14px;
+                gap: 12px;
             }
 
-            /* 左側：ステータスパネル（固定表示） */
+            /* 左側：ステータスパネル（固定表示・メニューバー表示時も窮屈にならないよう余白調整） */
             .status-panel {
                 flex: 0 0 38%;
                 min-width: 340px;
@@ -594,55 +594,55 @@
                 height: 100%;
                 margin-bottom: 0;
                 position: static;
-                padding: 16px 18px;
+                padding: 12px 14px;
                 justify-content: space-between;
-                gap: 12px;
+                gap: 8px;
             }
 
             .datetime-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-                padding: 0 4px 10px 4px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: baseline;
+                padding: 0 4px 6px 4px;
             }
 
             #date-display {
-                font-size: 1.05rem;
+                font-size: 0.95rem;
             }
 
             #time-display {
-                font-size: 2.1rem;
+                font-size: 1.55rem;
                 line-height: 1.1;
             }
 
             #status-label,
             button.control-btn {
-                padding: 11px 12px;
-                font-size: 0.95rem;
+                padding: 9px 10px;
+                font-size: 0.9rem;
             }
 
             #current-station-btn {
-                height: 3.1rem;
-                font-size: 1.2rem;
+                height: 2.6rem;
+                font-size: 1.15rem;
                 margin: 0;
             }
 
             .media-bar {
-                padding: 9px 14px;
+                padding: 7px 14px;
             }
 
             .bottom-row {
-                padding-top: 12px;
+                padding-top: 8px;
             }
 
-            /* 右側：放送局カードエリア（16局まではぴったり収まり、17局以上は右エリアのみ縦スクロール） */
+            /* 右側：放送局カードエリア（Silkメニューバー表示時の高さでも16局がぴったり収まり、17局以上で右エリアのみスクロール） */
             .grid {
                 flex: 1;
                 min-width: 0;
                 height: 100%;
                 grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: minmax(56px, 1fr);
-                gap: 8px;
+                grid-auto-rows: minmax(44px, 1fr);
+                gap: 6px;
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
@@ -663,9 +663,9 @@
 
             .station-btn {
                 height: 100%;
-                min-height: 56px;
-                font-size: 0.95rem;
-                padding: 4px 24px;
+                min-height: 44px;
+                font-size: 0.92rem;
+                padding: 2px 24px;
             }
         }
 

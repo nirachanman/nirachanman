@@ -45,7 +45,6 @@
             background-color: var(--midnight-blue);
         }
 
-        /* 画面いっぱいに広がる横長カード */
         .player-card {
             background: var(--deep-navy);
             width: 97vw;
@@ -60,7 +59,6 @@
             align-items: center;
         }
 
-        /* 左カラム：タイトル・時計・天気・ステータス */
         .left-panel {
             display: flex;
             flex-direction: column;
@@ -83,7 +81,7 @@
             flex-direction: column;
             justify-content: center;
             margin: auto 0;
-            gap: 20px;
+            gap: 18px;
         }
 
         .live-clock {
@@ -94,10 +92,12 @@
 
         .clock-date {
             color: var(--date-color);
-            font-size: 2.15rem;
-            font-weight: 600;
-            letter-spacing: 0.06rem;
-            margin-bottom: 6px;
+            font-size: 2.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04rem;
+            line-height: 1.15;
+            margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
         }
 
         .clock-time {
@@ -110,7 +110,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* 大きく見やすいお天気ボックス */
         .weather-box {
             display: flex;
             align-items: center;
@@ -118,7 +117,7 @@
             background: rgba(11, 17, 32, 0.7);
             border: 1.5px solid var(--border-blue);
             border-radius: 18px;
-            padding: 16px 20px;
+            padding: 15px 20px;
         }
 
         .weather-icon {
@@ -202,7 +201,6 @@
             font-weight: 700;
         }
 
-        /* 右カラム：選局・タイマー・プレーヤー */
         .right-panel {
             display: flex;
             flex-direction: column;
@@ -248,6 +246,19 @@
             border-color: var(--highlight-blue);
         }
 
+        select optgroup {
+            background-color: #1e293b;
+            color: #38bdf8;
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        select option {
+            background-color: #0b1120;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
         .select-container::after {
             content: '▼';
             font-size: 1.2rem;
@@ -259,7 +270,6 @@
             pointer-events: none;
         }
 
-        /* 大きな再生・停止ボタン＋オーディオプレーヤーエリア */
         .control-row {
             display: flex;
             align-items: center;
@@ -295,7 +305,6 @@
             transform: scale(0.97);
         }
 
-        /* 再生中のボタンスタイル（目に優しいソフトレッド） */
         .play-toggle-btn.is-playing {
             border-color: var(--stop-red-border);
             background-color: var(--stop-red-bg);
@@ -328,7 +337,6 @@
             padding: 0 4px;
         }
 
-        /* 縦画面やスマホで開いた場合のフォールバック */
         @media (max-width: 760px) {
             html, body {
                 height: auto;
@@ -349,6 +357,9 @@
                 padding-bottom: 20px;
                 text-align: center;
                 align-items: center;
+            }
+            .clock-date {
+                font-size: 2rem;
             }
             .clock-time {
                 font-size: 3.6rem;
@@ -407,13 +418,13 @@
             <div class="select-container">
                 <select id="channelSelector">
                     <option value="">放送局を選択してください</option>
-                    <optgroup label="ニュース・公共放送">
+                    <optgroup label="━━ ニュース・公共放送 ━━">
                         <option value="https://simul2.drdi.st.nhk/live/3/joined/master.m3u8">NHK AM（東京）</option>
                         <option value="https://simul2.drdi.st.nhk/live/5/joined/master.m3u8">NHK FM（東京）</option>
                         <option value="https://simul2.drdi.st.nhk/live/8/joined/master.m3u8">NHK AM（仙台）</option>
                         <option value="https://simul2.drdi.st.nhk/live/9/joined/master.m3u8">NHK FM（仙台）</option>
                     </optgroup>
-                    <optgroup label="SmoothJazz・リラックス">
+                    <optgroup label="━━ SmoothJazz・リラックス ━━">
                         <option value="https://bcast.vigormultimedia.com:48888/sjcompl192aac">smoothjazz.com.pl</option>
                         <option value="https://jking.cdnstream1.com/b22139_128mp3">101 Smooth Jazz</option>
                         <option value="https://ais-edge89-dal02.cdnstream.com/b48071_128mp3">101 Smooth Jazz Mellow Mix</option>
@@ -427,7 +438,7 @@
                         <option value="https://pianosolo.streamguys1.com/live">Solo Piano Radio</option>
                         <option value="https://az1.mediacp.eu/listen/natureradiosleep/radio.mp3">NATURE RADIO SLEEP(自然音)</option> 
                     </optgroup>
-                    <optgroup label="J-Pop">
+                    <optgroup label="━━ J-Pop ━━">
                         <option value="https://quincy.torontocast.com:2070/stream.mp3">J-Pop Sakura 懐かしい</option>
                         <option value="https://jenny.torontocast.com:2000/stream/J1GOLD">J1 GOLD 昭和</option>
                         <option value="https://0nlineradio.stream13.radiohost.de/0r-j-pop?ref=tunein&upd-meta&upd-scheme=https&_art=dD0xNzgxODgzMjE3JmQ9OTY5OTVhMmRiZGVhOTdiNTY2ZjU">0nlineradio J-POP</option>
@@ -455,7 +466,7 @@
         </div>
 
         <div class="footer-row">
-            <span id="keepAwakeStatus">画面維持: 待機中</span>
+            <span id="keepAwakeStatus">画面維持: 起動中...</span>
             <span>Echo Show 8 見やすい特大表示</span>
         </div>
     </div>
@@ -493,14 +504,24 @@
     let remainingTime = 0;
     let currentStreamType = "";
     let wakeLock = null;
-    let keepAwakeEnabled = false;
+    let keepAwakeEnabled = true;
 
     // 画面スリープ防止（Wake Lock + 無音ループ再生）を有効化
     async function enableKeepAwake() {
         keepAwakeEnabled = true;
-        silentKeeper.volume = 0.01;
-        silentKeeper.play().catch(() => {});
+        let audioStarted = false;
+        let wakeLockStarted = false;
 
+        // 1. 無音オーディオのループ開始を試行
+        try {
+            silentKeeper.volume = 0.01;
+            await silentKeeper.play();
+            audioStarted = true;
+        } catch (e) {
+            audioStarted = false;
+        }
+
+        // 2. Screen Wake Lock API のリクエストを試行
         if ('wakeLock' in navigator) {
             try {
                 if (!wakeLock) {
@@ -509,9 +530,20 @@
                         wakeLock = null;
                     });
                 }
-            } catch (e) {}
+                wakeLockStarted = true;
+            } catch (e) {
+                wakeLockStarted = false;
+            }
         }
-        keepAwakeStatus.textContent = "画面維持: ON";
+
+        // ステータス表示の更新
+        if (audioStarted) {
+            keepAwakeStatus.textContent = "画面維持: ON";
+        } else if (wakeLockStarted) {
+            keepAwakeStatus.textContent = "画面維持: ON (画面タッチで強化)";
+        } else {
+            keepAwakeStatus.textContent = "画面維持: 待機 (画面タッチでON)";
+        }
     }
 
     // 画面スリープ防止を解除（スリープタイマー完了時用）
@@ -524,6 +556,24 @@
         }
         keepAwakeStatus.textContent = "画面維持: OFF";
     }
+
+    // ページ読み込み直後に自動実行を試みる
+    window.addEventListener('DOMContentLoaded', () => {
+        enableKeepAwake();
+    });
+
+    // 初期ロード時にブラウザ制限で無音再生がブロックされた場合、画面のどこかを1回タッチした瞬間に有効化
+    function unlockOnFirstTouch() {
+        if (keepAwakeEnabled && silentKeeper.paused) {
+            enableKeepAwake();
+        }
+        if (!silentKeeper.paused) {
+            document.removeEventListener('touchstart', unlockOnFirstTouch);
+            document.removeEventListener('click', unlockOnFirstTouch);
+        }
+    }
+    document.addEventListener('touchstart', unlockOnFirstTouch, { passive: true });
+    document.addEventListener('click', unlockOnFirstTouch);
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && keepAwakeEnabled) {

@@ -908,9 +908,17 @@
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 scroll-behavior: auto !important;
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+            }
+
+            /* 再生状態を知らせるアニメーションは、視認性のため停止しない */
+            .station-btn.playing:not(.paused) {
+                animation: cardPulse 2.2s infinite ease-in-out !important;
+            }
+
+            .station-btn.playing:not(.paused) .eq-bars span,
+            #status-label.active .status-eq-bars span {
+                animation: eqBounce 0.8s infinite ease-in-out !important;
             }
         }
 

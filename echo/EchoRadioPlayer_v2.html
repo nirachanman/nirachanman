@@ -913,6 +913,32 @@
             }
         }
 
+    
+        /* 日付と現在時刻を2段表示にし、左右に振り分ける */
+        .datetime-row {
+            display: flex;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: center;
+            gap: 4px;
+            padding: 4px 6px 10px;
+        }
+
+        #date-display {
+            align-self: flex-start;
+            text-align: left;
+            font-size: 1.3rem !important;
+            line-height: 1.35;
+        }
+
+        #time-display {
+            align-self: flex-end;
+            text-align: right;
+            font-size: 2rem !important;
+            line-height: 1.2;
+            letter-spacing: 0.06em;
+        }
+
     </style>
 </head>
 <body>

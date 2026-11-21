@@ -568,81 +568,110 @@
             transform: scale(0.98);
         }
 
-        /* --- Echo Show 8（横画面・Silkメニューバー表示時でも1画面フィット）左右2カラム分割レイアウト --- */
+        /* --- Echo Show 8（横画面・Silkメニューバー表示時でも1画面に完全フィット）左右2カラム分割 --- */
         @media (min-width: 768px) {
             body {
                 height: 100vh;
                 height: 100dvh;
+                min-height: 0;
                 overflow: hidden;
             }
 
             .container {
                 max-width: 1280px;
                 height: 100%;
-                padding: 8px 12px;
+                min-height: 0;
+                padding: 6px 10px;
                 display: flex;
                 flex-direction: row;
                 align-items: stretch;
-                gap: 12px;
+                gap: 10px;
             }
 
-            /* 左側：ステータスパネル（固定表示・メニューバー表示時も窮屈にならないよう余白調整） */
+            /* 左側：ステータスパネル（メニューバー表示時の低い高さでも収まるよう圧縮） */
             .status-panel {
-                flex: 0 0 38%;
-                min-width: 340px;
-                max-width: 430px;
+                flex: 0 0 35%;
+                min-width: 310px;
+                max-width: 400px;
                 height: 100%;
+                min-height: 0;
                 margin-bottom: 0;
                 position: static;
-                padding: 12px 14px;
+                padding: 8px 12px;
+                border-width: 4px;
                 justify-content: space-between;
-                gap: 8px;
+                gap: 4px;
             }
 
             .datetime-row {
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: baseline;
-                padding: 0 4px 6px 4px;
+                padding: 0 2px 4px 2px;
             }
 
             #date-display {
-                font-size: 0.95rem;
+                font-size: 0.88rem;
             }
 
             #time-display {
-                font-size: 1.55rem;
-                line-height: 1.1;
+                font-size: 1.35rem;
+                line-height: 1;
             }
 
             #status-label,
             button.control-btn {
-                padding: 9px 10px;
-                font-size: 0.9rem;
+                padding: 6px 8px;
+                font-size: 0.85rem;
             }
 
             #current-station-btn {
-                height: 2.6rem;
-                font-size: 1.15rem;
+                height: 2.2rem;
+                font-size: 1.05rem;
+                padding: 0 10px;
                 margin: 0;
             }
 
             .media-bar {
-                padding: 7px 14px;
+                padding: 5px 10px;
+                gap: 8px;
+            }
+
+            .media-icon-btn {
+                padding: 2px;
+            }
+
+            .media-icon-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .media-time-text {
+                font-size: 0.78rem;
             }
 
             .bottom-row {
-                padding-top: 8px;
+                padding-top: 6px;
             }
 
-            /* 右側：放送局カードエリア（Silkメニューバー表示時の高さでも16局がぴったり収まり、17局以上で右エリアのみスクロール） */
+            .timer-select {
+                padding: 4px 22px 4px 8px;
+                font-size: 0.82rem;
+            }
+
+            #timer-display {
+                font-size: 0.95rem;
+            }
+
+            /* 右側：放送局カードエリア（3列×6行にすることでSilkメニューバー表示時でも16局が1画面に収まる） */
             .grid {
                 flex: 1;
                 min-width: 0;
+                min-height: 0;
                 height: 100%;
-                grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: minmax(44px, 1fr);
-                gap: 6px;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-auto-rows: minmax(36px, 1fr);
+                gap: 5px;
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
@@ -651,7 +680,7 @@
 
             /* スクロール発生時の控えめなダークスクロールバー */
             .grid::-webkit-scrollbar {
-                width: 6px;
+                width: 5px;
             }
             .grid::-webkit-scrollbar-track {
                 background: transparent;
@@ -663,9 +692,17 @@
 
             .station-btn {
                 height: 100%;
-                min-height: 44px;
-                font-size: 0.92rem;
-                padding: 2px 24px;
+                min-height: 36px;
+                font-size: 0.84rem;
+                padding: 2px 18px;
+                line-height: 1.15;
+                border-radius: 8px;
+            }
+
+            .eq-bars {
+                right: 5px;
+                bottom: 5px;
+                height: 10px;
             }
         }
 

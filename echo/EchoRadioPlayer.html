@@ -38,24 +38,24 @@
         .container {
             width: 100%;
             max-width: 600px;
-            padding: 12px;
+            padding: 10px;
             box-sizing: border-box;
             text-align: center;
         }
 
-        /* --- ステータスパネル全体を5pxの青い枠で囲む --- */
+        /* --- ステータスパネル全体を青い枠で囲む（余白を詰めて文字を拡大） --- */
         .status-panel {
             background: var(--panel-bg);
-            padding: 14px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            border: 5px solid var(--accent-color);
+            padding: 10px 12px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border: 4px solid var(--accent-color);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             
             position: sticky;
-            top: 10px; 
+            top: 8px; 
             z-index: 100; 
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55); 
             box-sizing: border-box;
@@ -65,8 +65,8 @@
         .datetime-row {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding: 0 4px 8px 4px;
+            gap: 1px;
+            padding: 0 2px 4px 2px;
             border-bottom: 1px solid #2b3a4f;
             font-variant-numeric: tabular-nums;
         }
@@ -74,26 +74,27 @@
         #date-display {
             align-self: flex-start;
             text-align: left;
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             color: var(--off-white);
             font-weight: bold;
+            line-height: 1.15;
         }
 
         #time-display {
             align-self: flex-end;
             text-align: right;
-            font-size: 1.75rem;
+            font-size: 2.05rem;
             color: var(--text-color);
             font-weight: bold;
-            letter-spacing: 0.04em;
-            line-height: 1.1;
+            letter-spacing: 0.03em;
+            line-height: 1.05;
         }
 
         .panel-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -111,10 +112,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px 26px;
+            padding: 8px 24px;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 1.0rem;
+            font-size: 1.15rem;
             border: 2px solid #465870;
             background-color: rgba(0, 0, 0, 0.2);
             color: var(--off-white);
@@ -132,12 +133,12 @@
         .status-eq-bars {
             display: none;
             position: absolute;
-            right: 10px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             align-items: flex-end;
             gap: 2px;
-            height: 14px;
+            height: 15px;
             pointer-events: none;
         }
 
@@ -159,23 +160,23 @@
         }
 
         .status-eq-bars span:nth-child(2) {
-            height: 13px;
+            height: 14px;
             animation-delay: 0.2s;
         }
 
         .status-eq-bars span:nth-child(3) {
-            height: 8px;
+            height: 9px;
             animation-delay: 0.4s;
         }
 
         /* 放送局名表示兼ポップアップトリガーボタン */
         #current-station-btn {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             font-weight: bold;
-            margin: 2px 0;
+            margin: 0;
             width: 100%;
-            height: 2.8rem;
-            padding: 0 14px;
+            height: 3.1rem;
+            padding: 0 10px;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid #2b3a4f;
             border-radius: 10px;
@@ -202,24 +203,24 @@
         }
 
         .dropdown-arrow {
-            font-size: 0.9rem;
+            font-size: 1.0rem;
             color: var(--off-white);
-            margin-left: 8px;
+            margin-left: 6px;
         }
 
         /* --- ピル型メディアコントロールバー（再生/一時停止・時間・シーク・ミュート） --- */
         .media-bar-row {
-            padding: 2px 0;
+            padding: 0;
         }
 
         .media-bar {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
             background: #101722;
             border: 1px solid #2b3a4f;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 999px;
             box-sizing: border-box;
         }
@@ -229,7 +230,7 @@
             border: none;
             color: #e2e4e6;
             cursor: pointer;
-            padding: 4px;
+            padding: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -248,15 +249,16 @@
         }
 
         .media-icon-btn svg {
-            width: 21px;
-            height: 21px;
+            width: 24px;
+            height: 24px;
             fill: currentColor;
             display: block;
         }
 
         .media-time-text {
-            font-size: 0.95rem;
-            color: #d8dade;
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #e2e4e8;
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
             user-select: none;
@@ -265,10 +267,10 @@
 
         .seek-slider {
             flex: 1;
-            min-width: 40px;
+            min-width: 36px;
             -webkit-appearance: none;
             appearance: none;
-            height: 5px;
+            height: 6px;
             border-radius: 3px;
             background: #36475e;
             outline: none;
@@ -283,8 +285,8 @@
         .seek-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #e0e0e0;
             transition: transform 0.1s, background-color 0.15s;
@@ -295,8 +297,8 @@
         }
 
         .seek-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border: none;
             border-radius: 50%;
             background: #e0e0e0;
@@ -310,23 +312,23 @@
         .bottom-row {
             justify-content: space-between;
             border-top: 1px solid #2b3a4f;
-            padding-top: 10px;
+            padding-top: 6px;
         }
 
         .timer-select-wrapper {
             flex: 1;
-            max-width: 165px;
+            max-width: 185px;
             text-align: left;
         }
 
         .timer-select {
             width: 100%;
-            padding: 7px 10px;
+            padding: 6px 28px 6px 10px;
             border-radius: 6px;
             background-color: #212e42;
-            color: #d0d4da;
+            color: #dce0e6;
             border: 1px solid #3c506e;
-            font-size: 0.98rem;
+            font-size: 1.12rem;
             font-weight: bold;
             cursor: pointer;
             outline: none;
@@ -335,25 +337,25 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d0d4da' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23dce0e6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat;
             background-position: right 8px center;
-            padding-right: 26px;
         }
 
         .timer-select.active {
             border-color: var(--timer-color);
             color: var(--timer-color);
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237da87b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237da87b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
         }
 
         #timer-display {
-            font-size: 1.15rem;
+            font-size: 1.35rem;
             color: var(--timer-color);
             font-weight: bold;
             text-align: right;
             flex: 1;
-            padding-left: 10px;
+            padding-left: 8px;
+            white-space: nowrap;
         }
 
         /* --- ポップアップリスト（モーダル） --- */
@@ -397,14 +399,14 @@
             background: rgba(0, 0, 0, 0.25);
             border-bottom: 1px solid #3a3c40;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         .popup-close-btn {
             background: transparent;
             border: none;
             color: var(--off-white);
-            font-size: 1.4rem;
+            font-size: 1.45rem;
             cursor: pointer;
             padding: 4px 8px;
             line-height: 1;
@@ -423,7 +425,7 @@
             color: var(--off-white);
             padding: 16px 18px;
             text-align: left;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s ease;
@@ -459,7 +461,7 @@
             color: #d4d7dc;
             padding: 8px 24px;
             border-radius: 10px;
-            font-size: 1.05rem;
+            font-size: 1.08rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -555,12 +557,12 @@
 
         /* --- コントロールボタン群（枠線と文字色のみ赤系のアウトラインスタイル） --- */
         button.control-btn {
-            padding: 10px 10px;
+            padding: 8px 10px;
             border-radius: 8px;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1.0rem;
+            font-size: 1.15rem;
             box-sizing: border-box;
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
@@ -576,7 +578,7 @@
             transform: scale(0.98);
         }
 
-        /* --- Echo Show 8（横画面）：左パネル固定＋右エリア2列・縦スクロール --- */
+        /* --- Echo Show 8（横画面）：左パネル固定（極小余白＆特大フォント）＋右エリア2列・縦スクロール --- */
         @media (min-width: 768px) {
             body {
                 height: 100vh;
@@ -589,61 +591,75 @@
                 max-width: 1280px;
                 height: 100%;
                 min-height: 0;
-                padding: 8px 12px;
+                padding: 6px 10px;
                 display: flex;
                 flex-direction: row;
                 align-items: stretch;
-                gap: 12px;
+                gap: 10px;
             }
 
-            /* 左側：ステータスパネル（固定表示・大きなフォントで見やすく） */
+            /* 左側：ステータスパネル（上下余白を極限まで詰めて特大フォントを配置） */
             .status-panel {
-                flex: 0 0 38%;
-                min-width: 340px;
-                max-width: 440px;
+                flex: 0 0 41%;
+                min-width: 360px;
+                max-width: 470px;
                 height: 100%;
                 min-height: 0;
                 margin-bottom: 0;
                 position: static;
-                padding: 10px 14px;
+                padding: 6px 10px;
                 border-width: 4px;
                 justify-content: space-between;
-                gap: 6px;
+                gap: 3px;
             }
 
             .datetime-row {
                 flex-direction: column;
-                gap: 2px;
-                padding: 0 2px 6px 2px;
+                gap: 0;
+                padding: 0 2px 3px 2px;
             }
 
             #date-display {
                 align-self: flex-start;
-                font-size: 1.05rem;
+                font-size: 1.2rem;
+                line-height: 1.15;
             }
 
             #time-display {
                 align-self: flex-end;
-                font-size: 2.0rem;
-                line-height: 1.05;
+                font-size: 2.55rem;
+                line-height: 1.0;
+            }
+
+            .panel-row {
+                gap: 6px;
             }
 
             #status-label,
             button.control-btn {
-                padding: 8px 10px;
-                font-size: 1.02rem;
+                padding: 6px 8px;
+                font-size: 1.2rem;
+                line-height: 1.15;
+            }
+
+            #status-label {
+                padding-right: 26px;
             }
 
             #current-station-btn {
-                height: 2.7rem;
-                font-size: 1.28rem;
-                padding: 0 12px;
+                height: 3.15rem;
+                font-size: 1.5rem;
+                padding: 0 10px;
                 margin: 0;
             }
 
+            .dropdown-arrow {
+                font-size: 1.05rem;
+            }
+
             .media-bar {
-                padding: 6px 12px;
-                gap: 8px;
+                padding: 5px 10px;
+                gap: 7px;
             }
 
             .media-icon-btn {
@@ -651,25 +667,30 @@
             }
 
             .media-icon-btn svg {
-                width: 20px;
-                height: 20px;
+                width: 24px;
+                height: 24px;
             }
 
             .media-time-text {
-                font-size: 0.92rem;
+                font-size: 1.08rem;
             }
 
             .bottom-row {
-                padding-top: 8px;
+                padding-top: 4px;
+            }
+
+            .timer-select-wrapper {
+                max-width: 195px;
             }
 
             .timer-select {
-                padding: 6px 26px 6px 10px;
-                font-size: 0.98rem;
+                padding: 5px 28px 5px 8px;
+                font-size: 1.15rem;
             }
 
             #timer-display {
-                font-size: 1.15rem;
+                font-size: 1.45rem;
+                padding-left: 6px;
             }
 
             /* 右側：放送局カードエリア（2列表示・エリア内のみスムーズ縦スクロール） */
@@ -704,7 +725,7 @@
             .station-btn {
                 height: 100%;
                 min-height: 62px;
-                font-size: 1.08rem;
+                font-size: 1.12rem;
                 font-weight: 600;
                 padding: 6px 26px;
                 line-height: 1.25;
@@ -714,12 +735,12 @@
 
         @media (max-width: 350px) {
             .grid { grid-template-columns: 1fr; }
-            #current-station-btn { font-size: 1.1rem; }
-            .station-btn { height: auto; min-height: 56px; font-size: 1rem; }
-            #date-display { font-size: 0.92rem; }
-            #time-display { font-size: 1.45rem; }
+            #current-station-btn { font-size: 1.2rem; }
+            .station-btn { height: auto; min-height: 56px; font-size: 1.05rem; }
+            #date-display { font-size: 1.0rem; }
+            #time-display { font-size: 1.7rem; }
             .media-bar { padding: 6px 10px; gap: 6px; }
-            .media-time-text { font-size: 0.85rem; }
+            .media-time-text { font-size: 0.92rem; }
         }
     </style>
 </head>

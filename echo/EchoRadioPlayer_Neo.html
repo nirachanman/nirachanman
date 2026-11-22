@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <title>Echo Radio Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+
+:root {
+  color-scheme: dark;
+  --bg: #09111f;
+  --panel: #111e31;
+  --panel-2: #172840;
+  --card: #14243a;
+  --card-hover: #1b3451;
+  --line: #29415d;
+  --text: #f2f6fb;
+  --muted: #a8b8ca;
+  --gold: #f4d477;
+  --mint: #69e0bd;
+  --red: #ff7b83;
+  --shadow: 0 18px 48px rgba(0,0,0,.28);
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; min-height: 100%; margin: 0; }
+body {
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(38,91,135,.28), transparent 38%),
+    radial-gradient(ellipse at 100% 100%, rgba(35,77,93,.18), transparent 42%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  font-size: 16px;
+}
+button, input, select { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+.container {
+  width: min(1600px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+.status-panel {
+  position: sticky;
+  top: 22px;
+  height: calc(100vh - 44px);
+  min-height: 590px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(127,164,197,.22);
+  border-radius: 26px;
+  background: linear-gradient(155deg, rgba(25,46,70,.97), rgba(13,27,45,.98));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.status-panel::before {
+  content: "ECHO  /  LIVE RADIO";
+  display: block;
+  color: #91a9c3;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+.datetime-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px 0 13px;
+  border-bottom: 1px solid var(--line);
+}
+#date-display { color: var(--muted); font-size: 1rem; font-weight: 600; }
+#time-display {
+  color: var(--gold);
+  font-size: clamp(2.3rem, 4vw, 3.2rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: .055em;
+  font-variant-numeric: tabular-nums;
+}
+.panel-row { display: flex; align-items: center; gap: 12px; }
+.top-row { justify-content: space-between; }
+#status-label {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 42px 0 15px;
+  border: 1px solid #40536b;
+  border-radius: 14px;
+  color: #d3deea;
+  background: rgba(4,13,25,.42);
+  font-weight: 750;
+}
+#status-label.active {
+  color: var(--mint);
+  border-color: rgba(105,224,189,.65);
+  background: rgba(37,112,98,.14);
+}
+#status-text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.status-eq-bars {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+}
+#status-label.active .status-eq-bars { display: flex; }
+.status-eq-bars span {
+  display: block;
+  width: 4px;
+  height: 7px;
+  border-radius: 5px;
+  background: var(--mint);
+  transform-origin: bottom;
+  animation: equalize .72s ease-in-out infinite;
+}
+.status-eq-bars span:nth-child(2) { animation-delay: -.24s; }
+.status-eq-bars span:nth-child(3) { animation-delay: -.48s; }
+.control-btn {
+  min-height: 46px;
+  padding: 0 15px;
+  border: 1px solid rgba(255,123,131,.55);
+  border-radius: 13px;
+  background: rgba(255,123,131,.08);
+  color: #ffabb0;
+  font-size: .9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.control-btn:active { transform: scale(.97); }
+#current-station-btn {
+  width: 100%;
+  min-height: 76px;
+  padding: 14px 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(244,212,119,.45);
+  border-radius: 18px;
+  background: linear-gradient(120deg, rgba(244,212,119,.13), rgba(244,212,119,.035));
+  color: var(--gold);
+  cursor: pointer;
+  text-align: left;
+}
+#current-station-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.14rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dropdown-arrow { color: #d9c27e; font-size: .85rem; }
+.media-bar-row { width: 100%; }
+.media-bar {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background: rgba(4,13,25,.5);
+}
+.media-icon-btn {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #48617d;
+  border-radius: 50%;
+  background: #203954;
+  color: white;
+  cursor: pointer;
+}
+#play-pause-btn {
+  background: linear-gradient(145deg, #f5dc8b, #d7ad4c);
+  color: #172338;
+  border: 0;
+  box-shadow: 0 5px 18px rgba(216,176,78,.2);
+}
+.media-icon-btn svg { width: 23px; height: 23px; fill: currentColor; }
+.media-time-text {
+  min-width: 88px;
+  color: var(--gold);
+  font-size: .86rem;
+  font-weight: 750;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.seek-slider { min-width: 20px; flex: 1; accent-color: var(--gold); }
+.seek-slider:disabled { opacity: .3; }
+.bottom-row { align-items: center; justify-content: space-between; }
+.timer-select-wrapper { flex: 1; }
+.timer-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #0d1a2b;
+  color: var(--text);
+  font-weight: 700;
+}
+#timer-display {
+  min-width: 92px;
+  color: var(--gold);
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.status-panel::after {
+  content: "お気に入りの放送局を選んでお楽しみください";
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: #8399b1;
+  font-size: .78rem;
+  line-height: 1.7;
+}
+.grid {
+  min-width: 0;
+  align-content: start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(70px, auto);
+  gap: 12px;
+  padding: 2px 5px 22px 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #45617e transparent;
+}
+.grid::before {
+  content: "RADIO STATIONS";
+  grid-column: 1 / -1;
+  padding: 5px 2px 7px;
+  color: #9db3ca;
+  font-size: .78rem;
+  font-weight: 850;
+  letter-spacing: .22em;
+}
+.station-btn {
+  position: relative;
+  min-width: 0;
+  min-height: 70px;
+  padding: 13px 48px 13px 17px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid #2c435d;
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(24,43,65,.96), rgba(15,30,48,.96));
+  color: #dce6f0;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  cursor: pointer;
+  box-shadow: 0 5px 16px rgba(0,0,0,.13);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.station-btn:hover { background: var(--card-hover); border-color: #5d7c9e; }
+.station-btn:active { transform: scale(.985); }
+.station-btn.playing {
+  border: 1px solid rgba(105,224,189,.9);
+  background: linear-gradient(120deg, rgba(34,103,91,.98), rgba(20,70,72,.98));
+  color: #f4fffb;
+  box-shadow: 0 0 0 1px rgba(105,224,189,.14), 0 8px 24px rgba(28,165,132,.16);
+}
+.station-btn.playing.paused {
+  border-color: #7890a8;
+  background: linear-gradient(120deg, #34465b, #25374d);
+  color: #e5edf5;
+}
+.eq-bars {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  width: 22px;
+  height: 27px;
+  pointer-events: none;
+}
+.station-btn.playing .eq-bars { display: flex; }
+.eq-bars span {
+  display: block;
+  width: 4px;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--mint);
+  transform: scaleY(.35);
+  transform-origin: bottom;
+  animation: equalize .68s ease-in-out infinite;
+  will-change: transform;
+}
+.eq-bars span:nth-child(2) { animation-delay: -.23s; }
+.eq-bars span:nth-child(3) { animation-delay: -.46s; }
+.station-btn.playing.paused .eq-bars span {
+  animation: none !important;
+  transform: scaleY(.45);
+}
+@keyframes equalize {
+  0%, 100% { transform: scaleY(.22); }
+  25% { transform: scaleY(.62); }
+  50% { transform: scaleY(1); }
+  75% { transform: scaleY(.42); }
+}
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2,8,16,.76);
+  backdrop-filter: blur(8px);
+}
+.popup-overlay.open { display: flex; }
+.popup-content {
+  width: min(560px, 100%);
+  max-height: min(82vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #45617e;
+  border-radius: 22px;
+  background: #122238;
+  box-shadow: 0 25px 80px rgba(0,0,0,.5);
+}
+.popup-header {
+  min-height: 68px;
+  padding: 13px 18px 13px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 1.15rem;
+  font-weight: 850;
+}
+.popup-close-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #526a84;
+  border-radius: 12px;
+  background: #203750;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.popup-list { overflow-y: auto; padding: 10px; }
+.popup-item {
+  width: 100%;
+  min-height: 53px;
+  margin: 3px 0;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #e0e9f2;
+  text-align: left;
+  font-size: .98rem;
+  cursor: pointer;
+}
+.popup-item:hover, .popup-item.playing {
+  border-color: rgba(105,224,189,.4);
+  background: rgba(105,224,189,.1);
+  color: var(--mint);
+}
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+@media (min-width: 768px) {
+  body { height: 100vh; height: 100dvh; overflow: hidden; }
+  .container { height: 100vh; height: 100dvh; min-height: 0; }
+  .grid { height: calc(100vh - 44px); height: calc(100dvh - 44px); }
+}
+@media (max-width: 900px) and (min-width: 768px) {
+  .container { grid-template-columns: minmax(285px, 34%) minmax(0,1fr); gap: 14px; padding: 14px; }
+  .status-panel { top: 14px; height: calc(100vh - 28px); padding: 18px; gap: 14px; }
+  .station-btn { min-height: 66px; padding-left: 13px; font-size: .92rem; }
+  .grid { height: calc(100vh - 28px); gap: 9px; }
+  .media-bar { gap: 8px; padding: 9px; }
+  .media-time-text { min-width: 78px; font-size: .78rem; }
+  .media-icon-btn { width: 42px; height: 42px; flex-basis: 42px; }
+}
+@media (max-width: 767px) {
+  .container { display: flex; flex-direction: column; min-height: 100vh; padding: 12px; gap: 14px; }
+  .status-panel { position: relative; top: auto; height: auto; min-height: 0; padding: 18px; gap: 13px; border-radius: 21px; }
+  .status-panel::after { display: none; }
+  #time-display { font-size: 2.5rem; }
+  .grid { overflow: visible; grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-rows: minmax(64px,auto); gap: 9px; padding: 0 0 18px; }
+  .station-btn { min-height: 66px; padding: 11px 37px 11px 12px; border-radius: 13px; font-size: .88rem; }
+  .eq-bars { right: 10px; }
+  .grid::before { padding: 5px 2px 2px; }
+}
+@media (max-width: 390px) {
+  .container { padding: 8px; }
+  .status-panel { padding: 14px; }
+  .station-btn { font-size: .82rem; min-height: 62px; }
+  .media-bar { gap: 7px; padding: 8px; }
+  .media-time-text { min-width: 72px; font-size: .75rem; }
+  .media-icon-btn { width: 40px; height: 40px; flex-basis: 40px; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="status-panel">
+        <!-- 年月日と現在時刻の表示行 -->
+        <div class="datetime-row">
+            <span id="date-display">----年--月--日(-)</span>
+            <span id="time-display">--:--:--</span>
+        </div>
+
+        <div class="panel-row top-row">
+            <div id="status-label">
+                <span id="status-text">再生停止中</span>
+                <span class="status-eq-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+            </div>
+            <button class="control-btn stop-btn" onclick="stopAudio()">停止 (OFF)</button>
+        </div>
+
+        <!-- タップでポップアップリストを開く放送局表示ボタン -->
+        <button id="current-station-btn" onclick="openStationPopup()" aria-label="放送局リストを開く">
+            <span id="current-station-text">放送局を選択してください</span>
+            <span class="dropdown-arrow">▼</span>
+        </button>
+
+        <!-- 再生/一時停止・時間・スライダー・ミュートをまとめたピル型バー -->
+        <div class="panel-row media-bar-row">
+            <div class="media-bar">
+                <!-- 再生・一時停止ボタン -->
+                <button id="play-pause-btn" class="media-icon-btn" onclick="togglePlayPause()" aria-label="再生 / 一時停止">
+                    <svg id="play-pause-icon" viewBox="0 0 24 24">
+                        <polygon points="6,4 20,12 6,20"></polygon>
+                    </svg>
+                </button>
+
+                <!-- 経過時間 / 全体時間表示 -->
+                <span id="media-time-display" class="media-time-text">00:00 / LIVE</span>
+
+                <!-- 再生スライダー -->
+                <input type="range" id="seek-slider" class="seek-slider" min="0" max="100" step="0.1" value="0" disabled
+                       oninput="onSeekInput(this.value)" onchange="onSeekChange(this.value)">
+
+                <!-- ミュート（消音）ボタン -->
+                <button id="mute-btn" class="media-icon-btn" onclick="toggleMute()" aria-label="ミュート切替">
+                    <svg id="mute-icon" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-row bottom-row">
+            <div class="timer-select-wrapper">
+                <select id="sleep-timer-select" class="timer-select" onchange="handleTimerChange(this.value)">
+                    <option value="0">OFFタイマー</option>
+                    <option value="30">30分</option>
+                    <option value="60">60分</option>
+                    <option value="90">90分</option>
+                    <option value="120">120分</option>
+                </select>
+            </div>
+            <div id="timer-display"></div>
+        </div>
+    </div>
+
+    <div class="grid" id="station-grid"></div>
+</div>
+
+<!-- 放送局選択ポップアップリスト -->
+<div class="popup-overlay" id="station-popup" onclick="closeStationPopupOnOverlay(event)">
+    <div class="popup-content">
+        <div class="popup-header">
+            <span>放送局一覧</span>
+            <button class="popup-close-btn" onclick="closeStationPopup()" aria-label="閉じる">✕</button>
+        </div>
+        <div class="popup-list" id="popup-station-list"></div>
+    </div>
+</div>
+
+<audio id="audio-player" preload="none"></audio>
+
+<script>
+    const stations = [
+        { name: "NHK AM（仙台）", url: "https://simul2.drdi.st.nhk/live/8/joined/master.m3u8" },
+        { name: "NHK FM（仙台）", url: "https://simul2.drdi.st.nhk/live/9/joined/master.m3u8" },
+        { name: "NHK AM（東京）", url: "https://simul2.drdi.st.nhk/live/3/joined/master.m3u8" },
+        { name: "NHK FM（東京）", url: "https://simul2.drdi.st.nhk/live/5/joined/master.m3u8" },
+        { name: "smoothjazz.com.pl", url: "https://bcast.vigormultimedia.com:48888/sjcompl192aac" },        
+        { name: "101 Smooth Jazz", url: "https://jking.cdnstream1.com/b22139_128mp3" },
+        { name: "smooth-jazz-247", url: "https://ais-edge89-dal02.cdnstream.com/2124_128.mp3" },
+        { name: "SMOOTH JAZZ DELUXE", url: "https://cast1.torontocast.com:4490/;" },
+        { name: "SmoothJazz.com Global Radio", url: "https://smoothjazz.cdnstream1.com/2585_128.mp3" },
+        { name: "J-Pop Sakura 懐かしい", url: "https://quincy.torontocast.com:2070/stream.mp3" },
+        { name: "J1 GOLD 昭和", url: "https://jenny.torontocast.com:2000/stream/J1GOLD" },
+        { name: "Shonan BeachFM", url: "https://shonanbeachfm.out.airtime.pro:8000/shonanbeachfm_a" },
+        { name: "Gold Instrumental", url: "https://centova2.svdns.com.br:20038/stream" },
+        { name: "Gold web radio", url: "https://centova2.svdns.com.br:20056/stream" },
+        { name: "Solo Piano Radio", url: "https://pianosolo.streamguys1.com/live" },
+        { name: "NATURE RADIO SLEEP(自然音)", url: "https://az1.mediacp.eu/listen/natureradiosleep/radio.mp3" }
+    ];
+
+    const audio = document.getElementById('audio-player');
+    const stationGrid = document.getElementById('station-grid');
+    const popupStationList = document.getElementById('popup-station-list');
+    const stationPopup = document.getElementById('station-popup');
+    const currentStationText = document.getElementById('current-station-text');
+    const statusLabel = document.getElementById('status-label');
+    const statusText = document.getElementById('status-text');
+    const timerDisplay = document.getElementById('timer-display');
+    const timerSelect = document.getElementById('sleep-timer-select');
+    const seekSlider = document.getElementById('seek-slider');
+    const mediaTimeDisplay = document.getElementById('media-time-display');
+    const playPauseIcon = document.getElementById('play-pause-icon');
+    const muteBtn = document.getElementById('mute-btn');
+    const muteIcon = document.getElementById('mute-icon');
+    const dateDisplay = document.getElementById('date-display');
+    const timeDisplay = document.getElementById('time-display');
+    
+    let hls = null;
+    let timerId = null;
+    let countdownIntervalId = null;
+    let fadeTimerId = null;
+    let remainingSeconds = 0;
+    let isSeeking = false;
+    let currentStation = null;
+
+    // SVGアイコン定義
+    const SVG_PLAY = '<polygon points="6,4 20,12 6,20"></polygon>';
+    const SVG_PAUSE = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+    const SVG_VOL_ON = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>';
+    const SVG_VOL_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>';
+
+    // 年月日と現在時刻の更新処理
+    function updateDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        const dayStr = days[now.getDay()];
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        dateDisplay.innerText = `${year}年${month}月${date}日(${dayStr})`;
+        timeDisplay.innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // 再生・一時停止ボタンとカードのアニメーション状態同期
+    function updatePlayPauseUI(isPlaying) {
+        playPauseIcon.innerHTML = isPlaying ? SVG_PAUSE : SVG_PLAY;
+        document.querySelectorAll('.station-btn.playing').forEach(btn => {
+            btn.classList.toggle('paused', !isPlaying);
+            // アニメーションを確実に再始動（CSSアニメーションの状態が残る環境への対策）
+            const bars = btn.querySelectorAll('.eq-bars span');
+            bars.forEach(bar => {
+                bar.style.animation = 'none';
+                void bar.offsetWidth;
+                bar.style.animation = isPlaying ? '' : 'none';
+            });
+        });
+        const statusBars = document.querySelectorAll('.status-eq-bars span');
+        statusBars.forEach(bar => {
+            bar.style.animation = 'none';
+            void bar.offsetWidth;
+            bar.style.animation = isPlaying ? '' : 'none';
+        });
+    }
+
+    // 再生 / 一時停止トグル処理
+    function togglePlayPause() {
+        if (!currentStation) {
+            if (stations.length > 0) {
+                playAudio(stations[0]);
+            }
+            return;
+        }
+
+        if (audio.paused) {
+            audio.play().catch(() => {
+                playAudio(currentStation);
+            });
+        } else {
+            audio.pause();
+        }
+    }
+
+    // ミュート（消音）トグル処理
+    function toggleMute() {
+        audio.muted = !audio.muted;
+        if (audio.muted) {
+            muteBtn.classList.add('muted');
+            muteIcon.innerHTML = SVG_VOL_MUTE;
+        } else {
+            muteBtn.classList.remove('muted');
+            muteIcon.innerHTML = SVG_VOL_ON;
+        }
+    }
+
+    // 秒数を MM:SS または HH:MM:SS にフォーマット
+    function formatTime(sec) {
+        if (!isFinite(sec) || sec < 0) return "00:00";
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = Math.floor(sec % 60);
+        if (h > 0) {
+            return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // 再生進行に合わせてシークバーと時間表示を更新
+    audio.addEventListener('timeupdate', () => {
+        if (isSeeking) return;
+        const current = audio.currentTime || 0;
+        const currentStr = formatTime(current);
+        let durationStr = "LIVE";
+
+        if (audio.seekable && audio.seekable.length > 0) {
+            const start = audio.seekable.start(0);
+            const end = audio.seekable.end(audio.seekable.length - 1);
+            if (end > start) {
+                seekSlider.disabled = false;
+                seekSlider.min = start;
+                seekSlider.max = end;
+                seekSlider.value = current;
+                if (isFinite(audio.duration) && audio.duration > 0) {
+                    durationStr = formatTime(audio.duration);
+                }
+            }
+        } else if (isFinite(audio.duration) && audio.duration > 0) {
+            seekSlider.disabled = false;
+            seekSlider.min = 0;
+            seekSlider.max = audio.duration;
+            seekSlider.value = current;
+            durationStr = formatTime(audio.duration);
+        } else {
+            seekSlider.disabled = true;
+            seekSlider.min = 0;
+            seekSlider.max = Math.max(1, current);
+            seekSlider.value = current;
+        }
+
+        mediaTimeDisplay.innerText = `${currentStr} / ${durationStr}`;
+    });
+
+    // スライダー操作中（ドラッグ中）の表示更新
+    function onSeekInput(val) {
+        isSeeking = true;
+        const currentStr = formatTime(parseFloat(val));
+        const durationStr = (isFinite(audio.duration) && audio.duration > 0) ? formatTime(audio.duration) : "LIVE";
+        mediaTimeDisplay.innerText = `${currentStr} / ${durationStr}`;
+    }
+
+    // スライダーを離したときに再生位置を確定
+    function onSeekChange(val) {
+        const targetTime = parseFloat(val);
+        if (isFinite(targetTime)) {
+            audio.currentTime = targetTime;
+        }
+        isSeeking = false;
+    }
+
+    // グリッドボタンとポップアップリストの両方を生成
+    stations.forEach(station => {
+        const btn = document.createElement('button');
+        btn.className = 'station-btn';
+        btn.dataset.stationName = station.name;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = station.name;
+        btn.appendChild(nameSpan);
+
+        // イコライザーアニメーション用バーを追加
+        const eq = document.createElement('span');
+        eq.className = 'eq-bars';
+        eq.setAttribute('aria-hidden', 'true');
+        eq.innerHTML = '<span></span><span></span><span></span>';
+        btn.appendChild(eq);
+
+        btn.onclick = () => playAudio(station);
+        stationGrid.appendChild(btn);
+
+        const listItem = document.createElement('button');
+        listItem.className = 'popup-item';
+        listItem.dataset.stationName = station.name;
+        listItem.innerText = station.name;
+        listItem.onclick = () => {
+            playAudio(station);
+            closeStationPopup();
+        };
+        popupStationList.appendChild(listItem);
+    });
+
+    function openStationPopup() {
+        stationPopup.classList.add('open');
+    }
+
+    function closeStationPopup() {
+        stationPopup.classList.remove('open');
+    }
+
+    function closeStationPopupOnOverlay(event) {
+        if (event.target === stationPopup) {
+            closeStationPopup();
+        }
+    }
+
+    function updateStatus(text, isActive = false) {
+        statusText.innerText = text;
+        if (isActive) {
+            statusLabel.classList.add('active');
+        } else {
+            statusLabel.classList.remove('active');
+        }
+    }
+
+    function playAudio(station) {
+        resetAudioSystem();
+        currentStation = station;
+        currentStationText.innerText = station.name;
+        updateStatus("接続中...", true);
+        
+        document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
+            const isMatch = el.dataset.stationName === station.name;
+            el.classList.toggle('playing', isMatch);
+            el.classList.remove('paused');
+        });
+        updatePlayPauseUI(true);
+
+        const secureUrl = station.url.replace("http://", "https://");
+        const isHls = secureUrl.includes('.m3u8');
+
+        if (isHls) {
+            if (Hls.isSupported()) {
+                hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                hls.loadSource(secureUrl);
+                hls.attachMedia(audio);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { audio.volume = 1.0; audio.play(); });
+                hls.on(Hls.Events.ERROR, (e, data) => {
+                    if (data.fatal) {
+                        updateStatus("再生エラー");
+                        updatePlayPauseUI(false);
+                    }
+                });
+            } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                audio.src = secureUrl;
+                audio.volume = 1.0;
+                audio.play();
+            }
+        } else {
+            audio.src = secureUrl;
+            audio.volume = 1.0;
+            audio.play().catch(() => {
+                updateStatus("再生エラー");
+                updatePlayPauseUI(false);
+            });
+        }
+    }
+
+    // audio要素の再生・一時停止・待機イベント連動
+    audio.onplaying = () => {
+        updateStatus("再生中", true);
+        updatePlayPauseUI(true);
+    };
+
+    audio.onpause = () => {
+        if (currentStation) {
+            updateStatus("一時停止中", false);
+        }
+        updatePlayPauseUI(false);
+    };
+
+    audio.onwaiting = () => {
+        updateStatus("読込中...", true);
+    };
+
+    function resetAudioSystem() {
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        if (hls) {
+            hls.stopLoad();
+            hls.destroy();
+            hls = null;
+        }
+        // 再生スライダーとアイコンを初期状態にリセット
+        isSeeking = false;
+        seekSlider.disabled = true;
+        seekSlider.min = 0;
+        seekSlider.max = 100;
+        seekSlider.value = 0;
+        mediaTimeDisplay.innerText = "00:00 / LIVE";
+        updatePlayPauseUI(false);
+
+        updateStatus("再生停止中");
+    }
+
+    function stopAudio() {
+        currentStation = null;
+        resetAudioSystem();
+        clearTimers();
+        currentStationText.innerText = "放送局を選択してください";
+        document.querySelectorAll('.station-btn, .popup-item').forEach(el => {
+            el.classList.remove('playing');
+            el.classList.remove('paused');
+        });
+    }
+
+    function clearTimers() {
+        clearTimeout(timerId);
+        clearTimeout(fadeTimerId);
+        clearInterval(countdownIntervalId);
+        timerId = null;
+        fadeTimerId = null;
+        countdownIntervalId = null;
+        remainingSeconds = 0;
+        timerDisplay.innerText = "";
+        timerSelect.value = "0";
+        timerSelect.classList.remove('active');
+        
+        audio.volume = 1.0;
+    }
+
+    function handleTimerChange(minutes) {
+        const min = parseInt(minutes, 10);
+        if (min === 0) {
+            clearTimers();
+        } else {
+            setTimer(min);
+        }
+    }
+
+    function setTimer(minutes) {
+        clearTimeout(timerId);
+        clearTimeout(fadeTimerId);
+        clearInterval(countdownIntervalId);
+        
+        timerSelect.classList.add('active');
+
+        remainingSeconds = minutes * 60;
+        updateTimerDisplay();
+
+        countdownIntervalId = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds <= 0) {
+                clearInterval(countdownIntervalId);
+                updateTimerDisplay();
+            } else {
+                updateTimerDisplay();
+            }
+        }, 1000);
+
+        timerId = setTimeout(() => {
+            stopAudio();
+        }, remainingSeconds * 1000);
+
+        fadeTimerId = setTimeout(() => {
+            fadeOut();
+        }, Math.max(0, (remainingSeconds - 10) * 1000));
+    }
+
+    function updateTimerDisplay() {
+        if (remainingSeconds <= 0) {
+            timerDisplay.innerText = "";
+            return;
+        }
+        const m = Math.floor(remainingSeconds / 60);
+        const s = remainingSeconds % 60;
+        timerDisplay.innerText = `残り ${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function fadeOut() {
+        if (audio.volume > 0.05) {
+            audio.volume = Math.max(0, audio.volume - 0.1);
+            setTimeout(fadeOut, 1000);
+        }
+    }
+</script>
+
+</body>
+</html>

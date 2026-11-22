@@ -56,26 +56,102 @@
     gap: 8px;
   }
 
-  /* 並び順リセット用のコントロールバー */
+  /* コントロールバー */
   .controls {
-    text-align: right;
-    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
   }
 
-  .reset-btn {
+  .ctrl-btn {
     background-color: var(--card-bg);
-    color: var(--text-muted);
+    color: var(--text-color);
     border: 1px solid var(--border-color);
-    padding: 4px 12px;
+    padding: 6px 12px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
   }
 
-  .reset-btn:hover {
+  .ctrl-btn:hover {
     background-color: #e2e6ea;
+  }
+
+  .ctrl-btn.add-mode {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+  }
+
+  .ctrl-btn.add-mode:hover {
+    background-color: #1b5e20;
+  }
+
+  /* 新規タイル追加フォーム */
+  .add-form-container {
+    display: none;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .add-form-container.open {
+    display: block;
+  }
+
+  .add-form-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
     color: var(--text-color);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    color: var(--text-color);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
   }
 
   h2.section-title {
@@ -94,6 +170,9 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
     margin-bottom: 20px;
+    min-height: 90px;
+    padding: 4px;
+    border-radius: 12px;
   }
 
   /* タイル（カード）のスタイル */
@@ -105,13 +184,39 @@
     border: 1px solid var(--border-color);
     position: relative;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    cursor: grab; /* 掴めることを示すカーソル */
-    user-select: none; /* ドラッグ中の文字選択を防止 */
+    cursor: grab;
+    user-select: none;
   }
 
   .tile:active {
     cursor: grabbing;
     transform: scale(0.98);
+  }
+
+  /* カスタム追加タイルの削除ボタン */
+  .delete-tile-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.12);
+    color: #444;
+    border: none;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .delete-tile-btn:hover {
+    background-color: #dc3545;
+    color: #fff;
   }
 
   /* ドラッグ中のスタイル */
@@ -141,7 +246,7 @@
     height: 100%;
     text-decoration: none;
     color: inherit;
-    -webkit-user-drag: none; /* ブラウザ標準のリンクドラッグを無効化 */
+    -webkit-user-drag: none;
   }
 
   /* ボタン風デザイン */
@@ -161,7 +266,7 @@
     margin: 0 auto 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    pointer-events: none; /* 親の<a>や.tileにドラッグ判定を譲る */
+    pointer-events: none;
   }
 
   /* 各カテゴリごとの背景と1px枠線 */
@@ -259,8 +364,42 @@
   </header>
 
   <div class="controls">
-    <button id="reset-order-btn" class="reset-btn">🔄 並び順をリセット</button>
+    <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
+    <button id="reset-order-btn" class="ctrl-btn">🔄 初期化リセット</button>
   </div>
+
+  <!-- 新規リンクタイル追加フォーム -->
+  <section id="add-tile-section" class="add-form-container" aria-label="新しいリンクタイルの追加">
+    <div class="add-form-title">✨ 新しいリンクタイルを作成</div>
+    <form id="add-tile-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tile-title">ボタンのタイトル（必須）</label>
+          <input type="text" id="tile-title" placeholder="例: 📅 新しい予定表" required>
+        </div>
+        <div class="form-group">
+          <label for="tile-url">リンク先URL（必須）</label>
+          <input type="text" id="tile-url" placeholder="例: https://... または events/..." required>
+        </div>
+        <div class="form-group">
+          <label for="tile-desc">説明文（任意）</label>
+          <input type="text" id="tile-desc" placeholder="例: サブテキストを入力">
+        </div>
+        <div class="form-group">
+          <label for="tile-section">追加先セクション</label>
+          <select id="tile-section">
+            <option value="grid-cal">📅 施設カレンダー & スプレッドシート（緑）</option>
+            <option value="grid-radio">📻 RadioPlayer.html（青）</option>
+            <option value="grid-menu">🛠️ Menu / Links（紫）</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="cancel-add-btn" class="ctrl-btn">キャンセル</button>
+        <button type="submit" class="ctrl-btn add-mode">追加する</button>
+      </div>
+    </form>
+  </section>
 
   <main>
     <!-- カレンダー・施設関連 -->
@@ -497,49 +636,126 @@
   </footer>
   
  <script>
-    // ドラッグ＆ドロップと並び順保存の初期化
     document.addEventListener('DOMContentLoaded', () => {
       const gridIds = ['grid-cal', 'grid-radio', 'grid-menu'];
+      const LAYOUT_STORAGE_KEY = 'tileLayout_allSections';
+      const CUSTOM_TILES_KEY = 'customTiles_data';
       let isDragging = false;
 
-      // ドラッグ直後の誤クリックによるリンク遷移を防止
-      document.querySelectorAll('.tile a').forEach(link => {
-        link.addEventListener('click', (e) => {
+      // リンクの誤クリック防止を登録するヘルパー関数
+      const bindLinkClickGuard = (linkEl) => {
+        linkEl.addEventListener('click', (e) => {
           if (isDragging) {
             e.preventDefault();
           }
         });
+      };
+
+      document.querySelectorAll('.tile a').forEach(bindLinkClickGuard);
+
+      // カスタムタイルDOMを生成する関数
+      const createTileElement = (tileData) => {
+        const div = document.createElement('div');
+        div.className = 'tile';
+        div.setAttribute('data-id', tileData.id);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'delete-tile-btn';
+        delBtn.title = 'このタイルを削除';
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm(`「${tileData.title}」を削除しますか？`)) {
+            div.remove();
+            // カスタムタイル一覧から削除
+            const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+            const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
+            localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(updatedCustom));
+            saveAllOrders();
+          }
+        });
+
+        const a = document.createElement('a');
+        a.href = tileData.url;
+        if (/^https?:\/\//i.test(tileData.url)) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+        bindLinkClickGuard(a);
+
+        const btn = document.createElement('button');
+        btn.className = 'tile-btn';
+        btn.textContent = tileData.title;
+
+        const desc = document.createElement('div');
+        desc.className = 'tile-desc';
+        desc.textContent = tileData.desc || '';
+
+        a.appendChild(btn);
+        a.appendChild(desc);
+        div.appendChild(delBtn);
+        div.appendChild(a);
+
+        return div;
+      };
+
+      // 全セクションの現在の配置を保存する関数
+      const saveAllOrders = () => {
+        const layoutData = {};
+        gridIds.forEach(id => {
+          const gridEl = document.getElementById(id);
+          if (gridEl) {
+            layoutData[id] = Array.from(gridEl.children).map(el => el.getAttribute('data-id'));
+          }
+        });
+        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutData));
+      };
+
+      // 1. 保存されたカスタムタイルを復元
+      const savedCustomTiles = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+      savedCustomTiles.forEach(tileData => {
+        const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-menu');
+        if (targetGrid) {
+          targetGrid.appendChild(createTileElement(tileData));
+        }
       });
 
+      // 2. 保存された配置順序を復元（カスタムタイル含む）
+      const savedLayout = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY));
+      if (savedLayout && typeof savedLayout === 'object') {
+        gridIds.forEach(id => {
+          const gridEl = document.getElementById(id);
+          const itemIds = savedLayout[id];
+          if (gridEl && Array.isArray(itemIds)) {
+            itemIds.forEach(itemId => {
+              const tile = document.querySelector(`.tile[data-id="${itemId}"]`);
+              if (tile) {
+                gridEl.appendChild(tile);
+              }
+            });
+          }
+        });
+      }
+
+      // 3. SortableJSの適用（セクション間移動対応）
       gridIds.forEach(id => {
         const gridEl = document.getElementById(id);
         if (!gridEl) return;
 
-        // 保存された並び順があれば復元
-        const savedOrder = JSON.parse(localStorage.getItem('tileOrder_' + id));
-        if (savedOrder && Array.isArray(savedOrder)) {
-          savedOrder.forEach(itemId => {
-            const tile = gridEl.querySelector(`[data-id="${itemId}"]`);
-            if (tile) gridEl.appendChild(tile);
-          });
-        }
-
-        // SortableJSの適用
         new Sortable(gridEl, {
+          group: 'shared',
           animation: 150,
           ghostClass: 'sortable-ghost',
           dragClass: 'sortable-drag',
-          delay: 150, // スマホでスクロールと区別するための長押し判定時間(ms)
-          delayOnTouchOnly: true, // タッチ操作時のみ遅延を有効化（PCは即ドラッグ可能）
+          delay: 150,
+          delayOnTouchOnly: true,
           onStart: () => {
             isDragging = true;
           },
           onEnd: () => {
-            // 並び順をlocalStorageに保存
-            const currentOrder = Array.from(gridEl.children).map(el => el.getAttribute('data-id'));
-            localStorage.setItem('tileOrder_' + id, JSON.stringify(currentOrder));
-            
-            // クリックイベント発火タイミングをやり過ごしてからフラグを戻す
+            saveAllOrders();
             setTimeout(() => {
               isDragging = false;
             }, 50);
@@ -547,10 +763,60 @@
         });
       });
 
-      // リセットボタンの処理
+      // 4. 新規タイル追加フォームの開閉と送信処理
+      const addSection = document.getElementById('add-tile-section');
+      const toggleAddBtn = document.getElementById('toggle-add-form-btn');
+      const cancelAddBtn = document.getElementById('cancel-add-btn');
+      const addForm = document.getElementById('add-tile-form');
+
+      toggleAddBtn.addEventListener('click', () => {
+        addSection.classList.toggle('open');
+        if (addSection.classList.contains('open')) {
+          document.getElementById('tile-title').focus();
+        }
+      });
+
+      cancelAddBtn.addEventListener('click', () => {
+        addSection.classList.remove('open');
+        addForm.reset();
+      });
+
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('tile-title').value.trim();
+        const url = document.getElementById('tile-url').value.trim();
+        const desc = document.getElementById('tile-desc').value.trim();
+        const section = document.getElementById('tile-section').value;
+
+        if (!title || !url) return;
+
+        const newTileData = {
+          id: 'custom-' + Date.now(),
+          title,
+          url,
+          desc,
+          section
+        };
+
+        // カスタムデータに保存
+        const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+        currentCustom.push(newTileData);
+        localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
+
+        // 画面に追加して全体の並び順を保存
+        const targetGrid = document.getElementById(section);
+        targetGrid.appendChild(createTileElement(newTileData));
+        saveAllOrders();
+
+        addForm.reset();
+        addSection.classList.remove('open');
+      });
+
+      // 5. リセットボタンの処理
       document.getElementById('reset-order-btn').addEventListener('click', () => {
-        if (confirm('タイルの並び順を初期状態に戻しますか？')) {
-          gridIds.forEach(id => localStorage.removeItem('tileOrder_' + id));
+        if (confirm('並び順と追加したカスタムタイルをすべて初期状態に戻しますか？')) {
+          localStorage.removeItem(LAYOUT_STORAGE_KEY);
+          localStorage.removeItem(CUSTOM_TILES_KEY);
           location.reload();
         }
       });

@@ -425,6 +425,130 @@ button { -webkit-tap-highlight-color: transparent; }
   .media-icon-btn { width: 40px; height: 40px; flex-basis: 40px; }
 }
 
+
+/* Echo Show 8 横画面（ブラウザのツールバー表示中も収める） */
+@media (orientation: landscape) and (min-width: 768px) {
+  html, body {
+    min-height: 0;
+    height: 100%;
+  }
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .container {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding: clamp(8px, 1.25vh, 14px);
+    grid-template-columns: minmax(270px, 31vw) minmax(0, 1fr);
+    gap: clamp(10px, 1.2vw, 18px);
+  }
+  .status-panel {
+    position: relative;
+    top: auto;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: clamp(11px, 1.45vh, 17px);
+    gap: clamp(7px, 1.05vh, 12px);
+    border-radius: 19px;
+    overflow: hidden;
+  }
+  .status-panel::before {
+    font-size: .62rem;
+    line-height: 1.1;
+  }
+  .datetime-row {
+    gap: 2px;
+    padding: 1px 0 clamp(6px, .9vh, 10px);
+  }
+  #date-display { font-size: clamp(.78rem, 1.25vw, .95rem); }
+  #time-display {
+    font-size: clamp(2rem, 4.2vh, 2.8rem);
+    line-height: 1;
+  }
+  .panel-row { gap: 8px; }
+  #status-label {
+    min-height: clamp(38px, 6vh, 46px);
+    padding-left: 11px;
+    padding-right: 37px;
+    font-size: .9rem;
+  }
+  .control-btn {
+    min-height: clamp(38px, 6vh, 44px);
+    padding: 0 10px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+  #current-station-btn {
+    min-height: clamp(52px, 8.4vh, 66px);
+    padding: 9px 12px;
+    border-radius: 14px;
+  }
+  #current-station-text { font-size: clamp(.92rem, 1.5vw, 1.08rem); }
+  .media-bar {
+    min-height: clamp(52px, 8.5vh, 66px);
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 15px;
+  }
+  .media-icon-btn {
+    width: clamp(38px, 5.8vh, 45px);
+    height: clamp(38px, 5.8vh, 45px);
+    flex-basis: clamp(38px, 5.8vh, 45px);
+  }
+  .media-icon-btn svg { width: 20px; height: 20px; }
+  .media-time-text {
+    min-width: 74px;
+    font-size: clamp(.72rem, 1.1vw, .82rem);
+  }
+  .bottom-row { gap: 8px; }
+  .timer-select {
+    min-height: clamp(38px, 6vh, 45px);
+    padding: 0 9px;
+    font-size: .82rem;
+  }
+  #timer-display { min-width: 76px; font-size: .86rem; }
+  .status-panel::after {
+    padding-top: 7px;
+    font-size: .68rem;
+    line-height: 1.35;
+  }
+  .grid {
+    height: 100%;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 8px;
+    gap: clamp(7px, 1.1vh, 10px);
+    grid-auto-rows: minmax(clamp(54px, 8.2vh, 68px), auto);
+  }
+  .grid::before { padding: 2px 2px 4px; }
+  .station-btn {
+    min-height: clamp(54px, 8.2vh, 68px);
+    padding: 9px 43px 9px 13px;
+    font-size: clamp(.82rem, 1.25vw, .98rem);
+    border-radius: 13px;
+  }
+  .eq-bars { right: 13px; }
+}
+/* 高さが特に小さい場合の追加圧縮 */
+@media (orientation: landscape) and (min-width: 768px) and (max-height: 720px) {
+  .status-panel { padding: 9px 12px; gap: 6px; }
+  .status-panel::before { display: none; }
+  .datetime-row { padding-bottom: 5px; }
+  #time-display { font-size: clamp(1.7rem, 4vh, 2.25rem); }
+  #current-station-btn { min-height: 48px; }
+  .media-bar { min-height: 48px; }
+  .media-icon-btn {
+    width: 36px; height: 36px; flex-basis: 36px;
+  }
+  .timer-select { min-height: 36px; }
+  .status-panel::after { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -609,6 +733,7 @@ button { -webkit-tap-highlight-color: transparent; }
         }
 
         if (audio.paused) {
+            enterPlayerFullscreen();
             audio.play().catch(() => {
                 playAudio(currentStation);
             });
@@ -747,7 +872,30 @@ button { -webkit-tap-highlight-color: transparent; }
         }
     }
 
+    // 再生操作をきっかけにプレーヤーを全画面化（対応ブラウザのみ）
+    function enterPlayerFullscreen() {
+        const root = document.documentElement;
+        if (document.fullscreenElement || !root.requestFullscreen) return;
+        try {
+            const request = root.requestFullscreen({ navigationUI: "hide" });
+            if (request && typeof request.catch === "function") {
+                request.catch(() => {
+                    // ブラウザが全画面化を許可しない場合も、通常表示で再生を継続
+                });
+            }
+        } catch (error) {
+            // 全画面API非対応・制限環境では通常表示を維持
+        }
+    }
+
+    function exitPlayerFullscreen() {
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
+    }
+
     function playAudio(station) {
+        enterPlayerFullscreen();
         resetAudioSystem();
         currentStation = station;
         currentStationText.innerText = station.name;
@@ -829,6 +977,7 @@ button { -webkit-tap-highlight-color: transparent; }
     }
 
     function stopAudio() {
+        exitPlayerFullscreen();
         currentStation = null;
         resetAudioSystem();
         clearTimers();

@@ -365,6 +365,9 @@
 
   <div class="controls">
     <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
+    <button id="export-json-btn" class="ctrl-btn">📤 エクスポート</button>
+    <button id="import-json-btn" class="ctrl-btn">📥 インポート</button>
+    <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
     <button id="reset-order-btn" class="ctrl-btn">🔄 初期化リセット</button>
   </div>
 
@@ -669,7 +672,6 @@
           e.stopPropagation();
           if (confirm(`「${tileData.title}」を削除しますか？`)) {
             div.remove();
-            // カスタムタイル一覧から削除
             const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
             const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
             localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(updatedCustom));
@@ -798,12 +800,10 @@
           section
         };
 
-        // カスタムデータに保存
         const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
         currentCustom.push(newTileData);
         localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
 
-        // 画面に追加して全体の並び順を保存
         const targetGrid = document.getElementById(section);
         targetGrid.appendChild(createTileElement(newTileData));
         saveAllOrders();
@@ -812,7 +812,79 @@
         addSection.classList.remove('open');
       });
 
-      // 5. リセットボタンの処理
+      // 5. JSONエクスポート処理
+      document.getElementById('export-json-btn').addEventListener('click', () => {
+        // 最新の配置状態を確実に反映
+        saveAllOrders();
+
+        const exportPayload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          layout: JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || '{}'),
+          customTiles: JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]')
+        };
+
+        const jsonStr = JSON.stringify(exportPayload, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nirachanman_tiles_${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // 6. JSONインポート処理
+      const importBtn = document.getElementById('import-json-btn');
+      const importInput = document.getElementById('import-file-input');
+
+      importBtn.addEventListener('click', () => {
+        importInput.value = ''; // 同じファイルを再選択できるようにリセット
+        importInput.click();
+      });
+
+      importInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            if (!parsed || typeof parsed !== 'object' || (!parsed.layout && !parsed.customTiles)) {
+              throw new Error('有効なタイル設定データではありません。');
+            }
+
+            if (!confirm('現在の並び順や追加タイルを上書きしてインポートしますか？')) {
+              return;
+            }
+
+            if (parsed.layout && typeof parsed.layout === 'object') {
+              localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(parsed.layout));
+            } else {
+              localStorage.removeItem(LAYOUT_STORAGE_KEY);
+            }
+
+            if (Array.isArray(parsed.customTiles)) {
+              localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(parsed.customTiles));
+            } else {
+              localStorage.removeItem(CUSTOM_TILES_KEY);
+            }
+
+            alert('インポートが完了しました。ページを再読み込みします。');
+            location.reload();
+          } catch (err) {
+            alert('JSONファイルの読み込みに失敗しました。\n' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // 7. リセットボタンの処理
       document.getElementById('reset-order-btn').addEventListener('click', () => {
         if (confirm('並び順と追加したカスタムタイルをすべて初期状態に戻しますか？')) {
           localStorage.removeItem(LAYOUT_STORAGE_KEY);

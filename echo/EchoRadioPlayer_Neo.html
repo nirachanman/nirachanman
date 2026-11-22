@@ -496,6 +496,32 @@ button { -webkit-tap-highlight-color: transparent; }
   }
 }
 
+
+/* 最終レイアウト調整：左パネルを上下中央、局一覧上部の空白を除去 */
+@media (orientation: landscape) and (min-width: 768px) {
+  .container {
+    align-items: center;
+  }
+  .status-panel {
+    align-self: center;
+    height: min(100%, calc(100dvh - 2 * clamp(8px, 1.25vh, 14px)));
+    max-height: calc(100dvh - 2 * clamp(8px, 1.25vh, 14px));
+  }
+  .grid {
+    align-self: stretch;
+    height: 100%;
+    padding-top: 0;
+    align-content: start;
+  }
+  /* 見出し用の疑似要素が作っていた先頭の空き領域をなくす */
+  .grid::before {
+    display: none;
+    content: none;
+    padding: 0;
+    margin: 0;
+  }
+}
+
 </style>
 </head>
 <body>

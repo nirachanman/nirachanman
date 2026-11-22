@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#007bff">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</title>
+<!-- スマホ・PC両対応のドラッグ＆ドロップライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
   :root {
     --bg-color: #b8babc;      /* 背景色 */
@@ -42,7 +44,7 @@
 
   header {
     text-align: center;
-    padding: 1px 0 1px;
+    padding: 1px 0 10px;
   }
 
   header h1 {
@@ -54,9 +56,31 @@
     gap: 8px;
   }
 
+  /* 並び順リセット用のコントロールバー */
+  .controls {
+    text-align: right;
+    margin-bottom: 10px;
+  }
+
+  .reset-btn {
+    background-color: var(--card-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .reset-btn:hover {
+    background-color: #e2e6ea;
+    color: var(--text-color);
+  }
+
   h2.section-title {
     font-size: 1.2rem;
-    margin: 30px 0 15px;
+    margin: 25px 0 15px;
     padding-left: 10px;
     border-left: 4px solid var(--primary-color);
     color: #111111;
@@ -81,15 +105,31 @@
     border: 1px solid var(--border-color);
     position: relative;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    cursor: grab; /* 掴めることを示すカーソル */
+    user-select: none; /* ドラッグ中の文字選択を防止 */
   }
 
   .tile:active {
+    cursor: grabbing;
     transform: scale(0.98);
+  }
+
+  /* ドラッグ中のスタイル */
+  .sortable-ghost {
+    opacity: 0.4;
+    background-color: #e9ecef;
+    border: 2px dashed var(--text-muted);
+  }
+
+  .sortable-drag {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
+    transform: scale(1.02) !important;
+    z-index: 1000;
   }
 
   @media (min-width: 768px) {
     .tile:hover {
-      transform: none; /* 上への動きを停止 */
+      transform: none;
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
     }
   }
@@ -101,15 +141,16 @@
     height: 100%;
     text-decoration: none;
     color: inherit;
+    -webkit-user-drag: none; /* ブラウザ標準のリンクドラッグを無効化 */
   }
 
-  /* ボタン風デザイン（1pxの枠線を追加） */
+  /* ボタン風デザイン */
   .tile-btn {
     display: block;
     text-align: center;
     background-color: #eee; 
     color: #111;
-    border: 1px solid #ced4da; /* 1pxの基本枠線 */
+    border: 1px solid #ced4da;
     padding: 8px 12px;
     border-radius: 10px;
     font-size: 1.1rem;
@@ -120,6 +161,7 @@
     margin: 0 auto 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    pointer-events: none; /* 親の<a>や.tileにドラッグ判定を譲る */
   }
 
   /* 各カテゴリごとの背景と1px枠線 */
@@ -171,10 +213,6 @@
     text-align: center;
   }
 
-  .tile.btn-tile {
-    cursor: pointer;
-  }
-
   footer {
     text-align: center;
     margin-top: 60px;
@@ -220,75 +258,79 @@
     <h1>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</h1>
   </header>
 
+  <div class="controls">
+    <button id="reset-order-btn" class="reset-btn">🔄 並び順をリセット</button>
+  </div>
+
   <main>
     <!-- カレンダー・施設関連 -->
     <h2 class="section-title">📅 施設カレンダー & スプレッドシート</h2>
-    <div class="tile-grid cal-group">
+    <div class="tile-grid cal-group" id="grid-cal">
 
-      <div class="tile">
+      <div class="tile" data-id="cal-1">
         <a href="events/calendar_all2.html">
           <button class="tile-btn">📅 全施設の予定表</button>
           <div class="tile-desc">（公民館・体育館・別館）</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-2">
         <a href="events/calendar-bekkan.html">
           <button class="tile-btn">🗓️ 川口公民館別館 予定表</button>
           <div class="tile-desc">当月から2か月先までの予定表</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-3">
         <a href="events/calendar-gym1.html">
           <button class="tile-btn">🗓️ 社会体育館 日程表1</button>
           <div class="tile-desc">当月から2か月先までの予定表</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-4">
         <a href="events/calendar-gym2.html">
           <button class="tile-btn">🗓️ 社会体育館 日程表2</button>
           <div class="tile-desc">月切り替え予定表</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="cal-5">
         <a href="events/calendar-gym3.html">
           <button class="tile-btn">🗓️ 社会体育館 日程表3</button>
           <div class="tile-desc"> 横(1200px)</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="cal-6">
         <a href="events/calendar_kouminkan.html">
           <button class="tile-btn">🖨️ 川口公民館印刷</button>
           <div class="tile-desc">印刷レイアウト</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-7">
         <a href="events/calendar_kouminkan_bekkan.html">
           <button class="tile-btn">🖨️ 川口公民館別館印刷</button>
           <div class="tile-desc">印刷レイアウト</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-8">
         <a href="events/calendar_taiikukan.html">
           <button class="tile-btn">🖨️ 川口社会体育館印刷</button>
           <div class="tile-desc">印刷レイアウト</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-9">
         <a href="events/calendar.html">
           <button class="tile-btn">🖨️ カレンダー最適化印刷</button>
           <div class="tile-desc">施設ごとに印刷</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="cal-10">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
           <button class="tile-btn">スプレッドシート連携 ↗</button>
           <div class="tile-desc">Googleカレンダーに予定を同期</div>
@@ -299,72 +341,72 @@
 
     <!-- ラジオプレイヤー関連 -->
     <h2 class="section-title radio">📻 RadioPlayer.html</h2>
-    <div class="tile-grid radio-group">
+    <div class="tile-grid radio-group" id="grid-radio">
 
-      <div class="tile">
+      <div class="tile" data-id="rad-1">
         <a href="echo/NHK LIVE Player.html">
           <button class="tile-btn">📻NHKラジオ LIVE Player</button>
           <div class="tile-desc">全国局プレーヤー（高速版）</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="rad-2">
         <a href="echo/NHK_radio_player_premium_timer.html">
           <button class="tile-btn">📻NHKラジオ全国局</button>
           <div class="tile-desc">即時再生プレーヤー（premium）</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="rad-3">
         <a href="echo/EchoRadioPlayer_Neo.html">
           <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
           <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="rad-4">
         <a href="echo/EchoRadioPlayer.html">
           <button class="tile-btn">📻Echo Radio Player</button>
           <div class="tile-desc">Echo Show 対応版</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="rad-5">
         <a href="echo/radiolive1.html">
           <button class="tile-btn">📻Deep Blue Radio</button>
           <div class="tile-desc">Echo Show 対応版</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="rad-6">
         <a href="echo/NHK LIVE Player.html">
           <button class="tile-btn">📻地域別 NHK「LIVE」</button>
           <div class="tile-desc">全国のローカル放送局</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="rad-7">
         <a href="mobile/panel.html">
           <button class="tile-btn">📻NHKラジオニュース</button>
           <div class="tile-desc">NHKニュースを連続再生</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="rad-8">
         <a href="mobile/panel4.html">
           <button class="tile-btn">📻NHKラジオニュース[2]</button>
           <div class="tile-desc">Podcastニュースを再生</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="rad-9">
         <a href="echo/news monitor_yahoo.html">
           <button class="tile-btn">📰News monitor_Yahoo</button>
           <div class="tile-desc">（echoでのスリープ対策用）</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="rad-10">
         <a href="echo/news monitor_nhk.html">
           <button class="tile-btn">📰News monitor_NHK</button>
           <div class="tile-desc">（岩手県防災・災害特化版）</div>
@@ -375,65 +417,65 @@
 
     <!-- その他メニュー -->
     <h2 class="section-title menu">🛠️ Menu / Links（表示テスト用）</h2>
-    <div class="tile-grid menu-group">
+    <div class="tile-grid menu-group" id="grid-menu">
 
-      <div class="tile">
+      <div class="tile" data-id="menu-1">
         <a href="echo/news monitor_y.html">
           <button class="tile-btn">📰news monitor_yahoo</button>
           <div class="tile-desc">yahoo version</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="menu-2">
         <a href="https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja">
           <button class="tile-btn">📰google ニュース</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
       
-      <div class="tile">
+      <div class="tile" data-id="menu-3">
         <a href="echo/EchoRadioPlayer_Neo.html">
           <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
           <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="menu-4">
         <a href="tile_index.html">
           <button class="tile-btn">tile_index.html</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="menu-5">
         <a href="events/calendar.html">
           <button class="tile-btn">calendar.html</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="menu-6">
         <a href="events/calendar_shisethu.html">
           <button class="tile-btn">shisethu</button>
           <div class="tile-desc">Menu / Links（表示テスト用）</div>
         </a>
       </div>
 
-      <div class="tile btn-tile" onclick="window.open('https://github.com/', '_blank')">
-        <a href="https://github.com/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">
+      <div class="tile" data-id="menu-7">
+        <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
           <button class="tile-btn">GitHubで管理状況を確認 </button>
           <div class="tile-desc">別タブで開きます</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="menu-8">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
           <button class="tile-btn">Googleスプレッドシート </button>
           <div class="tile-desc">予定を同期・更新・削除</div>
         </a>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-id="menu-9">
         <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
           <button class="tile-btn">Googleスプレッドシート </button>
           <div class="tile-desc">同期・更新・削除</div>
@@ -455,6 +497,65 @@
   </footer>
   
  <script>
+    // ドラッグ＆ドロップと並び順保存の初期化
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridIds = ['grid-cal', 'grid-radio', 'grid-menu'];
+      let isDragging = false;
+
+      // ドラッグ直後の誤クリックによるリンク遷移を防止
+      document.querySelectorAll('.tile a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          if (isDragging) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      gridIds.forEach(id => {
+        const gridEl = document.getElementById(id);
+        if (!gridEl) return;
+
+        // 保存された並び順があれば復元
+        const savedOrder = JSON.parse(localStorage.getItem('tileOrder_' + id));
+        if (savedOrder && Array.isArray(savedOrder)) {
+          savedOrder.forEach(itemId => {
+            const tile = gridEl.querySelector(`[data-id="${itemId}"]`);
+            if (tile) gridEl.appendChild(tile);
+          });
+        }
+
+        // SortableJSの適用
+        new Sortable(gridEl, {
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          dragClass: 'sortable-drag',
+          delay: 150, // スマホでスクロールと区別するための長押し判定時間(ms)
+          delayOnTouchOnly: true, // タッチ操作時のみ遅延を有効化（PCは即ドラッグ可能）
+          onStart: () => {
+            isDragging = true;
+          },
+          onEnd: () => {
+            // 並び順をlocalStorageに保存
+            const currentOrder = Array.from(gridEl.children).map(el => el.getAttribute('data-id'));
+            localStorage.setItem('tileOrder_' + id, JSON.stringify(currentOrder));
+            
+            // クリックイベント発火タイミングをやり過ごしてからフラグを戻す
+            setTimeout(() => {
+              isDragging = false;
+            }, 50);
+          }
+        });
+      });
+
+      // リセットボタンの処理
+      document.getElementById('reset-order-btn').addEventListener('click', () => {
+        if (confirm('タイルの並び順を初期状態に戻しますか？')) {
+          gridIds.forEach(id => localStorage.removeItem('tileOrder_' + id));
+          location.reload();
+        }
+      });
+    });
+
     // Service Workerの登録（相対パスで確実に登録）
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

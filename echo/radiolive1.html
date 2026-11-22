@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <title>Deep Blue Radio - Echo Show 8 Large Font Edition</title>
+    <title>Echo Radio Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -29,7 +29,7 @@
         html, body {
             width: 100%;
             height: 100vh;
-            height: 100dvh; /* アドレスバー表示時の実際の表示領域に自動フィット */
+            height: 100dvh;
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -48,7 +48,6 @@
             background-color: var(--midnight-blue);
         }
 
-        /* 初期表示（アドレスバーあり）でも全画面でもぴったり収まるカード */
         .player-card {
             background: var(--deep-navy);
             width: 97vw;
@@ -74,7 +73,6 @@
             border-right: 2px solid rgba(59, 77, 107, 0.7);
         }
 
-        /* 上部ヘッダー行：タイトルと「画面維持」表示を並べて配置 */
         .left-header {
             display: flex;
             justify-content: space-between;
@@ -141,7 +139,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* 大きく見やすいお天気ボックス */
         .weather-box {
             display: flex;
             align-items: center;
@@ -234,13 +231,14 @@
             font-weight: 700;
         }
 
-        /* 右カラム：選局・タイマー・プレーヤー */
+        /* 右カラム：選局・再生コントロールバー（中央）・スリープタイマー */
         .right-panel {
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
+            justify-content: space-between;
             height: 100%;
-            gap: 12px;
+            gap: 14px;
+            padding: 6px 0;
         }
 
         .select-group {
@@ -304,15 +302,16 @@
             pointer-events: none;
         }
 
-        /* 大きな再生・停止ボタン＋オーディオプレーヤーエリア */
+        /* 中央配置の再生コントロールバー */
         .control-row {
             display: flex;
             align-items: center;
             gap: 14px;
             background: rgba(11, 17, 32, 0.75);
-            padding: 14px 16px;
+            padding: 16px 18px;
             border-radius: 18px;
             border: 1.5px solid var(--border-blue);
+            margin: auto 0;
         }
 
         .play-toggle-btn {
@@ -361,7 +360,6 @@
             opacity: 0.85;
         }
 
-        /* 縦画面やスマホで開いた場合のフォールバック */
         @media (max-width: 760px) {
             html, body {
                 height: auto;
@@ -439,7 +437,7 @@
         </div>
     </div>
 
-    <!-- 右パネル：選局とコントロール -->
+    <!-- 右パネル：選局 → 再生コントロールバー（中央） → スリープタイマー -->
     <div class="right-panel">
         <div class="select-group">
             <label for="channelSelector">放送局 (Station)</label>
@@ -475,6 +473,11 @@
             </div>
         </div>
 
+        <div class="control-row">
+            <button id="playToggleBtn" class="play-toggle-btn" disabled>▶ 再生</button>
+            <audio id="player" controls></audio>
+        </div>
+
         <div class="select-group">
             <label for="timerSelector">スリープタイマー (Sleep Timer)</label>
             <div class="select-container">
@@ -486,11 +489,6 @@
                     <option value="90">90 分</option>
                 </select>
             </div>
-        </div>
-
-        <div class="control-row">
-            <button id="playToggleBtn" class="play-toggle-btn" disabled>▶ 再生</button>
-            <audio id="player" controls></audio>
         </div>
     </div>
 </div>

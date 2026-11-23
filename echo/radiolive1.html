@@ -428,7 +428,140 @@
             opacity: 0.85;
         }
 
-        @media (max-width: 760px) {
+        /* Echo Show 5 などの小型横画面（幅1060px以下 または 高さ620px以下）向けフィット調整 */
+        @media (max-width: 1060px), (max-height: 620px) {
+            .player-card {
+                width: 97.5vw;
+                height: 95dvh;
+                padding: 12px 18px;
+                border-radius: 18px;
+                grid-template-columns: 1fr 1.15fr;
+                gap: 16px;
+            }
+
+            .left-panel {
+                padding-right: 16px;
+            }
+
+            h1 {
+                font-size: 1.05rem;
+                letter-spacing: 0.06rem;
+            }
+
+            .keep-awake-badge {
+                font-size: 0.78rem;
+                padding: 3px 8px;
+            }
+
+            .fullscreen-btn {
+                font-size: 0.82rem;
+                padding: 4px 9px;
+            }
+
+            .clock-weather-group {
+                gap: 8px;
+            }
+
+            .clock-date {
+                font-size: 1.65rem;
+                margin-bottom: 2px;
+            }
+
+            .clock-time {
+                font-size: 3.45rem;
+            }
+
+            .weather-box {
+                gap: 10px;
+                padding: 8px 12px;
+                border-radius: 12px;
+            }
+
+            .weather-icon {
+                font-size: 1.9rem;
+            }
+
+            .weather-main {
+                gap: 8px;
+                font-size: 1.15rem;
+            }
+
+            .weather-temp {
+                font-size: 1.3rem;
+            }
+
+            .weather-sub {
+                font-size: 0.92rem;
+            }
+
+            .status-indicator {
+                font-size: 1rem;
+                gap: 8px;
+            }
+
+            .dot {
+                width: 11px;
+                height: 11px;
+            }
+
+            .timer-display {
+                font-size: 0.98rem;
+            }
+
+            .right-panel {
+                gap: 8px;
+            }
+
+            label {
+                font-size: 0.9rem;
+                margin-bottom: 4px;
+            }
+
+            select {
+                padding: 10px 36px 10px 14px;
+                border-radius: 12px;
+                font-size: 1.1rem;
+            }
+
+            .select-container::after {
+                font-size: 0.95rem;
+                right: 14px;
+            }
+
+            .now-playing-banner {
+                margin-top: 6px;
+                padding: 6px 12px;
+                border-radius: 10px;
+                font-size: 1rem;
+                gap: 8px;
+            }
+
+            .now-playing-label {
+                font-size: 0.78rem;
+                padding: 2px 7px;
+            }
+
+            .control-row {
+                gap: 10px;
+                padding: 9px 12px;
+                border-radius: 14px;
+            }
+
+            .play-toggle-btn {
+                min-width: 112px;
+                height: 46px;
+                padding: 0 14px;
+                border-radius: 10px;
+                font-size: 1.05rem;
+            }
+
+            audio {
+                height: 38px;
+            }
+        }
+
+        /* 縦画面やスマホで開いた場合のフォールバック */
+        @media (max-width: 760px) and (min-height: 621px) {
             html, body {
                 height: auto;
                 min-height: 100vh;

@@ -76,6 +76,17 @@ html, body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* 全画面表示時にも背景色を維持 */
+:fullscreen, ::backdrop {
+  background-color: var(--bg-page);
+}
+:-webkit-full-screen {
+  background-color: var(--bg-page);
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
 body {
   padding: 0 10px 10px 10px;
   display: flex;
@@ -110,7 +121,7 @@ body {
   gap: 8px;
   background: linear-gradient(135deg, #0051a8 0%, #0284c7 100%);
   color: #ffffff;
-  padding: 10px 48px;
+  padding: 10px 88px;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.03em;
@@ -137,16 +148,22 @@ body {
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 
-.theme-toggle {
+.header-actions {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-toggle {
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 5px 9px;
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
@@ -154,13 +171,8 @@ body {
   backdrop-filter: blur(4px);
 }
 
-.theme-toggle:hover:not(:disabled) {
+.icon-toggle:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%);
-}
-
-.theme-toggle:active:not(:disabled) {
-  transform: translateY(-50%) scale(0.96);
 }
 
 /* -------------------------
@@ -223,7 +235,7 @@ button {
   line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
@@ -235,11 +247,6 @@ button {
 
 button:hover:not(:disabled) {
   background: var(--primary-hover);
-  transform: translateY(-1px);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 button:disabled {
@@ -366,12 +373,11 @@ button:disabled {
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .news-item:hover {
   border-color: var(--active-border);
-  transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
@@ -385,7 +391,7 @@ button:disabled {
   background: var(--primary-light);
   color: var(--primary);
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .news-item:hover .play-icon-wrap {
@@ -460,11 +466,11 @@ button:disabled {
   }
   .header {
     font-size: 20px;
-    padding: 10px 56px;
+    padding: 10px 104px;
   }
-  .theme-toggle {
+  .icon-toggle {
     font-size: 16px;
-    padding: 6px 12px;
+    padding: 6px 11px;
   }
   button {
     font-size: 18px;
@@ -499,7 +505,10 @@ button:disabled {
     <div class="header">
       <img src="podcast.png" alt="podcast" class="header-icon" onerror="this.style.display='none'">
       <span class="header-title">NHKラジオニュース 連続再生</span>
-      <button id="themeToggle" class="theme-toggle" title="ダークモード切替" aria-label="ダークモード切替">🌙</button>
+      <div class="header-actions">
+        <button id="fullscreenToggle" class="icon-toggle" title="全画面表示切替" aria-label="全画面表示切替">⛶</button>
+        <button id="themeToggle" class="icon-toggle" title="ダークモード切替" aria-label="ダークモード切替">🌙</button>
+      </div>
     </div>
 
     <div class="status-panel">
@@ -540,6 +549,75 @@ let items = [];
 let index = -1;
 let disabled = false;
 let liveWindow = null;
+let isTrackTransition = false; // 曲切り替え中の一時停止判定用フラグ
+
+/* -------------------------
+   全画面表示制御（再生中は全画面・停止で解除）
+------------------------- */
+const fullscreenToggle = document.getElementById('fullscreenToggle');
+
+function isFullscreen() {
+  return !!(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  );
+}
+
+function enterFullscreen() {
+  if (isFullscreen()) return;
+  const el = document.documentElement;
+  const req =
+    el.requestFullscreen ||
+    el.webkitRequestFullscreen ||
+    el.mozRequestFullScreen ||
+    el.msRequestFullscreen;
+
+  if (req) {
+    try {
+      const p = req.call(el);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) {}
+  }
+}
+
+function exitFullscreen() {
+  if (!isFullscreen()) return;
+  const exit =
+    document.exitFullscreen ||
+    document.webkitExitFullscreen ||
+    document.mozCancelFullScreen ||
+    document.msExitFullscreen;
+
+  if (exit) {
+    try {
+      const p = exit.call(document);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) {}
+  }
+}
+
+function updateFullscreenIcon() {
+  if (isFullscreen()) {
+    fullscreenToggle.textContent = '🗗';
+    fullscreenToggle.title = '全画面表示を解除';
+  } else {
+    fullscreenToggle.textContent = '⛶';
+    fullscreenToggle.title = '全画面表示にする';
+  }
+}
+
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+
+fullscreenToggle.onclick = () => {
+  if (isFullscreen()) {
+    exitFullscreen();
+  } else {
+    enterFullscreen();
+  }
+};
 
 /* -------------------------
    ダークモード切替処理
@@ -721,17 +799,37 @@ function renderListForDate(dateKey) {
 }
 
 /* -------------------------
-   再生処理
+   再生処理＆オーディオイベント連動
 ------------------------- */
+const audioEl = document.getElementById('audio');
+
+audioEl.addEventListener('play', () => {
+  isTrackTransition = false;
+  document.querySelector('.player-card').classList.add('active');
+  enterFullscreen();
+});
+
+audioEl.addEventListener('pause', () => {
+  // 次の曲へ切り替わる瞬間（ended直後やsrc変更直後）でなければ全画面解除
+  if (!isTrackTransition && !audioEl.ended) {
+    document.querySelector('.player-card').classList.remove('active');
+    exitFullscreen();
+  }
+});
+
 function playCurrent() {
-  const audio = document.getElementById('audio');
   const title = document.getElementById('title');
 
-  audio.src = items[index].url;
+  isTrackTransition = true;
+  enterFullscreen();
+
+  audioEl.src = items[index].url;
   title.textContent = items[index].title;
 
   document.querySelector('.player-card').classList.add('active');
-  audio.play();
+  audioEl.play().catch(() => {
+    isTrackTransition = false;
+  });
 
   updateListHighlight();
 }
@@ -779,8 +877,13 @@ document.getElementById('next').onclick = () => {
 /* -------------------------
    再生終了時（6件ループ）
 ------------------------- */
-document.getElementById('audio').onended = () => {
-  if (disabled) return;
+audioEl.onended = () => {
+  if (disabled) {
+    exitFullscreen();
+    return;
+  }
+
+  isTrackTransition = true;
 
   if (index === 0) {
     index = (items.length > 6) ? 6 : items.length - 1;
@@ -797,8 +900,8 @@ document.getElementById('audio').onended = () => {
    らじる☆らじる
 ------------------------- */
 document.getElementById('liveButton').onclick = () => {
-  const audio = document.getElementById('audio');
-  audio.pause();
+  audioEl.pause();
+  exitFullscreen();
 
   disabled = true;
   document.getElementById('title').textContent = '停止中';
@@ -824,8 +927,8 @@ document.getElementById('liveButton').onclick = () => {
    聴き逃し
 ------------------------- */
 document.getElementById('ondemandButton').onclick = () => {
-  const audio = document.getElementById('audio');
-  audio.pause();
+  audioEl.pause();
+  exitFullscreen();
 
   disabled = true;
   document.getElementById('title').textContent = '停止中';

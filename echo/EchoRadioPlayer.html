@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon1.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <title>Echo Radio Player</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -61,23 +61,66 @@
             box-sizing: border-box;
         }
 
-        /* 年月日（1行目・左寄せ）・現在時刻（2行目・右寄せ）の表示行 */
+        /* 年月日＋全画面ボタン（1行目）・現在時刻（2行目・右寄せ）の表示行 */
         .datetime-row {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
             padding: 0 2px 4px 2px;
             border-bottom: 1px solid #2b3a4f;
             font-variant-numeric: tabular-nums;
         }
 
+        .date-top-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 6px;
+        }
+
         #date-display {
-            align-self: flex-start;
             text-align: left;
             font-size: 1.15rem;
             color: var(--off-white);
             font-weight: bold;
             line-height: 1.15;
+        }
+
+        /* 手動全画面切り替えボタン */
+        .fullscreen-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid #465870;
+            color: #dce0e6;
+            border-radius: 7px;
+            padding: 4px 10px;
+            font-size: 0.92rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .fullscreen-btn.active {
+            border-color: var(--timer-color);
+            color: var(--timer-color);
+            background: rgba(125, 168, 123, 0.15);
+        }
+
+        .fullscreen-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            display: block;
         }
 
         #time-display {
@@ -635,19 +678,23 @@
 
             .datetime-row {
                 flex-direction: column;
-                gap: 0;
+                gap: 1px;
                 padding: 0 2px 3px 2px;
             }
 
             #date-display {
-                align-self: flex-start;
-                font-size: 1.2rem;
+                font-size: 1.18rem;
                 line-height: 1.15;
+            }
+
+            .fullscreen-btn {
+                padding: 4px 10px;
+                font-size: 0.95rem;
             }
 
             #time-display {
                 align-self: flex-end;
-                font-size: 2.55rem;
+                font-size: 2.5rem;
                 line-height: 1.0;
             }
 
@@ -771,7 +818,8 @@
             .grid { grid-template-columns: 1fr; }
             #current-station-btn { font-size: 1.2rem; }
             .station-btn { height: auto; min-height: 56px; font-size: 1.05rem; }
-            #date-display { font-size: 1.0rem; }
+            #date-display { font-size: 0.98rem; }
+            .fullscreen-btn { padding: 3px 7px; font-size: 0.82rem; }
             #time-display { font-size: 1.7rem; }
             .media-bar { padding: 5px 8px; gap: 5px; }
             .media-time-text { font-size: 0.92rem; }
@@ -782,9 +830,17 @@
 
 <div class="container">
     <div class="status-panel">
-        <!-- 年月日（1行目・左寄せ）と現在時刻（2行目・右寄せ）の表示行 -->
+        <!-- 年月日＋手動全画面ボタン（1行目）と現在時刻（2行目・右寄せ）の表示行 -->
         <div class="datetime-row">
-            <span id="date-display">----年--月--日(-)</span>
+            <div class="date-top-line">
+                <span id="date-display">----年--月--日(-)</span>
+                <button id="fullscreen-btn" class="fullscreen-btn" onclick="toggleFullscreen()" aria-label="全画面切り替え">
+                    <svg id="fullscreen-icon" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path>
+                    </svg>
+                    <span id="fullscreen-label">全画面</span>
+                </button>
+            </div>
             <span id="time-display">--:--:--</span>
         </div>
 
@@ -894,6 +950,9 @@
     const muteIcon = document.getElementById('mute-icon');
     const dateDisplay = document.getElementById('date-display');
     const timeDisplay = document.getElementById('time-display');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const fullscreenIcon = document.getElementById('fullscreen-icon');
+    const fullscreenLabel = document.getElementById('fullscreen-label');
     
     let hls = null;
     let timerId = null;
@@ -908,6 +967,40 @@
     const SVG_PAUSE = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
     const SVG_VOL_ON = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>';
     const SVG_VOL_MUTE = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>';
+    const SVG_FS_ENTER = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path>';
+    const SVG_FS_EXIT = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path>';
+
+    // 手動全画面切り替え処理
+    function isFullscreenActive() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    function updateFullscreenUI() {
+        const active = isFullscreenActive();
+        fullscreenBtn.classList.toggle('active', active);
+        fullscreenIcon.innerHTML = active ? SVG_FS_EXIT : SVG_FS_ENTER;
+        fullscreenLabel.innerText = active ? '解除' : '全画面';
+    }
+
+    function toggleFullscreen() {
+        if (!isFullscreenActive()) {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+
+    document.addEventListener('fullscreenchange', updateFullscreenUI);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 
     // 年月日と現在時刻の更新処理
     function updateDateTime() {

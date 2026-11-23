@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <title>Echo Radio Player</title>
+    <title>radiolive1</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
@@ -39,13 +39,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        :fullscreen, ::backdrop {
-            background-color: var(--midnight-blue);
-        }
-        :-webkit-full-screen {
-            background-color: var(--midnight-blue);
         }
 
         .player-card {
@@ -300,11 +293,59 @@
             outline: none;
             cursor: pointer;
             appearance: none;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         select:focus {
             border-color: var(--highlight-blue);
+        }
+
+        /* 再生中の放送局セレクタ強調スタイル */
+        .select-container.is-playing select {
+            border-color: var(--time-color);
+            background-color: rgba(253, 224, 71, 0.1);
+            color: var(--time-color);
+            box-shadow: 0 0 18px rgba(253, 224, 71, 0.22);
+        }
+
+        .select-container.is-playing::after {
+            color: var(--time-color);
+        }
+
+        /* 現在再生中の放送局バナー */
+        .now-playing-banner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            background: rgba(253, 224, 71, 0.14);
+            border: 1.5px solid rgba(253, 224, 71, 0.65);
+            color: var(--time-color);
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.03rem;
+        }
+
+        .now-playing-banner.is-visible {
+            display: flex;
+        }
+
+        .now-playing-label {
+            flex-shrink: 0;
+            background: var(--time-color);
+            color: var(--midnight-blue);
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 8px;
+        }
+
+        .now-playing-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         select optgroup {
@@ -433,7 +474,7 @@
     <!-- 左パネル：タイトル＋画面維持・全画面ボタン・時計・お天気・ステータス -->
     <div class="left-panel">
         <div class="left-header">
-            <h1>📻 Deep Blue Radio</h1>
+            <h1>📻 radiolive1</h1>
             <div class="header-controls">
                 <span id="keepAwakeStatus" class="keep-awake-badge">画面維持: 起動中...</span>
                 <button id="fullscreenBtn" type="button" class="fullscreen-btn">⛶ 全画面</button>
@@ -471,7 +512,7 @@
     <div class="right-panel">
         <div class="select-group">
             <label for="channelSelector">放送局 (Station)</label>
-            <div class="select-container">
+            <div id="channelSelectContainer" class="select-container">
                 <select id="channelSelector">
                     <option value="">放送局を選択してください</option>
                     <optgroup label="━━ ニュース・公共放送 ━━">
@@ -500,6 +541,10 @@
                         <option value="https://0nlineradio.stream13.radiohost.de/0r-j-pop?ref=tunein&upd-meta&upd-scheme=https&_art=dD0xNzgxODgzMjE3JmQ9OTY5OTVhMmRiZGVhOTdiNTY2ZjU">0nlineradio J-POP</option>
                     </optgroup>
                 </select>
+            </div>
+            <div id="nowPlayingBanner" class="now-playing-banner">
+                <span class="now-playing-label">再生中</span>
+                <span id="nowPlayingName" class="now-playing-name"></span>
             </div>
         </div>
 
@@ -530,6 +575,9 @@
     const audio = document.getElementById('player');
     const silentKeeper = document.getElementById('silentKeeper');
     const selector = document.getElementById('channelSelector');
+    const channelSelectContainer = document.getElementById('channelSelectContainer');
+    const nowPlayingBanner = document.getElementById('nowPlayingBanner');
+    const nowPlayingName = document.getElementById('nowPlayingName');
     const timerSelector = document.getElementById('timerSelector');
     const timerDisplay = document.getElementById('timerDisplay');
     const statusText = document.getElementById('statusText');
@@ -557,6 +605,22 @@
     let currentStreamType = "";
     let wakeLock = null;
     let keepAwakeEnabled = true;
+
+    // 再生中の放送局強調表示を更新
+    function updateNowPlayingHighlight(isPlaying) {
+        const selectedOption = selector.options[selector.selectedIndex];
+        const stationTitle = selectedOption ? selectedOption.textContent.trim() : "";
+
+        if (isPlaying && selector.value && stationTitle) {
+            channelSelectContainer.classList.add('is-playing');
+            nowPlayingName.textContent = stationTitle;
+            nowPlayingBanner.classList.add('is-visible');
+        } else {
+            channelSelectContainer.classList.remove('is-playing');
+            nowPlayingName.textContent = "";
+            nowPlayingBanner.classList.remove('is-visible');
+        }
+    }
 
     // 全画面表示の状態判定・切り替え処理
     function isFullscreenActive() {
@@ -742,15 +806,18 @@
             playToggleBtn.disabled = true;
             playToggleBtn.textContent = "▶ 再生";
             playToggleBtn.classList.remove('is-playing');
+            updateNowPlayingHighlight(false);
             return;
         }
         playToggleBtn.disabled = false;
         if (isPlaying) {
             playToggleBtn.textContent = "■ 停止";
             playToggleBtn.classList.add('is-playing');
+            updateNowPlayingHighlight(true);
         } else {
             playToggleBtn.textContent = "▶ 再生";
             playToggleBtn.classList.remove('is-playing');
+            updateNowPlayingHighlight(false);
         }
     }
 
@@ -759,6 +826,7 @@
         audio.pause();
         audio.src = "";
         statusContainer.classList.remove('playing');
+        updateNowPlayingHighlight(false);
 
         if (!url) {
             statusText.textContent = "スタンバイ";

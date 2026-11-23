@@ -63,7 +63,7 @@ button { -webkit-tap-highlight-color: transparent; }
   overflow: hidden;
 }
 .status-panel::before {
-  content: "ECHO  /  LIVE RADIO_NEO";
+  content: "LIVE RADIO_NEO";
   display: block;
   color: #91a9c3;
   font-size: .72rem;
@@ -534,12 +534,73 @@ button { -webkit-tap-highlight-color: transparent; }
   }
 }
 
+
+/* LIVE RADIO_NEO 見出しと手動全画面切替 */
+.status-panel::before { content: none; display: none; }
+.panel-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+.panel-brand {
+  min-width: 0;
+  color: #91a9c3;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+  line-height: 1.25;
+}
+.fullscreen-toggle-btn {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #4d83b8;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(49,133,216,.22), rgba(26,76,126,.2));
+  color: #b9dcff;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.fullscreen-toggle-btn:hover {
+  background: rgba(49,133,216,.32);
+  border-color: #76b7f4;
+}
+.fullscreen-toggle-btn:focus-visible {
+  outline: 2px solid #f4d477;
+  outline-offset: 3px;
+}
+.fullscreen-toggle-btn.is-on {
+  color: #10243a;
+  border-color: #8dc5ff;
+  background: #8dc5ff;
+}
+@media (orientation: landscape) and (min-width: 768px) {
+  .panel-brand-row { margin-bottom: 1px; }
+  .fullscreen-toggle-btn { min-height: 32px; }
+}
+@media (max-width: 767px) {
+  .panel-brand { font-size: .68rem; }
+  .fullscreen-toggle-btn { min-height: 32px; font-size: .72rem; }
+}
+
 </style>
 </head>
 <body>
 
 <div class="container">
     <div class="status-panel">
+        <div class="panel-brand-row">
+            <span class="panel-brand">LIVE RADIO_NEO</span>
+            <button type="button" id="fullscreen-toggle-btn" class="fullscreen-toggle-btn"
+                    onclick="togglePlayerFullscreen()" aria-label="全画面表示に切り替え" aria-pressed="false">
+                全画面 ON
+            </button>
+        </div>
         <!-- 年月日と現在時刻の表示行 -->
         <div class="datetime-row">
             <span id="date-display">----年--月--日(-)</span>
@@ -718,7 +779,6 @@ button { -webkit-tap-highlight-color: transparent; }
         }
 
         if (audio.paused) {
-            enterPlayerFullscreen();
             audio.play().catch(() => {
                 playAudio(currentStation);
             });
@@ -857,30 +917,36 @@ button { -webkit-tap-highlight-color: transparent; }
         }
     }
 
-    // 再生操作をきっかけにプレーヤーを全画面化（対応ブラウザのみ）
-    function enterPlayerFullscreen() {
-        const root = document.documentElement;
-        if (document.fullscreenElement || !root.requestFullscreen) return;
+    // ボタン操作による手動全画面切り替え
+    async function togglePlayerFullscreen() {
         try {
-            const request = root.requestFullscreen({ navigationUI: "hide" });
-            if (request && typeof request.catch === "function") {
-                request.catch(() => {
-                    // ブラウザが全画面化を許可しない場合も、通常表示で再生を継続
-                });
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            } else if (document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen({ navigationUI: "hide" });
             }
         } catch (error) {
-            // 全画面API非対応・制限環境では通常表示を維持
+            // ブラウザが全画面化を許可しない場合は通常表示を維持
         }
+        updateFullscreenButton();
     }
 
-    function exitPlayerFullscreen() {
-        if (document.fullscreenElement && document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-        }
+    function updateFullscreenButton() {
+        const button = document.getElementById("fullscreen-toggle-btn");
+        if (!button) return;
+        const isFullscreen = !!document.fullscreenElement;
+        button.textContent = isFullscreen ? "全画面 OFF" : "全画面 ON";
+        button.classList.toggle("is-on", isFullscreen);
+        button.setAttribute("aria-pressed", String(isFullscreen));
+        button.setAttribute(
+            "aria-label",
+            isFullscreen ? "全画面表示を終了" : "全画面表示に切り替え"
+        );
     }
+
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
 
     function playAudio(station) {
-        enterPlayerFullscreen();
         resetAudioSystem();
         currentStation = station;
         currentStationText.innerText = station.name;
@@ -962,7 +1028,6 @@ button { -webkit-tap-highlight-color: transparent; }
     }
 
     function stopAudio() {
-        exitPlayerFullscreen();
         currentStation = null;
         resetAudioSystem();
         clearTimers();

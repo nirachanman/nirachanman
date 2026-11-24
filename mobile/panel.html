@@ -306,6 +306,7 @@ button:disabled {
 
 .btn-group {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
@@ -318,6 +319,29 @@ button:disabled {
 .btn-secondary:hover:not(:disabled) {
   background: var(--active-player-bg);
   color: var(--primary-hover);
+}
+
+/* 音量均一化トグルボタン */
+.btn-normalize {
+  background: var(--bg-control);
+  color: var(--text-sub);
+  border: 1px solid var(--border-color);
+}
+
+.btn-normalize:hover:not(:disabled) {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.btn-normalize[aria-pressed="true"] {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+[data-theme="dark"] .btn-normalize[aria-pressed="true"] {
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .date-select {
@@ -337,6 +361,7 @@ button:disabled {
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s, background-color 0.2s;
+  flex-shrink: 0;
 }
 
 [data-theme="dark"] .date-select {
@@ -530,11 +555,12 @@ button:disabled {
         <audio id="audio" controls></audio>
       </div>
 
-      <!-- 操作ボタン + 日付プルダウン -->
+      <!-- 操作ボタン + 音量均一化 + 日付プルダウン -->
       <div class="toolbar">
         <div class="btn-group">
           <button id="liveButton" class="btn-secondary">📻 らじる★らじる</button>
           <button id="ondemandButton" class="btn-secondary">🎧 聴き逃し</button>
+          <button id="normalizeToggle" class="btn-normalize" aria-pressed="true" title="番組ごとの音量差を自動で一定に揃えます">🔊 音量均一</button>
         </div>
         <select id="dateSelect" class="date-select" aria-label="日付を選択"></select>
       </div>
@@ -550,6 +576,99 @@ let index = -1;
 let disabled = false;
 let liveWindow = null;
 let isTrackTransition = false; // 曲切り替え中の一時停止判定用フラグ
+
+const audioEl = document.getElementById('audio');
+
+/* -------------------------
+   音量均一化機能（Web Audio API + CORS安全フォールバック）
+------------------------- */
+const normalizeToggle = document.getElementById('normalizeToggle');
+let isNormalizerEnabled = localStorage.getItem('nhk-news-normalize') !== 'false';
+let audioCtx = null;
+let sourceNode = null;
+let compressorNode = null;
+let makeupGainNode = null;
+let bypassCorsForCurrentTrack = false;
+
+function updateNormalizeButtonUI() {
+  normalizeToggle.setAttribute('aria-pressed', String(isNormalizerEnabled));
+  if (isNormalizerEnabled) {
+    normalizeToggle.textContent = '🔊 音量均一';
+    normalizeToggle.title = '音量均一化：ON（クリックでOFF）';
+  } else {
+    normalizeToggle.textContent = '🔈 標準音量';
+    normalizeToggle.title = '音量均一化：OFF（クリックでON）';
+  }
+}
+
+function initAudioGraph() {
+  if (audioCtx) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+
+  audioCtx = new AudioContext();
+  sourceNode = audioCtx.createMediaElementSource(audioEl);
+
+  // 大きな音を抑え小さな声を持ち上げるコンプレッサー
+  compressorNode = audioCtx.createDynamicsCompressor();
+  compressorNode.threshold.value = -24; // 圧縮開始しきい値 (dB)
+  compressorNode.knee.value = 28;       // 圧縮カーブの滑らかさ
+  compressorNode.ratio.value = 12;      // 圧縮比率（一定音量に揃える強さ）
+  compressorNode.attack.value = 0.003;  // 立ち上がり時間 (秒)
+  compressorNode.release.value = 0.25;  // リリース時間 (秒)
+
+  // 圧縮後の全体音量を適切に持ち上げるゲイン
+  makeupGainNode = audioCtx.createGain();
+  makeupGainNode.gain.value = 1.45;
+
+  applyAudioRouting();
+}
+
+function applyAudioRouting() {
+  if (!audioCtx || !sourceNode) return;
+  try {
+    sourceNode.disconnect();
+    compressorNode.disconnect();
+    makeupGainNode.disconnect();
+  } catch (e) {}
+
+  if (isNormalizerEnabled && !bypassCorsForCurrentTrack) {
+    sourceNode.connect(compressorNode);
+    compressorNode.connect(makeupGainNode);
+    makeupGainNode.connect(audioCtx.destination);
+  } else {
+    sourceNode.connect(audioCtx.destination);
+  }
+}
+
+updateNormalizeButtonUI();
+
+normalizeToggle.onclick = () => {
+  isNormalizerEnabled = !isNormalizerEnabled;
+  localStorage.setItem('nhk-news-normalize', String(isNormalizerEnabled));
+  updateNormalizeButtonUI();
+  applyAudioRouting();
+
+  // 現在再生中でCORS未適用だった場合は再読み込みして即時反映
+  if (index >= 0 && items[index] && !audioEl.paused) {
+    const currentTime = audioEl.currentTime;
+    playCurrent(currentTime);
+  }
+};
+
+// CORS非対応サーバーの音声で読み込みエラーが起きた場合、自動で標準再生へフォールバックして無音を防ぐ
+audioEl.addEventListener('error', () => {
+  if (audioEl.crossOrigin === 'anonymous' && index >= 0 && items[index]) {
+    bypassCorsForCurrentTrack = true;
+    audioEl.removeAttribute('crossorigin');
+    applyAudioRouting();
+    isTrackTransition = true;
+    audioEl.src = items[index].url;
+    audioEl.play().catch(() => {
+      isTrackTransition = false;
+    });
+  }
+});
 
 /* -------------------------
    全画面表示制御（再生中は全画面・停止で解除）
@@ -801,12 +920,14 @@ function renderListForDate(dateKey) {
 /* -------------------------
    再生処理＆オーディオイベント連動
 ------------------------- */
-const audioEl = document.getElementById('audio');
-
 audioEl.addEventListener('play', () => {
   isTrackTransition = false;
   document.querySelector('.player-card').classList.add('active');
   enterFullscreen();
+
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 });
 
 audioEl.addEventListener('pause', () => {
@@ -817,13 +938,26 @@ audioEl.addEventListener('pause', () => {
   }
 });
 
-function playCurrent() {
+function playCurrent(resumeTime = 0) {
   const title = document.getElementById('title');
 
   isTrackTransition = true;
+  bypassCorsForCurrentTrack = false;
   enterFullscreen();
 
+  if (isNormalizerEnabled) {
+    initAudioGraph();
+    audioEl.crossOrigin = 'anonymous';
+    applyAudioRouting();
+  } else {
+    audioEl.removeAttribute('crossorigin');
+    applyAudioRouting();
+  }
+
   audioEl.src = items[index].url;
+  if (resumeTime > 0) {
+    audioEl.currentTime = resumeTime;
+  }
   title.textContent = items[index].title;
 
   document.querySelector('.player-card').classList.add('active');

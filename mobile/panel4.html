@@ -704,7 +704,7 @@ async function fetchFeed() {
           return;
         }
 
-        const title = e.querySelector("title")?.textContent || "";
+        const title = (e.querySelector("title")?.textContent || "").trim();
         const url =
           e.querySelector("enclosure")?.getAttribute("url") ||
           e.querySelector("link")?.textContent ||
@@ -720,7 +720,23 @@ async function fetchFeed() {
       });
     });
 
-    items = allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    // 重複を自動で1件にまとめる（同一URL または 同一番組＋同一タイトル）
+    const seenKeys = new Set();
+    const uniqueItems = allItems.filter(item => {
+      const normalizedTitle = item.title.replace(/\s+/g, ' ').trim();
+      const titleKey = `title::${item.source}::${normalizedTitle}`;
+      const urlKey = item.url ? `url::${item.url}` : null;
+
+      if (seenKeys.has(titleKey) || (urlKey && seenKeys.has(urlKey))) {
+        return false;
+      }
+
+      seenKeys.add(titleKey);
+      if (urlKey) seenKeys.add(urlKey);
+      return true;
+    });
+
+    items = uniqueItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     buildDateSelect();
 
   } catch (e) {

@@ -13,14 +13,20 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
   :root {
-    --bg-color: #b8babc;      /* 背景色 */
-    --card-bg: #f8f9fa;      /* 明るいカード背景 */
-    --text-color: #212529;   /* メインの濃い文字色 */
-    --text-muted: #6c757d;   /* 補足のグレー文字色 */
-    --primary-color: #2e7d32; /* ニラグリーン（ライトモード最適化） */
-    --accent-blue: #0288d1;   /* ラジオ系 */
-    --accent-purple: #7b1fa2; /* メニュー系 */
-    --border-color: #919497;  /* 境界線 */
+    --bg-color: #cfd2d6;
+    --card-bg: #f8f9fa;
+    --section-bg: rgba(255, 255, 255, 0.45);
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #adb2b8;
+
+    /* 系統別テーマカラー（6色） */
+    --c-green: #2e7d32;   --c-green-bg: #e8f5e9;   --c-green-bd: #c8e6c9;
+    --c-blue: #0277bd;    --c-blue-bg: #e1f5fe;    --c-blue-bd: #b3e5fc;
+    --c-purple: #6a1b9a;  --c-purple-bg: #f3e5f5;  --c-purple-bd: #e1bee7;
+    --c-orange: #d84315;  --c-orange-bg: #fbe9e7;  --c-orange-bd: #ffccbc;
+    --c-teal: #00695c;    --c-teal-bg: #e0f2f1;    --c-teal-bd: #b2dfdb;
+    --c-slate: #37474f;   --c-slate-bg: #eceff1;   --c-slate-bd: #cfd8dc;
   }
 
   * {
@@ -34,7 +40,7 @@
     color: var(--text-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
-    padding: 20px 10px;
+    padding: 16px 10px 40px;
   }
 
   #outer {
@@ -44,29 +50,36 @@
 
   header {
     text-align: center;
-    padding: 1px 0 10px;
+    padding: 4px 0 12px;
   }
 
   header h1 {
-    font-size: 1.8rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #111111;
     display: inline-flex;
     align-items: center;
     gap: 8px;
   }
 
-  /* コントロールバー & 同期ステータス */
+  /* トップコントロールバー */
   .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .top-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
   }
 
   .sync-status {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     padding: 4px 10px;
     border-radius: 20px;
@@ -78,8 +91,8 @@
     gap: 5px;
   }
 
-  .sync-status.syncing { color: var(--accent-blue); border-color: var(--accent-blue); }
-  .sync-status.synced  { color: var(--primary-color); border-color: var(--primary-color); }
+  .sync-status.syncing { color: var(--c-blue); border-color: var(--c-blue); }
+  .sync-status.synced  { color: var(--c-green); border-color: var(--c-green); }
   .sync-status.error   { color: #dc3545; border-color: #dc3545; }
 
   .ctrl-btn {
@@ -87,9 +100,9 @@
     color: var(--text-color);
     border: 1px solid var(--border-color);
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
   }
@@ -99,9 +112,9 @@
   }
 
   .ctrl-btn.add-mode {
-    background-color: var(--primary-color);
+    background-color: var(--c-green);
     color: #fff;
-    border-color: var(--primary-color);
+    border-color: var(--c-green);
   }
 
   .ctrl-btn.add-mode:hover {
@@ -116,7 +129,7 @@
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
   }
 
   .add-form-container.open {
@@ -125,7 +138,7 @@
 
   .add-form-title {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 12px;
     color: var(--text-color);
   }
@@ -162,7 +175,7 @@
   .form-group input:focus,
   .form-group select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--c-green);
   }
 
   .form-actions {
@@ -171,25 +184,87 @@
     gap: 8px;
   }
 
-  h2.section-title {
-    font-size: 1.2rem;
-    margin: 25px 0 15px;
-    padding-left: 10px;
-    border-left: 4px solid var(--primary-color);
-    color: #111111;
+  /* ジャンルブロック（アコーディオン対応） */
+  .genre-block {
+    background-color: var(--section-bg);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   }
 
-  h2.section-title.radio { border-left-color: var(--accent-blue); }
-  h2.section-title.menu { border-left-color: var(--accent-purple); }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 4px;
+    border-radius: 8px;
+    transition: background-color 0.15s;
+  }
 
+  .section-header:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  h2.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding-left: 10px;
+    border-left: 5px solid var(--c-green);
+    color: #111111;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .tile-count {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1px 8px;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  .chevron {
+    transition: transform 0.2s;
+    font-size: 0.75rem;
+  }
+
+  .genre-block.collapsed .chevron {
+    transform: rotate(-90deg);
+  }
+
+  .genre-block.collapsed .tile-grid {
+    display: none;
+  }
+
+  /* タイルグリッド */
   .tile-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-    min-height: 90px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+    min-height: 48px;
     padding: 4px;
-    border-radius: 12px;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+  }
+
+  .tile-grid:empty {
+    border: 1px dashed var(--border-color);
+    background-color: rgba(255, 255, 255, 0.25);
   }
 
   /* タイル（カード）のスタイル */
@@ -197,7 +272,7 @@
     background-color: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: box-shadow 0.2s;
     border: 1px solid var(--border-color);
     position: relative;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
@@ -252,92 +327,90 @@
   @media (min-width: 768px) {
     .tile:hover {
       transform: none;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
     }
   }
 
-  /* カード内のリンクを全面に広げる */
   .tile a {
     display: block;
-    padding: 20px;
+    padding: 16px;
     height: 100%;
     text-decoration: none;
     color: inherit;
     -webkit-user-drag: none;
   }
 
-  /* ボタン風デザイン */
   .tile-btn {
     display: block;
     text-align: center;
-    background-color: #eee; 
-    color: #111;
-    border: 1px solid #ced4da;
-    padding: 8px 12px;
+    padding: 8px 10px;
     border-radius: 10px;
-    font-size: 1.1rem;
+    font-size: 1.02rem;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
     max-width: 340px;
-    margin: 0 auto 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin: 0 auto 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     pointer-events: none;
   }
 
-  /* 各カテゴリごとの背景と1px枠線 */
-  .cal-group .tile-btn {
-    background-color: #e8f5e9;
-    color: var(--primary-color);
-    border: 1px solid #c8e6c9;
-  }
-  .radio-group .tile-btn {
-    background-color: #e1f5fe;
-    color: var(--accent-blue);
-    border: 1px solid #b3e5fc;
-  }
-  .menu-group .tile-btn {
-    background-color: #f3e5f5;
-    color: var(--accent-purple);
-    border: 1px solid #e1bee7;
-  }
-
-  /* ホバー時に色反転と枠線の最適化 */
-  @media (min-width: 768px) {
-    .cal-group .tile:hover .tile-btn { 
-      background-color: var(--primary-color); 
-      color: #fff; 
-      border-color: var(--primary-color);
-      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
-    }
-    .radio-group .tile:hover .tile-btn { 
-      background-color: var(--accent-blue); 
-      color: #fff; 
-      border-color: var(--accent-blue);
-      box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
-    }
-    .menu-group .tile:hover .tile-btn { 
-      background-color: var(--accent-purple); 
-      color: #fff; 
-      border-color: var(--accent-purple);
-      box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
-    }
-  }
-
-  .tile:active .tile-btn {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
   .tile-desc {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
     text-align: center;
+    line-height: 1.4;
+  }
+
+  /* =========================================================
+     系統別カラー定義（見出しライン＋ボタン＋ホバー色反転）
+     ========================================================= */
+  /* 1. グリーン系（毎日見る・健康・生活） */
+  .theme-green .section-title { border-left-color: var(--c-green); }
+  .theme-green .tile-btn { background-color: var(--c-green-bg); color: var(--c-green); border: 1px solid var(--c-green-bd); }
+  @media (min-width: 768px) {
+    .theme-green .tile:hover .tile-btn { background-color: var(--c-green); color: #fff; border-color: var(--c-green); }
+  }
+
+  /* 2. ブルー系（ニュース・ラジオ・動画） */
+  .theme-blue .section-title { border-left-color: var(--c-blue); }
+  .theme-blue .tile-btn { background-color: var(--c-blue-bg); color: var(--c-blue); border: 1px solid var(--c-blue-bd); }
+  @media (min-width: 768px) {
+    .theme-blue .tile:hover .tile-btn { background-color: var(--c-blue); color: #fff; border-color: var(--c-blue); }
+  }
+
+  /* 3. パープル系（AI・IT開発・SNS） */
+  .theme-purple .section-title { border-left-color: var(--c-purple); }
+  .theme-purple .tile-btn { background-color: var(--c-purple-bg); color: var(--c-purple); border: 1px solid var(--c-purple-bd); }
+  @media (min-width: 768px) {
+    .theme-purple .tile:hover .tile-btn { background-color: var(--c-purple); color: #fff; border-color: var(--c-purple); }
+  }
+
+  /* 4. オレンジ系（趣味・ショッピング・旅行） */
+  .theme-orange .section-title { border-left-color: var(--c-orange); }
+  .theme-orange .tile-btn { background-color: var(--c-orange-bg); color: var(--c-orange); border: 1px solid var(--c-orange-bd); }
+  @media (min-width: 768px) {
+    .theme-orange .tile:hover .tile-btn { background-color: var(--c-orange); color: #fff; border-color: var(--c-orange); }
+  }
+
+  /* 5. ティール系（クラウド・仕事・学習） */
+  .theme-teal .section-title { border-left-color: var(--c-teal); }
+  .theme-teal .tile-btn { background-color: var(--c-teal-bg); color: var(--c-teal); border: 1px solid var(--c-teal-bd); }
+  @media (min-width: 768px) {
+    .theme-teal .tile:hover .tile-btn { background-color: var(--c-teal); color: #fff; border-color: var(--c-teal); }
+  }
+
+  /* 6. スレート系（行政・資料アーカイブ） */
+  .theme-slate .section-title { border-left-color: var(--c-slate); }
+  .theme-slate .tile-btn { background-color: var(--c-slate-bg); color: var(--c-slate); border: 1px solid var(--c-slate-bd); }
+  @media (min-width: 768px) {
+    .theme-slate .tile:hover .tile-btn { background-color: var(--c-slate); color: #fff; border-color: var(--c-slate); }
   }
 
   footer {
     text-align: center;
-    margin-top: 60px;
+    margin-top: 40px;
     padding: 20px 0;
     color: var(--text-muted);
     font-size: 0.9rem;
@@ -345,7 +418,7 @@
   }
 
   #pagetop {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   #pagetop a {
@@ -367,7 +440,7 @@
   @media (max-width: 480px) {
     .tile-grid {
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 10px;
     }
     header h1 { font-size: 1.5rem; }
   }
@@ -382,7 +455,10 @@
 
   <div class="top-bar">
     <div id="sync-status" class="sync-status">☁️ 同期待機中</div>
-    <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
+    <div class="top-actions">
+      <button id="toggle-all-btn" class="ctrl-btn" title="全ジャンルの開閉を切り替え">↕️ 全開閉</button>
+      <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
+    </div>
   </div>
 
   <!-- 新規リンクタイル追加フォーム -->
@@ -403,11 +479,25 @@
           <input type="text" id="tile-desc" placeholder="例: サブテキストを入力">
         </div>
         <div class="form-group">
-          <label for="tile-section">追加先セクション</label>
+          <label for="tile-section">追加先ジャンル</label>
           <select id="tile-section">
-            <option value="grid-cal">📅 施設カレンダー & スプレッドシート（緑）</option>
-            <option value="grid-radio">📻 RadioPlayer.html（青）</option>
-            <option value="grid-menu">🛠️ Menu / Links（紫）</option>
+            <option value="grid-daily">📂 毎日見る</option>
+            <option value="grid-news">📂 ニュース・メディア</option>
+            <option value="grid-sns">📂 SNS・コミュニティ</option>
+            <option value="grid-it">📂 IT・開発</option>
+            <option value="grid-ai">📂 AI・生成AI</option>
+            <option value="grid-cloud">📂 クラウド・ストレージ</option>
+            <option value="grid-hobby">📂 趣味・娯楽</option>
+            <option value="grid-radio">📂 音楽・ラジオ</option>
+            <option value="grid-video">📂 動画・配信</option>
+            <option value="grid-shop">📂 ショッピング</option>
+            <option value="grid-work">📂 仕事・ビジネス</option>
+            <option value="grid-study">📂 学習・教育</option>
+            <option value="grid-gov">📂 行政・公共サービス</option>
+            <option value="grid-travel">📂 交通・旅行</option>
+            <option value="grid-health">📂 健康・医療</option>
+            <option value="grid-life">📂 自宅・生活</option>
+            <option value="grid-archive">📂 資料・アーカイブ</option>
           </select>
         </div>
       </div>
@@ -419,226 +509,314 @@
   </section>
 
   <main>
-    <!-- カレンダー・施設関連 -->
-    <h2 class="section-title">📅 施設カレンダー & スプレッドシート</h2>
-    <div class="tile-grid cal-group" id="grid-cal">
+    <!-- 1. 毎日見る -->
+    <section class="genre-block theme-green" data-genre="grid-daily">
+      <div class="section-header">
+        <h2 class="section-title">📂 毎日見る</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
+      </div>
+      <div class="tile-grid" id="grid-daily">
+        <div class="tile" data-id="cal-1">
+          <a href="events/calendar_all2.html">
+            <button class="tile-btn">📅 全施設の予定表</button>
+            <div class="tile-desc">（公民館・体育館・別館）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-2">
+          <a href="events/calendar-bekkan.html">
+            <button class="tile-btn">🗓️ 川口公民館別館 予定表</button>
+            <div class="tile-desc">当月から2か月先までの予定表</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-3">
+          <a href="events/calendar-gym1.html">
+            <button class="tile-btn">🗓️ 社会体育館 日程表1</button>
+            <div class="tile-desc">当月から2か月先までの予定表</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-4">
+          <a href="events/calendar-gym2.html">
+            <button class="tile-btn">🗓️ 社会体育館 日程表2</button>
+            <div class="tile-desc">月切り替え予定表</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-5">
+          <a href="events/calendar-gym3.html">
+            <button class="tile-btn">🗓️ 社会体育館 日程表3</button>
+            <div class="tile-desc">横(1200px)</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-10">
+          <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+            <button class="tile-btn">スプレッドシート連携 ↗</button>
+            <div class="tile-desc">Googleカレンダーに予定を同期</div>
+          </a>
+        </div>
+      </div>
+    </section>
 
-      <div class="tile" data-id="cal-1">
-        <a href="events/calendar_all2.html">
-          <button class="tile-btn">📅 全施設の予定表</button>
-          <div class="tile-desc">（公民館・体育館・別館）</div>
-        </a>
+    <!-- 2. ニュース・メディア -->
+    <section class="genre-block theme-blue" data-genre="grid-news">
+      <div class="section-header">
+        <h2 class="section-title">📂 ニュース・メディア</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-news">
+        <div class="tile" data-id="rad-9">
+          <a href="echo/news monitor_yahoo.html">
+            <button class="tile-btn">📰News monitor_Yahoo</button>
+            <div class="tile-desc">（echoでのスリープ対策用）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-10">
+          <a href="echo/news monitor_nhk.html">
+            <button class="tile-btn">📰News monitor_NHK</button>
+            <div class="tile-desc">（岩手県防災・災害特化版）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="menu-1">
+          <a href="echo/news monitor_y.html">
+            <button class="tile-btn">📰news monitor_yahoo</button>
+            <div class="tile-desc">yahoo version</div>
+          </a>
+        </div>
+        <div class="tile" data-id="menu-2">
+          <a href="https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja" target="_blank" rel="noopener noreferrer">
+            <button class="tile-btn">📰google ニュース</button>
+            <div class="tile-desc">Google ニュース総合</div>
+          </a>
+        </div>
+      </div>
+    </section>
 
-      <div class="tile" data-id="cal-2">
-        <a href="events/calendar-bekkan.html">
-          <button class="tile-btn">🗓️ 川口公民館別館 予定表</button>
-          <div class="tile-desc">当月から2か月先までの予定表</div>
-        </a>
+    <!-- 3. SNS・コミュニティ -->
+    <section class="genre-block theme-purple" data-genre="grid-sns">
+      <div class="section-header">
+        <h2 class="section-title">📂 SNS・コミュニティ</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-sns"></div>
+    </section>
 
-      <div class="tile" data-id="cal-3">
-        <a href="events/calendar-gym1.html">
-          <button class="tile-btn">🗓️ 社会体育館 日程表1</button>
-          <div class="tile-desc">当月から2か月先までの予定表</div>
-        </a>
+    <!-- 4. IT・開発 -->
+    <section class="genre-block theme-purple" data-genre="grid-it">
+      <div class="section-header">
+        <h2 class="section-title">📂 IT・開発</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-it">
+        <div class="tile" data-id="menu-7">
+          <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
+            <button class="tile-btn">GitHubで管理状況を確認 ↗</button>
+            <div class="tile-desc">リポジトリ・ソース管理</div>
+          </a>
+        </div>
+        <div class="tile" data-id="menu-4">
+          <a href="tile_index.html">
+            <button class="tile-btn">tile_index.html</button>
+            <div class="tile-desc">表示テスト用ページ</div>
+          </a>
+        </div>
+      </div>
+    </section>
 
-      <div class="tile" data-id="cal-4">
-        <a href="events/calendar-gym2.html">
-          <button class="tile-btn">🗓️ 社会体育館 日程表2</button>
-          <div class="tile-desc">月切り替え予定表</div>
-        </a>
+    <!-- 5. AI・生成AI -->
+    <section class="genre-block theme-purple" data-genre="grid-ai">
+      <div class="section-header">
+        <h2 class="section-title">📂 AI・生成AI</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
-      
-      <div class="tile" data-id="cal-5">
-        <a href="events/calendar-gym3.html">
-          <button class="tile-btn">🗓️ 社会体育館 日程表3</button>
-          <div class="tile-desc"> 横(1200px)</div>
-        </a>
-      </div>
-      
-      <div class="tile" data-id="cal-6">
-        <a href="events/calendar_kouminkan.html">
-          <button class="tile-btn">🖨️ 川口公民館印刷</button>
-          <div class="tile-desc">印刷レイアウト</div>
-        </a>
-      </div>
+      <div class="tile-grid" id="grid-ai"></div>
+    </section>
 
-      <div class="tile" data-id="cal-7">
-        <a href="events/calendar_kouminkan_bekkan.html">
-          <button class="tile-btn">🖨️ 川口公民館別館印刷</button>
-          <div class="tile-desc">印刷レイアウト</div>
-        </a>
+    <!-- 6. クラウド・ストレージ -->
+    <section class="genre-block theme-teal" data-genre="grid-cloud">
+      <div class="section-header">
+        <h2 class="section-title">📂 クラウド・ストレージ</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-cloud"></div>
+    </section>
 
-      <div class="tile" data-id="cal-8">
-        <a href="events/calendar_taiikukan.html">
-          <button class="tile-btn">🖨️ 川口社会体育館印刷</button>
-          <div class="tile-desc">印刷レイアウト</div>
-        </a>
+    <!-- 7. 趣味・娯楽 -->
+    <section class="genre-block theme-orange" data-genre="grid-hobby">
+      <div class="section-header">
+        <h2 class="section-title">📂 趣味・娯楽</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-hobby"></div>
+    </section>
 
-      <div class="tile" data-id="cal-9">
-        <a href="events/calendar.html">
-          <button class="tile-btn">🖨️ カレンダー最適化印刷</button>
-          <div class="tile-desc">施設ごとに印刷</div>
-        </a>
+    <!-- 8. 音楽・ラジオ -->
+    <section class="genre-block theme-blue" data-genre="grid-radio">
+      <div class="section-header">
+        <h2 class="section-title">📂 音楽・ラジオ</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-radio">
+        <div class="tile" data-id="rad-1">
+          <a href="echo/NHK LIVE Player.html">
+            <button class="tile-btn">📻NHKラジオ LIVE Player</button>
+            <div class="tile-desc">全国局プレーヤー（高速版）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-2">
+          <a href="echo/NHK_radio_player_premium_timer.html">
+            <button class="tile-btn">📻NHKラジオ全国局</button>
+            <div class="tile-desc">即時再生プレーヤー（premium）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-3">
+          <a href="echo/EchoRadioPlayer_Neo.html">
+            <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
+            <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-4">
+          <a href="echo/EchoRadioPlayer.html">
+            <button class="tile-btn">📻Echo Radio Player</button>
+            <div class="tile-desc">Echo Show 対応版</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-5">
+          <a href="echo/radiolive1.html">
+            <button class="tile-btn">📻Deep Blue Radio</button>
+            <div class="tile-desc">Echo Show 対応版</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-6">
+          <a href="echo/NHK LIVE Player.html">
+            <button class="tile-btn">📻地域別 NHK「LIVE」</button>
+            <div class="tile-desc">全国のローカル放送局</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-7">
+          <a href="mobile/panel.html">
+            <button class="tile-btn">📻NHKラジオニュース</button>
+            <div class="tile-desc">NHKニュースを連続再生</div>
+          </a>
+        </div>
+        <div class="tile" data-id="rad-8">
+          <a href="mobile/panel4.html">
+            <button class="tile-btn">📻NHKラジオニュース[2]</button>
+            <div class="tile-desc">Podcastニュースを再生</div>
+          </a>
+        </div>
+      </div>
+    </section>
 
-      <div class="tile" data-id="cal-10">
-        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <button class="tile-btn">スプレッドシート連携 ↗</button>
-          <div class="tile-desc">Googleカレンダーに予定を同期</div>
-        </a>
+    <!-- 9. 動画・配信 -->
+    <section class="genre-block theme-blue" data-genre="grid-video">
+      <div class="section-header">
+        <h2 class="section-title">📂 動画・配信</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-video"></div>
+    </section>
 
-    </div>
+    <!-- 10. ショッピング -->
+    <section class="genre-block theme-orange" data-genre="grid-shop">
+      <div class="section-header">
+        <h2 class="section-title">📂 ショッピング</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
+      </div>
+      <div class="tile-grid" id="grid-shop"></div>
+    </section>
 
-    <!-- ラジオプレイヤー関連 -->
-    <h2 class="section-title radio">📻 RadioPlayer.html</h2>
-    <div class="tile-grid radio-group" id="grid-radio">
+    <!-- 11. 仕事・ビジネス -->
+    <section class="genre-block theme-teal" data-genre="grid-work">
+      <div class="section-header">
+        <h2 class="section-title">📂 仕事・ビジネス</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
+      </div>
+      <div class="tile-grid" id="grid-work">
+        <div class="tile" data-id="cal-6">
+          <a href="events/calendar_kouminkan.html">
+            <button class="tile-btn">🖨️ 川口公民館印刷</button>
+            <div class="tile-desc">印刷レイアウト</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-7">
+          <a href="events/calendar_kouminkan_bekkan.html">
+            <button class="tile-btn">🖨️ 川口公民館別館印刷</button>
+            <div class="tile-desc">印刷レイアウト</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-8">
+          <a href="events/calendar_taiikukan.html">
+            <button class="tile-btn">🖨️ 川口社会体育館印刷</button>
+            <div class="tile-desc">印刷レイアウト</div>
+          </a>
+        </div>
+        <div class="tile" data-id="cal-9">
+          <a href="events/calendar.html">
+            <button class="tile-btn">🖨️ カレンダー最適化印刷</button>
+            <div class="tile-desc">施設ごとに印刷</div>
+          </a>
+        </div>
+      </div>
+    </section>
 
-      <div class="tile" data-id="rad-1">
-        <a href="echo/NHK LIVE Player.html">
-          <button class="tile-btn">📻NHKラジオ LIVE Player</button>
-          <div class="tile-desc">全国局プレーヤー（高速版）</div>
-        </a>
+    <!-- 12. 学習・教育 -->
+    <section class="genre-block theme-teal" data-genre="grid-study">
+      <div class="section-header">
+        <h2 class="section-title">📂 学習・教育</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
-      
-      <div class="tile" data-id="rad-2">
-        <a href="echo/NHK_radio_player_premium_timer.html">
-          <button class="tile-btn">📻NHKラジオ全国局</button>
-          <div class="tile-desc">即時再生プレーヤー（premium）</div>
-        </a>
-      </div>
-      
-      <div class="tile" data-id="rad-3">
-        <a href="echo/EchoRadioPlayer_Neo.html">
-          <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
-          <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
-        </a>
-      </div>
-      
-      <div class="tile" data-id="rad-4">
-        <a href="echo/EchoRadioPlayer.html">
-          <button class="tile-btn">📻Echo Radio Player</button>
-          <div class="tile-desc">Echo Show 対応版</div>
-        </a>
-      </div>
-      
-      <div class="tile" data-id="rad-5">
-        <a href="echo/radiolive1.html">
-          <button class="tile-btn">📻Deep Blue Radio</button>
-          <div class="tile-desc">Echo Show 対応版</div>
-        </a>
-      </div>
+      <div class="tile-grid" id="grid-study"></div>
+    </section>
 
-      <div class="tile" data-id="rad-6">
-        <a href="echo/NHK LIVE Player.html">
-          <button class="tile-btn">📻地域別 NHK「LIVE」</button>
-          <div class="tile-desc">全国のローカル放送局</div>
-        </a>
+    <!-- 13. 行政・公共サービス -->
+    <section class="genre-block theme-slate" data-genre="grid-gov">
+      <div class="section-header">
+        <h2 class="section-title">📂 行政・公共サービス</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
-
-      <div class="tile" data-id="rad-7">
-        <a href="mobile/panel.html">
-          <button class="tile-btn">📻NHKラジオニュース</button>
-          <div class="tile-desc">NHKニュースを連続再生</div>
-        </a>
+      <div class="tile-grid" id="grid-gov">
+        <div class="tile" data-id="menu-6">
+          <a href="events/calendar_shisethu.html">
+            <button class="tile-btn">shisethu（施設案内）</button>
+            <div class="tile-desc">施設カレンダー関連</div>
+          </a>
+        </div>
       </div>
+    </section>
 
-      <div class="tile" data-id="rad-8">
-        <a href="mobile/panel4.html">
-          <button class="tile-btn">📻NHKラジオニュース[2]</button>
-          <div class="tile-desc">Podcastニュースを再生</div>
-        </a>
+    <!-- 14. 交通・旅行 -->
+    <section class="genre-block theme-orange" data-genre="grid-travel">
+      <div class="section-header">
+        <h2 class="section-title">📂 交通・旅行</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-travel"></div>
+    </section>
 
-      <div class="tile" data-id="rad-9">
-        <a href="echo/news monitor_yahoo.html">
-          <button class="tile-btn">📰News monitor_Yahoo</button>
-          <div class="tile-desc">（echoでのスリープ対策用）</div>
-        </a>
+    <!-- 15. 健康・医療 -->
+    <section class="genre-block theme-green" data-genre="grid-health">
+      <div class="section-header">
+        <h2 class="section-title">📂 健康・医療</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-health"></div>
+    </section>
 
-      <div class="tile" data-id="rad-10">
-        <a href="echo/news monitor_nhk.html">
-          <button class="tile-btn">📰News monitor_NHK</button>
-          <div class="tile-desc">（岩手県防災・災害特化版）</div>
-        </a>
+    <!-- 16. 自宅・生活 -->
+    <section class="genre-block theme-green" data-genre="grid-life">
+      <div class="section-header">
+        <h2 class="section-title">📂 自宅・生活</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
+      <div class="tile-grid" id="grid-life"></div>
+    </section>
 
-    </div>
-
-    <!-- その他メニュー -->
-    <h2 class="section-title menu">🛠️ Menu / Links（表示テスト用）</h2>
-    <div class="tile-grid menu-group" id="grid-menu">
-
-      <div class="tile" data-id="menu-1">
-        <a href="echo/news monitor_y.html">
-          <button class="tile-btn">📰news monitor_yahoo</button>
-          <div class="tile-desc">yahoo version</div>
-        </a>
+    <!-- 17. 資料・アーカイブ -->
+    <section class="genre-block theme-slate" data-genre="grid-archive">
+      <div class="section-header">
+        <h2 class="section-title">📂 資料・アーカイブ</h2>
+        <div class="section-meta"><span class="tile-count">0</span><span class="chevron">▼</span></div>
       </div>
-      
-      <div class="tile" data-id="menu-2">
-        <a href="https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja">
-          <button class="tile-btn">📰google ニュース</button>
-          <div class="tile-desc">Menu / Links（表示テスト用）</div>
-        </a>
-      </div>
-      
-      <div class="tile" data-id="menu-3">
-        <a href="echo/EchoRadioPlayer_Neo.html">
-          <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
-          <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-4">
-        <a href="tile_index.html">
-          <button class="tile-btn">tile_index.html</button>
-          <div class="tile-desc">Menu / Links（表示テスト用）</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-5">
-        <a href="events/calendar.html">
-          <button class="tile-btn">calendar.html</button>
-          <div class="tile-desc">Menu / Links（表示テスト用）</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-6">
-        <a href="events/calendar_shisethu.html">
-          <button class="tile-btn">shisethu</button>
-          <div class="tile-desc">Menu / Links（表示テスト用）</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-7">
-        <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
-          <button class="tile-btn">GitHubで管理状況を確認 </button>
-          <div class="tile-desc">別タブで開きます</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-8">
-        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <button class="tile-btn">Googleスプレッドシート </button>
-          <div class="tile-desc">予定を同期・更新・削除</div>
-        </a>
-      </div>
-
-      <div class="tile" data-id="menu-9">
-        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-          <button class="tile-btn">Googleスプレッドシート </button>
-          <div class="tile-desc">同期・更新・削除</div>
-        </a>
-      </div>
-
-    </div>
+      <div class="tile-grid" id="grid-archive"></div>
+    </section>
   </main>
   
   <footer>
@@ -659,9 +837,15 @@
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyFb8B8rgqAFzUx2tE5kXRjzB4JzGP-PW1eTKhsOYAMFWLTBl9n3V5xr3Rbhz17nsjV/exec';
 
     document.addEventListener('DOMContentLoaded', () => {
-      const gridIds = ['grid-cal', 'grid-radio', 'grid-menu'];
-      const LAYOUT_STORAGE_KEY = 'tileLayout_allSections';
-      const CUSTOM_TILES_KEY = 'customTiles_data';
+      const gridIds = [
+        'grid-daily', 'grid-news', 'grid-sns', 'grid-it', 'grid-ai',
+        'grid-cloud', 'grid-hobby', 'grid-radio', 'grid-video', 'grid-shop',
+        'grid-work', 'grid-study', 'grid-gov', 'grid-travel', 'grid-health',
+        'grid-life', 'grid-archive'
+      ];
+      const LAYOUT_STORAGE_KEY = 'tileLayout_17genres';
+      const CUSTOM_TILES_KEY = 'customTiles_17genres';
+      const COLLAPSED_KEY = 'collapsedGenres_17genres';
       const syncStatusEl = document.getElementById('sync-status');
       let isDragging = false;
 
@@ -670,6 +854,57 @@
         syncStatusEl.className = `sync-status ${type}`;
         syncStatusEl.textContent = text;
       };
+
+      // 各ジャンルのタイル件数バッジを更新する関数
+      const updateAllCounts = () => {
+        document.querySelectorAll('.genre-block').forEach(block => {
+          const countEl = block.querySelector('.tile-count');
+          const gridEl = block.querySelector('.tile-grid');
+          if (countEl && gridEl) {
+            countEl.textContent = gridEl.children.length;
+          }
+        });
+      };
+
+      // 折りたたみ状態の保存・復元
+      const saveCollapsedState = () => {
+        const collapsed = [];
+        document.querySelectorAll('.genre-block.collapsed').forEach(block => {
+          collapsed.push(block.getAttribute('data-genre'));
+        });
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
+      };
+
+      const savedCollapsed = JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]');
+      savedCollapsed.forEach(genreId => {
+        const block = document.querySelector(`.genre-block[data-genre="${genreId}"]`);
+        if (block) block.classList.add('collapsed');
+      });
+
+      // 見出しクリックでアコーディオン開閉
+      document.querySelectorAll('.section-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const block = header.closest('.genre-block');
+          if (block) {
+            block.classList.toggle('collapsed');
+            saveCollapsedState();
+          }
+        });
+      });
+
+      // 全開閉ボタン
+      document.getElementById('toggle-all-btn').addEventListener('click', () => {
+        const blocks = Array.from(document.querySelectorAll('.genre-block'));
+        const hasOpen = blocks.some(b => !b.classList.contains('collapsed'));
+        blocks.forEach(b => {
+          if (hasOpen) {
+            b.classList.add('collapsed');
+          } else {
+            b.classList.remove('collapsed');
+          }
+        });
+        saveCollapsedState();
+      });
 
       // リンクの誤クリック防止
       const bindLinkClickGuard = (linkEl) => {
@@ -698,6 +933,7 @@
             const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
             const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
             localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(updatedCustom));
+            updateAllCounts();
             saveAllState();
           }
         });
@@ -732,7 +968,7 @@
 
         if (Array.isArray(customTilesData)) {
           customTilesData.forEach(tileData => {
-            const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-menu');
+            const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-daily');
             if (targetGrid) {
               targetGrid.appendChild(createTileElement(tileData));
             }
@@ -753,6 +989,7 @@
             }
           });
         }
+        updateAllCounts();
       };
 
       // 現在の状態を保存し、GASへ自動送信する関数
@@ -765,6 +1002,7 @@
           }
         });
         localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutData));
+        updateAllCounts();
 
         if (!GAS_API_URL || GAS_API_URL.includes('ここにGAS')) {
           updateSyncStatus('', '💾 ローカル保存のみ（GAS未設定）');
@@ -831,7 +1069,7 @@
       // 2. 続いてクラウド（GAS）から最新データを取得して自動同期
       fetchFromCloud();
 
-      // 3. SortableJSの適用（セクション間移動対応）
+      // 3. SortableJSの適用（17ジャンル間の自由移動対応）
       gridIds.forEach(id => {
         const gridEl = document.getElementById(id);
         if (!gridEl) return;
@@ -895,6 +1133,13 @@
         localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
 
         const targetGrid = document.getElementById(section);
+        // 追加先ジャンルが折りたたまれていた場合は自動で開く
+        const parentBlock = targetGrid.closest('.genre-block');
+        if (parentBlock && parentBlock.classList.contains('collapsed')) {
+          parentBlock.classList.remove('collapsed');
+          saveCollapsedState();
+        }
+
         targetGrid.appendChild(createTileElement(newTileData));
         saveAllState();
 

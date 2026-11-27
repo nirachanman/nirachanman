@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- PWA / Favicon設定 -->
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007bff">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</title>
+<!-- スマホ・PC両対応のドラッグ＆ドロップライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<style>
+  :root {
+    --bg-color: #b8babc;      /* 背景色 */
+    --card-bg: #f8f9fa;      /* 明るいカード背景 */
+    --text-color: #212529;   /* メインの濃い文字色 */
+    --text-muted: #6c757d;   /* 補足のグレー文字色 */
+    --primary-color: #2e7d32; /* ニラグリーン（ライトモード最適化） */
+    --accent-blue: #0288d1;   /* ラジオ系 */
+    --accent-purple: #7b1fa2; /* メニュー系 */
+    --border-color: #919497;  /* 境界線 */
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    padding: 20px 10px;
+  }
+
+  #outer {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    padding: 1px 0 10px;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #111111;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* コントロールバー & 同期ステータス */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .sync-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .sync-status.syncing { color: var(--accent-blue); border-color: var(--accent-blue); }
+  .sync-status.synced  { color: var(--primary-color); border-color: var(--primary-color); }
+  .sync-status.error   { color: #dc3545; border-color: #dc3545; }
+
+  .ctrl-btn {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .ctrl-btn:hover {
+    background-color: #e2e6ea;
+  }
+
+  .ctrl-btn.add-mode {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+  }
+
+  .ctrl-btn.add-mode:hover {
+    background-color: #1b5e20;
+  }
+
+  /* 新規タイル追加フォーム */
+  .add-form-container {
+    display: none;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .add-form-container.open {
+    display: block;
+  }
+
+  .add-form-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-color);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    color: var(--text-color);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  h2.section-title {
+    font-size: 1.2rem;
+    margin: 25px 0 15px;
+    padding-left: 10px;
+    border-left: 4px solid var(--primary-color);
+    color: #111111;
+  }
+
+  h2.section-title.radio { border-left-color: var(--accent-blue); }
+  h2.section-title.menu { border-left-color: var(--accent-purple); }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    min-height: 90px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  /* タイル（カード）のスタイル */
+  .tile {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--border-color);
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    cursor: grab;
+    user-select: none;
+  }
+
+  .tile:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+  }
+
+  /* カスタム追加タイルの削除ボタン */
+  .delete-tile-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.12);
+    color: #444;
+    border: none;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .delete-tile-btn:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  /* ドラッグ中のスタイル */
+  .sortable-ghost {
+    opacity: 0.4;
+    background-color: #e9ecef;
+    border: 2px dashed var(--text-muted);
+  }
+
+  .sortable-drag {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
+    transform: scale(1.02) !important;
+    z-index: 1000;
+  }
+
+  @media (min-width: 768px) {
+    .tile:hover {
+      transform: none;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+  }
+
+  /* カード内のリンクを全面に広げる */
+  .tile a {
+    display: block;
+    padding: 20px;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    -webkit-user-drag: none;
+  }
+
+  /* ボタン風デザイン */
+  .tile-btn {
+    display: block;
+    text-align: center;
+    background-color: #eee; 
+    color: #111;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    pointer-events: none;
+  }
+
+  /* 各カテゴリごとの背景と1px枠線 */
+  .cal-group .tile-btn {
+    background-color: #e8f5e9;
+    color: var(--primary-color);
+    border: 1px solid #c8e6c9;
+  }
+  .radio-group .tile-btn {
+    background-color: #e1f5fe;
+    color: var(--accent-blue);
+    border: 1px solid #b3e5fc;
+  }
+  .menu-group .tile-btn {
+    background-color: #f3e5f5;
+    color: var(--accent-purple);
+    border: 1px solid #e1bee7;
+  }
+
+  /* ホバー時に色反転と枠線の最適化 */
+  @media (min-width: 768px) {
+    .cal-group .tile:hover .tile-btn { 
+      background-color: var(--primary-color); 
+      color: #fff; 
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    }
+    .radio-group .tile:hover .tile-btn { 
+      background-color: var(--accent-blue); 
+      color: #fff; 
+      border-color: var(--accent-blue);
+      box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
+    }
+    .menu-group .tile:hover .tile-btn { 
+      background-color: var(--accent-purple); 
+      color: #fff; 
+      border-color: var(--accent-purple);
+      box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
+    }
+  }
+
+  .tile:active .tile-btn {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .tile-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    padding: 20px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  #pagetop {
+    margin-bottom: 15px;
+  }
+
+  #pagetop a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: var(--card-bg);
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  #pagetop svg path {
+    fill: var(--text-muted);
+  }
+
+  @media (max-width: 480px) {
+    .tile-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div id="outer">
+
+  <header>
+    <h1>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</h1>
+  </header>
+
+  <div class="top-bar">
+    <div id="sync-status" class="sync-status">☁️ 同期待機中</div>
+    <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
+  </div>
+
+  <!-- 新規リンクタイル追加フォーム -->
+  <section id="add-tile-section" class="add-form-container" aria-label="新しいリンクタイルの追加">
+    <div class="add-form-title">✨ 新しいリンクタイルを作成（全デバイスに自動同期）</div>
+    <form id="add-tile-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tile-title">ボタンのタイトル（必須）</label>
+          <input type="text" id="tile-title" placeholder="例: 📅 新しい予定表" required>
+        </div>
+        <div class="form-group">
+          <label for="tile-url">リンク先URL（必須）</label>
+          <input type="text" id="tile-url" placeholder="例: https://... または events/..." required>
+        </div>
+        <div class="form-group">
+          <label for="tile-desc">説明文（任意）</label>
+          <input type="text" id="tile-desc" placeholder="例: サブテキストを入力">
+        </div>
+        <div class="form-group">
+          <label for="tile-section">追加先セクション</label>
+          <select id="tile-section">
+            <option value="grid-cal">📅 施設カレンダー & スプレッドシート（緑）</option>
+            <option value="grid-radio">📻 RadioPlayer.html（青）</option>
+            <option value="grid-menu">🛠️ Menu / Links（紫）</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="cancel-add-btn" class="ctrl-btn">キャンセル</button>
+        <button type="submit" class="ctrl-btn add-mode">追加して同期</button>
+      </div>
+    </form>
+  </section>
+
+  <main>
+    <!-- カレンダー・施設関連 -->
+    <h2 class="section-title">📅 施設カレンダー & スプレッドシート</h2>
+    <div class="tile-grid cal-group" id="grid-cal">
+
+      <div class="tile" data-id="cal-1">
+        <a href="events/calendar_all2.html">
+          <button class="tile-btn">📅 全施設の予定表</button>
+          <div class="tile-desc">（公民館・体育館・別館）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-2">
+        <a href="events/calendar-bekkan.html">
+          <button class="tile-btn">🗓️ 川口公民館別館 予定表</button>
+          <div class="tile-desc">当月から2か月先までの予定表</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-3">
+        <a href="events/calendar-gym1.html">
+          <button class="tile-btn">🗓️ 社会体育館 日程表1</button>
+          <div class="tile-desc">当月から2か月先までの予定表</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-4">
+        <a href="events/calendar-gym2.html">
+          <button class="tile-btn">🗓️ 社会体育館 日程表2</button>
+          <div class="tile-desc">月切り替え予定表</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="cal-5">
+        <a href="events/calendar-gym3.html">
+          <button class="tile-btn">🗓️ 社会体育館 日程表3</button>
+          <div class="tile-desc"> 横(1200px)</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="cal-6">
+        <a href="events/calendar_kouminkan.html">
+          <button class="tile-btn">🖨️ 川口公民館印刷</button>
+          <div class="tile-desc">印刷レイアウト</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-7">
+        <a href="events/calendar_kouminkan_bekkan.html">
+          <button class="tile-btn">🖨️ 川口公民館別館印刷</button>
+          <div class="tile-desc">印刷レイアウト</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-8">
+        <a href="events/calendar_taiikukan.html">
+          <button class="tile-btn">🖨️ 川口社会体育館印刷</button>
+          <div class="tile-desc">印刷レイアウト</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-9">
+        <a href="events/calendar.html">
+          <button class="tile-btn">🖨️ カレンダー最適化印刷</button>
+          <div class="tile-desc">施設ごとに印刷</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="cal-10">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <button class="tile-btn">スプレッドシート連携 ↗</button>
+          <div class="tile-desc">Googleカレンダーに予定を同期</div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ラジオプレイヤー関連 -->
+    <h2 class="section-title radio">📻 RadioPlayer.html</h2>
+    <div class="tile-grid radio-group" id="grid-radio">
+
+      <div class="tile" data-id="rad-1">
+        <a href="echo/NHK LIVE Player.html">
+          <button class="tile-btn">📻NHKラジオ LIVE Player</button>
+          <div class="tile-desc">全国局プレーヤー（高速版）</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="rad-2">
+        <a href="echo/NHK_radio_player_premium_timer.html">
+          <button class="tile-btn">📻NHKラジオ全国局</button>
+          <div class="tile-desc">即時再生プレーヤー（premium）</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="rad-3">
+        <a href="echo/EchoRadioPlayer_Neo.html">
+          <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
+          <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="rad-4">
+        <a href="echo/EchoRadioPlayer.html">
+          <button class="tile-btn">📻Echo Radio Player</button>
+          <div class="tile-desc">Echo Show 対応版</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="rad-5">
+        <a href="echo/radiolive1.html">
+          <button class="tile-btn">📻Deep Blue Radio</button>
+          <div class="tile-desc">Echo Show 対応版</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="rad-6">
+        <a href="echo/NHK LIVE Player.html">
+          <button class="tile-btn">📻地域別 NHK「LIVE」</button>
+          <div class="tile-desc">全国のローカル放送局</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="rad-7">
+        <a href="mobile/panel.html">
+          <button class="tile-btn">📻NHKラジオニュース</button>
+          <div class="tile-desc">NHKニュースを連続再生</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="rad-8">
+        <a href="mobile/panel4.html">
+          <button class="tile-btn">📻NHKラジオニュース[2]</button>
+          <div class="tile-desc">Podcastニュースを再生</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="rad-9">
+        <a href="echo/news monitor_yahoo.html">
+          <button class="tile-btn">📰News monitor_Yahoo</button>
+          <div class="tile-desc">（echoでのスリープ対策用）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="rad-10">
+        <a href="echo/news monitor_nhk.html">
+          <button class="tile-btn">📰News monitor_NHK</button>
+          <div class="tile-desc">（岩手県防災・災害特化版）</div>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- その他メニュー -->
+    <h2 class="section-title menu">🛠️ Menu / Links（表示テスト用）</h2>
+    <div class="tile-grid menu-group" id="grid-menu">
+
+      <div class="tile" data-id="menu-1">
+        <a href="echo/news monitor_y.html">
+          <button class="tile-btn">📰news monitor_yahoo</button>
+          <div class="tile-desc">yahoo version</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="menu-2">
+        <a href="https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja">
+          <button class="tile-btn">📰google ニュース</button>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+      
+      <div class="tile" data-id="menu-3">
+        <a href="echo/EchoRadioPlayer_Neo.html">
+          <button class="tile-btn">📻EchoRadioPlayer_Neo</button>
+          <div class="tile-desc">Echo Radio Player_neo（スマホ用）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-4">
+        <a href="tile_index.html">
+          <button class="tile-btn">tile_index.html</button>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-5">
+        <a href="events/calendar.html">
+          <button class="tile-btn">calendar.html</button>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-6">
+        <a href="events/calendar_shisethu.html">
+          <button class="tile-btn">shisethu</button>
+          <div class="tile-desc">Menu / Links（表示テスト用）</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-7">
+        <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
+          <button class="tile-btn">GitHubで管理状況を確認 </button>
+          <div class="tile-desc">別タブで開きます</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-8">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <button class="tile-btn">Googleスプレッドシート </button>
+          <div class="tile-desc">予定を同期・更新・削除</div>
+        </a>
+      </div>
+
+      <div class="tile" data-id="menu-9">
+        <a href="https://docs.google.com/spreadsheets/d/1WKy1X_3nPvTYqLj1emanxuUfP6tN57b5Nrwe_xHP6v0/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+          <button class="tile-btn">Googleスプレッドシート </button>
+          <div class="tile-desc">同期・更新・削除</div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+  
+  <footer>
+    <div id="pagetop">
+      <a href="#outer" aria-label="ページトップへ戻る">
+        <svg viewBox="0 0 24 24" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/>
+        </svg>
+      </a>
+    </div>
+    &copy; 2026 nirachamamn
+  </footer>
+  
+ <script>
+    // =========================================================================
+    // ★ ここに発行した Google Apps Script の「ウェブアプリURL」を貼り付け ★
+    // =========================================================================
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyFb8B8rgqAFzUx2tE5kXRjzB4JzGP-PW1eTKhsOYAMFWLTBl9n3V5xr3Rbhz17nsjV/exec';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridIds = ['grid-cal', 'grid-radio', 'grid-menu'];
+      const LAYOUT_STORAGE_KEY = 'tileLayout_allSections';
+      const CUSTOM_TILES_KEY = 'customTiles_data';
+      const syncStatusEl = document.getElementById('sync-status');
+      let isDragging = false;
+
+      // 同期ステータス表示の更新
+      const updateSyncStatus = (type, text) => {
+        syncStatusEl.className = `sync-status ${type}`;
+        syncStatusEl.textContent = text;
+      };
+
+      // リンクの誤クリック防止
+      const bindLinkClickGuard = (linkEl) => {
+        linkEl.addEventListener('click', (e) => {
+          if (isDragging) e.preventDefault();
+        });
+      };
+      document.querySelectorAll('.tile a').forEach(bindLinkClickGuard);
+
+      // カスタムタイルDOM生成
+      const createTileElement = (tileData) => {
+        const div = document.createElement('div');
+        div.className = 'tile custom-tile';
+        div.setAttribute('data-id', tileData.id);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'delete-tile-btn';
+        delBtn.title = 'このタイルを削除';
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (confirm(`「${tileData.title}」を削除しますか？（全デバイスからも削除されます）`)) {
+            div.remove();
+            const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+            const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
+            localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(updatedCustom));
+            saveAllState();
+          }
+        });
+
+        const a = document.createElement('a');
+        a.href = tileData.url;
+        if (/^https?:\/\//i.test(tileData.url)) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+        bindLinkClickGuard(a);
+
+        const btn = document.createElement('button');
+        btn.className = 'tile-btn';
+        btn.textContent = tileData.title;
+
+        const desc = document.createElement('div');
+        desc.className = 'tile-desc';
+        desc.textContent = tileData.desc || '';
+
+        a.appendChild(btn);
+        a.appendChild(desc);
+        div.appendChild(delBtn);
+        div.appendChild(a);
+
+        return div;
+      };
+
+      // データを画面DOMへ適用する関数
+      const applyStateToDOM = (layoutData, customTilesData) => {
+        document.querySelectorAll('.tile.custom-tile').forEach(el => el.remove());
+
+        if (Array.isArray(customTilesData)) {
+          customTilesData.forEach(tileData => {
+            const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-menu');
+            if (targetGrid) {
+              targetGrid.appendChild(createTileElement(tileData));
+            }
+          });
+        }
+
+        if (layoutData && typeof layoutData === 'object') {
+          gridIds.forEach(id => {
+            const gridEl = document.getElementById(id);
+            const itemIds = layoutData[id];
+            if (gridEl && Array.isArray(itemIds)) {
+              itemIds.forEach(itemId => {
+                const tile = document.querySelector(`.tile[data-id="${itemId}"]`);
+                if (tile) {
+                  gridEl.appendChild(tile);
+                }
+              });
+            }
+          });
+        }
+      };
+
+      // 現在の状態を保存し、GASへ自動送信する関数
+      const saveAllState = async () => {
+        const layoutData = {};
+        gridIds.forEach(id => {
+          const gridEl = document.getElementById(id);
+          if (gridEl) {
+            layoutData[id] = Array.from(gridEl.children).map(el => el.getAttribute('data-id'));
+          }
+        });
+        localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutData));
+
+        if (!GAS_API_URL || GAS_API_URL.includes('ここにGAS')) {
+          updateSyncStatus('', '💾 ローカル保存のみ（GAS未設定）');
+          return;
+        }
+
+        updateSyncStatus('syncing', '🔄 クラウドへ保存中...');
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          layout: layoutData,
+          customTiles: JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]')
+        };
+
+        try {
+          const res = await fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (result.status === 'success') {
+            updateSyncStatus('synced', '☁️ 全デバイスと同期済み');
+          } else {
+            throw new Error(result.message || '保存エラー');
+          }
+        } catch (err) {
+          console.error('GAS保存エラー:', err);
+          updateSyncStatus('error', '⚠️ クラウド保存失敗');
+        }
+      };
+
+      // GASから最新データを取得して反映する関数
+      const fetchFromCloud = async () => {
+        if (!GAS_API_URL || GAS_API_URL.includes('ここにGAS')) {
+          updateSyncStatus('', '💾 ローカルモード（GAS未設定）');
+          return;
+        }
+
+        updateSyncStatus('syncing', '🔄 最新配置を取得中...');
+        try {
+          const res = await fetch(GAS_API_URL, { cache: 'no-store' });
+          const data = await res.json();
+
+          if (data && typeof data === 'object' && (data.layout || data.customTiles)) {
+            const newLayout = data.layout || {};
+            const newCustom = Array.isArray(data.customTiles) ? data.customTiles : [];
+
+            localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout));
+            localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(newCustom));
+            applyStateToDOM(newLayout, newCustom);
+          }
+          updateSyncStatus('synced', '☁️ 全デバイスと同期済み');
+        } catch (err) {
+          console.error('GAS読み込みエラー:', err);
+          updateSyncStatus('error', '⚠️ オフライン（ローカル表示中）');
+        }
+      };
+
+      // 1. まずローカルキャッシュから即座に画面復元
+      const initialLayout = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || 'null');
+      const initialCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+      applyStateToDOM(initialLayout, initialCustom);
+
+      // 2. 続いてクラウド（GAS）から最新データを取得して自動同期
+      fetchFromCloud();
+
+      // 3. SortableJSの適用（セクション間移動対応）
+      gridIds.forEach(id => {
+        const gridEl = document.getElementById(id);
+        if (!gridEl) return;
+
+        new Sortable(gridEl, {
+          group: 'shared',
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          dragClass: 'sortable-drag',
+          delay: 150,
+          delayOnTouchOnly: true,
+          onStart: () => {
+            isDragging = true;
+          },
+          onEnd: () => {
+            saveAllState();
+            setTimeout(() => {
+              isDragging = false;
+            }, 50);
+          }
+        });
+      });
+
+      // 4. 新規タイル追加フォームの処理
+      const addSection = document.getElementById('add-tile-section');
+      const toggleAddBtn = document.getElementById('toggle-add-form-btn');
+      const cancelAddBtn = document.getElementById('cancel-add-btn');
+      const addForm = document.getElementById('add-tile-form');
+
+      toggleAddBtn.addEventListener('click', () => {
+        addSection.classList.toggle('open');
+        if (addSection.classList.contains('open')) {
+          document.getElementById('tile-title').focus();
+        }
+      });
+
+      cancelAddBtn.addEventListener('click', () => {
+        addSection.classList.remove('open');
+        addForm.reset();
+      });
+
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('tile-title').value.trim();
+        const url = document.getElementById('tile-url').value.trim();
+        const desc = document.getElementById('tile-desc').value.trim();
+        const section = document.getElementById('tile-section').value;
+
+        if (!title || !url) return;
+
+        const newTileData = {
+          id: 'custom-' + Date.now(),
+          title,
+          url,
+          desc,
+          section
+        };
+
+        const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+        currentCustom.push(newTileData);
+        localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
+
+        const targetGrid = document.getElementById(section);
+        targetGrid.appendChild(createTileElement(newTileData));
+        saveAllState();
+
+        addForm.reset();
+        addSection.classList.remove('open');
+      });
+    });
+
+    // Service Workerの登録
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker 登録成功:', reg.scope))
+                .catch(err => console.log('PWA Service Worker 登録失敗:', err));
+        });
+    }
+ </script>
+
+</div>
+</body>
+</html>

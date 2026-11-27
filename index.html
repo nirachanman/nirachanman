@@ -56,14 +56,31 @@
     gap: 8px;
   }
 
-  /* コントロールバー */
-  .controls {
+  /* コントロールバー & 同期ステータス */
+  .top-bar {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 12px;
-    flex-wrap: wrap;
   }
+
+  .sync-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .sync-status.syncing { color: var(--accent-blue); border-color: var(--accent-blue); }
+  .sync-status.synced  { color: var(--primary-color); border-color: var(--primary-color); }
+  .sync-status.error   { color: #dc3545; border-color: #dc3545; }
 
   .ctrl-btn {
     background-color: var(--card-bg);
@@ -363,17 +380,14 @@
     <h1>🟩ﾆﾗﾁｬﾝﾏﾝＨＰ</h1>
   </header>
 
-  <div class="controls">
+  <div class="top-bar">
+    <div id="sync-status" class="sync-status">☁️ 同期待機中</div>
     <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
-    <button id="export-json-btn" class="ctrl-btn">📤 エクスポート</button>
-    <button id="import-json-btn" class="ctrl-btn">📥 インポート</button>
-    <input type="file" id="import-file-input" accept=".json,application/json" style="display: none;">
-    <button id="reset-order-btn" class="ctrl-btn">🔄 初期化リセット</button>
   </div>
 
   <!-- 新規リンクタイル追加フォーム -->
   <section id="add-tile-section" class="add-form-container" aria-label="新しいリンクタイルの追加">
-    <div class="add-form-title">✨ 新しいリンクタイルを作成</div>
+    <div class="add-form-title">✨ 新しいリンクタイルを作成（全デバイスに自動同期）</div>
     <form id="add-tile-form">
       <div class="form-grid">
         <div class="form-group">
@@ -399,7 +413,7 @@
       </div>
       <div class="form-actions">
         <button type="button" id="cancel-add-btn" class="ctrl-btn">キャンセル</button>
-        <button type="submit" class="ctrl-btn add-mode">追加する</button>
+        <button type="submit" class="ctrl-btn add-mode">追加して同期</button>
       </div>
     </form>
   </section>
@@ -515,7 +529,7 @@
       
       <div class="tile" data-id="rad-5">
         <a href="echo/radiolive1.html">
-          <button class="tile-btn">📻radiolive1</button>
+          <button class="tile-btn">📻Deep Blue Radio</button>
           <div class="tile-desc">Echo Show 対応版</div>
         </a>
       </div>
@@ -639,27 +653,36 @@
   </footer>
   
  <script>
+    // =========================================================================
+    // ★ ここに発行した Google Apps Script の「ウェブアプリURL」を貼り付け ★
+    // =========================================================================
+    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyFb8B8rgqAFzUx2tE5kXRjzB4JzGP-PW1eTKhsOYAMFWLTBl9n3V5xr3Rbhz17nsjV/exec';
+
     document.addEventListener('DOMContentLoaded', () => {
       const gridIds = ['grid-cal', 'grid-radio', 'grid-menu'];
       const LAYOUT_STORAGE_KEY = 'tileLayout_allSections';
       const CUSTOM_TILES_KEY = 'customTiles_data';
+      const syncStatusEl = document.getElementById('sync-status');
       let isDragging = false;
 
-      // リンクの誤クリック防止を登録するヘルパー関数
-      const bindLinkClickGuard = (linkEl) => {
-        linkEl.addEventListener('click', (e) => {
-          if (isDragging) {
-            e.preventDefault();
-          }
-        });
+      // 同期ステータス表示の更新
+      const updateSyncStatus = (type, text) => {
+        syncStatusEl.className = `sync-status ${type}`;
+        syncStatusEl.textContent = text;
       };
 
+      // リンクの誤クリック防止
+      const bindLinkClickGuard = (linkEl) => {
+        linkEl.addEventListener('click', (e) => {
+          if (isDragging) e.preventDefault();
+        });
+      };
       document.querySelectorAll('.tile a').forEach(bindLinkClickGuard);
 
-      // カスタムタイルDOMを生成する関数
+      // カスタムタイルDOM生成
       const createTileElement = (tileData) => {
         const div = document.createElement('div');
-        div.className = 'tile';
+        div.className = 'tile custom-tile';
         div.setAttribute('data-id', tileData.id);
 
         const delBtn = document.createElement('button');
@@ -670,12 +693,12 @@
         delBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (confirm(`「${tileData.title}」を削除しますか？`)) {
+          if (confirm(`「${tileData.title}」を削除しますか？（全デバイスからも削除されます）`)) {
             div.remove();
             const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
             const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
             localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(updatedCustom));
-            saveAllOrders();
+            saveAllState();
           }
         });
 
@@ -703,8 +726,37 @@
         return div;
       };
 
-      // 全セクションの現在の配置を保存する関数
-      const saveAllOrders = () => {
+      // データを画面DOMへ適用する関数
+      const applyStateToDOM = (layoutData, customTilesData) => {
+        document.querySelectorAll('.tile.custom-tile').forEach(el => el.remove());
+
+        if (Array.isArray(customTilesData)) {
+          customTilesData.forEach(tileData => {
+            const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-menu');
+            if (targetGrid) {
+              targetGrid.appendChild(createTileElement(tileData));
+            }
+          });
+        }
+
+        if (layoutData && typeof layoutData === 'object') {
+          gridIds.forEach(id => {
+            const gridEl = document.getElementById(id);
+            const itemIds = layoutData[id];
+            if (gridEl && Array.isArray(itemIds)) {
+              itemIds.forEach(itemId => {
+                const tile = document.querySelector(`.tile[data-id="${itemId}"]`);
+                if (tile) {
+                  gridEl.appendChild(tile);
+                }
+              });
+            }
+          });
+        }
+      };
+
+      // 現在の状態を保存し、GASへ自動送信する関数
+      const saveAllState = async () => {
         const layoutData = {};
         gridIds.forEach(id => {
           const gridEl = document.getElementById(id);
@@ -713,33 +765,71 @@
           }
         });
         localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutData));
+
+        if (!GAS_API_URL || GAS_API_URL.includes('ここにGAS')) {
+          updateSyncStatus('', '💾 ローカル保存のみ（GAS未設定）');
+          return;
+        }
+
+        updateSyncStatus('syncing', '🔄 クラウドへ保存中...');
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          layout: layoutData,
+          customTiles: JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]')
+        };
+
+        try {
+          const res = await fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (result.status === 'success') {
+            updateSyncStatus('synced', '☁️ 全デバイスと同期済み');
+          } else {
+            throw new Error(result.message || '保存エラー');
+          }
+        } catch (err) {
+          console.error('GAS保存エラー:', err);
+          updateSyncStatus('error', '⚠️ クラウド保存失敗');
+        }
       };
 
-      // 1. 保存されたカスタムタイルを復元
-      const savedCustomTiles = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
-      savedCustomTiles.forEach(tileData => {
-        const targetGrid = document.getElementById(tileData.section) || document.getElementById('grid-menu');
-        if (targetGrid) {
-          targetGrid.appendChild(createTileElement(tileData));
+      // GASから最新データを取得して反映する関数
+      const fetchFromCloud = async () => {
+        if (!GAS_API_URL || GAS_API_URL.includes('ここにGAS')) {
+          updateSyncStatus('', '💾 ローカルモード（GAS未設定）');
+          return;
         }
-      });
 
-      // 2. 保存された配置順序を復元（カスタムタイル含む）
-      const savedLayout = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY));
-      if (savedLayout && typeof savedLayout === 'object') {
-        gridIds.forEach(id => {
-          const gridEl = document.getElementById(id);
-          const itemIds = savedLayout[id];
-          if (gridEl && Array.isArray(itemIds)) {
-            itemIds.forEach(itemId => {
-              const tile = document.querySelector(`.tile[data-id="${itemId}"]`);
-              if (tile) {
-                gridEl.appendChild(tile);
-              }
-            });
+        updateSyncStatus('syncing', '🔄 最新配置を取得中...');
+        try {
+          const res = await fetch(GAS_API_URL, { cache: 'no-store' });
+          const data = await res.json();
+
+          if (data && typeof data === 'object' && (data.layout || data.customTiles)) {
+            const newLayout = data.layout || {};
+            const newCustom = Array.isArray(data.customTiles) ? data.customTiles : [];
+
+            localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout));
+            localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(newCustom));
+            applyStateToDOM(newLayout, newCustom);
           }
-        });
-      }
+          updateSyncStatus('synced', '☁️ 全デバイスと同期済み');
+        } catch (err) {
+          console.error('GAS読み込みエラー:', err);
+          updateSyncStatus('error', '⚠️ オフライン（ローカル表示中）');
+        }
+      };
+
+      // 1. まずローカルキャッシュから即座に画面復元
+      const initialLayout = JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || 'null');
+      const initialCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+      applyStateToDOM(initialLayout, initialCustom);
+
+      // 2. 続いてクラウド（GAS）から最新データを取得して自動同期
+      fetchFromCloud();
 
       // 3. SortableJSの適用（セクション間移動対応）
       gridIds.forEach(id => {
@@ -757,7 +847,7 @@
             isDragging = true;
           },
           onEnd: () => {
-            saveAllOrders();
+            saveAllState();
             setTimeout(() => {
               isDragging = false;
             }, 50);
@@ -765,7 +855,7 @@
         });
       });
 
-      // 4. 新規タイル追加フォームの開閉と送信処理
+      // 4. 新規タイル追加フォームの処理
       const addSection = document.getElementById('add-tile-section');
       const toggleAddBtn = document.getElementById('toggle-add-form-btn');
       const cancelAddBtn = document.getElementById('cancel-add-btn');
@@ -806,95 +896,14 @@
 
         const targetGrid = document.getElementById(section);
         targetGrid.appendChild(createTileElement(newTileData));
-        saveAllOrders();
+        saveAllState();
 
         addForm.reset();
         addSection.classList.remove('open');
       });
-
-      // 5. JSONエクスポート処理
-      document.getElementById('export-json-btn').addEventListener('click', () => {
-        // 最新の配置状態を確実に反映
-        saveAllOrders();
-
-        const exportPayload = {
-          version: 1,
-          exportedAt: new Date().toISOString(),
-          layout: JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || '{}'),
-          customTiles: JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]')
-        };
-
-        const jsonStr = JSON.stringify(exportPayload, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `nirachanman_tiles_${dateStr}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
-
-      // 6. JSONインポート処理
-      const importBtn = document.getElementById('import-json-btn');
-      const importInput = document.getElementById('import-file-input');
-
-      importBtn.addEventListener('click', () => {
-        importInput.value = ''; // 同じファイルを再選択できるようにリセット
-        importInput.click();
-      });
-
-      importInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const parsed = JSON.parse(event.target.result);
-            if (!parsed || typeof parsed !== 'object' || (!parsed.layout && !parsed.customTiles)) {
-              throw new Error('有効なタイル設定データではありません。');
-            }
-
-            if (!confirm('現在の並び順や追加タイルを上書きしてインポートしますか？')) {
-              return;
-            }
-
-            if (parsed.layout && typeof parsed.layout === 'object') {
-              localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(parsed.layout));
-            } else {
-              localStorage.removeItem(LAYOUT_STORAGE_KEY);
-            }
-
-            if (Array.isArray(parsed.customTiles)) {
-              localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(parsed.customTiles));
-            } else {
-              localStorage.removeItem(CUSTOM_TILES_KEY);
-            }
-
-            alert('インポートが完了しました。ページを再読み込みします。');
-            location.reload();
-          } catch (err) {
-            alert('JSONファイルの読み込みに失敗しました。\n' + err.message);
-          }
-        };
-        reader.readAsText(file);
-      });
-
-      // 7. リセットボタンの処理
-      document.getElementById('reset-order-btn').addEventListener('click', () => {
-        if (confirm('並び順と追加したカスタムタイルをすべて初期状態に戻しますか？')) {
-          localStorage.removeItem(LAYOUT_STORAGE_KEY);
-          localStorage.removeItem(CUSTOM_TILES_KEY);
-          location.reload();
-        }
-      });
     });
 
-    // Service Workerの登録（相対パスで確実に登録）
+    // Service Workerの登録
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')

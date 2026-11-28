@@ -121,6 +121,16 @@
     background-color: #1b5e20;
   }
 
+  .ctrl-btn.edit-mode {
+    background-color: var(--c-blue);
+    color: #fff;
+    border-color: var(--c-blue);
+  }
+
+  .ctrl-btn.edit-mode:hover {
+    background-color: #01579b;
+  }
+
   /* 初期状態ガイドバナー */
   .empty-guide {
     display: none;
@@ -138,7 +148,7 @@
     display: block;
   }
 
-  /* 新規タイル追加フォーム */
+  /* タイル追加・編集フォーム */
   .add-form-container {
     display: none;
     background-color: var(--card-bg);
@@ -151,6 +161,10 @@
 
   .add-form-container.open {
     display: block;
+  }
+
+  .add-form-container.is-editing {
+    border: 2px solid var(--c-blue);
   }
 
   .add-form-title {
@@ -302,25 +316,35 @@
     transform: scale(0.98);
   }
 
-  /* カスタム追加タイルの削除ボタン */
-  .delete-tile-btn {
+  /* タイル右上の編集・削除アクションボタン群 */
+  .tile-actions {
     position: absolute;
     top: 6px;
     right: 6px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+  }
+
+  .tile-action-btn {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.12);
+    background-color: rgba(0, 0, 0, 0.1);
     color: #444;
     border: none;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
     transition: background-color 0.2s, color 0.2s;
+  }
+
+  .edit-tile-btn:hover {
+    background-color: var(--c-blue);
+    color: #fff;
   }
 
   .delete-tile-btn:hover {
@@ -350,7 +374,7 @@
 
   .tile a {
     display: block;
-    padding: 16px;
+    padding: 26px 16px 16px; /* 上部の編集・削除ボタンと重ならないよう余白を確保 */
     height: 100%;
     text-decoration: none;
     color: inherit;
@@ -477,10 +501,11 @@
     まだブックマークが登録されていません。右上の <strong>「➕ タイルを追加」</strong> から最初のリンクを登録してください。
   </div>
 
-  <!-- 新規リンクタイル追加フォーム -->
-  <section id="add-tile-section" class="add-form-container" aria-label="新しいリンクタイルの追加">
-    <div class="add-form-title">✨ 新しいリンクタイルを作成（全デバイスに自動同期）</div>
+  <!-- リンクタイル追加・編集共通フォーム -->
+  <section id="add-tile-section" class="add-form-container" aria-label="リンクタイルの追加・編集">
+    <div id="form-header-title" class="add-form-title">✨ 新しいリンクタイルを作成（全デバイスに自動同期）</div>
     <form id="add-tile-form">
+      <input type="hidden" id="editing-tile-id" value="">
       <div class="form-grid">
         <div class="form-group">
           <label for="tile-title">ボタンのタイトル（必須）</label>
@@ -495,7 +520,7 @@
           <input type="text" id="tile-desc" placeholder="例: サブテキストを入力">
         </div>
         <div class="form-group">
-          <label for="tile-section">追加先ジャンル</label>
+          <label for="tile-section">ジャンル</label>
           <select id="tile-section">
             <option value="grid-daily">📂 毎日見る</option>
             <option value="grid-news">📂 ニュース・メディア</option>
@@ -519,7 +544,7 @@
       </div>
       <div class="form-actions">
         <button type="button" id="cancel-add-btn" class="ctrl-btn">キャンセル</button>
-        <button type="submit" class="ctrl-btn add-mode">追加して同期</button>
+        <button type="submit" id="submit-tile-btn" class="ctrl-btn add-mode">追加して同期</button>
       </div>
     </form>
   </section>
@@ -710,6 +735,15 @@
       const emptyGuideEl = document.getElementById('empty-guide');
       let isDragging = false;
 
+      // フォーム関連要素
+      const addSection = document.getElementById('add-tile-section');
+      const formHeaderTitle = document.getElementById('form-header-title');
+      const toggleAddBtn = document.getElementById('toggle-add-form-btn');
+      const cancelAddBtn = document.getElementById('cancel-add-btn');
+      const addForm = document.getElementById('add-tile-form');
+      const editingIdInput = document.getElementById('editing-tile-id');
+      const submitTileBtn = document.getElementById('submit-tile-btn');
+
       // 同期ステータス表示の更新
       const updateSyncStatus = (type, text) => {
         syncStatusEl.className = `sync-status ${type}`;
@@ -783,21 +817,76 @@
         });
       };
 
+      // フォームをリセットして閉じる関数
+      const closeAndResetForm = () => {
+        addSection.classList.remove('open', 'is-editing');
+        addForm.reset();
+        editingIdInput.value = '';
+        formHeaderTitle.textContent = '✨ 新しいリンクタイルを作成（全デバイスに自動同期）';
+        submitTileBtn.textContent = '追加して同期';
+        submitTileBtn.className = 'ctrl-btn add-mode';
+      };
+
+      // 編集モードでフォームを開く関数
+      const openEditForm = (tileId) => {
+        const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
+        const targetData = currentCustom.find(item => item.id === tileId);
+        if (!targetData) return;
+
+        // 現在のDOM上の親グリッドIDを取得（ドラッグ移動後の正確な位置）
+        const tileEl = document.querySelector(`.tile[data-id="${tileId}"]`);
+        const currentSectionId = tileEl && tileEl.parentElement ? tileEl.parentElement.id : targetData.section;
+
+        editingIdInput.value = targetData.id;
+        document.getElementById('tile-title').value = targetData.title;
+        document.getElementById('tile-url').value = targetData.url;
+        document.getElementById('tile-desc').value = targetData.desc || '';
+        document.getElementById('tile-section').value = currentSectionId;
+
+        formHeaderTitle.textContent = '✏️ リンクタイルを編集（全デバイスに自動同期）';
+        submitTileBtn.textContent = '更新して同期';
+        submitTileBtn.className = 'ctrl-btn edit-mode';
+
+        addSection.classList.add('open', 'is-editing');
+        addSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('tile-title').focus();
+      };
+
       // タイルDOM生成
       const createTileElement = (tileData) => {
         const div = document.createElement('div');
         div.className = 'tile custom-tile';
         div.setAttribute('data-id', tileData.id);
 
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'tile-actions';
+
+        // 編集ボタン
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'tile-action-btn edit-tile-btn';
+        editBtn.title = 'このタイルを編集';
+        editBtn.textContent = '✎';
+        editBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openEditForm(tileData.id);
+        });
+
+        // 削除ボタン
         const delBtn = document.createElement('button');
         delBtn.type = 'button';
-        delBtn.className = 'delete-tile-btn';
+        delBtn.className = 'tile-action-btn delete-tile-btn';
         delBtn.title = 'このタイルを削除';
         delBtn.textContent = '×';
         delBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (confirm(`「${tileData.title}」を削除しますか？（全デバイスからも削除されます）`)) {
+          const currentBtnText = div.querySelector('.tile-btn').textContent;
+          if (confirm(`「${currentBtnText}」を削除しますか？（全デバイスからも削除されます）`)) {
+            if (editingIdInput.value === tileData.id) {
+              closeAndResetForm();
+            }
             div.remove();
             const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
             const updatedCustom = currentCustom.filter(item => item.id !== tileData.id);
@@ -806,6 +895,9 @@
             saveAllState();
           }
         });
+
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(delBtn);
 
         const a = document.createElement('a');
         a.href = tileData.url;
@@ -825,7 +917,7 @@
 
         a.appendChild(btn);
         a.appendChild(desc);
-        div.appendChild(delBtn);
+        div.appendChild(actionsDiv);
         div.appendChild(a);
 
         return div;
@@ -874,7 +966,6 @@
             const idsInGrid = Array.from(gridEl.children).map(el => el.getAttribute('data-id'));
             layoutData[id] = idsInGrid;
 
-            // 移動後のセクション情報もタイルデータ本体に反映
             idsInGrid.forEach(itemId => {
               const item = tileMap.get(itemId);
               if (item) {
@@ -978,26 +1069,25 @@
         });
       });
 
-      // 4. 新規タイル追加フォームの処理
-      const addSection = document.getElementById('add-tile-section');
-      const toggleAddBtn = document.getElementById('toggle-add-form-btn');
-      const cancelAddBtn = document.getElementById('cancel-add-btn');
-      const addForm = document.getElementById('add-tile-form');
-
+      // 4. 新規タイル追加・編集フォームの開閉と送信処理
       toggleAddBtn.addEventListener('click', () => {
-        addSection.classList.toggle('open');
-        if (addSection.classList.contains('open')) {
+        // すでに編集中で開いている場合は一旦新規モードに切り替え、新規モードで開いていれば閉じる
+        if (addSection.classList.contains('open') && !editingIdInput.value) {
+          closeAndResetForm();
+        } else {
+          closeAndResetForm();
+          addSection.classList.add('open');
           document.getElementById('tile-title').focus();
         }
       });
 
       cancelAddBtn.addEventListener('click', () => {
-        addSection.classList.remove('open');
-        addForm.reset();
+        closeAndResetForm();
       });
 
       addForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        const editingId = editingIdInput.value;
         const title = document.getElementById('tile-title').value.trim();
         const url = document.getElementById('tile-url').value.trim();
         const desc = document.getElementById('tile-desc').value.trim();
@@ -1005,30 +1095,60 @@
 
         if (!title || !url) return;
 
-        const newTileData = {
-          id: 'custom-' + Date.now(),
-          title,
-          url,
-          desc,
-          section
-        };
-
         const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
-        currentCustom.push(newTileData);
-        localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
-
         const targetGrid = document.getElementById(section);
+
+        // 移動先・追加先のジャンルが折りたたまれていた場合は自動で開く
         const parentBlock = targetGrid.closest('.genre-block');
         if (parentBlock && parentBlock.classList.contains('collapsed')) {
           parentBlock.classList.remove('collapsed');
           saveCollapsedState();
         }
 
-        targetGrid.appendChild(createTileElement(newTileData));
-        saveAllState();
+        if (editingId) {
+          // --- 既存タイルの編集更新 ---
+          const idx = currentCustom.findIndex(item => item.id === editingId);
+          if (idx !== -1) {
+            currentCustom[idx] = { id: editingId, title, url, desc, section };
+            localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
+          }
 
-        addForm.reset();
-        addSection.classList.remove('open');
+          const existingTileEl = document.querySelector(`.tile[data-id="${editingId}"]`);
+          if (existingTileEl) {
+            const linkEl = existingTileEl.querySelector('a');
+            linkEl.href = url;
+            if (/^https?:\/\//i.test(url)) {
+              linkEl.target = '_blank';
+              linkEl.rel = 'noopener noreferrer';
+            } else {
+              linkEl.removeAttribute('target');
+              linkEl.removeAttribute('rel');
+            }
+            existingTileEl.querySelector('.tile-btn').textContent = title;
+            existingTileEl.querySelector('.tile-desc').textContent = desc;
+
+            // ジャンルが変更された場合は新しいグリッドへ移動
+            if (existingTileEl.parentElement.id !== section) {
+              targetGrid.appendChild(existingTileEl);
+            }
+          }
+        } else {
+          // --- 新規タイルの追加 ---
+          const newTileData = {
+            id: 'custom-' + Date.now(),
+            title,
+            url,
+            desc,
+            section
+          };
+
+          currentCustom.push(newTileData);
+          localStorage.setItem(CUSTOM_TILES_KEY, JSON.stringify(currentCustom));
+          targetGrid.appendChild(createTileElement(newTileData));
+        }
+
+        saveAllState();
+        closeAndResetForm();
       });
     });
 

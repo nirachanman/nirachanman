@@ -104,11 +104,22 @@
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   }
 
   .ctrl-btn:hover {
     background-color: #e2e6ea;
+  }
+
+  /* 管理ボタン表示ON時のトグルボタンスタイル */
+  .ctrl-btn.manage-active {
+    background-color: var(--c-slate);
+    color: #fff;
+    border-color: var(--c-slate);
+  }
+
+  .ctrl-btn.manage-active:hover {
+    background-color: #263238;
   }
 
   .ctrl-btn.add-mode {
@@ -316,22 +327,27 @@
     transform: scale(0.98);
   }
 
-  /* タイル右上の編集・削除アクションボタン群 */
+  /* タイル右上の編集・削除アクションボタン群（デフォルトは非表示） */
   .tile-actions {
     position: absolute;
     top: 6px;
     right: 6px;
-    display: flex;
+    display: none;
     gap: 4px;
     z-index: 10;
+  }
+
+  /* bodyに show-tile-actions クラスが付いているときだけ表示 */
+  body.show-tile-actions .tile-actions {
+    display: flex;
   }
 
   .tile-action-btn {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #444;
+    background-color: rgba(0, 0, 0, 0.12);
+    color: #333;
     border: none;
     font-size: 0.8rem;
     line-height: 1;
@@ -374,11 +390,17 @@
 
   .tile a {
     display: block;
-    padding: 26px 16px 16px; /* 上部の編集・削除ボタンと重ならないよう余白を確保 */
+    padding: 16px;
     height: 100%;
     text-decoration: none;
     color: inherit;
     -webkit-user-drag: none;
+    transition: padding-top 0.15s;
+  }
+
+  /* 管理ボタン表示ON時はボタンと重ならないよう上部余白を広げる */
+  body.show-tile-actions .tile a {
+    padding-top: 28px;
   }
 
   .tile-btn {
@@ -491,6 +513,7 @@
   <div class="top-bar">
     <div id="sync-status" class="sync-status">☁️ 同期待機中</div>
     <div class="top-actions">
+      <button id="toggle-manage-btn" class="ctrl-btn" title="タイルの編集(✎)・削除(×)ボタンの表示切替">⚙️ 編集・削除: OFF</button>
       <button id="toggle-all-btn" class="ctrl-btn" title="全ジャンルの開閉を切り替え">↕️ 全開閉</button>
       <button id="toggle-add-form-btn" class="ctrl-btn add-mode">➕ タイルを追加</button>
     </div>
@@ -731,8 +754,10 @@
       const LAYOUT_STORAGE_KEY = 'tileLayout_17genres_clean';
       const CUSTOM_TILES_KEY = 'customTiles_17genres_clean';
       const COLLAPSED_KEY = 'collapsedGenres_17genres_clean';
+      const MANAGE_MODE_KEY = 'manageButtonsVisible_17genres';
       const syncStatusEl = document.getElementById('sync-status');
       const emptyGuideEl = document.getElementById('empty-guide');
+      const toggleManageBtn = document.getElementById('toggle-manage-btn');
       let isDragging = false;
 
       // フォーム関連要素
@@ -743,6 +768,28 @@
       const addForm = document.getElementById('add-tile-form');
       const editingIdInput = document.getElementById('editing-tile-id');
       const submitTileBtn = document.getElementById('submit-tile-btn');
+
+      // 管理ボタン（✎・×）の表示ON/OFF制御
+      const setManageMode = (isVisible) => {
+        if (isVisible) {
+          document.body.classList.add('show-tile-actions');
+          toggleManageBtn.classList.add('manage-active');
+          toggleManageBtn.textContent = '⚙️ 編集・削除: ON';
+        } else {
+          document.body.classList.remove('show-tile-actions');
+          toggleManageBtn.classList.remove('manage-active');
+          toggleManageBtn.textContent = '⚙️ 編集・削除: OFF';
+        }
+        localStorage.setItem(MANAGE_MODE_KEY, isVisible ? '1' : '0');
+      };
+
+      // 保存された管理ボタン表示状態を復元（初期値はOFF）
+      setManageMode(localStorage.getItem(MANAGE_MODE_KEY) === '1');
+
+      toggleManageBtn.addEventListener('click', () => {
+        const nextState = !document.body.classList.contains('show-tile-actions');
+        setManageMode(nextState);
+      });
 
       // 同期ステータス表示の更新
       const updateSyncStatus = (type, text) => {
@@ -833,7 +880,6 @@
         const targetData = currentCustom.find(item => item.id === tileId);
         if (!targetData) return;
 
-        // 現在のDOM上の親グリッドIDを取得（ドラッグ移動後の正確な位置）
         const tileEl = document.querySelector(`.tile[data-id="${tileId}"]`);
         const currentSectionId = tileEl && tileEl.parentElement ? tileEl.parentElement.id : targetData.section;
 
@@ -1071,12 +1117,12 @@
 
       // 4. 新規タイル追加・編集フォームの開閉と送信処理
       toggleAddBtn.addEventListener('click', () => {
-        // すでに編集中で開いている場合は一旦新規モードに切り替え、新規モードで開いていれば閉じる
         if (addSection.classList.contains('open') && !editingIdInput.value) {
           closeAndResetForm();
         } else {
           closeAndResetForm();
           addSection.classList.add('open');
+          setManageMode(true); // 追加フォームを開いたら編集・削除ボタンも自動でONにする
           document.getElementById('tile-title').focus();
         }
       });
@@ -1098,7 +1144,6 @@
         const currentCustom = JSON.parse(localStorage.getItem(CUSTOM_TILES_KEY) || '[]');
         const targetGrid = document.getElementById(section);
 
-        // 移動先・追加先のジャンルが折りたたまれていた場合は自動で開く
         const parentBlock = targetGrid.closest('.genre-block');
         if (parentBlock && parentBlock.classList.contains('collapsed')) {
           parentBlock.classList.remove('collapsed');
@@ -1127,7 +1172,6 @@
             existingTileEl.querySelector('.tile-btn').textContent = title;
             existingTileEl.querySelector('.tile-desc').textContent = desc;
 
-            // ジャンルが変更された場合は新しいグリッドへ移動
             if (existingTileEl.parentElement.id !== section) {
               targetGrid.appendChild(existingTileEl);
             }
